@@ -20,4 +20,77 @@ body {
   .flex-start {
     @apply flex justify-start items-center;
   }
+
+  .flex-end {
+    @apply flex justify-end items-center;
+  }
+
+  .camera-button {
+    @apply bg-dark-100 absolute bottom-2 right-2 p-2 flex-center rounded-lg cursor-pointer;
+  }
+}
+
+@layer components {
+  /* SHADCN COMPONENTS */
+
+  /* Form and inputs */
+
+  .shad-auth_form_label {
+    @apply text-light-900 text-[13px] font-normal !important;
+  }
+
+  .shad-auth_form_input {
+    @apply h-11 bg-dark-300 border-none placeholder:text-light-500 focus-visible:ring-1 focus-visible:ring-offset-1 ring-offset-light-500 text-light-900 !important;
+  }
+
+  .shad-auth_form_select_placeholder {
+    @apply text-[#3667c2] font-normal !important;
+  }
+
+  .shad-auth_form_select_option {
+    @apply bg-dark-300 text-light-500 border-dark-400  !important;
+  }
+
+  .shad-auth_form_select_item {
+    @apply hover:text-light-850 hover:bg-dark-400 cursor-pointer h-10  !important;
+  }
+
+  .shad-auth_form_message {
+    @apply text-custom-100 font-normal text-xs !important;
+  }
+
+  .shad-auth_form_textarea {
+    @apply bg-dark-300 border-none placeholder:text-light-500 focus-visible:ring-1 focus-visible:ring-offset-1 ring-offset-light-500 text-light-900 !important;
+  }
+
+  /* Button */
+
+  .shad-button_primary {
+    @apply h-11 bg-primary-500 hover:bg-primary-500 text-light-900 flex gap-2 !important;
+  }
+
+  .shad-button_dark {
+    @apply h-11 bg-dark-100 px-5 text-light-800 flex gap-2 flex-center rounded-lg text-sm cursor-pointer !important;
+  }
+}
+
+/* custom CSS Styles */
+
+.auth-or {
+  color: #ffffff;
+  overflow: visible;
+  text-align: center;
+  height: 0.5rem;
+  width: 100%;
+  margin: 1rem 0;
+  border-top: 1px solid #ffffff;
+
+  &:after {
+    content: "OR";
+    font-size: 1rem;
+    padding: 0 1rem;
+    position: relative;
+    top: -0.8rem;
+    background: rgb(17, 19, 27);
+  }
 }
