@@ -1,4 +1,8 @@
 "use client";
+import Link from "next/link";
+import { SigninValidation } from "@/lib/validation/authValidation";
+import { signinAction } from "@/actions/auth.action";
+import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -11,12 +15,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import Link from "next/link";
-import { SigninValidation } from "@/lib/validation/authValidation";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const Signin = () => {
-  // 1. Define your form.
+  const router = useRouter();
   const form = useForm<z.infer<typeof SigninValidation>>({
     resolver: zodResolver(SigninValidation),
     defaultValues: {
@@ -25,11 +28,24 @@ const Signin = () => {
     },
   });
 
-  // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof SigninValidation>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof SigninValidation>) {
+    const formData = {
+      email: values.email,
+      password: values.password,
+      deviceId: "string",
+      appVersion: "string",
+    };
+
+    const res = await signinAction(formData);
+    console.log(res);
+    if (res?.status === "7400") {
+      toast.success("Sign In Successfully", { duration: 6000 });
+      router.push("/");
+    } else {
+      toast.error("Sign In Failed, Invalid Email or Password.", {
+        duration: 9000,
+      });
+    }
   }
 
   return (
