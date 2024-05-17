@@ -40,7 +40,7 @@ body {
   }
 
   .shad-auth_form_input {
-    @apply h-11 bg-dark-300 border-none placeholder:text-light-500 focus-visible:ring-1 focus-visible:ring-offset-1 ring-offset-light-500 text-light-900 !important;
+    @apply h-11 bg-dark-300 border-none placeholder:text-light-500 focus-visible:ring-1 focus-visible:ring-offset-1 ring-offset-light-500 text-light-900 w-full !important;
   }
 
   .shad-auth_form_select_placeholder {
@@ -72,18 +72,24 @@ body {
   .shad-button_dark {
     @apply h-11 bg-dark-100 px-5 text-light-800 flex gap-2 flex-center rounded-lg text-sm cursor-pointer !important;
   }
+
+  /* Input OTP */
+
+  .shad-input_otp {
+    @apply rounded-sm border-none bg-dark-400 p-6 !important;
+  }
 }
 
 /* custom CSS Styles */
 
 .auth-or {
-  color: #ffffff;
+  color: #e6e6e6;
   overflow: visible;
   text-align: center;
   height: 0.5rem;
   width: 100%;
   margin: 1rem 0;
-  border-top: 1px solid #ffffff;
+  border-top: 1px solid #e6e6e6;
 
   &:after {
     content: "OR";
@@ -91,6 +97,6 @@ body {
     padding: 0 1rem;
     position: relative;
     top: -0.8rem;
-    background: rgb(17, 19, 27);
+    background: #11131b;
   }
 }

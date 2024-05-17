@@ -69,6 +69,12 @@
     @apply text-[14px] font-semibold leading-[18.2px];
   }
 
+  /* font size 13px */
+
+  .font-regular {
+    @apply text-[13px] font-normal;
+  }
+
   /* font size 12px */
 
   .small-regular {
