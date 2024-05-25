@@ -31,7 +31,9 @@ const FormInput = ({
       name={inputName}
       render={({ field }) => (
         <FormItem className="flex w-full flex-col">
-          <FormLabel className="shad-auth_form_label">{formLabel}</FormLabel>
+          {formLabel && (
+            <FormLabel className="shad-auth_form_label">{formLabel}</FormLabel>
+          )}
           <FormControl>
             <Input
               type={inputType}
