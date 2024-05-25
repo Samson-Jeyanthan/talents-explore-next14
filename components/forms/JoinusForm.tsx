@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { SignupValidation } from "@/lib/validation/authValidation";
+import { SignupValidation } from "@/lib/validations/authValidation";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import Link from "next/link";
@@ -24,10 +24,10 @@ const JoinusForm = () => {
     },
   });
 
-  function onSubmit(values: z.infer<typeof SignupValidation>) {
+  async function onSubmit(values: z.infer<typeof SignupValidation>) {
     console.log(values);
-    localStorage.setItem("isOTP", "true");
-    setIsOTPOpen(true);
+    // localStorage.setItem("isOTP", "true");
+    // setIsOTPOpen(true);
     // setCountdown(10 * 60); // have to set 10 * 60
   }
 
@@ -51,8 +51,8 @@ const JoinusForm = () => {
           <FormInput
             form={form}
             formLabel="Username"
-            inputName="text"
-            inputType="username"
+            inputName="username"
+            inputType="text"
             placeholder="username"
           />
 
@@ -71,8 +71,12 @@ const JoinusForm = () => {
             inputType="password"
             placeholder="password"
           />
-          <Button type="submit" className="shad-button_primary mt-4">
-            Join us
+          <Button
+            type="submit"
+            disabled={form.formState.isSubmitting}
+            className="shad-button_primary mt-4"
+          >
+            {form.formState.isSubmitting ? "Joining..." : "Join us"}
           </Button>
 
           <div className="auth-or" />

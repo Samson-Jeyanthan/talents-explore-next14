@@ -1,10 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { SigninValidation } from "@/lib/validation/authValidation";
+import { SigninValidation } from "@/lib/validations/authValidation";
 import { signinAction } from "@/actions/auth.action";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -14,8 +13,7 @@ import { toast } from "sonner";
 import { FormInput } from "../inputs";
 
 const SigninForm = () => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const router = useRouter();
+  // const router = useRouter();
   const form = useForm<z.infer<typeof SigninValidation>>({
     resolver: zodResolver(SigninValidation),
     defaultValues: {
@@ -25,7 +23,6 @@ const SigninForm = () => {
   });
 
   async function onSubmit(values: z.infer<typeof SigninValidation>) {
-    setIsSubmitting(true);
     const formData = {
       email: values.email,
       password: values.password,
@@ -37,12 +34,11 @@ const SigninForm = () => {
     console.log(res);
     if (res?.status === "7400") {
       toast.success("Sign In Successfully", { duration: 3000 });
-      router.push("/");
+      // router.push("/");
     } else {
       toast.error("Sign In Failed, Invalid Email or Password.", {
         duration: 4000,
       });
-      setIsSubmitting(false);
     }
   }
 
@@ -77,10 +73,10 @@ const SigninForm = () => {
         </p>
         <Button
           type="submit"
-          disabled={isSubmitting}
+          disabled={form.formState.isSubmitting}
           className="shad-button_primary mt-4"
         >
-          {isSubmitting ? "Signing in..." : "Sign in"}
+          {form.formState.isSubmitting ? "Signing in..." : "Sign in"}
         </Button>
         <div className="auth-or" />
         <p className="flex-center body-regular gap-4 text-center text-sm text-light-500">

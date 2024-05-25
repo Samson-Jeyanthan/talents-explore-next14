@@ -3,17 +3,37 @@ import {
   otpVerificationAction,
   resendOtpAction,
   resetPasswordAction,
+  signinAction,
   verifyForgotPasswordAction,
 } from "@/actions/auth.action";
+// import { setIsAuthenticated } from "@/redux/slices/authSlice";
+import { AppDispatch } from "@/redux/store";
 import {
   TOTPProps,
   TResetPasswordProps,
+  TSigninProps,
   TVerifyForgotPasswordOtpProps,
   TVerifyOTPProps,
 } from "@/types/auth.types";
 import { toast } from "sonner";
 
-// note - unction is for signup otp
+// note - sign-in function
+export async function handleSignIn(formData: TSigninProps, dispatch : AppDispatch) {
+  const res = await signinAction(formData);
+  console.log(res);
+  if (res?.status === "7400") {
+    toast.success("Sign In Successfully");
+    // dispatch(setIsAuthenticated())
+      // const dispatch = useDispatch<AppDispatch>();
+      // const mode = useAppSelector((state: any) => state.utilsReducer.mode);
+      // dispatch(setMode("dark"));
+    return true;
+  } else {
+    toast.error("Sign In Failed");
+  }
+}
+
+// note - signup otp function
 export async function handleVerifyEmailOtp(formData: TVerifyOTPProps) {
   const res = await otpVerificationAction(formData);
   console.log(res);
