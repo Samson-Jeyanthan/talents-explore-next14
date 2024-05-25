@@ -69,8 +69,12 @@ body {
     @apply h-11 bg-primary-500 hover:bg-primary-500 text-light-900 flex gap-2 !important;
   }
 
+  .shad-btn_primary-200 {
+    @apply h-10 bg-primary-500 hover:bg-primary-500 text-light-900 flex gap-2 rounded-full !important;
+  }
+
   .shad-button_dark {
-    @apply h-11 bg-dark-100 px-5 text-light-800 flex gap-2 flex-center rounded-lg text-sm cursor-pointer !important;
+    @apply h-11 bg-dark-100 p-3 text-light-800 flex gap-2 flex-center rounded-lg text-[13px] cursor-pointer !important;
   }
 
   /* Input OTP */
