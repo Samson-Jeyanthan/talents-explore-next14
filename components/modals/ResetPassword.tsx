@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "../ui/button";
 import { DialogContent, DialogOverlay } from "../ui/dialog";
 import { cn } from "@/lib/utils";
-import { ResetPasswordValidation } from "@/lib/validation/authValidation";
+import { ResetPasswordValidation } from "@/lib/validations/authValidation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
