@@ -1,5 +1,12 @@
 import React from "react";
 
+export type TSigninProps = {
+  email: string;
+  password: string;
+  deviceId: string;
+  appVersion: string;
+};
+
 type IsOpenState = {
   isFP: boolean;
   isOTP: boolean;
