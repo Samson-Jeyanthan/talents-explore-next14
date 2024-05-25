@@ -2,3 +2,4 @@ export { default as OTPModal } from "./OTP";
 export { default as ForgotPasswordModal } from "./ForgotPassword";
 export { default as ResetPasswordModal } from "./ResetPassword";
 export { default as CropImgModal } from "./CropImg";
+export { default as PhotoActionModal } from "./PhotoAction";
