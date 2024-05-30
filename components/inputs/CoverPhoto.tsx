@@ -14,7 +14,7 @@ const CoverPhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
   const { handleImageInput, media, resetMedia, error } = useMedia();
   const [isOpen, setIsOpen] = useState(false);
   const [finalCropImage, setFinalCropImage] = useState(null);
-  const [isActionOpen, setIsActionOpen] = useState(null);
+  const [isActionOpen, setIsActionOpen] = useState(false);
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     handleImageInput(event);

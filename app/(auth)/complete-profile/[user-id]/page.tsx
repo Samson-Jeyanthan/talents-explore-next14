@@ -1,8 +1,11 @@
 // import { getLanguages } from "@/lib/utils/getData";
 
-import { CompleteProfileFform } from "@/components/forms";
+import { CompleteProfileForm } from "@/components/forms";
+// import { getLanguages } from "@/lib/data/getData";
 
 const CompleteProfile = () => {
+  // const langData = getLanguages();
+
   return (
     <>
       <title>Complete Profile | Talents Explore</title>
@@ -16,7 +19,9 @@ const CompleteProfile = () => {
             as well as filling out the form below. Providing more information
             will help others to trust and connect with you.
           </p>
-          <CompleteProfileFform />
+          <CompleteProfileForm
+          // langData={ langData }
+          />
         </div>
       </div>
     </>

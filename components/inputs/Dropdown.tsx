@@ -19,7 +19,7 @@ type TDropdownProps = {
   formLabel?: string;
   inputName: string;
   placeholder?: string;
-  options: { id: string; name: string }[];
+  options: { _id: string; name: string }[];
   value: string | boolean | undefined;
   formDescription?: string;
 };
@@ -41,7 +41,7 @@ const Dropdown = ({
         <FormItem>
           <FormLabel className="shad-auth_form_label">{formLabel}</FormLabel>
           <FormControl>
-            <Select onValueChange={(id: string) => field.onChange(id)}>
+            <Select onValueChange={(_id: string) => field.onChange(_id)}>
               <SelectTrigger className="flex-between shad-auth_form_input">
                 <SelectValue />
                 {!value && (
@@ -54,7 +54,7 @@ const Dropdown = ({
                 {options.map((option, index) => (
                   <SelectItem
                     key={index}
-                    value={option.id}
+                    value={option._id}
                     className="shad-auth_form_select_item"
                   >
                     {option.name}

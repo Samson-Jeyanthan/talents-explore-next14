@@ -30,3 +30,8 @@ export type TPhotoActionProps = {
   onInputChange: (event: ChangeEvent<HTMLInputElement>) => void;
   onDelete: () => void;
 };
+
+export type TFetchDataArray = {
+  _id: string;
+  [key: string]: any;
+};
