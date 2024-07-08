@@ -73,8 +73,20 @@ body {
     @apply h-10 bg-primary-500 hover:bg-primary-500 text-light-900 flex gap-2 rounded-full !important;
   }
 
+  .shad-button_primary_round {
+    @apply h-auto bg-primary-500 hover:bg-primary-500 text-light-900 flex gap-2 rounded-full text-xl p-4 !important;
+  }
+
+  .shad-button_back_round {
+    @apply h-auto bg-dark-200 hover:bg-dark-200 text-light-600 hover:text-light-900 flex border-[1px] border-light-600 hover:border-light-900 gap-2 rounded-full text-xl p-4 !important;
+  }
+
   .shad-button_dark {
     @apply h-11 bg-dark-100 p-3 text-light-800 flex gap-2 flex-center rounded-lg text-[13px] cursor-pointer !important;
+  }
+
+  .account_selection_button {
+    @apply flex h-16 w-full cursor-pointer items-center justify-start gap-9 rounded-2xl border-2 border-dark-300 bg-dark-250 px-3 py-11 text-xl font-medium text-light-600 hover:bg-dark-300 hover:text-light-900 !important;
   }
 
   /* Input OTP */
