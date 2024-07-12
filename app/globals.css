@@ -94,6 +94,11 @@ body {
   .shad-input_otp {
     @apply rounded-sm border-none bg-dark-400 p-6 !important;
   }
+
+  /* navigation link */
+  .leftsidebar-link {
+    @apply flex-start cursor-pointer gap-4 rounded-md fill-light-600 p-3 text-sm text-light-600 hover:bg-dark-250 hover:fill-light-900 hover:text-light-900;
+  }
 }
 
 /* custom CSS Styles */
