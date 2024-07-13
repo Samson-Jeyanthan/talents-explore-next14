@@ -6,9 +6,12 @@ import {
   HomeIcon,
   SaveIcon,
   SettingsIcon,
+  SystemIcon,
   UploadIcon,
 } from "@/public/assets/svgs";
 import { TConvertedSvgJsxProps } from "@/types/utils.types";
+import { IoMdMoon } from "react-icons/io";
+import { TbSunHigh } from "react-icons/tb";
 
 export const GENDER_VALUES = [
   {
@@ -73,4 +76,17 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
     name: "Settings",
     isLink: true,
   },
+];
+
+interface ThemeItems {
+  name: string;
+  value: string;
+  icon: IconType | React.ComponentType<TConvertedSvgJsxProps>;
+  height: string | undefined;
+}
+
+export const THEME_OPTIONS: ThemeItems[] = [
+  { name: "Light", value: "light", icon: TbSunHigh, height: undefined },
+  { name: "Dark", value: "dark", icon: IoMdMoon, height: undefined },
+  { name: "System", value: "system", icon: SystemIcon, height: "16px" },
 ];

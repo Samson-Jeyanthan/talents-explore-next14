@@ -12,7 +12,7 @@ function UploadIcon({ fill, width, height }: TConvertedSvgJsxProps) {
     >
       <g
         transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)"
-        fill={fill || "var(--dark-primary)"}
+        fill={fill}
         stroke="none"
       >
         <path

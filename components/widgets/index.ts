@@ -7,3 +7,6 @@ export { default as UnlockFeature } from "./UnlockFeature";
 export { default as Promotion } from "./Promotion";
 // other widgets
 export { default as LeftSidebar } from "./LeftSidebar";
+export { default as Navbar } from "./Navbar";
+export { default as UserAvatar } from "./UserAvatar";
+export { default as Theme } from "./Theme";
