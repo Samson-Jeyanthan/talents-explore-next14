@@ -8,20 +8,19 @@ import Link from "next/link";
 import { AiOutlineLogout } from "react-icons/ai";
 import {
   Drawer,
-  DrawerClose,
   DrawerContent,
   DrawerDescription,
-  DrawerFooter,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
 } from "../ui/drawer";
+import { Button } from "../ui/button";
 
 const LeftSidebar = () => {
   const pathname = usePathname();
   return (
-    <>
-      <aside className="flex-between w-72 flex-col bg-dark-100 py-8">
+    <Drawer>
+      <aside className="lg:flex-between hidden min-w-64  flex-col bg-dark-100 py-8">
         <div className="flex-center w-full flex-col gap-8">
           <Image
             src="/assets/images/te-logo-expanded-light.png"
@@ -46,12 +45,12 @@ const LeftSidebar = () => {
                       {item.name}
                     </Link>
                   ) : (
-                    <div
+                    <DrawerTrigger
                       className={`${isActive ? "bg-dark-250 fill-light-900 text-light-900" : ""} leftsidebar-link w-full `}
                     >
                       <item.icon width="20px" height="20px" />
                       {item.name}
-                    </div>
+                    </DrawerTrigger>
                   )}
                 </li>
               );
@@ -64,17 +63,17 @@ const LeftSidebar = () => {
         </div>
       </aside>
 
-      {/* <Drawer>
-        <DrawerTrigger>Open</DrawerTrigger>
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle>Are you absolutely sure?</DrawerTitle>
-            <DrawerDescription>This action cannot be undone.</DrawerDescription>
-          </DrawerHeader>
-          <DrawerFooter>hi</DrawerFooter>
-        </DrawerContent>
-      </Drawer> */}
-    </>
+      <DrawerContent className="flex-start h-2/5 gap-6 border-none bg-dark-200">
+        <DrawerHeader>
+          <DrawerTitle>Are you absolutely sure?</DrawerTitle>
+          <DrawerDescription>This action cannot be undone.</DrawerDescription>
+        </DrawerHeader>
+        <div className="flex w-72 flex-col gap-6">
+          <Button className="shad-button_primary w-full">Create Post</Button>
+          <Button className="shad-button_primary w-full">Share Anything</Button>
+        </div>
+      </DrawerContent>
+    </Drawer>
   );
 };
 
