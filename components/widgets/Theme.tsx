@@ -16,12 +16,10 @@ const Theme = () => {
   return (
     <Menubar className="relative border-none bg-transparent p-0 shadow-none">
       <MenubarMenu>
-        <MenubarTrigger className="flex-center size-10 cursor-pointer rounded-full bg-dark-300 text-light-600 hover:bg-dark-400 hover:text-light-900">
-          {mode === "dark" ? (
-            <IoMdMoon className="text-base text-custom-100" />
-          ) : (
-            <TbSunHigh />
-          )}
+        <MenubarTrigger
+          className={`${mode === "dark" ? "text-custom-100" : "text-light-600"} flex-center size-10 cursor-pointer rounded-full bg-dark-300 text-base  hover:bg-dark-400 hover:text-light-900`}
+        >
+          {mode === "dark" ? <IoMdMoon /> : <TbSunHigh />}
         </MenubarTrigger>
         <MenubarContent className="absolute -right-5 min-w-32 gap-10 rounded-lg border-none bg-dark-300 p-2">
           {THEME_OPTIONS.map((item, index) => (

@@ -10,7 +10,7 @@ const Navbar = () => {
         <li className="flex-center size-10 cursor-pointer rounded-full bg-dark-300 fill-light-600 hover:bg-dark-400 hover:fill-light-900">
           <NotificationIcon height="20px" width="20px" />
         </li>
-        <UserAvatar />
+        <UserAvatar size="size-10" />
       </ul>
     </nav>
   );

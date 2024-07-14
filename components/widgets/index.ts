@@ -10,3 +10,5 @@ export { default as LeftSidebar } from "./LeftSidebar";
 export { default as Navbar } from "./Navbar";
 export { default as UserAvatar } from "./UserAvatar";
 export { default as Theme } from "./Theme";
+// profile widgets
+export { default as ProfileHeader } from "./ProfileHeader";
