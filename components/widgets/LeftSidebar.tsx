@@ -20,14 +20,14 @@ const LeftSidebar = () => {
   const pathname = usePathname();
   return (
     <Drawer>
-      <aside className="lg:flex-between hidden min-w-64  flex-col bg-dark-100 py-8">
+      <aside className="lg:flex-between sticky top-0 hidden h-screen min-w-64 flex-col bg-dark-100 py-8">
         <div className="flex-center w-full flex-col gap-8">
           <Image
             src="/assets/images/te-logo-expanded-light.png"
             alt="TE-Logo"
             width={200}
             height={30}
-            className="h-auto w-3/4 object-contain"
+            className="h-auto w-[70%] object-contain"
           />
           <ul className="flex w-full flex-col gap-4 p-3">
             {SIDEBAR_ITEMS.map((item, index) => {

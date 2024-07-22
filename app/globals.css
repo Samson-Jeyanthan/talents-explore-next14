@@ -66,7 +66,11 @@ body {
   /* Button */
 
   .shad-button_primary {
-    @apply h-11 bg-primary-500 hover:bg-primary-500 text-light-900 flex gap-2 !important;
+    @apply h-11 bg-primary-500 hover:bg-primary-500 text-sm font-medium text-light-900 flex gap-2 !important;
+  }
+
+  .shad-button_secondary {
+    @apply h-11 bg-dark-300 hover:bg-dark-300 text-sm font-medium text-light-900 flex gap-2 !important;
   }
 
   .shad-btn_primary-200 {
@@ -98,6 +102,15 @@ body {
   /* navigation link */
   .leftsidebar-link {
     @apply flex-start cursor-pointer gap-4 rounded-md fill-light-600 p-3 text-sm text-light-600 hover:bg-dark-250 hover:fill-light-900 hover:text-light-900;
+  }
+
+  /* connection blocks */
+  .connection-counting {
+    @apply flex-center gap-[6px] text-light-900 bg-none px-3 py-1 cursor-pointer rounded-full hover:bg-dark-300 text-base font-medium;
+  }
+
+  .connection-counting-text {
+    @apply text-light-600 font-normal text-sm;
   }
 }
 

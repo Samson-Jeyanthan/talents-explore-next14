@@ -1,5 +1,5 @@
 const ProfileOverview = () => {
-  return <div>profile</div>;
+  return <div className="min-h-screen">profile</div>;
 };
 
 export default ProfileOverview;
