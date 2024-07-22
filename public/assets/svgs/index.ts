@@ -1,1 +1,11 @@
 export { default as CameraIcon } from "./CameraIcon";
+export { default as HomeIcon } from "./HomeIcon";
+export { default as ExploreIcon } from "./ExploreIcon";
+export { default as UploadIcon } from "./UploadIcon";
+export { default as SaveIcon } from "./SaveIcon";
+export { default as CommunityIcon } from "./CommunityIcon";
+export { default as SettingsIcon } from "./SettingsIcon";
+export { default as NotificationIcon } from "./NotificationIcon";
+export { default as SystemIcon } from "./SystemIcon";
+export { default as StarIcon } from "./StarIcon";
+export { default as HalfStarIcon } from "./HalfStarIcon";
