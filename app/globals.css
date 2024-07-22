@@ -66,7 +66,11 @@ body {
   /* Button */
 
   .shad-button_primary {
-    @apply h-11 bg-primary-500 hover:bg-primary-500 text-light-900 flex gap-2 !important;
+    @apply h-11 bg-primary-500 hover:bg-primary-500 text-sm font-medium text-light-900 flex gap-2 !important;
+  }
+
+  .shad-button_secondary {
+    @apply h-11 bg-dark-300 hover:bg-dark-300 text-sm font-medium text-light-900 flex gap-2 !important;
   }
 
   .shad-btn_primary-200 {
@@ -94,6 +98,20 @@ body {
   .shad-input_otp {
     @apply rounded-sm border-none bg-dark-400 p-6 !important;
   }
+
+  /* navigation link */
+  .leftsidebar-link {
+    @apply flex-start cursor-pointer gap-4 rounded-md fill-light-600 p-3 text-sm text-light-600 hover:bg-dark-250 hover:fill-light-900 hover:text-light-900;
+  }
+
+  /* connection blocks */
+  .connection-counting {
+    @apply flex-center gap-[6px] text-light-900 bg-none px-3 py-1 cursor-pointer rounded-full hover:bg-dark-300 text-base font-medium;
+  }
+
+  .connection-counting-text {
+    @apply text-light-600 font-normal text-sm;
+  }
 }
 
 /* custom CSS Styles */
@@ -115,4 +133,16 @@ body {
     top: -0.8rem;
     background: #11131b;
   }
+}
+
+.test-drawer {
+  position: absolute;
+  background-color: #11131b;
+  color: #e6e6e6;
+  transition: transform 1s cubic-bezier(0.32, 0.72, 0, 1);
+  transform: scale(1) translate(0, 0); /* Initial state, scaled down and centered */
+}
+
+.test-drawer.active {
+  transform: scale(0.99) translate(0, 0); /* Final state, full size and original position */
 }
