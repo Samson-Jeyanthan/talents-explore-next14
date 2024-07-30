@@ -28,11 +28,7 @@ export const SignupValidation = z.object({
 
 export const SigninValidation = z.object({
   email: z.string().min(1, { message: "Email is required" }).email(),
-  password: z
-    .string()
-    .min(1, { message: "Password is required" })
-    .min(8, { message: "Password must be at least 8 characters" })
-    .trim(),
+  password: z.string().min(1, { message: "Password is required" }),
 });
 
 export const ForgotPasswordValidation = z.object({

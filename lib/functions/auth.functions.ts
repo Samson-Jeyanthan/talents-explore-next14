@@ -1,63 +1,47 @@
+"use client";
+
 import {
   forgotPasswordAction,
   otpVerificationAction,
   resendOtpAction,
-  resetPasswordAction,
-  signinAction,
   verifyForgotPasswordAction,
 } from "@/actions/auth.action";
-// import { setIsAuthenticated } from "@/redux/slices/authSlice";
-import { AppDispatch } from "@/redux/store";
+
 import {
   TOTPProps,
-  TResetPasswordProps,
-  TSigninProps,
   TVerifyForgotPasswordOtpProps,
   TVerifyOTPProps,
 } from "@/types/auth.types";
 import { toast } from "sonner";
 
-// note - sign-in function
-export async function handleSignIn(formData: TSigninProps, dispatch : AppDispatch) {
-  const res = await signinAction(formData);
-  console.log(res);
-  if (res?.status === "7400") {
-    toast.success("Sign In Successfully");
-    // dispatch(setIsAuthenticated())
-      // const dispatch = useDispatch<AppDispatch>();
-      // const mode = useAppSelector((state: any) => state.utilsReducer.mode);
-      // dispatch(setMode("dark"));
-    return true;
-  } else {
-    toast.error("Sign In Failed");
-  }
-}
-
-// note - signup otp function
+// signup otp function
 export async function handleVerifyEmailOtp(formData: TVerifyOTPProps) {
   const res = await otpVerificationAction(formData);
-  console.log(res);
+  console.log(res, formData);
   if (res?.status === "7400") {
     toast.success("Credentials Verified");
     return true;
   } else {
     toast.error("OTP Verification Failed");
+    return false;
   }
 }
 
-// note - signup otp resend function
+// request for resend otp when registering the user
 export async function handleResendOtp(userId: string) {
   const res = await resendOtpAction(userId);
-  console.log(res);
   if (res?.status === "7400") {
     toast.success("OTP Has Send to Your Email", { duration: 4000 });
+    return true;
   } else {
     toast.error("Couldn't Find Your Email Address", {
       duration: 4000,
     });
+    return false;
   }
 }
 
+// request for forgot password otp
 export async function handleForgotPassword(
   email: string,
   { setError, setIsOpen }: TOTPProps
@@ -74,19 +58,19 @@ export async function handleForgotPassword(
       }));
     }
     toast.success("OTP Has Send to Your Email", { duration: 4000 });
-    return true;
+    return email;
   } else {
-    toast.error("Couldn't Find Your Email Address", {
-      duration: 4000,
-    });
     if (setError) {
       setError("Invalid Email Address");
     }
+    toast.error("Couldn't Find Your Email Address", {
+      duration: 4000,
+    });
     return false;
   }
 }
 
-// note - otp verification for forgot password
+// otp verification for forgot password
 export async function handleVerifyForgotPasswordOtp(
   formData: TVerifyForgotPasswordOtpProps,
   { setIsOpen }: TOTPProps
@@ -102,42 +86,41 @@ export async function handleVerifyForgotPasswordOtp(
         isReset: true,
       }));
     }
+    localStorage.setItem("resetpassword", "true");
     localStorage.removeItem("countdown");
     localStorage.removeItem("isOTP");
     return res?.response;
   } else {
     toast.error("OTP Verification Failed");
-    // this is temp otp fail action
     if (setIsOpen) {
       setIsOpen((prevState) => ({
         ...prevState,
         isOTP: true,
       }));
     }
+    return false;
   }
 }
 
-// note - resend otp for forgot password
-export async function handleResendFPOtp(email: string | undefined) {
+// request to resend otp for forgot password
+export async function handleResendForgotpasswordOtp(email: string) {
   const res = await forgotPasswordAction(email);
   console.log(res);
   if (res?.status === "7400") {
     toast.success("OTP Has Resend to Your Email", { duration: 4000 });
+    return true;
   } else {
-    toast.error("Couldn't Send OTP", {
+    toast.error("Couldn't Send OTP, Please Try Again", {
       duration: 4000,
     });
+    return false;
   }
 }
 
-export async function handleResetPassword(formData: TResetPasswordProps) {
-  const res = await resetPasswordAction(formData);
-  console.log(res);
-  if (res?.status === "7400") {
-    toast.success("Password Reset Successful", { duration: 5000 });
-    return true;
-  } else {
-    toast.error("Password Reset Failed", { duration: 5000 });
-    return false;
-  }
+// removing localstorage items when canceling the forgot password function
+export async function handleClearStorage() {
+  localStorage.removeItem("countdown");
+  localStorage.removeItem("isOTP");
+  localStorage.removeItem("verifiedEmail");
+  localStorage.removeItem("registerUserId");
 }

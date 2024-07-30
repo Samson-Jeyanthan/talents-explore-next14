@@ -11,9 +11,21 @@ import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { FormInput } from "../inputs";
+import { AppDispatch, useAppSelector } from "@/redux/store";
+import { useDispatch } from "react-redux";
+import { setIsAuthenticated } from "@/redux/slices/authSlice";
+// import { checkSession } from "@/lib/functions/auth.functions";
+import { jwtDecode } from "jwt-decode";
 
 const SigninForm = () => {
   // const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
+  const currentUserId = useAppSelector(
+    (state: any) => state.authReducer.currentUserId
+  );
+  const isAuth = useAppSelector(
+    (state: any) => state.authReducer.isAuthenticated
+  );
   const form = useForm<z.infer<typeof SigninValidation>>({
     resolver: zodResolver(SigninValidation),
     defaultValues: {
@@ -31,10 +43,18 @@ const SigninForm = () => {
     };
 
     const res = await signinAction(formData);
-    console.log(res);
+    console.log(res, "signin res");
     if (res?.status === "7400") {
       toast.success("Sign In Successfully", { duration: 3000 });
       // router.push("/");
+      const decodeToken = jwtDecode(res.response.accessToken);
+      console.log(decodeToken, "decodeToken");
+
+      dispatch(
+        setIsAuthenticated({
+          currentUserId: decodeToken.sub,
+        })
+      );
     } else {
       toast.error("Sign In Failed, Invalid Email or Password.", {
         duration: 4000,
@@ -42,8 +62,16 @@ const SigninForm = () => {
     }
   }
 
+  async function handleClick() {
+    // const tokenCheck = await checkSession();
+    console.log("tokenCheck");
+  }
+
   return (
     <Form {...form}>
+      <p className="text-light-900" onClick={() => handleClick()}>
+        Hi {currentUserId} and {isAuth ? "true" : "false"}
+      </p>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="mt-4 flex w-full flex-col gap-2 2xl:gap-5"
@@ -81,7 +109,10 @@ const SigninForm = () => {
         <div className="auth-or" />
         <p className="flex-center body-regular gap-4 text-center text-sm text-light-500">
           Don&apos;t have an account?
-          <Link href="/join-us" className=" text-primary-500">
+          <Link
+            href="/join-us"
+            className="text-primary-500 hover:text-light-900"
+          >
             Join us
           </Link>
         </p>

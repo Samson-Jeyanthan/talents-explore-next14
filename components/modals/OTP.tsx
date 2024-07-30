@@ -6,106 +6,137 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { DialogContent, DialogOverlay } from "@/components/ui/dialog";
+import {
+  DialogContent,
+  DialogDescription,
+  DialogOverlay,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import useTimer from "@/lib/hooks/useTimer";
 import { useRouter } from "next/navigation";
 import { TOTPProps } from "@/types/auth.types";
 import {
-  handleResendFPOtp,
+  handleClearStorage,
+  handleResendForgotpasswordOtp,
   handleResendOtp,
   handleVerifyEmailOtp,
   handleVerifyForgotPasswordOtp,
 } from "@/lib/functions/auth.functions";
 
-const OTP = ({
-  isSignup,
-  setIsOpen,
-  verifiedEmail,
-  setVerifiedUserId,
-}: TOTPProps) => {
+const OTP = ({ userId, isSignup, setIsOpen, setVerifiedUserId }: TOTPProps) => {
   const router = useRouter();
   const [value, setValue] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const {
     isTimerRunning,
     countdown,
     formatTime,
     setIsTimerRunning,
     setCountdown,
+    // checkOTPTimer,
   } = useTimer();
 
-  const countdownValue = localStorage.getItem("countdown") ?? "0";
-  const isTimer = parseInt(countdownValue) > 0;
+  const verifiedEmail: string | null = localStorage.getItem("verifiedEmail");
+  const accountCreationUserId: string | null =
+    localStorage.getItem("registerUserId");
+  const isTimer = localStorage.getItem("countdown") === "00:00";
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    console.log(value);
-
+    console.log(value, userId, "otp-val-userid");
+    setIsSubmitting(true);
     if (value.length === 0) {
       setError("OTP Verification Code is Required");
+      setIsSubmitting(false);
     } else if (value.length !== 6) {
       setError("OTP Verification Code must be 6 digits");
+      setIsSubmitting(false);
     } else {
       setError(null);
-      // forgot password otp
-      if (!isSignup) {
+      if (!isSignup && verifiedEmail) {
+        // forgot password otp
         const verifyOtpEmailData = {
-          email: verifiedEmail && verifiedEmail,
+          email: verifiedEmail,
           otp: parseInt(value),
         };
         const response = await handleVerifyForgotPasswordOtp(
           verifyOtpEmailData,
-          { setIsOpen }
+          { userId: "", setIsOpen }
         );
-        // parse the verified id to reset password modal
-        if (setVerifiedUserId) {
+        // parse the verified id prop to reset password modal
+        if (setVerifiedUserId && response) {
           setVerifiedUserId(response);
         }
+        if (!response) {
+          setError("Invalid OTP");
+          setIsTimerRunning(false);
+        }
+        setIsSubmitting(false);
       } else {
-        // sign-up email otp
-        const formData = {
-          userId: "651a4167806d38119491d9ee",
-          emailVerificationCode: parseInt(value),
-          deviceId: "string",
-          appVersion: "string",
-        };
-        await handleVerifyEmailOtp(formData);
+        // sign-up email otp verification
+        if (accountCreationUserId) {
+          const formData = {
+            userId,
+            emailVerificationCode: parseInt(value),
+            deviceId: "string",
+            appVersion: "string",
+          };
+          const res = await handleVerifyEmailOtp(formData);
+          if (res) {
+            await handleClearStorage();
+            router.push(`/complete-profile/${userId}`);
+          } else {
+            setError("Invalid OTP");
+            setIsTimerRunning(false);
+          }
+        }
+        setIsSubmitting(false);
       }
     }
   };
 
-  const handleResend = async () => {
+  const handleOTPStates = () => {
     localStorage.setItem("countdown", "");
     setIsTimerRunning(true);
-    setCountdown(10 * 60); // 10 min
+    setCountdown(1 * 40); // 10 min 10*60
     setError(null);
-    if (!isSignup) {
-      const email = verifiedEmail && verifiedEmail;
-      await handleResendFPOtp(email);
-    } else {
-      const userId = "651a4167806d38119491d9ee";
-      await handleResendOtp(userId);
+  };
+
+  const handleResend = async () => {
+    setValue("");
+    if (!isSignup && verifiedEmail) {
+      const res = await handleResendForgotpasswordOtp(verifiedEmail);
+      if (res) {
+        handleOTPStates();
+      }
+    } else if (accountCreationUserId) {
+      const res = await handleResendOtp(accountCreationUserId);
+      if (res) {
+        handleOTPStates();
+      }
     }
   };
 
-  const handleCancel = () => {
-    localStorage.removeItem("countdown");
-    localStorage.removeItem("isOTP");
+  const handleCancel = async () => {
+    await handleClearStorage();
     router.push("/sign-in");
   };
 
   return (
     <>
       <DialogOverlay className={cn("bg-black/10 backdrop-blur-sm")} />
-      <DialogContent className="flex max-w-96 flex-col items-center gap-3 border-none bg-dark-250 p-5">
-        <h1 className="h1-bold text-light-900">Verify Your Account</h1>
-        <p className="text-justify text-[12px] text-light-900">
+      <DialogContent className="flex max-w-96 flex-col items-center gap-3 rounded-xl border-none bg-dark-250 p-5">
+        <DialogTitle className="h1-bold text-light-900">
+          Verify Your Account
+        </DialogTitle>
+        <DialogDescription className="text-justify text-[12px] text-light-900">
           Check your inbox we have send an OTP verification code to your email.
           Please Enter the code to
           {isSignup ? " continue..." : " reset password"}
-        </p>
+        </DialogDescription>
         <form
           onSubmit={handleSubmit}
           className="flex w-full flex-col items-center gap-2"
@@ -129,7 +160,7 @@ const OTP = ({
             <p className="font-regular my-2 text-custom-100">{error}</p>
           )}
 
-          {isTimerRunning || isTimer ? (
+          {isTimerRunning || !isTimer ? (
             <h4 className="flex-center my-2 w-full gap-2 text-[13px] text-light-700">
               Verification code expires in
               <span className="text-primary-500">{formatTime(countdown)}</span>
@@ -144,7 +175,11 @@ const OTP = ({
             </>
           )}
 
-          <Button type="submit" className="shad-button_primary w-full">
+          <Button
+            type="submit"
+            className="shad-button_primary w-full"
+            disabled={isSubmitting}
+          >
             Submit
           </Button>
 
@@ -158,14 +193,12 @@ const OTP = ({
             </p>
           </div>
 
-          {!isSignup && (
-            <p
-              className="font-regular my-4 mb-1 cursor-pointer text-light-700 hover:text-light-900"
-              onClick={handleCancel}
-            >
-              Cancel
-            </p>
-          )}
+          <p
+            className="font-regular my-4 mb-1 cursor-pointer text-light-700 hover:text-light-900"
+            onClick={handleCancel}
+          >
+            Cancel
+          </p>
         </form>
       </DialogContent>
     </>

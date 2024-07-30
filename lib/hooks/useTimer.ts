@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from "react";
 
 function useTimer() {
@@ -31,7 +33,7 @@ function useTimer() {
   const isOTPTimer = checkOTPTimer();
   const isOTPOpen = checkOTPOpen();
   const [isTimerRunning, setIsTimerRunning] = useState(true);
-  const [countdown, setCountdown] = useState<number>(initialCountdown);
+  const [countdown, setCountdown] = useState<any>(initialCountdown);
 
   // set interval for auto countdown
   useEffect(() => {
@@ -81,6 +83,7 @@ function useTimer() {
     formatTime,
     setIsTimerRunning,
     setCountdown,
+    checkOTPTimer,
   };
 }
 
