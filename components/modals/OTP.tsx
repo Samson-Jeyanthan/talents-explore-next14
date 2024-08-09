@@ -85,10 +85,7 @@ const OTP = ({ userId, isSignup, setIsOpen, setVerifiedUserId }: TOTPProps) => {
             appVersion: "string",
           };
           const res = await handleVerifyEmailOtp(formData);
-          if (res) {
-            await handleClearStorage();
-            router.push(`/complete-profile/${userId}`);
-          } else {
+          if (!res) {
             setError("Invalid OTP");
             setIsTimerRunning(false);
           }
@@ -160,7 +157,7 @@ const OTP = ({ userId, isSignup, setIsOpen, setVerifiedUserId }: TOTPProps) => {
             <p className="font-regular my-2 text-custom-100">{error}</p>
           )}
 
-          {isTimerRunning || !isTimer ? (
+          {!isTimer || isTimerRunning ? (
             <h4 className="flex-center my-2 w-full gap-2 text-[13px] text-light-700">
               Verification code expires in
               <span className="text-primary-500">{formatTime(countdown)}</span>

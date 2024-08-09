@@ -3,8 +3,6 @@
 @tailwind utilities;
 
 @layer utilities {
-  /* text sizes */
-
   .h1-bold {
     @apply text-[28px] 2xl:text-[32px] font-bold leading-[42px];
   } /* used */

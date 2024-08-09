@@ -1,4 +1,5 @@
-import "server-only";
+// import "server-only";
+"use server";
 
 import { cookies } from "next/headers";
 
@@ -44,6 +45,10 @@ export async function storeIsAbout(isOk: boolean) {
     });
     return 200;
   } else {
+    cookies().set("isAbout", "false", {
+      expires: new Date(Date.now() + 2 * 60 * 1000),
+      httpOnly: true,
+    });
     return 400;
   }
 }

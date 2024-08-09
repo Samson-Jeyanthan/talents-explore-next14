@@ -58,11 +58,12 @@ function useTimer() {
         }
       };
     } else {
+      setIsTimerRunning(false);
       localStorage.setItem("countdown", "00:00");
     }
   }, [countdown, isOTPOpen, isOTPTimer]);
 
-  // function to display format time in the otp modal
+  // function to display time countdown in the otp modal
   const formatTime = (time: any) => {
     const minutes = Math.floor(time / 60)
       .toString()

@@ -17,9 +17,10 @@ import { toast } from "sonner";
 // signup otp function
 export async function handleVerifyEmailOtp(formData: TVerifyOTPProps) {
   const res = await otpVerificationAction(formData);
-  console.log(res, formData);
+  console.log(res);
   if (res?.status === "7400") {
     toast.success("Credentials Verified");
+    await handleClearStorage();
     return true;
   } else {
     toast.error("OTP Verification Failed");

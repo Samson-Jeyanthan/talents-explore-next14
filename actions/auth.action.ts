@@ -19,6 +19,7 @@ export const otpVerificationAction = async (formData: unknown) => {
     const response = await axiosInstance.post("/auth/verifyEmailOtp", formData);
     const res = response.data;
     if (res?.status === "7400") {
+      await storeIsAbout(false);
       const result = await createSession(res.response.accessToken);
       console.log(result, "result-access-token-isAbout-fsldr");
       return res;
@@ -41,6 +42,22 @@ export const resendOtpAction = async (userId: string) => {
   }
 };
 
+export const completeProfileAction = async (
+  userId: string,
+  formData: unknown
+) => {
+  try {
+    const response = await axiosInstance.put(
+      `/user/personalInfo/${userId}`,
+      formData
+    );
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+};
+
 export const signinAction = async (formData: unknown) => {
   try {
     const response = await axiosInstance.post("/auth/login", formData);
@@ -53,20 +70,13 @@ export const signinAction = async (formData: unknown) => {
       const userFirstName = userPersonalInfo?.firstName;
       console.log(userFirstName, "userFirstName");
 
-      // store isAbout based on userFirstName
+      // store isAbout based on user's first name
       if (userFirstName) {
-        const isAboutRes = await storeIsAbout(true);
-        if (isAboutRes === 200) {
-          const result = await createSession(res.response.accessToken);
-          console.log(result, "result-access-token-isAbout-true", isAboutRes);
-        }
+        await storeIsAbout(true);
+        await createSession(res.response.accessToken);
       } else {
-        const result = await createSession(res.response.accessToken);
-        console.log(
-          result,
-          "no-token-result-access-token-isAbout-false",
-          userFirstName
-        );
+        await storeIsAbout(false);
+        await createSession(res.response.accessToken);
       }
       return res;
     } else {

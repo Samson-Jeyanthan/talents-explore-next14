@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { SigninValidation } from "@/lib/validations/authValidation";
 import { signinAction } from "@/actions/auth.action";
-// import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -11,21 +11,18 @@ import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { FormInput } from "../inputs";
-import { AppDispatch, useAppSelector } from "@/redux/store";
+import { AppDispatch } from "@/redux/store";
 import { useDispatch } from "react-redux";
 import { setIsAuthenticated } from "@/redux/slices/authSlice";
-// import { checkSession } from "@/lib/functions/auth.functions";
 import { jwtDecode } from "jwt-decode";
 
 const SigninForm = () => {
-  // const router = useRouter();
+  // const []
+  const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
-  const currentUserId = useAppSelector(
-    (state: any) => state.authReducer.currentUserId
-  );
-  const isAuth = useAppSelector(
-    (state: any) => state.authReducer.isAuthenticated
-  );
+  // const currentUserId = useAppSelector(
+  //   (state: any) => state.authReducer.currentUserId
+  // );
   const form = useForm<z.infer<typeof SigninValidation>>({
     resolver: zodResolver(SigninValidation),
     defaultValues: {
@@ -45,9 +42,10 @@ const SigninForm = () => {
     const res = await signinAction(formData);
     console.log(res, "signin res");
     if (res?.status === "7400") {
-      toast.success("Sign In Successfully", { duration: 3000 });
+      toast.success("Sign In Successfully", { duration: 4000 });
       // router.push("/");
       const decodeToken = jwtDecode(res.response.accessToken);
+      router.push(`/complete-profile/${decodeToken.sub}`);
       console.log(decodeToken, "decodeToken");
 
       dispatch(
@@ -62,16 +60,8 @@ const SigninForm = () => {
     }
   }
 
-  async function handleClick() {
-    // const tokenCheck = await checkSession();
-    console.log("tokenCheck");
-  }
-
   return (
     <Form {...form}>
-      <p className="text-light-900" onClick={() => handleClick()}>
-        Hi {currentUserId} and {isAuth ? "true" : "false"}
-      </p>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="mt-4 flex w-full flex-col gap-2 2xl:gap-5"
