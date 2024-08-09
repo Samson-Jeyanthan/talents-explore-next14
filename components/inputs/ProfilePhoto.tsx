@@ -26,6 +26,7 @@ const ProfilePhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
   // image crop compelte function
   const handleCropComplete = (img: any) => {
     setFinalCropImage(img?.croppedPrev);
+    fieldChange(img.croppedData);
     setIsOpen(false);
     resetMedia();
   };

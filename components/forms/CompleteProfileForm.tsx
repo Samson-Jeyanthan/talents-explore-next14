@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Form } from "../ui/form";
+import { Form, FormField } from "../ui/form";
 import {
   CheckboxInput,
   CoverPhoto,
@@ -17,128 +17,172 @@ import { CompleteProfileValidation } from "@/lib/validations/authValidation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useRouter } from "next/navigation";
+import { completeProfileAction } from "@/actions/auth.action";
+import { convertToISOString } from "@/lib/hooks/useDateSelector";
+import { toast } from "sonner";
+// import { useRouter } from "next/navigation";
 
-const CompleteProfileForm = () =>
-  // { langData }: any
-  {
-    const router = useRouter();
-    const form = useForm<z.infer<typeof CompleteProfileValidation>>({
-      resolver: zodResolver(CompleteProfileValidation),
-      defaultValues: {
-        firstName: "",
-        lastName: "",
-        knownLanguage: "",
-        profession: "",
-        year: "",
-        month: "",
-        day: "",
-        gender: "",
-        quotes: "",
-        coverPhoto: [],
-        profilePhoto: [],
-      },
-    });
+const CompleteProfileForm = ({ langData, professionData }: any) => {
+  const LangOptions = langData.response.map((item: any) => ({
+    _id: item._id,
+    name: item.language,
+  }));
 
-    function onSubmit(values: z.infer<typeof CompleteProfileValidation>) {
-      console.log(values);
-      router.push("/onboarding");
-    }
+  const professionOptions = professionData.response.map((item: any) => ({
+    _id: item._id,
+    name: item.professional,
+  }));
 
-    // console.log(langData);
+  const form = useForm<z.infer<typeof CompleteProfileValidation>>({
+    resolver: zodResolver(CompleteProfileValidation),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      knownLanguage: "",
+      profession: "",
+      year: "",
+      month: "",
+      day: "",
+      tempDob: "",
+      gender: "",
+      quotes: "",
+      coverPhoto: [],
+      profilePhoto: [],
+    },
+  });
 
-    return (
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="mt-4 flex w-full flex-col gap-5"
-        >
-          <div className="relative flex w-full">
-            <CoverPhoto />
-            <ProfilePhoto />
-          </div>
-          <div className="mt-20 flex w-full max-w-screen-md flex-col gap-6">
-            <div className="flex w-full gap-4">
-              <FormInput
-                form={form}
-                formLabel="First Name"
-                inputName="firstName"
-                inputType="text"
-                placeholder="John"
-              />
-              <FormInput
-                form={form}
-                formLabel="Last Name"
-                inputName="lastName"
-                inputType="text"
-                placeholder="Doe"
-              />
-            </div>
-
-            <CheckboxInput
-              form={form}
-              inputName="gender"
-              formLabel="Gender"
-              data={GENDER_VALUES}
-            />
-
-            <DateInpt
-              form={form}
-              formLabel="Date of Birth"
-              yearValue={form.getValues("year")}
-              monthValue={form.getValues("month")}
-              dayValue={form.getValues("day")}
-            />
-
-            <Dropdown
-              form={form}
-              value={form.getValues("knownLanguage")}
-              formLabel="Known Language"
-              inputName="knownLanguage"
-              placeholder="Select your native language"
-              formDescription="Let us know the language you speak so we can connect you with people who share your interests and culture."
-              options={[
-                { _id: "1", name: "English" },
-                { _id: "2", name: "French" },
-                { _id: "3", name: "Spanish" },
-              ]}
-            />
-            <Dropdown
-              form={form}
-              value={form.getValues("profession")}
-              formLabel="Profession"
-              inputName="profession"
-              placeholder="Select your profession"
-              formDescription="This information helps us understand your professional background and can be used to provide you with relevant content and services."
-              options={[
-                { _id: "1", name: "English" },
-                { _id: "2", name: "French" },
-                { _id: "3", name: "Spanish" },
-              ]}
-            />
-
-            <TextArea
-              form={form}
-              formLabel="Quotes"
-              inputName="quotes"
-              placeholder="What's on your mind...?"
-              formDescription="Keep it positive: Let's create a supportive community by sharing constructive and respectful messages."
-              maxLength={120}
-            />
-          </div>
-
-          <div className="flex w-full justify-end">
-            <Button
-              type="submit"
-              disabled={form.formState.isSubmitting}
-              className="shad-button_primary mt-4 w-40"
-            >
-              Complete Profile
-            </Button>
-          </div>
-        </form>
-      </Form>
+  async function onSubmit(values: z.infer<typeof CompleteProfileValidation>) {
+    const convertedDate = convertToISOString(
+      values.year,
+      values.month,
+      values.day
     );
-  };
+    const formData = {
+      firstName: values.firstName,
+      lastName: values.lastName,
+      dob: convertedDate,
+      gender: values.gender,
+      languageKnown: values.knownLanguage,
+      profileImage: null,
+      coverImage: null,
+      shortBio: values.quotes,
+      professional: values.profession,
+      location: "trincomalee, srilanka",
+      latitude: 8.5668,
+      longitude: 81.2253,
+    };
+    console.log(formData);
+    // router.push("/onboarding");
+    const res = await completeProfileAction(
+      "66a86e4be83cd9d78b914b50",
+      formData
+    );
+
+    if (res.status === "7400") {
+      toast.success("Profile Updated Successfully", { duration: 4000 });
+    } else {
+      toast.error("Profile Update Failed", { duration: 4000 });
+    }
+  }
+
+  return (
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="mt-4 flex w-full flex-col gap-5"
+      >
+        <div className="relative flex w-full">
+          <FormField
+            control={form.control}
+            name="coverPhoto"
+            render={({ field }) => <CoverPhoto fieldChange={field.onChange} />}
+          />
+          <FormField
+            control={form.control}
+            name="profilePhoto"
+            render={({ field }) => (
+              <ProfilePhoto fieldChange={field.onChange} />
+            )}
+          />
+        </div>
+
+        <div className="mt-20 flex w-full max-w-screen-md flex-col gap-6">
+          <div className="flex w-full gap-4">
+            <FormInput
+              form={form}
+              formLabel="First Name"
+              inputName="firstName"
+              inputType="text"
+              placeholder="John"
+            />
+            <FormInput
+              form={form}
+              formLabel="Last Name"
+              inputName="lastName"
+              inputType="text"
+              placeholder="Doe"
+            />
+          </div>
+
+          <CheckboxInput
+            form={form}
+            inputName="gender"
+            formLabel="Gender"
+            data={GENDER_VALUES}
+          />
+
+          <DateInpt
+            form={form}
+            formLabel="Date of Birth"
+            yearValue={form.getValues("year")}
+            monthValue={form.getValues("month")}
+            dayValue={form.getValues("day")}
+          />
+
+          <Dropdown
+            form={form}
+            value={form.getValues("knownLanguage")}
+            formLabel="Known Language"
+            inputName="knownLanguage"
+            placeholder="Select your native language"
+            formDescription="Let us know the language you speak so we can connect you with people who share your interests and culture."
+            options={LangOptions}
+          />
+
+          <Dropdown
+            form={form}
+            value={form.getValues("profession")}
+            formLabel="Profession"
+            inputName="profession"
+            placeholder="Select your profession"
+            formDescription="This information helps us understand your professional background and can be used to provide you with relevant content and services."
+            options={professionOptions}
+          />
+
+          <TextArea
+            form={form}
+            formLabel="Quotes"
+            inputName="quotes"
+            placeholder="What's on your mind...?"
+            formDescription="Keep it positive: Let's create a supportive community by sharing constructive and respectful messages."
+            maxLength={120}
+          />
+        </div>
+
+        <div className="flex w-full justify-end">
+          <Button
+            type="submit"
+            disabled={form.formState.isSubmitting}
+            className="shad-button_primary mt-4 w-40"
+          >
+            {form.formState.isSubmitting
+              ? "Creating Profile..."
+              : "Create Profile"}
+          </Button>
+        </div>
+      </form>
+    </Form>
+  );
+};
 
 export default CompleteProfileForm;

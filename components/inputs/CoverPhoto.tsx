@@ -23,7 +23,9 @@ const CoverPhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
   };
 
   const handleCropComplete = (img: any) => {
+    console.log(img, "img");
     setFinalCropImage(img?.croppedPrev);
+    fieldChange(img.croppedData);
     setIsOpen(false);
     resetMedia();
   };
@@ -60,6 +62,7 @@ const CoverPhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
           onDelete={handleDelete}
         />
       </Dialog>
+
       <div
         className={`flex-center relative flex ${finalCropImage ? "h-auto" : "h-96"} max-h-96 min-h-48 w-full rounded-lg bg-dark-300`}
       >
