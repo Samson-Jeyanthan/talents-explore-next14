@@ -20,6 +20,7 @@ import { z } from "zod";
 import { completeProfileAction } from "@/actions/auth.action";
 import { convertToISOString } from "@/lib/hooks/useDateSelector";
 import { toast } from "sonner";
+import TransparentLoader from "../ui/transparent-loader";
 // import { useRouter } from "next/navigation";
 
 const CompleteProfileForm = ({ langData, professionData }: any) => {
@@ -43,7 +44,6 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
       year: "",
       month: "",
       day: "",
-      tempDob: "",
       gender: "",
       quotes: "",
       coverPhoto: [],
@@ -57,6 +57,7 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
       values.month,
       values.day
     );
+
     const formData = {
       firstName: values.firstName,
       lastName: values.lastName,
@@ -86,102 +87,107 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
   }
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="mt-4 flex w-full flex-col gap-5"
-      >
-        <div className="relative flex w-full">
-          <FormField
-            control={form.control}
-            name="coverPhoto"
-            render={({ field }) => <CoverPhoto fieldChange={field.onChange} />}
-          />
-          <FormField
-            control={form.control}
-            name="profilePhoto"
-            render={({ field }) => (
-              <ProfilePhoto fieldChange={field.onChange} />
-            )}
-          />
-        </div>
-
-        <div className="mt-20 flex w-full max-w-screen-md flex-col gap-6">
-          <div className="flex w-full gap-4">
-            <FormInput
-              form={form}
-              formLabel="First Name"
-              inputName="firstName"
-              inputType="text"
-              placeholder="John"
+    <>
+      {form.formState.isSubmitting && <TransparentLoader />}
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="mt-4 flex w-full flex-col gap-5"
+        >
+          <div className="relative flex w-full">
+            <FormField
+              control={form.control}
+              name="coverPhoto"
+              render={({ field }) => (
+                <CoverPhoto fieldChange={field.onChange} />
+              )}
             />
-            <FormInput
-              form={form}
-              formLabel="Last Name"
-              inputName="lastName"
-              inputType="text"
-              placeholder="Doe"
+            <FormField
+              control={form.control}
+              name="profilePhoto"
+              render={({ field }) => (
+                <ProfilePhoto fieldChange={field.onChange} />
+              )}
             />
           </div>
 
-          <CheckboxInput
-            form={form}
-            inputName="gender"
-            formLabel="Gender"
-            data={GENDER_VALUES}
-          />
+          <div className="mt-20 flex w-full max-w-screen-md flex-col gap-6">
+            <div className="flex w-full gap-4">
+              <FormInput
+                form={form}
+                formLabel="First Name"
+                inputName="firstName"
+                inputType="text"
+                placeholder="John"
+              />
+              <FormInput
+                form={form}
+                formLabel="Last Name"
+                inputName="lastName"
+                inputType="text"
+                placeholder="Doe"
+              />
+            </div>
 
-          <DateInpt
-            form={form}
-            formLabel="Date of Birth"
-            yearValue={form.getValues("year")}
-            monthValue={form.getValues("month")}
-            dayValue={form.getValues("day")}
-          />
+            <CheckboxInput
+              form={form}
+              inputName="gender"
+              formLabel="Gender"
+              data={GENDER_VALUES}
+            />
 
-          <Dropdown
-            form={form}
-            value={form.getValues("knownLanguage")}
-            formLabel="Known Language"
-            inputName="knownLanguage"
-            placeholder="Select your native language"
-            formDescription="Let us know the language you speak so we can connect you with people who share your interests and culture."
-            options={LangOptions}
-          />
+            <DateInpt
+              form={form}
+              formLabel="Date of Birth"
+              yearValue={form.getValues("year")}
+              monthValue={form.getValues("month")}
+              dayValue={form.getValues("day")}
+            />
 
-          <Dropdown
-            form={form}
-            value={form.getValues("profession")}
-            formLabel="Profession"
-            inputName="profession"
-            placeholder="Select your profession"
-            formDescription="This information helps us understand your professional background and can be used to provide you with relevant content and services."
-            options={professionOptions}
-          />
+            <Dropdown
+              form={form}
+              value={form.getValues("knownLanguage")}
+              formLabel="Known Language"
+              inputName="knownLanguage"
+              placeholder="Select your native language"
+              formDescription="Let us know the language you speak so we can connect you with people who share your interests and culture."
+              options={LangOptions}
+            />
 
-          <TextArea
-            form={form}
-            formLabel="Quotes"
-            inputName="quotes"
-            placeholder="What's on your mind...?"
-            formDescription="Keep it positive: Let's create a supportive community by sharing constructive and respectful messages."
-            maxLength={120}
-          />
-        </div>
+            <Dropdown
+              form={form}
+              value={form.getValues("profession")}
+              formLabel="Profession"
+              inputName="profession"
+              placeholder="Select your profession"
+              formDescription="This information helps us understand your professional background and can be used to provide you with relevant content and services."
+              options={professionOptions}
+            />
 
-        <div className="flex w-full justify-end">
-          <Button
-            type="submit"
-            disabled={form.formState.isSubmitting}
-            className="shad-button_primary mt-4 w-40"
-          >
-            {form.formState.isSubmitting
-              ? "Creating Profile..."
-              : "Create Profile"}
-          </Button>
-        </div>
-      </form>
-    </Form>
+            <TextArea
+              form={form}
+              formLabel="Quotes"
+              inputName="quotes"
+              placeholder="What's on your mind...?"
+              formDescription="Keep it positive: Let's create a supportive community by sharing constructive and respectful messages."
+              maxLength={120}
+            />
+          </div>
+
+          <div className="flex w-full justify-end">
+            <Button
+              type="submit"
+              disabled={form.formState.isSubmitting}
+              className="shad-button_primary mt-4 w-40"
+            >
+              {form.formState.isSubmitting
+                ? "Creating Profile..."
+                : "Create Profile"}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </>
   );
 };
 

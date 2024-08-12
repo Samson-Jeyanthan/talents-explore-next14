@@ -1,7 +1,7 @@
 import { Media } from "@/types/utils.types";
 import { ChangeEvent, useState } from "react";
 
-const defaultMediaState: Media = {
+export const defaultMediaState: Media = {
   data: null,
   preview: "",
   fileType: null,
@@ -49,5 +49,7 @@ export function useMedia() {
     error,
     handleImageInput,
     resetMedia: () => setMedia(defaultMediaState),
+    setError,
+    setMedia,
   };
 }

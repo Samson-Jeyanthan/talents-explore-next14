@@ -2,26 +2,29 @@
 
 import React, { useRef, ChangeEvent, useState } from "react";
 import { Dialog } from "../ui/dialog";
-import { CropImgModal, PhotoActionModal } from "../modals";
+import { CropImgModal, PhotoActionModal, ErrorAlert } from "../modals";
 import { CameraIcon } from "@/public/assets/svgs";
-import { useMedia } from "@/lib/hooks/useMedia";
+import { defaultMediaState, useMedia } from "@/lib/hooks/useMedia";
 import Image from "next/image";
 import { TCoverProfilePhotoProps } from "@/types/utils.types";
 import { MdEdit } from "react-icons/md";
 
 const CoverPhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
   const photoRef = useRef<HTMLInputElement>(null);
-  const { handleImageInput, media, resetMedia, error } = useMedia();
+  const { handleImageInput, media, resetMedia, error, setError, setMedia } =
+    useMedia();
   const [isOpen, setIsOpen] = useState(false);
   const [finalCropImage, setFinalCropImage] = useState(null);
   const [isActionOpen, setIsActionOpen] = useState(false);
 
+  // handle image input change
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     handleImageInput(event);
     setIsOpen(true);
     setIsActionOpen(false);
   };
 
+  // image crop compelte function
   const handleCropComplete = (img: any) => {
     console.log(img, "img");
     setFinalCropImage(img?.croppedPrev);
@@ -30,6 +33,7 @@ const CoverPhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
     resetMedia();
   };
 
+  // handle the photo action modal open and input change
   const handleInputBtn = () => {
     if (finalCropImage === null) {
       photoRef.current?.click();
@@ -38,13 +42,27 @@ const CoverPhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
     }
   };
 
+  // delete the cropped photo
   const handleDelete = () => {
     setFinalCropImage(null);
     setIsActionOpen(false);
   };
 
+  // handling invalid media
+  const handleOkClick = () => {
+    setError("");
+    setMedia(defaultMediaState);
+    setIsOpen(false);
+  };
+
   return (
     <>
+      <ErrorAlert
+        isOpen={Boolean(error)}
+        title="OOPS! Something went wrong"
+        error={error}
+        onClick={handleOkClick}
+      />
       <Dialog
         open={isOpen && media && !error}
         onOpenChange={() => setIsOpen(false)}
@@ -62,7 +80,6 @@ const CoverPhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
           onDelete={handleDelete}
         />
       </Dialog>
-
       <div
         className={`flex-center relative flex ${finalCropImage ? "h-auto" : "h-96"} max-h-96 min-h-48 w-full rounded-lg bg-dark-300`}
       >
