@@ -4,7 +4,7 @@ import React, { useRef, ChangeEvent, useState } from "react";
 import { Dialog } from "../ui/dialog";
 import { CropImgModal, PhotoActionModal, ErrorAlert } from "../modals";
 import { CameraIcon } from "@/public/assets/svgs";
-import { defaultMediaState, useMedia } from "@/lib/hooks/useMedia";
+import { defaultMediaState, useCoverAndProfilePic } from "@/lib/hooks/useMedia";
 import Image from "next/image";
 import { TCoverProfilePhotoProps } from "@/types/utils.types";
 import { MdEdit } from "react-icons/md";
@@ -12,7 +12,7 @@ import { MdEdit } from "react-icons/md";
 const CoverPhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
   const photoRef = useRef<HTMLInputElement>(null);
   const { handleImageInput, media, resetMedia, error, setError, setMedia } =
-    useMedia();
+    useCoverAndProfilePic();
   const [isOpen, setIsOpen] = useState(false);
   const [finalCropImage, setFinalCropImage] = useState(null);
   const [isActionOpen, setIsActionOpen] = useState(false);

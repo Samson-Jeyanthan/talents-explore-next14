@@ -12,6 +12,7 @@ import {
   TVerifyForgotPasswordOtpProps,
   TVerifyOTPProps,
 } from "@/types/auth.types";
+import { jwtDecode } from "jwt-decode";
 import { toast } from "sonner";
 
 // signup otp function
@@ -20,8 +21,9 @@ export async function handleVerifyEmailOtp(formData: TVerifyOTPProps) {
   console.log(res);
   if (res?.status === "7400") {
     toast.success("Credentials Verified");
+    const decodeToken = jwtDecode(res.response.accessToken);
     await handleClearStorage();
-    return true;
+    return decodeToken.sub;
   } else {
     toast.error("OTP Verification Failed");
     return false;

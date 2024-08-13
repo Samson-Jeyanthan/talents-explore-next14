@@ -6,10 +6,10 @@ export const defaultMediaState: Media = {
   preview: "",
   fileType: null,
   fileName: null,
-  mediaType: null,
+  mediaType: "",
 };
 
-export function useMedia() {
+export function useCoverAndProfilePic() {
   const [error, setError] = useState("");
   const [media, setMedia] = useState<Media>(defaultMediaState);
 
@@ -41,6 +41,7 @@ export function useMedia() {
       preview: URL.createObjectURL(file),
       fileType: file.type,
       fileName: file.name,
+      mediaType: "image",
     });
   };
 

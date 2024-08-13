@@ -11,7 +11,7 @@ export type Media = {
   preview: string;
   fileType: string | null;
   fileName: string | null;
-  mediaType: string | null;
+  mediaType?: string | null;
 };
 
 export type TCropImgModalProps = {

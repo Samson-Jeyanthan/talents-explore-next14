@@ -17,12 +17,8 @@ import { setIsAuthenticated } from "@/redux/slices/authSlice";
 import { jwtDecode } from "jwt-decode";
 
 const SigninForm = () => {
-  // const []
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
-  // const currentUserId = useAppSelector(
-  //   (state: any) => state.authReducer.currentUserId
-  // );
   const form = useForm<z.infer<typeof SigninValidation>>({
     resolver: zodResolver(SigninValidation),
     defaultValues: {
@@ -43,7 +39,6 @@ const SigninForm = () => {
     console.log(res, "signin res");
     if (res?.status === "7400") {
       toast.success("Sign In Successfully", { duration: 4000 });
-      // router.push("/");
       const decodeToken = jwtDecode(res.response.accessToken);
       router.push(`/complete-profile/${decodeToken.sub}`);
       console.log(decodeToken, "decodeToken");

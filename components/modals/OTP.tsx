@@ -76,7 +76,7 @@ const OTP = ({ userId, isSignup, setIsOpen, setVerifiedUserId }: TOTPProps) => {
         }
         setIsSubmitting(false);
       } else {
-        // sign-up email otp verification
+        // sign-up email otp verification and redirection to complete profile
         if (accountCreationUserId) {
           const formData = {
             userId,
@@ -85,7 +85,9 @@ const OTP = ({ userId, isSignup, setIsOpen, setVerifiedUserId }: TOTPProps) => {
             appVersion: "string",
           };
           const res = await handleVerifyEmailOtp(formData);
-          if (!res) {
+          if (res) {
+            router.push(`/complete-profile/${res}`);
+          } else {
             setError("Invalid OTP");
             setIsTimerRunning(false);
           }

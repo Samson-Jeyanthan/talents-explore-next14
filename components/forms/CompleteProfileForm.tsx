@@ -21,9 +21,11 @@ import { completeProfileAction } from "@/actions/auth.action";
 import { convertToISOString } from "@/lib/hooks/useDateSelector";
 import { toast } from "sonner";
 import TransparentLoader from "../ui/transparent-loader";
-// import { useRouter } from "next/navigation";
+import { getFileUpload } from "@/lib/utils/getFileUpload";
+import { useRouter } from "next/navigation";
 
 const CompleteProfileForm = ({ langData, professionData }: any) => {
+  const router = useRouter();
   const LangOptions = langData.response.map((item: any) => ({
     _id: item._id,
     name: item.language,
@@ -46,8 +48,8 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
       day: "",
       gender: "",
       quotes: "",
-      coverPhoto: [],
-      profilePhoto: [],
+      coverPhoto: undefined,
+      profilePhoto: undefined,
     },
   });
 
@@ -57,6 +59,31 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
       values.month,
       values.day
     );
+    console.log(values.profilePhoto, "values.profilePhoto");
+    console.log(values.coverPhoto, "values.coverPhoto");
+
+    let profileImageKey: string = "";
+    let coverImageKey: string = "";
+
+    if (values.profilePhoto) {
+      profileImageKey = await getFileUpload(
+        values.profilePhoto,
+        values.firstName,
+        "profile-pic"
+      );
+      console.log("profile-photo - values.profilephoto true", profileImageKey);
+    } else {
+      console.log("profile-photo - values.profilephoto false");
+    }
+
+    if (values.coverPhoto) {
+      coverImageKey = await getFileUpload(
+        values.coverPhoto,
+        values.firstName,
+        "cover-pic"
+      );
+      console.log("hi there cover photo", coverImageKey);
+    }
 
     const formData = {
       firstName: values.firstName,
@@ -64,23 +91,24 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
       dob: convertedDate,
       gender: values.gender,
       languageKnown: values.knownLanguage,
-      profileImage: null,
-      coverImage: null,
+      profileImage: profileImageKey && profileImageKey,
+      coverImage: coverImageKey && coverImageKey,
       shortBio: values.quotes,
       professional: values.profession,
       location: "trincomalee, srilanka",
       latitude: 8.5668,
       longitude: 81.2253,
     };
-    console.log(formData);
-    // router.push("/onboarding");
+    console.log(formData, "formData");
+
     const res = await completeProfileAction(
       "66a86e4be83cd9d78b914b50",
       formData
     );
 
     if (res.status === "7400") {
-      toast.success("Profile Updated Successfully", { duration: 4000 });
+      toast.success("Profile Updated Successfully", { duration: 5000 });
+      router.push("/onboarding");
     } else {
       toast.error("Profile Update Failed", { duration: 4000 });
     }

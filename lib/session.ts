@@ -27,7 +27,7 @@ export async function verifySession() {
   const isAboutCheck = cookies().get("isAbout");
   console.log(isAboutCheck, "isAboutCheck-in-session.ts");
   if (!session) {
-    return "session illai";
+    return false;
   } else {
     return session;
   }

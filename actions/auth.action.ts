@@ -139,3 +139,16 @@ export const userPersonalInfoAction = async (userId: string | undefined) => {
     return error;
   }
 };
+
+export const checkIsAboutAction = async (token: any) => {
+  const decodedJWTToken = jwtDecode(token);
+  const userDetailsRes = await userPersonalInfoAction(decodedJWTToken?.sub);
+  const userPersonalInfo = userDetailsRes?.response?.personalInfo;
+  const userFirstName = userPersonalInfo?.firstName;
+
+  if (userFirstName) {
+    return true;
+  } else {
+    return false;
+  }
+};
