@@ -1,14 +1,33 @@
-// import { getLanguages } from "@/lib/utils/getData";
-
+import { checkIsAboutAction } from "@/actions/auth.action";
+import {
+  getLanguagesAction,
+  getProfessionsAction,
+} from "@/actions/utils.action";
 import { CompleteProfileForm } from "@/components/forms";
-// import { getLanguages } from "@/lib/data/getData";
+import { verifySession } from "@/lib/session";
+import { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
-const CompleteProfile = () => {
-  // const langData = getLanguages();
+export const metadata: Metadata = {
+  title: "Complete Profile | Talents Explore",
+  description: "",
+};
+
+const CompleteProfile = async () => {
+  const langData = await getLanguagesAction();
+  const professionData = await getProfessionsAction();
+  const token = await verifySession();
+
+  if (token) {
+    const res = await checkIsAboutAction(token);
+    if (res) redirect("/home");
+  } else {
+    redirect("/sign-in");
+  }
 
   return (
-    <>
-      <title>Complete Profile | Talents Explore</title>
+    <Suspense fallback={"Loading"}>
       <div className="flex-start min-h-screen w-full flex-col">
         <div className="my-3 flex max-w-6xl flex-col 2xl:my-8">
           <h1 className="h1-bold text-light-900">
@@ -20,11 +39,12 @@ const CompleteProfile = () => {
             will help others to trust and connect with you.
           </p>
           <CompleteProfileForm
-          // langData={ langData }
+            langData={langData}
+            professionData={professionData}
           />
         </div>
       </div>
-    </>
+    </Suspense>
   );
 };
 

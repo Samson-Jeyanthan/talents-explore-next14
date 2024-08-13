@@ -1,7 +1,13 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { DialogContent, DialogOverlay, Dialog } from "../ui/dialog";
+import {
+  DialogContent,
+  DialogOverlay,
+  Dialog,
+  DialogTitle,
+  DialogDescription,
+} from "../ui/dialog";
 import React, { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -12,17 +18,20 @@ import { ForgotPasswordValidation } from "@/lib/validations/authValidation";
 import { FormInput } from "../inputs";
 import { OTPModal, ResetPasswordModal } from ".";
 import { useRouter } from "next/navigation";
-import { handleForgotPassword } from "@/lib/functions/auth.functions";
+import {
+  handleForgotPassword,
+  handleClearStorage,
+} from "@/lib/functions/auth.functions";
+import { IsOpenState } from "@/types/auth.types";
 
 const ForgotPassword = () => {
   const router = useRouter();
-  const [isOpen, setIsOpen] = useState({
+  const [isOpen, setIsOpen] = useState<IsOpenState>({
     isFP: false,
     isOTP: false,
     isReset: false,
   });
-  const [verifiedEmail, setVerifiedEmail] = useState("");
-  const [verifiedUserId, setVerifiedUserId] = useState("");
+  const [verifiedUserId, setVerifiedUserId] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const form = useForm<z.infer<typeof ForgotPasswordValidation>>({
     resolver: zodResolver(ForgotPasswordValidation),
@@ -31,17 +40,21 @@ const ForgotPassword = () => {
     },
   });
 
-  const handleCancel = () => {
-    localStorage.removeItem("countdown");
-    localStorage.removeItem("isOTP");
-    router.push("/sign-in");
-  };
-
-  // open forgot password modal at component did mount
+  // open FP | OTP modal at component did mount
   useEffect(() => {
-    if (!isOpen.isFP && !isOpen.isOTP && !isOpen.isReset) {
-      localStorage.removeItem("countdown");
-      localStorage.removeItem("isOTP");
+    const checkExistingCountDown =
+      localStorage.getItem("countdown") !== "00:00";
+    const checkOTPOpen = localStorage.getItem("isOTP") === "true";
+
+    if (checkExistingCountDown && checkOTPOpen) {
+      if (!isOpen.isFP && !isOpen.isOTP && !isOpen.isReset) {
+        setIsOpen({
+          ...isOpen,
+          isOTP: true,
+        });
+      }
+    } else {
+      handleClearStorage();
       setIsOpen({
         ...isOpen,
         isFP: true,
@@ -51,25 +64,35 @@ const ForgotPassword = () => {
   }, []);
 
   async function onSubmit(values: z.infer<typeof ForgotPasswordValidation>) {
-    // setIsSubmitting(true);
     const email = values.email;
-    const response = await handleForgotPassword(email, { setError, setIsOpen });
+    const response = await handleForgotPassword(email, {
+      userId: "",
+      setError,
+      setIsOpen,
+    });
     if (response) {
-      setVerifiedEmail(email);
+      localStorage.setItem("verifiedEmail", email);
     }
   }
+
+  const handleCancel = async () => {
+    await handleClearStorage();
+    router.push("/sign-in");
+  };
 
   return (
     <>
       {isOpen.isFP && (
         <Dialog open={isOpen.isFP}>
           <DialogOverlay className={cn("bg-black/10 backdrop-blur-sm")} />
-          <DialogContent className="flex max-w-96 flex-col items-center gap-3 border-none bg-dark-250 p-5">
-            <h1 className="h1-bold text-light-900">Forgot Password?</h1>
-            <p className="text-justify text-[12px] text-light-900">
+          <DialogContent className="flex max-w-96 flex-col items-center gap-3 rounded-xl border-none bg-dark-250 p-5">
+            <DialogTitle className="h1-bold text-light-900">
+              Forgot Password?
+            </DialogTitle>
+            <DialogDescription className="text-justify text-[12px] text-light-900">
               Simply enter your email address below, and we&rsquo;ll send you an
               OTP code to reset your password securely via email.
-            </p>
+            </DialogDescription>
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
@@ -87,7 +110,7 @@ const ForgotPassword = () => {
                 )}
                 <Button
                   type="submit"
-                  // disabled={isSubmitting}
+                  disabled={form.formState.isSubmitting}
                   className="shad-button_primary mt-4 w-full"
                 >
                   Submit
@@ -107,9 +130,9 @@ const ForgotPassword = () => {
       {isOpen.isOTP ? (
         <Dialog open={isOpen.isOTP}>
           <OTPModal
+            userId=""
             isSignup={false}
             setIsOpen={setIsOpen}
-            verifiedEmail={verifiedEmail}
             setVerifiedUserId={setVerifiedUserId}
           />
         </Dialog>

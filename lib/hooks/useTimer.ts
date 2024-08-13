@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from "react";
 
 function useTimer() {
@@ -31,7 +33,7 @@ function useTimer() {
   const isOTPTimer = checkOTPTimer();
   const isOTPOpen = checkOTPOpen();
   const [isTimerRunning, setIsTimerRunning] = useState(true);
-  const [countdown, setCountdown] = useState<number>(initialCountdown);
+  const [countdown, setCountdown] = useState<any>(initialCountdown);
 
   // set interval for auto countdown
   useEffect(() => {
@@ -56,11 +58,12 @@ function useTimer() {
         }
       };
     } else {
+      setIsTimerRunning(false);
       localStorage.setItem("countdown", "00:00");
     }
   }, [countdown, isOTPOpen, isOTPTimer]);
 
-  // function to display format time in the otp modal
+  // function to display time countdown in the otp modal
   const formatTime = (time: any) => {
     const minutes = Math.floor(time / 60)
       .toString()
@@ -81,6 +84,7 @@ function useTimer() {
     formatTime,
     setIsTimerRunning,
     setCountdown,
+    checkOTPTimer,
   };
 }
 

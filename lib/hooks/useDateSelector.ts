@@ -100,3 +100,19 @@ const useDateSelector = ({
 };
 
 export default useDateSelector;
+
+// function to convert the date to ISO string
+export function convertToISOString(
+  year: string,
+  month: string,
+  day: string
+): string {
+  // Create a new Date object with the given year, month, and day
+  const y = parseInt(year);
+  const m = parseInt(month);
+  const d = parseInt(day);
+  const date = new Date(Date.UTC(y, m - 1, d));
+
+  // Return the ISO string representation of the date
+  return date.toISOString();
+}

@@ -72,7 +72,10 @@ const CropImg = ({
   return (
     <>
       <DialogOverlay className={cn("bg-black/10 backdrop-blur-sm")} />
-      <DialogContent className="gap-0 rounded-2xl border-none bg-dark-250 p-0">
+      <DialogContent
+        className="gap-0 rounded-2xl border-none bg-dark-250 p-0"
+        aria-describedby={undefined}
+      >
         <DialogHeader className="flex w-full flex-row items-center justify-between p-2 px-4">
           <DialogTitle className="font-medium text-light-900">
             {modalFor === "cover" && "Set Cover Photo"}
