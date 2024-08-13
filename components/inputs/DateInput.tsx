@@ -1,7 +1,13 @@
 "use client";
 
 import useDateSelector from "@/lib/hooks/useDateSelector";
-import { FormControl, FormField, FormItem, FormLabel } from "../ui/form";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../ui/form";
 import {
   Select,
   SelectContent,
@@ -154,6 +160,13 @@ const DateInput = ({
           )}
         />
       </div>
+      <FormField
+        control={form.control}
+        name="year"
+        render={({ field }) => (
+          <FormMessage className="shad-auth_form_message mt-2" />
+        )}
+      />
     </div>
   );
 };

@@ -29,17 +29,17 @@ export const Tabs = ({
   const pathname = usePathname();
 
   const [active, setActive] = useState<Tab>(propTabs[0]);
-  const [tabs, setTabs] = useState<Tab[]>(propTabs);
+  // const [tabs, setTabs] = useState<Tab[]>(propTabs);
 
   const moveSelectedTabToTop = (idx: number) => {
     const newTabs = [...propTabs];
     const selectedTab = newTabs.splice(idx, 1);
     newTabs.unshift(selectedTab[0]);
-    setTabs(newTabs);
+    // setTabs(newTabs);
     setActive(newTabs[0]);
   };
 
-  const [hovering, setHovering] = useState(false);
+  // const [hovering, setHovering] = useState(false);
 
   return (
     <div
@@ -58,8 +58,8 @@ export const Tabs = ({
             onClick={() => {
               moveSelectedTabToTop(idx);
             }}
-            onMouseEnter={() => setHovering(true)}
-            onMouseLeave={() => setHovering(false)}
+            // onMouseEnter={() => setHovering(true)}
+            // onMouseLeave={() => setHovering(false)}
             className={cn("relative px-4 py-2 rounded-full", tabClassName)}
             style={{
               transformStyle: "preserve-3d",

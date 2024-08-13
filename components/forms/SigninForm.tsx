@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { SigninValidation } from "@/lib/validations/authValidation";
 import { signinAction } from "@/actions/auth.action";
-// import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -11,9 +11,14 @@ import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { FormInput } from "../inputs";
+import { AppDispatch } from "@/redux/store";
+import { useDispatch } from "react-redux";
+import { setIsAuthenticated } from "@/redux/slices/authSlice";
+import { jwtDecode } from "jwt-decode";
 
 const SigninForm = () => {
-  // const router = useRouter();
+  const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
   const form = useForm<z.infer<typeof SigninValidation>>({
     resolver: zodResolver(SigninValidation),
     defaultValues: {
@@ -31,10 +36,18 @@ const SigninForm = () => {
     };
 
     const res = await signinAction(formData);
-    console.log(res);
+    console.log(res, "signin res");
     if (res?.status === "7400") {
-      toast.success("Sign In Successfully", { duration: 3000 });
-      // router.push("/");
+      toast.success("Sign In Successfully", { duration: 4000 });
+      const decodeToken = jwtDecode(res.response.accessToken);
+      router.push(`/complete-profile/${decodeToken.sub}`);
+      console.log(decodeToken, "decodeToken");
+
+      dispatch(
+        setIsAuthenticated({
+          currentUserId: decodeToken.sub,
+        })
+      );
     } else {
       toast.error("Sign In Failed, Invalid Email or Password.", {
         duration: 4000,
@@ -81,7 +94,10 @@ const SigninForm = () => {
         <div className="auth-or" />
         <p className="flex-center body-regular gap-4 text-center text-sm text-light-500">
           Don&apos;t have an account?
-          <Link href="/join-us" className=" text-primary-500">
+          <Link
+            href="/join-us"
+            className="text-primary-500 hover:text-light-900"
+          >
             Join us
           </Link>
         </p>

@@ -21,6 +21,7 @@ export const authSlice = createSlice({
     setIsAuthenticated: (state, action) => {
       state.isAuthenticated = true;
       state.user = action.payload;
+      state.currentUserId = action.payload.currentUserId;
     },
     setIsAbout: (state, action: PayloadAction<boolean>) => {
       state.isAbout = action.payload;
