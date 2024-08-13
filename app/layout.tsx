@@ -2,7 +2,8 @@ import "./globals.css";
 import React from "react";
 import { Poppins } from "next/font/google";
 import type { Metadata } from "next";
-import ReduxProvider from "@/redux/provider";
+import "./globals.css";
+import { ThemeProvider } from "@/context/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
 
 const poppins = Poppins({
@@ -25,7 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning={true}>
       <body className={`${poppins.variable}`}>
-        <ReduxProvider>{children}</ReduxProvider>
+        <ThemeProvider>{children}</ThemeProvider>
         <Toaster position="top-right" />
       </body>
     </html>
