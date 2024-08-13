@@ -1,13 +1,16 @@
+import "./globals.css";
 import React from "react";
 import { Poppins } from "next/font/google";
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/context/ThemeProvider";
+import { Toaster } from "@/components/ui/sonner";
 
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
   variable: "--font-poppins",
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -21,9 +24,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning={true}>
       <body className={`${poppins.variable}`}>
         <ThemeProvider>{children}</ThemeProvider>
+        <Toaster position="top-right" />
       </body>
     </html>
   );

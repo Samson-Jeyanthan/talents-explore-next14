@@ -3,10 +3,8 @@
 @tailwind utilities;
 
 @layer utilities {
-  /* text sizes */
-
   .h1-bold {
-    @apply text-[32px] font-bold leading-[42px];
+    @apply text-[28px] 2xl:text-[32px] font-bold leading-[42px];
   } /* used */
 
   /* font size 24px */
@@ -67,6 +65,12 @@
 
   .body-semibold {
     @apply text-[14px] font-semibold leading-[18.2px];
+  }
+
+  /* font size 13px */
+
+  .font-regular {
+    @apply text-[13px] font-normal;
   }
 
   /* font size 12px */
