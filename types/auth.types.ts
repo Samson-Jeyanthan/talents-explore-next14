@@ -7,15 +7,15 @@ export type TSigninProps = {
   appVersion: string;
 };
 
-type IsOpenState = {
+export type IsOpenState = {
   isFP: boolean;
   isOTP: boolean;
   isReset: boolean;
 };
 
 export type TOTPProps = {
+  userId: string;
   isSignup?: boolean;
-  verifiedEmail?: string;
   setVerifiedUserId?: (verifiedUserId: string) => void;
   setError?: (error: string) => void;
   setIsOpen?: React.Dispatch<React.SetStateAction<IsOpenState>>;
@@ -29,11 +29,25 @@ export type TVerifyOTPProps = {
 };
 
 export type TVerifyForgotPasswordOtpProps = {
-  email: string | undefined;
+  email: string;
   otp: number;
 };
 
-export type TResetPasswordProps = {
-  userId: string;
-  newPassword: string;
+export type ICurrentUser = {
+  currentUserId: string;
+  firstName: string;
+  lastName: string;
+  username: string;
+  email: string;
+  imageUrl: string | null;
+  isTalent: boolean;
+};
+
+export type IContextType = {
+  user: ICurrentUser;
+  isLoading: boolean;
+  setUser: React.Dispatch<React.SetStateAction<ICurrentUser>>;
+  isAuthenticated: boolean;
+  setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
+  checkAuthUser: () => void;
 };

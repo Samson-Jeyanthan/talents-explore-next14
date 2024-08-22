@@ -4,14 +4,15 @@ import React, { useRef, ChangeEvent, useState } from "react";
 import Image from "next/image";
 import { MdEdit } from "react-icons/md";
 import { Dialog } from "../ui/dialog";
-import { CropImgModal, PhotoActionModal } from "../modals";
+import { CropImgModal, ErrorAlert, PhotoActionModal } from "../modals";
 import { CameraIcon } from "@/public/assets/svgs";
-import { useMedia } from "@/lib/hooks/useMedia";
+import { defaultMediaState, useCoverAndProfilePic } from "@/lib/hooks/useMedia";
 import { TCoverProfilePhotoProps } from "@/types/utils.types";
 
 const ProfilePhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
   const photoRef = useRef<HTMLInputElement>(null);
-  const { handleImageInput, media, resetMedia, error } = useMedia();
+  const { handleImageInput, media, resetMedia, error, setError, setMedia } =
+    useCoverAndProfilePic();
   const [isOpen, setIsOpen] = useState(false);
   const [isActionOpen, setIsActionOpen] = useState(false);
   const [finalCropImage, setFinalCropImage] = useState(null);
@@ -26,6 +27,7 @@ const ProfilePhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
   // image crop compelte function
   const handleCropComplete = (img: any) => {
     setFinalCropImage(img?.croppedPrev);
+    fieldChange(img.croppedData);
     setIsOpen(false);
     resetMedia();
   };
@@ -45,8 +47,21 @@ const ProfilePhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
     setIsActionOpen(false);
   };
 
+  // handling invalid media
+  const handleOkClick = () => {
+    setError("");
+    setMedia(defaultMediaState);
+    setIsOpen(false);
+  };
+
   return (
     <>
+      <ErrorAlert
+        isOpen={Boolean(error)}
+        title="OOPS! Something went wrong"
+        error={error}
+        onClick={handleOkClick}
+      />
       <Dialog
         open={isOpen && media && !error}
         onOpenChange={() => setIsOpen(false)}

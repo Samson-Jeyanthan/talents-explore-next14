@@ -1,14 +1,16 @@
+import "./globals.css";
 import React from "react";
 import { Poppins } from "next/font/google";
 import type { Metadata } from "next";
-import ReduxProvider from "@/redux/provider";
+import { ThemeProvider } from "@/context/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
-import "./globals.css";
+import AuthProvider from "@/context/AuthProvider";
 
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
   variable: "--font-poppins",
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -22,10 +24,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning={true}>
       <body className={`${poppins.variable}`}>
-        <ReduxProvider>{children}</ReduxProvider>
-        <Toaster position="top-right" />
+        <AuthProvider>
+          <ThemeProvider>{children}</ThemeProvider>
+          <Toaster position="top-right" />
+        </AuthProvider>
       </body>
     </html>
   );

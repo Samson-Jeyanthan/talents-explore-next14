@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Form } from "../ui/form";
+import { Form, FormField } from "../ui/form";
 import {
   CheckboxInput,
   CoverPhoto,
@@ -17,46 +17,128 @@ import { CompleteProfileValidation } from "@/lib/validations/authValidation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { completeProfileAction } from "@/actions/auth.action";
+import { convertToISOString } from "@/lib/hooks/useDateSelector";
+import { toast } from "sonner";
+import TransparentLoader from "../ui/transparent-loader";
+import { getFileUpload } from "@/lib/utils/getFileUpload";
 import { useRouter } from "next/navigation";
 
-const CompleteProfileForm = () =>
-  // { langData }: any
-  {
-    const router = useRouter();
-    const form = useForm<z.infer<typeof CompleteProfileValidation>>({
-      resolver: zodResolver(CompleteProfileValidation),
-      defaultValues: {
-        firstName: "",
-        lastName: "",
-        knownLanguage: "",
-        profession: "",
-        year: "",
-        month: "",
-        day: "",
-        gender: "",
-        quotes: "",
-        coverPhoto: [],
-        profilePhoto: [],
-      },
-    });
+const CompleteProfileForm = ({ langData, professionData }: any) => {
+  const router = useRouter();
+  const LangOptions = langData.response.map((item: any) => ({
+    _id: item._id,
+    name: item.language,
+  }));
 
-    function onSubmit(values: z.infer<typeof CompleteProfileValidation>) {
-      console.log(values);
-      router.push("/onboarding");
+  const professionOptions = professionData.response.map((item: any) => ({
+    _id: item._id,
+    name: item.professional,
+  }));
+
+  const form = useForm<z.infer<typeof CompleteProfileValidation>>({
+    resolver: zodResolver(CompleteProfileValidation),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      knownLanguage: "",
+      profession: "",
+      year: "",
+      month: "",
+      day: "",
+      gender: "",
+      quotes: "",
+      coverPhoto: undefined,
+      profilePhoto: undefined,
+    },
+  });
+
+  async function onSubmit(values: z.infer<typeof CompleteProfileValidation>) {
+    const convertedDate = convertToISOString(
+      values.year,
+      values.month,
+      values.day
+    );
+    console.log(values.profilePhoto, "values.profilePhoto");
+    console.log(values.coverPhoto, "values.coverPhoto");
+
+    let profileImageKey: string = "";
+    let coverImageKey: string = "";
+
+    if (values.profilePhoto) {
+      profileImageKey = await getFileUpload(
+        values.profilePhoto,
+        values.firstName,
+        "profile-pic"
+      );
+      console.log("profile-photo - values.profilephoto true", profileImageKey);
+    } else {
+      console.log("profile-photo - values.profilephoto false");
     }
 
-    // console.log(langData);
+    if (values.coverPhoto) {
+      coverImageKey = await getFileUpload(
+        values.coverPhoto,
+        values.firstName,
+        "cover-pic"
+      );
+      console.log("hi there cover photo", coverImageKey);
+    }
 
-    return (
+    const formData = {
+      firstName: values.firstName,
+      lastName: values.lastName,
+      dob: convertedDate,
+      gender: values.gender,
+      languageKnown: values.knownLanguage,
+      profileImage: profileImageKey && profileImageKey,
+      coverImage: coverImageKey && coverImageKey,
+      shortBio: values.quotes,
+      professional: values.profession,
+      location: "trincomalee, srilanka",
+      latitude: 8.5668,
+      longitude: 81.2253,
+    };
+    console.log(formData, "formData");
+
+    const res = await completeProfileAction(
+      "66a86e4be83cd9d78b914b50",
+      formData
+    );
+
+    if (res.status === "7400") {
+      toast.success("Profile Updated Successfully", { duration: 5000 });
+      router.push("/onboarding");
+    } else {
+      toast.error("Profile Update Failed", { duration: 4000 });
+    }
+  }
+
+  return (
+    <>
+      {form.formState.isSubmitting && <TransparentLoader />}
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="mt-4 flex w-full flex-col gap-5"
         >
           <div className="relative flex w-full">
-            <CoverPhoto />
-            <ProfilePhoto />
+            <FormField
+              control={form.control}
+              name="coverPhoto"
+              render={({ field }) => (
+                <CoverPhoto fieldChange={field.onChange} />
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="profilePhoto"
+              render={({ field }) => (
+                <ProfilePhoto fieldChange={field.onChange} />
+              )}
+            />
           </div>
+
           <div className="mt-20 flex w-full max-w-screen-md flex-col gap-6">
             <div className="flex w-full gap-4">
               <FormInput
@@ -97,12 +179,9 @@ const CompleteProfileForm = () =>
               inputName="knownLanguage"
               placeholder="Select your native language"
               formDescription="Let us know the language you speak so we can connect you with people who share your interests and culture."
-              options={[
-                { _id: "1", name: "English" },
-                { _id: "2", name: "French" },
-                { _id: "3", name: "Spanish" },
-              ]}
+              options={LangOptions}
             />
+
             <Dropdown
               form={form}
               value={form.getValues("profession")}
@@ -110,11 +189,7 @@ const CompleteProfileForm = () =>
               inputName="profession"
               placeholder="Select your profession"
               formDescription="This information helps us understand your professional background and can be used to provide you with relevant content and services."
-              options={[
-                { _id: "1", name: "English" },
-                { _id: "2", name: "French" },
-                { _id: "3", name: "Spanish" },
-              ]}
+              options={professionOptions}
             />
 
             <TextArea
@@ -133,12 +208,15 @@ const CompleteProfileForm = () =>
               disabled={form.formState.isSubmitting}
               className="shad-button_primary mt-4 w-40"
             >
-              Complete Profile
+              {form.formState.isSubmitting
+                ? "Creating Profile..."
+                : "Create Profile"}
             </Button>
           </div>
         </form>
       </Form>
-    );
-  };
+    </>
+  );
+};
 
 export default CompleteProfileForm;
