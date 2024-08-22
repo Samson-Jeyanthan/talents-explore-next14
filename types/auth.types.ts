@@ -32,3 +32,22 @@ export type TVerifyForgotPasswordOtpProps = {
   email: string;
   otp: number;
 };
+
+export type ICurrentUser = {
+  currentUserId: string;
+  firstName: string;
+  lastName: string;
+  username: string;
+  email: string;
+  imageUrl: string | null;
+  isTalent: boolean;
+};
+
+export type IContextType = {
+  user: ICurrentUser;
+  isLoading: boolean;
+  setUser: React.Dispatch<React.SetStateAction<ICurrentUser>>;
+  isAuthenticated: boolean;
+  setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
+  checkAuthUser: () => void;
+};

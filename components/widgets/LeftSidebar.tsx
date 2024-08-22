@@ -15,9 +15,15 @@ import {
   DrawerTrigger,
 } from "../ui/drawer";
 import { Button } from "../ui/button";
+import { deleteSession } from "@/lib/session";
 
 const LeftSidebar = () => {
   const pathname = usePathname();
+
+  const handleLogout = () => {
+    deleteSession();
+    localStorage.clear();
+  };
   return (
     <Drawer>
       <aside className="lg:flex-between sticky top-0 hidden h-screen min-w-64 flex-col bg-dark-100 py-8">
@@ -57,7 +63,10 @@ const LeftSidebar = () => {
             })}
           </ul>
         </div>
-        <div className="leftsidebar-link flex-center w-[90%] border border-solid border-dark-250">
+        <div
+          className="leftsidebar-link flex-center w-[90%] border border-solid border-dark-250"
+          onClick={handleLogout}
+        >
           <AiOutlineLogout className="text-lg" />
           Logout
         </div>

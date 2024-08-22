@@ -11,14 +11,14 @@ import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { FormInput } from "../inputs";
-import { AppDispatch } from "@/redux/store";
-import { useDispatch } from "react-redux";
-import { setIsAuthenticated } from "@/redux/slices/authSlice";
+// import { AppDispatch } from "@/redux/store";
+// import { useDispatch } from "react-redux";
+// import { setIsAuthenticated } from "@/redux/slices/authSlice";
 import { jwtDecode } from "jwt-decode";
 
 const SigninForm = () => {
   const router = useRouter();
-  const dispatch = useDispatch<AppDispatch>();
+  // const dispatch = useDispatch<AppDispatch>();
   const form = useForm<z.infer<typeof SigninValidation>>({
     resolver: zodResolver(SigninValidation),
     defaultValues: {
@@ -42,12 +42,6 @@ const SigninForm = () => {
       const decodeToken = jwtDecode(res.response.accessToken);
       router.push(`/complete-profile/${decodeToken.sub}`);
       console.log(decodeToken, "decodeToken");
-
-      dispatch(
-        setIsAuthenticated({
-          currentUserId: decodeToken.sub,
-        })
-      );
     } else {
       toast.error("Sign In Failed, Invalid Email or Password.", {
         duration: 4000,
