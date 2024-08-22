@@ -152,3 +152,13 @@ export const checkIsAboutAction = async (token: any) => {
     return false;
   }
 };
+
+export const logoutAction = async (userId: string) => {
+  const refreshToken = "";
+  try {
+    const response = await axiosInstance.post(
+      `/auth/logout?userId=${userId}&refreshToken=${refreshToken}&from_all={true}`
+    );
+    console.log(response, "logout res");
+  } catch {}
+};

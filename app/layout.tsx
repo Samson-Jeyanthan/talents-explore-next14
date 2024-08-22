@@ -2,9 +2,9 @@ import "./globals.css";
 import React from "react";
 import { Poppins } from "next/font/google";
 import type { Metadata } from "next";
-import "./globals.css";
 import { ThemeProvider } from "@/context/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
+import AuthProvider from "@/context/AuthProvider";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -26,8 +26,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning={true}>
       <body className={`${poppins.variable}`}>
-        <ThemeProvider>{children}</ThemeProvider>
-        <Toaster position="top-right" />
+        <AuthProvider>
+          <ThemeProvider>{children}</ThemeProvider>
+          <Toaster position="top-right" />
+        </AuthProvider>
       </body>
     </html>
   );
