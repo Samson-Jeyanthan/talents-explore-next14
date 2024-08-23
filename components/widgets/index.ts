@@ -8,7 +8,7 @@ export { default as Promotion } from "./Promotion";
 // other widgets
 export { default as LeftSidebar } from "./LeftSidebar";
 export { default as Navbar } from "./Navbar";
-export { default as UserAvatar } from "./UserAvatar";
+export { default as CurrentUserAvatar } from "./CurrentUserAvatar";
 // profile widgets
 export { default as ProfileHeader } from "./ProfileHeader";
 export { default as ProfileCover } from "./ProfileCover";

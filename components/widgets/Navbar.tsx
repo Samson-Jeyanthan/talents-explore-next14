@@ -1,6 +1,6 @@
 import { NotificationIcon } from "@/public/assets/svgs";
-import UserAvatar from "./UserAvatar";
 import { Theme } from "../options";
+import CurrentUserAvatar from "./CurrentUserAvatar";
 
 const Navbar = () => {
   return (
@@ -10,7 +10,7 @@ const Navbar = () => {
         <li className="flex-center size-9 cursor-pointer rounded-full bg-dark-300 fill-light-600 hover:bg-dark-400 hover:fill-light-900">
           <NotificationIcon height="20px" width="20px" />
         </li>
-        <UserAvatar size="size-8" />
+        <CurrentUserAvatar size="size-8" />
       </ul>
     </nav>
   );
