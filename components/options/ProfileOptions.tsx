@@ -11,7 +11,7 @@ import { BsThreeDotsVertical } from "react-icons/bs";
 
 const ProfileOptions = () => {
   return (
-    <Menubar className="relative border-none bg-dark-300 p-0">
+    <Menubar className="relative rounded-full border-none bg-dark-300 p-0">
       <MenubarMenu>
         <MenubarTrigger className="cursor-pointer rounded-lg text-lg text-light-800 hover:text-light-900">
           <BsThreeDotsVertical />

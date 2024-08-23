@@ -12,3 +12,4 @@ export { default as CurrentUserAvatar } from "./CurrentUserAvatar";
 // profile widgets
 export { default as ProfileHeader } from "./ProfileHeader";
 export { default as ProfileCover } from "./ProfileCover";
+export { default as NormalUserProfileHeader } from "./NormalUserProfileHeader";

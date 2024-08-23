@@ -14,7 +14,7 @@ export async function createSession(accessToken: string) {
     expires,
     httpOnly: true,
   });
-  console.log(cookies().get("accessToken"));
+  // console.log(cookies().get("accessToken"));
   const res = cookies().get("accessToken");
   return res;
 }
@@ -22,10 +22,10 @@ export async function createSession(accessToken: string) {
 // verfiy session
 export async function verifySession() {
   const session = cookies().get("accessToken")?.value;
-  console.log(cookies().get("accessToken"), "verify-session");
+  // console.log(cookies().get("accessToken"), "verify-session");
 
-  const isAboutCheck = cookies().get("isAbout");
-  console.log(isAboutCheck, "isAboutCheck-in-session.ts");
+  // const isAboutCheck = cookies().get("isAbout");
+  // console.log(isAboutCheck, "isAboutCheck-in-session.ts");
   if (!session) {
     return "";
   } else {

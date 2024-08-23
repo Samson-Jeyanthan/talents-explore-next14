@@ -2,7 +2,7 @@
 
 export const userPublicInfoAction = async (
   userId: string | undefined,
-  viewerId: string
+  viewerId: string | undefined
 ) => {
   try {
     // const response = await axiosInstance.get(`/user/${userId}`);
