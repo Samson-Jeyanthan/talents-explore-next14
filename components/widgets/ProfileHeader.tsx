@@ -80,9 +80,11 @@ const ProfileHeader = ({
             </h4>
           </div>
 
-          <p className="w-96 pl-3 text-xs text-light-600">
-            {userData?.personalInfo?.shortBio}
-          </p>
+          {userData?.personalInfo?.shortBio && (
+            <p className="w-96 pl-3 text-xs text-light-600">
+              {userData?.personalInfo?.shortBio}
+            </p>
+          )}
         </div>
         <div className="flex-start gap-3">
           {isOwnProfile ? (
@@ -111,8 +113,10 @@ const ProfileHeader = ({
       {showConnection && (
         <Dialog open={showConnection}>
           <ConnectionListModal
+            isTalent={true}
             currentTab={currentTab}
             onClick={() => setShowConnection(!showConnection)}
+            setCuurentTab={(currentTab: number) => setCurrentTab(currentTab)}
           />
         </Dialog>
       )}

@@ -1,36 +1,43 @@
 "use client";
 
-import { followUserAction } from "@/actions/connection.action";
 import { Button } from "../ui/button";
+import { useState } from "react";
+import { handleFollowUnFollow } from "@/lib/functions/connect.functions";
 
 interface ConnectionButtonProps {
   isFollow: number;
   viewerId: string | undefined;
   userId: string;
+  userName: string;
+  isOwnProfile: boolean;
 }
 
 function ConnectionButton({
   isFollow,
   viewerId,
   userId,
+  userName,
+  isOwnProfile,
 }: ConnectionButtonProps) {
+  const [isFollowed, setIsFollowed] = useState(isFollow);
+
   const handleConnection = () => {
-    if (!isFollow) {
-      const res = followUserAction(viewerId, userId);
-      console.log(res, "res");
-    } else {
-      const res = followUserAction(viewerId, userId);
-      console.log(res, "res");
-    }
+    handleFollowUnFollow(isFollowed, viewerId, userId, userName, setIsFollowed);
   };
 
   return (
-    <Button
-      className="shad-button_primary rounded-full"
-      onClick={handleConnection}
-    >
-      {isFollow === 1 ? "Following" : "Follow"}
-    </Button>
+    <>
+      {isOwnProfile ? (
+        <p className="flex-center h-8 w-24 text-sm text-light-600">You</p>
+      ) : (
+        <Button
+          className={`${isFollowed === 1 ? "border border-solid border-primary-500 bg-none text-primary-500" : "bg-primary-500 text-light-900"} connection-btn rounded-full`}
+          onClick={handleConnection}
+        >
+          {isFollowed === 1 ? "Following" : "Follow"}
+        </Button>
+      )}
+    </>
   );
 }
 

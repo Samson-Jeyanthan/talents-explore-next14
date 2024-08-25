@@ -112,6 +112,22 @@ body {
   .connection-counting-text {
     @apply text-light-600 font-normal text-sm;
   }
+
+  .connection-modal-content {
+    @apply flex max-h-[78vh] min-h-[78vh] max-w-[25rem] flex-col items-center gap-0 rounded-xl border-none bg-dark-250 p-0 pb-2 2xl:max-w-[30rem] 2xl:max-h-[75vh] 2xl:min-h-[75vh] !important;
+  }
+
+  .active-connection-tab {
+    @apply text-light-900 border-b border-solid border-light-900;
+  }
+
+  .default-connection-tab {
+    @apply flex-center w-full py-4 pt-5 cursor-pointer;
+  }
+
+  .connection-btn {
+    @apply h-8 w-24 hover:bg-primary-500 hover:text-light-900 text-sm font-medium flex gap-2 !important;
+  }
 }
 
 /* custom CSS Styles */

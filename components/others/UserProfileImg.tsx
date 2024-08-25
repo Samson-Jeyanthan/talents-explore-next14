@@ -9,22 +9,14 @@ const UserProfileImg = ({
 }) => {
   return (
     <>
-      {src ? (
-        <Image
-          src={src}
-          alt={userName}
-          width={512}
-          height={512}
-          className="size-12 rounded-full bg-dark-400 object-cover"
-        />
-      ) : (
-        <div
-          className="size-12 rounded-full bg-dark-400 bg-top bg-no-repeat"
-          style={{
-            backgroundImage: `url(../../../../public/assets/images/default_profile_pic.png)`,
-          }}
-        ></div>
-      )}
+      <Image
+        // eslint-disable-next-line no-unneeded-ternary
+        src={src ? src : "/assets/images/default_profile_pic_2.png"}
+        alt={userName}
+        width={512}
+        height={512}
+        className="size-12 rounded-full bg-dark-400 object-cover object-top"
+      />
     </>
   );
 };

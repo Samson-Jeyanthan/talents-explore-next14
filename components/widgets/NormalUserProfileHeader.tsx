@@ -47,9 +47,11 @@ const NormalUserProfileHeader = ({
             @{userData?.userName} <GoDotFill className="text-[8px]" />{" "}
             {userData?.personalInfo?.professional}
           </p>
-          <p className="w-96 pt-2 text-xs text-light-600">
-            {userData?.personalInfo?.shortBio}
-          </p>
+          {userData?.personalInfo?.shortBio && (
+            <p className="w-96 pl-3 text-xs text-light-600">
+              {userData?.personalInfo?.shortBio}
+            </p>
+          )}
           <h4 className="connection-counting mt-2 w-max bg-dark-300">
             {userData?.following}
             <span className="connection-counting-text">Followings</span>

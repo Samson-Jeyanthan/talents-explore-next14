@@ -7,28 +7,66 @@ import {
   DialogOverlay,
   DialogTitle,
 } from "../ui/dialog";
-import LoadFollowerList from "../others/LoadFollowerList";
 import { MdClose } from "react-icons/md";
+import { LoadFollowerList, LoadFollowingList } from "../others";
 
 function ConnectionListModal({
+  isTalent,
   currentTab,
   onClick,
+  setCuurentTab,
 }: {
+  isTalent: boolean;
   currentTab: number;
   onClick: () => void;
+  setCuurentTab: (currentTab: number) => void;
 }) {
   return (
     <>
       <DialogOverlay className={cn("bg-black/10 backdrop-blur-sm")} />
       <DialogContent
-        className="flex max-h-[70vh] min-h-[70vh] max-w-[30rem] flex-col items-center gap-3 rounded-xl border-none bg-dark-250 p-5"
+        className="connection-modal-content"
         aria-describedby={undefined}
       >
-        <DialogTitle className="sticky top-0 z-10 h-max bg-dark-250 py-2 text-light-900">
-          {currentTab === 1 ? "Followers" : "Following"}
+        <DialogTitle className="sticky top-0 z-10 flex h-max w-full items-center justify-between rounded-xl bg-dark-250">
+          {isTalent && (
+            <>
+              <h2
+                className={`${currentTab === 0 ? "active-connection-tab" : "text-light-600"} default-connection-tab`}
+                onClick={() => setCuurentTab(0)}
+              >
+                Ratings
+              </h2>
+              <h2
+                className={`${currentTab === 1 ? "active-connection-tab" : "text-light-600"} default-connection-tab`}
+                onClick={() => setCuurentTab(1)}
+              >
+                Followers
+              </h2>
+            </>
+          )}
+          <h2
+            className={`${currentTab === 2 ? "active-connection-tab" : "text-light-600"} default-connection-tab`}
+            onClick={() => setCuurentTab(2)}
+          >
+            Following
+          </h2>
         </DialogTitle>
-        <div className="z-0 flex w-full flex-col gap-4 overflow-y-scroll">
-          <LoadFollowerList />
+
+        <div className="z-0 flex w-full flex-col gap-4 overflow-y-scroll p-4">
+          {isTalent ? (
+            <>
+              {currentTab === 0 ? (
+                <LoadFollowerList />
+              ) : currentTab === 1 ? (
+                <LoadFollowerList />
+              ) : (
+                <LoadFollowingList />
+              )}
+            </>
+          ) : (
+            <LoadFollowingList />
+          )}
         </div>
         <DialogClose
           className="absolute -right-8 -top-8 cursor-pointer rounded-full bg-dark-250 p-[6px] text-light-900 focus:outline-none"

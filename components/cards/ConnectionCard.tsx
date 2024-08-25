@@ -62,6 +62,8 @@ function ConnectionCard({ connectCard, index, viewerId }: Prop) {
           isFollow={connectCard.isFollow}
           viewerId={viewerId}
           userId={connectCard._id}
+          userName={connectCard.userName}
+          isOwnProfile={connectCard._id === viewerId}
         />
       )}
     </MotionDiv>
