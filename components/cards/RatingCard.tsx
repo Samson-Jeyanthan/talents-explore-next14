@@ -35,7 +35,7 @@ function RatingCard({ ratingCard, index }: Prop) {
         duration: 0.3,
       }}
       viewport={{ amount: 0 }}
-      className="flex-between w-full gap-2"
+      className="flex-between w-[95%] gap-2"
     >
       <div className="flex items-center justify-center gap-2">
         <Link href={`/profile/${ratingCard.userName}/${ratingCard._id}`}>
@@ -54,9 +54,9 @@ function RatingCard({ ratingCard, index }: Prop) {
           <p className="text-xs text-light-600">{ratingCard.professional}</p>
         </Link>
       </div>
-      <div className="flex-center w-14 gap-2 fill-custom-100">
-        <StarIcon width="18px" height="18px" />
-        <p className="text-light-900">{ratingCard.rating}</p>
+      <div className="flex-center w-12 gap-2 rounded bg-custom-100/10 fill-custom-100 py-[6px]">
+        <StarIcon width="14px" height="14px" />
+        <p className="text-sm text-custom-100">{ratingCard.rating}</p>
       </div>
     </MotionDiv>
   );

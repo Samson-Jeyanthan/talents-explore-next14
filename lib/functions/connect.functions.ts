@@ -2,6 +2,7 @@
 
 import {
   followUserAction,
+  getProfileOverallRating,
   unFollowUserAction,
 } from "@/actions/connection.action";
 import { toast } from "sonner";
@@ -44,4 +45,15 @@ export async function handleFollowUnFollow(
       return false;
     }
   }
+}
+
+export async function handleRatingProfileList(
+  setOverallList: (value: any) => void,
+  urlId: string,
+  setIsOverallListLoading: (value: boolean) => void
+) {
+  const res = await getProfileOverallRating(urlId);
+  setOverallList(res);
+  setIsOverallListLoading(false);
+  console.log(res);
 }

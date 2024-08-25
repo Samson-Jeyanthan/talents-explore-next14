@@ -19,6 +19,7 @@ interface Prop {
   connectCard: IConnectionListProp;
   index: number;
   viewerId: string | undefined;
+  connectionTab?: number;
 }
 
 const variants = {
@@ -26,7 +27,7 @@ const variants = {
   visible: { opacity: 1 },
 };
 
-function ConnectionCard({ connectCard, index, viewerId }: Prop) {
+function ConnectionCard({ connectCard, index, viewerId, connectionTab }: Prop) {
   return (
     <MotionDiv
       variants={variants}
@@ -38,7 +39,7 @@ function ConnectionCard({ connectCard, index, viewerId }: Prop) {
         duration: 0.3,
       }}
       viewport={{ amount: 0 }}
-      className="flex-between w-full gap-2"
+      className="flex-between w-[95%] gap-2"
     >
       <div className="flex items-center justify-center gap-2">
         <Link href={`/profile/${connectCard.userName}/${connectCard._id}`}>
@@ -64,6 +65,7 @@ function ConnectionCard({ connectCard, index, viewerId }: Prop) {
           userId={connectCard._id}
           userName={connectCard.userName}
           isOwnProfile={connectCard._id === viewerId}
+          connectionTab={connectionTab}
         />
       )}
     </MotionDiv>

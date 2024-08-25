@@ -9,13 +9,13 @@ const RadialBar = ({ avgRating, peopleCount }: RadialBarProps) => {
   const dashOffset = dashArray - (dashArray * percentage) / 100;
 
   return (
-    <div className="relative flex h-32 w-36 flex-col items-center justify-center">
+    <div className="relative flex h-32 w-full flex-col items-center justify-center">
       <svg className="size-40 -rotate-90" x="0px" y="0px" viewBox="0 0 200 120">
         <circle
           cx="100"
           cy="60"
           r="50"
-          className="stroke-current text-gray-300"
+          className="stroke-current text-dark-400"
           strokeWidth="8"
           strokeLinecap="round"
           fill="transparent"
@@ -24,7 +24,7 @@ const RadialBar = ({ avgRating, peopleCount }: RadialBarProps) => {
           cx="100"
           cy="60"
           r="50"
-          className="stroke-current text-yellow-400"
+          className="stroke-current text-custom-100"
           strokeWidth="8"
           strokeLinecap="round"
           fill="transparent"
@@ -32,10 +32,10 @@ const RadialBar = ({ avgRating, peopleCount }: RadialBarProps) => {
           strokeDashoffset={dashOffset}
         />
       </svg>
-      <span className="absolute top-1/3 text-lg text-gray-800">
+      <span className="absolute top-1/3 text-lg text-light-900">
         {avgRating === 0 ? "N/A" : avgRating}
       </span>
-      <p className="mt-1 text-xs text-gray-700">{peopleCount} Ratings</p>
+      <p className="mt-1 text-xs text-light-600">{peopleCount} Ratings</p>
     </div>
   );
 };

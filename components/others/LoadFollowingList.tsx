@@ -40,7 +40,8 @@ function LoadFollowingList() {
           key={item._id}
           connectCard={item}
           index={index}
-          viewerId={user.currentUserId}
+          viewerId={ user.currentUserId }
+          connectionTab={2}
         />
       ))}
       {!isEnd && <div ref={ref}>loading...</div>}

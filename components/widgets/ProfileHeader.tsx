@@ -59,7 +59,7 @@ const ProfileHeader = ({
               className="connection-counting"
               onClick={() => handleConnectionModalOpen(0)}
             >
-              {userData?.numberOfRating}
+              {userData?.numberOfRating || 0}
               <span className="connection-counting-text">Ratings</span>
             </h4>
 

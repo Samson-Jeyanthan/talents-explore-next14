@@ -28,7 +28,7 @@ const PhotoViewModal = ({
             width={1024}
             height={1024}
             alt="profile photo"
-            className="max-h-[90vh] w-full rounded-xl object-contain"
+            className="max-h-[85vh] w-full rounded-xl object-contain"
           />
         </DialogTitle>
         <DialogClose

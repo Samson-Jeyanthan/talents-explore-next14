@@ -86,3 +86,15 @@ export async function getProfileRatingList(
     return data;
   } catch {}
 }
+
+export async function getProfileOverallRating(userId: string | undefined) {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/rating/splitup/${userId}`
+    );
+
+    const res = await response.json();
+    const data = res.response;
+    return data;
+  } catch {}
+}

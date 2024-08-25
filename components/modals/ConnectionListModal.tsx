@@ -35,29 +35,29 @@ function ConnectionListModal({
         <DialogTitle className="sticky top-0 z-10 flex h-max w-full items-center justify-between rounded-xl bg-dark-250">
           {isTalent && (
             <>
-              <h2
+              <p
                 className={`${currentTab === 0 ? "active-connection-tab" : "text-light-600"} default-connection-tab`}
                 onClick={() => setCuurentTab(0)}
               >
                 Ratings
-              </h2>
-              <h2
+              </p>
+              <p
                 className={`${currentTab === 1 ? "active-connection-tab" : "text-light-600"} default-connection-tab`}
                 onClick={() => setCuurentTab(1)}
               >
                 Followers
-              </h2>
+              </p>
             </>
           )}
-          <h2
+          <p
             className={`${currentTab === 2 ? "active-connection-tab" : "text-light-600"} default-connection-tab`}
             onClick={() => setCuurentTab(2)}
           >
             Following
-          </h2>
+          </p>
         </DialogTitle>
 
-        <div className="z-0 flex w-full flex-col gap-4 overflow-y-scroll p-4">
+        <div className="z-0 flex w-full flex-col items-center gap-4 overflow-y-scroll p-4">
           {isTalent ? (
             <>
               {currentTab === 0 ? (
