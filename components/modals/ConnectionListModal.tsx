@@ -8,7 +8,11 @@ import {
   DialogTitle,
 } from "../ui/dialog";
 import { MdClose } from "react-icons/md";
-import { LoadFollowerList, LoadFollowingList } from "../others";
+import {
+  LoadFollowerList,
+  LoadFollowingList,
+  LoadProfileRatingList,
+} from "../others";
 
 function ConnectionListModal({
   isTalent,
@@ -57,7 +61,7 @@ function ConnectionListModal({
           {isTalent ? (
             <>
               {currentTab === 0 ? (
-                <LoadFollowerList />
+                <LoadProfileRatingList />
               ) : currentTab === 1 ? (
                 <LoadFollowerList />
               ) : (

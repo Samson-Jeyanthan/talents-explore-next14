@@ -70,3 +70,19 @@ export async function unFollowUserAction(
     return response.data;
   } catch {}
 }
+
+export async function getProfileRatingList(
+  userId: string | undefined,
+  pageNo: number,
+  pageSize: number
+) {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/rating/list?userId=${userId}&pageNo=${pageNo}&pageSize=${pageSize}`
+    );
+
+    const res = await response.json();
+    const data = res.response;
+    return data;
+  } catch {}
+}
