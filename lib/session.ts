@@ -1,6 +1,7 @@
 // import "server-only";
 "use server";
 
+import { jwtDecode } from "jwt-decode";
 import { cookies } from "next/headers";
 
 // create session
@@ -22,14 +23,22 @@ export async function createSession(accessToken: string) {
 // verfiy session
 export async function verifySession() {
   const session = cookies().get("accessToken")?.value;
-  // console.log(cookies().get("accessToken"), "verify-session");
 
-  // const isAboutCheck = cookies().get("isAbout");
-  // console.log(isAboutCheck, "isAboutCheck-in-session.ts");
   if (!session) {
     return "";
   } else {
     return session;
+  }
+}
+
+//  get session
+export async function getSession() {
+  const session = cookies().get("accessToken")?.value;
+  if (!session) {
+    return "";
+  } else {
+    const decodedJWTToken = jwtDecode(session);
+    return decodedJWTToken.sub;
   }
 }
 

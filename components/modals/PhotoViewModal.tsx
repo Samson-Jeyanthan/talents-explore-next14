@@ -32,7 +32,7 @@ const PhotoViewModal = ({
           />
         </DialogTitle>
         <DialogClose
-          className="absolute -right-3 -top-3 cursor-pointer rounded-full bg-dark-400 p-[6px] text-light-900"
+          className="absolute -right-3 -top-3 cursor-pointer rounded-full bg-dark-400 p-[6px] text-light-900 focus:outline-none"
           onClick={onClick}
         >
           <MdClose className="text-2xl" />

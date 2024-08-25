@@ -8,7 +8,13 @@ import { useState } from "react";
 import { Dialog } from "../ui/dialog";
 import { PhotoViewModal } from "../modals";
 
-const NormalUserProfileHeader = ({ userData }: { userData: any }) => {
+const NormalUserProfileHeader = ({
+  userData,
+  isOwnProfile,
+}: {
+  userData: any;
+  isOwnProfile: boolean;
+}) => {
   const [showDP, setShowDP] = useState(false);
 
   return (

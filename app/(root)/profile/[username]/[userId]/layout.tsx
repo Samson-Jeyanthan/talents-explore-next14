@@ -8,8 +8,7 @@ import { Tabs } from "@/components/widgets/ProfileTabs";
 
 import type { Metadata, ResolvingMetadata } from "next";
 import { userPublicInfoAction } from "@/actions/user.action";
-import { verifySession } from "@/lib/session";
-import { jwtDecode } from "jwt-decode";
+import { getSession } from "@/lib/session";
 import { userPersonalInfoAction } from "@/actions/auth.action";
 
 type Props = {
@@ -17,14 +16,13 @@ type Props = {
 };
 
 async function fetchUserData(userId: string, viewerId: string) {
-  const session = await verifySession();
-  if (session !== "") {
-    const decodedJWTToken = jwtDecode(session);
-    if (decodedJWTToken.sub === userId) {
+  const token = await getSession();
+  if (token !== "") {
+    if (token === userId) {
       const userData = await userPersonalInfoAction(userId);
       return userData;
     } else {
-      const userData = await userPublicInfoAction(userId, decodedJWTToken.sub);
+      const userData = await userPublicInfoAction(userId, token);
       return userData;
     }
   } else {
@@ -63,6 +61,8 @@ const layout = async ({
   params: { userId: string; username: string };
 }) => {
   const userData = await fetchUserData(params.userId, params.username);
+  const token = await getSession();
+  const isOwnProfile = token === params.userId;
   return (
     <main className="flex-center">
       <section className="relative flex w-full max-w-screen-xl flex-col items-center justify-center 2xl:max-w-[1380px]">
@@ -75,9 +75,16 @@ const layout = async ({
           className={`${userData?.response?.isTalent ? "z-10 mt-[36vh]" : ""} flex-center  w-full flex-col`}
         >
           {userData?.response?.isTalent ? (
-            <ProfileHeader userData={userData?.response} />
+            <ProfileHeader
+              userData={userData?.response}
+              isOwnProfile={isOwnProfile}
+              // userId={ params.userId }
+            />
           ) : (
-            <NormalUserProfileHeader userData={userData?.response} />
+            <NormalUserProfileHeader
+              userData={userData?.response}
+              isOwnProfile={isOwnProfile}
+            />
           )}
 
           <div className="flex-center w-full max-w-screen-xl flex-col bg-dark-200 pt-8">
