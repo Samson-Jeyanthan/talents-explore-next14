@@ -6,7 +6,7 @@ import { useInView } from "react-intersection-observer";
 import RatingCard, { IRatingListProp } from "../cards/RatingCard";
 import { getProfileRatingList } from "@/actions/connection.action";
 import RadialBar from "./RadialBar";
-import { handleRatingProfileList } from "@/lib/functions/connect.functions";
+import { fetchProfileOverallRating } from "@/lib/functions/connect.functions";
 import HorzBar from "./HorzBar";
 
 function LoadProfileRatingList() {
@@ -45,10 +45,10 @@ function LoadProfileRatingList() {
   }, [inView, data, isEnd, page]);
 
   useEffect(() => {
-    handleRatingProfileList(setOverallList, urlId, setIsOverallListLoading);
+    fetchProfileOverallRating(setOverallList, urlId, setIsOverallListLoading);
   }, [urlId]);
 
-  const overallRatnigForHorzBar = [
+  const overallRatingForHorzBar = [
     {
       no: 5,
       value: overallList?.fiveStar,
@@ -91,7 +91,7 @@ function LoadProfileRatingList() {
         />
       )}
       {!isOverallListLoading && (
-        <HorzBar ratingCounts={overallRatnigForHorzBar} />
+        <HorzBar ratingCounts={overallRatingForHorzBar} />
       )}
       {data.map((item, index) => (
         <RatingCard key={item._id} ratingCard={item} index={index} />

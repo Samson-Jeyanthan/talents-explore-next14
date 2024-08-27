@@ -47,13 +47,14 @@ export async function handleFollowUnFollow(
   }
 }
 
-export async function handleRatingProfileList(
+export async function fetchProfileOverallRating(
   setOverallList: (value: any) => void,
   urlId: string,
   setIsOverallListLoading: (value: boolean) => void
 ) {
   const res = await getProfileOverallRating(urlId);
-  setOverallList(res);
-  setIsOverallListLoading(false);
-  console.log(res);
+  if (res.status === "7400") {
+    setOverallList(res.response);
+    setIsOverallListLoading(false);
+  }
 }

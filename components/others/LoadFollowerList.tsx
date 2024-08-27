@@ -6,6 +6,7 @@ import { getFollowerList } from "@/actions/connection.action";
 import ConnectionCard, { IConnectionListProp } from "../cards/ConnectionCard";
 import { useUserContext } from "@/context/AuthProvider";
 import { useParams } from "next/navigation";
+import { toast } from "sonner";
 
 function LoadFollowerList() {
   const { user } = useUserContext();
@@ -18,31 +19,48 @@ function LoadFollowerList() {
   const urlId: any = params.userId;
 
   useEffect(() => {
-    if (!isEnd) {
-      if (inView) {
-        getFollowerList(urlId, user.currentUserId, page, 10).then((res) => {
-          setData([...data, ...res]);
-          if (res.length === 0) {
-            setIsEnd(true);
-          } else {
-            setPage(page + 1);
-          }
-        });
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inView, data, isEnd, page]);
+    const fetchData = async () => {
+      if (!isEnd && inView) {
+        try {
+          const res = await getFollowerList(
+            urlId,
+            user.currentUserId,
+            page,
+            10
+          );
 
+          if (res.status === "7400") {
+            setData((prevData) => [...prevData, ...res.response]);
+            if (res.response.length === 0) {
+              setIsEnd(true);
+            } else {
+              setPage((prevPage) => prevPage + 1);
+            }
+          } else {
+            toast.error("Could not fetch follower list", { duration: 4000 });
+            setIsEnd(true);
+          }
+        } catch (error) {
+          console.log("Error fetching follower list:", error);
+          setIsEnd(true);
+        }
+      }
+    };
+
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inView, isEnd, page]);
   return (
     <>
-      {data.map((item, index) => (
-        <ConnectionCard
-          key={item._id}
-          connectCard={item}
-          index={index}
-          viewerId={user.currentUserId}
-        />
-      ))}
+      {data.length > 0 &&
+        data.map((item, index) => (
+          <ConnectionCard
+            key={item._id}
+            connectCard={item}
+            index={index}
+            viewerId={user.currentUserId}
+          />
+        ))}
       {!isEnd && <div ref={ref}>loading...</div>}
     </>
   );

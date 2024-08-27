@@ -6,6 +6,7 @@ import { getFollowingList } from "@/actions/connection.action";
 import ConnectionCard, { IConnectionListProp } from "../cards/ConnectionCard";
 import { useUserContext } from "@/context/AuthProvider";
 import { useParams } from "next/navigation";
+import { toast } from "sonner";
 
 function LoadFollowingList() {
   const { user } = useUserContext();
@@ -18,20 +19,37 @@ function LoadFollowingList() {
   const urlId: any = params.userId;
 
   useEffect(() => {
-    if (!isEnd) {
-      if (inView) {
-        getFollowingList(urlId, user.currentUserId, page, 10).then((res) => {
-          setData([...data, ...res]);
-          if (res.length === 0) {
-            setIsEnd(true);
+    const fetchData = async () => {
+      if (!isEnd && inView) {
+        try {
+          const res = await getFollowingList(
+            urlId,
+            user.currentUserId,
+            page,
+            10
+          );
+
+          if (res.status === "7400") {
+            setData((prevData) => [...prevData, ...res.response]);
+            if (res.response.length === 0) {
+              setIsEnd(true);
+            } else {
+              setPage((prevPage) => prevPage + 1);
+            }
           } else {
-            setPage(page + 1);
+            toast.error("Could not fetch following list", { duration: 4000 });
+            setIsEnd(true);
           }
-        });
+        } catch (error) {
+          console.log("Error fetching following list:", error);
+          setIsEnd(true);
+        }
       }
-    }
+    };
+
+    fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inView, data, isEnd, page]);
+  }, [inView, isEnd, page]);
 
   return (
     <>
@@ -40,7 +58,7 @@ function LoadFollowingList() {
           key={item._id}
           connectCard={item}
           index={index}
-          viewerId={ user.currentUserId }
+          viewerId={user.currentUserId}
           connectionTab={2}
         />
       ))}

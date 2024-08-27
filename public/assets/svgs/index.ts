@@ -9,3 +9,4 @@ export { default as NotificationIcon } from "./NotificationIcon";
 export { default as SystemIcon } from "./SystemIcon";
 export { default as StarIcon } from "./StarIcon";
 export { default as HalfStarIcon } from "./HalfStarIcon";
+export { default as MessageIcon } from "./MessageIcon";

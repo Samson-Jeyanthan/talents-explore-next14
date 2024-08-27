@@ -12,10 +12,8 @@ export async function getFollowerList(
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/connect-user/followerList?userId=${userId}&viewerId=${viewerId}&pageNo=${pageNo}&pageSize=${pageSize}`
     );
-
     const res = await response.json();
-    const data = res.response;
-    return data;
+    return res;
   } catch {}
 }
 
@@ -29,10 +27,8 @@ export async function getFollowingList(
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/connect-user/followingList?userId=${userId}&viewerId=${viewerId}&pageNo=${pageNo}&pageSize=${pageSize}`
     );
-
     const res = await response.json();
-    const data = res.response;
-    return data;
+    return res;
   } catch {}
 }
 
@@ -80,7 +76,6 @@ export async function getProfileRatingList(
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/rating/list?userId=${userId}&pageNo=${pageNo}&pageSize=${pageSize}`
     );
-
     const res = await response.json();
     const data = res.response;
     return data;
@@ -92,9 +87,7 @@ export async function getProfileOverallRating(userId: string | undefined) {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/rating/splitup/${userId}`
     );
-
     const res = await response.json();
-    const data = res.response;
-    return data;
+    return res;
   } catch {}
 }

@@ -53,26 +53,28 @@ export async function generateMetadata(
   };
 }
 
-const layout = async ({
+async function layout({
   children,
   params,
 }: {
   children: React.ReactNode;
   params: { userId: string; username: string };
-}) => {
+}) {
+  await new Promise((resolve) => setTimeout(resolve, 1000));
   const userData = await fetchUserData(params.userId, params.username);
   const token = await getSession();
   const isOwnProfile = token === params.userId;
   return (
     <main className="flex-center">
-      <section className="relative flex w-full max-w-screen-xl flex-col items-center justify-center 2xl:max-w-[1380px]">
+      <section className="relative flex w-full max-w-screen-xl flex-col items-center justify-center 2xl:max-w-[1200px]">
         <ProfileCover
           coverPhoto={userData?.response?.personalInfo?.coverImage}
           isTalent={userData?.response?.isTalent}
           avgRating={userData?.response?.avgRating}
         />
+
         <div
-          className={`${userData?.response?.isTalent ? "z-10 mt-[36vh]" : ""} flex-center  w-full flex-col`}
+          className={`${userData?.response?.isTalent ? "z-10 mt-[30vh]" : ""} flex-center  w-full flex-col`}
         >
           {userData?.response?.isTalent ? (
             <ProfileHeader
@@ -115,7 +117,7 @@ const layout = async ({
       </section>
     </main>
   );
-};
+}
 
 export default layout;
 

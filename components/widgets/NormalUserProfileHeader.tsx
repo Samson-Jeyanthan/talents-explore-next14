@@ -21,11 +21,11 @@ const NormalUserProfileHeader = ({
     <header className="relative flex w-full max-w-screen-xl justify-between py-4">
       <section className="flex items-start justify-start gap-5">
         <Image
-          src={`${userData?.personalInfo?.profileImage}`}
+          src={`${userData?.personalInfo?.profileImage ? userData?.personalInfo?.profileImage : "/assets/images/default_profile_pic_2.png"}`}
           width={1024}
           height={1024}
           alt="profile photo"
-          className="relative size-24 cursor-pointer rounded-full object-cover"
+          className="relative size-24 cursor-pointer rounded-full bg-dark-400 object-cover"
           onClick={() => setShowDP(!showDP)}
         />
 
@@ -48,7 +48,7 @@ const NormalUserProfileHeader = ({
             {userData?.personalInfo?.professional}
           </p>
           {userData?.personalInfo?.shortBio && (
-            <p className="w-96 pl-3 text-xs text-light-600">
+            <p className="w-96 text-xs text-light-600">
               {userData?.personalInfo?.shortBio}
             </p>
           )}
