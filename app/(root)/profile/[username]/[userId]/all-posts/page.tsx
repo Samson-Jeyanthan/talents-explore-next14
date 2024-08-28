@@ -1,12 +1,10 @@
 import { getUserAllPosts } from "@/actions/post.action";
+import { ProfileURLProps } from "../layout";
+import { getSession } from "@/lib/session";
 
-async function AllPosts() {
-  const data = await getUserAllPosts(
-    "657160e126fd60915f674078",
-    "657160e126fd60915f674078",
-    1,
-    5
-  );
+async function AllPosts({ params }: ProfileURLProps) {
+  const token = await getSession();
+  const data = await getUserAllPosts(params.userId, token, 1, 5);
   return <section className="my-8 flex flex-col gap-4">{data}</section>;
 }
 

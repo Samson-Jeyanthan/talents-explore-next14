@@ -1,4 +1,4 @@
-export interface IAllPostCardProp {
+export interface IPost {
   _id: string;
   isBestWork: false;
   timeAgo: string;
