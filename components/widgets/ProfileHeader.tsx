@@ -27,8 +27,8 @@ const ProfileHeader = ({
   };
 
   return (
-    <header className="flex w-full flex-col">
-      <section className="flex items-start justify-between bg-gradient-to-t from-[rgb(17,19,27,0.75)] to-[rgba(17,19,27,0.0)] p-3">
+    <header className="-mt-10 flex w-full flex-col bg-gradient-to-b from-[rgb(17,19,27,0.45)] to-[rgba(17,19,27)] backdrop-blur-lg">
+      <section className="flex items-start justify-between p-3">
         <div className="flex-start gap-5">
           <Image
             src={`${userData?.personalInfo?.profileImage ? userData?.personalInfo?.profileImage : "/assets/images/default_profile_pic_2.png"}`}
@@ -69,7 +69,7 @@ const ProfileHeader = ({
         {/* <div className="text-sm text-light-900">Rate this Profile</div> */}
       </section>
 
-      <section className="flex items-start justify-between bg-gradient-to-b from-[rgb(17,19,27,0.85)] to-[rgba(17,19,27)] p-0 backdrop-blur-lg">
+      <section className="flex items-start justify-between p-0">
         <div className="flex flex-col gap-2">
           <div className="flex-start">
             <h4
