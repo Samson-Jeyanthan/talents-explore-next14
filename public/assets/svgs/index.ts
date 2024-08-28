@@ -10,3 +10,6 @@ export { default as SystemIcon } from "./SystemIcon";
 export { default as StarIcon } from "./StarIcon";
 export { default as HalfStarIcon } from "./HalfStarIcon";
 export { default as MessageIcon } from "./MessageIcon";
+export { default as MultiPostIcon } from "./MultiPostIcon";
+export { default as PinIcon } from "./PinIcon";
+export { default as WarningIcon } from "./WarningIcon";
