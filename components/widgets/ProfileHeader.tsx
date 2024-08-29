@@ -21,14 +21,18 @@ const ProfileHeader = ({
   const [showConnection, setShowConnection] = useState(false);
   const [currentTab, setCurrentTab] = useState(0);
 
+  const handleShowDP = () => {
+    if (userData?.personalInfo?.profileImage) setShowDP(!showDP);
+  };
+
   const handleConnectionModalOpen = async (currentTab: number) => {
     setShowConnection(!showConnection);
     setCurrentTab(currentTab);
   };
 
   return (
-    <header className="-mt-10 flex w-full flex-col bg-gradient-to-b from-[rgb(17,19,27,0.45)] to-[rgba(17,19,27)] backdrop-blur-lg">
-      <section className="flex items-start justify-between p-3">
+    <header className="-mt-1 flex w-full flex-col bg-gradient-to-b from-[rgb(17,19,27,0.45)] to-[rgba(17,19,27)] backdrop-blur-lg 2xl:-mt-10">
+      <section className="flex items-start justify-between p-3 py-2 2xl:p-3">
         <div className="flex-start gap-5">
           <Image
             src={`${userData?.personalInfo?.profileImage ? userData?.personalInfo?.profileImage : "/assets/images/default_profile_pic_2.png"}`}
@@ -36,7 +40,7 @@ const ProfileHeader = ({
             height={1024}
             alt="profile photo"
             className="size-24 cursor-pointer rounded-full bg-dark-400 object-cover"
-            onClick={() => setShowDP(!showDP)}
+            onClick={handleShowDP}
           />
           <div className="flex flex-col gap-1">
             <h1 className="text-5xl font-semibold capitalize text-light-900">
@@ -64,7 +68,10 @@ const ProfileHeader = ({
               </Button>
             </>
           )}
-          <ProfileOptions />
+          <ProfileOptions
+            profileOwnerId={userData._id}
+            userName={userData?.userName}
+          />
         </div>
         {/* <div className="text-sm text-light-900">Rate this Profile</div> */}
       </section>

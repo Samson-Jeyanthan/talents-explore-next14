@@ -14,7 +14,7 @@ const ProfileCover = async ({
 
   return (
     <div
-      className={`${isTalent ? "fixed top-0 z-0 mt-14" : ""} w-full max-w-screen-xl rounded-2xl 2xl:max-w-[1200px]`}
+      className={`${isTalent ? "fixed top-0 z-0 mt-14" : ""} w-full max-w-screen-lg rounded-2xl 2xl:max-w-[1200px]`}
     >
       {isTalent ? (
         <div className="flex-center absolute top-8 gap-3 rounded-r-lg bg-dark-200 fill-custom-100 px-5 py-3 text-light-900">
