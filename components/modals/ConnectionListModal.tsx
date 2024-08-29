@@ -21,9 +21,9 @@ function ConnectionListModal({
   setCuurentTab,
 }: {
   isTalent: boolean;
-  currentTab: number;
+  currentTab?: number;
   onClick: () => void;
-  setCuurentTab: (currentTab: number) => void;
+  setCuurentTab?: (currentTab: number) => void;
 }) {
   return (
     <>
@@ -33,25 +33,25 @@ function ConnectionListModal({
         aria-describedby={undefined}
       >
         <DialogTitle className="sticky top-0 z-10 flex h-max w-full items-center justify-between rounded-xl bg-dark-250">
-          {isTalent && (
+          {isTalent ? (
             <>
               <p
                 className={`${currentTab === 0 ? "active-connection-tab" : "text-light-600"} default-connection-tab`}
-                onClick={() => setCuurentTab(0)}
+                onClick={() => setCuurentTab && setCuurentTab(0)}
               >
                 Ratings
               </p>
               <p
                 className={`${currentTab === 1 ? "active-connection-tab" : "text-light-600"} default-connection-tab`}
-                onClick={() => setCuurentTab(1)}
+                onClick={() => setCuurentTab && setCuurentTab(1)}
               >
                 Followers
               </p>
             </>
-          )}
+          ) : null}
           <p
             className={`${currentTab === 2 ? "active-connection-tab" : "text-light-600"} default-connection-tab`}
-            onClick={() => setCuurentTab(2)}
+            onClick={() => setCuurentTab && setCuurentTab(2)}
           >
             Following
           </p>
@@ -64,13 +64,10 @@ function ConnectionListModal({
                 <LoadProfileRatingList />
               ) : currentTab === 1 ? (
                 <LoadFollowerList />
-              ) : (
-                <LoadFollowingList />
-              )}
+              ) : null}
             </>
-          ) : (
-            <LoadFollowingList />
-          )}
+          ) : null}
+          {currentTab === 2 ? <LoadFollowingList /> : null}
         </div>
         <DialogClose
           className="absolute -right-8 -top-8 cursor-pointer rounded-full bg-dark-250 p-[6px] text-light-900 focus:outline-none"

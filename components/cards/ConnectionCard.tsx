@@ -2,6 +2,7 @@ import Link from "next/link";
 import ConnectionButton from "../buttons/ConnectionButton";
 import { MotionDiv } from "../others/MotionDiv";
 import UserProfileImg from "../others/UserProfileImg";
+import { StarIcon } from "@/public/assets/svgs";
 
 export interface IConnectionListProp {
   _id: string;
@@ -42,11 +43,19 @@ function ConnectionCard({ connectCard, index, viewerId, connectionTab }: Prop) {
       className="flex-between w-[95%] gap-2"
     >
       <div className="flex items-center justify-center gap-2">
-        <Link href={`/profile/${connectCard.userName}/${connectCard._id}`}>
+        <Link
+          href={`/profile/${connectCard.userName}/${connectCard._id}`}
+          className="relative"
+        >
           <UserProfileImg
             src={connectCard.profileImage}
             userName={connectCard.name}
           />
+          {connectCard.isTalent && (
+            <span className="flex-center absolute -bottom-px -right-px rounded-full bg-dark-250 fill-custom-100 p-[2px]">
+              <StarIcon width="13px" height="13px" />
+            </span>
+          )}
         </Link>
         <Link
           href={`/profile/${connectCard.userName}/${connectCard._id}`}
