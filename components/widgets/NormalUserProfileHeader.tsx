@@ -89,7 +89,7 @@ const NormalUserProfileHeader = ({
           </>
         )}
         <ProfileOptions
-          profileOwnerId={userData._id}
+          profileOwnerId={userData?._id}
           userName={userData?.userName}
         />
       </section>

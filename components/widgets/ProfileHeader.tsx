@@ -69,7 +69,7 @@ const ProfileHeader = ({
             </>
           )}
           <ProfileOptions
-            profileOwnerId={userData._id}
+            profileOwnerId={userData?._id}
             userName={userData?.userName}
           />
         </div>

@@ -8,9 +8,9 @@ function loading() {
       {array.map((_, i) => (
         <div
           key={i}
-          className="my-4 flex w-full gap-4 rounded-xl bg-dark-300 p-4"
+          className="my-4 flex w-full gap-4 rounded-[28px] bg-dark-300 p-4"
         >
-          <Skeleton className="h-48 w-80 rounded-lg bg-dark-400" />
+          <Skeleton className="h-48 w-80 rounded-2xl bg-dark-400" />
           <div className="flex w-full flex-col gap-3">
             <Skeleton className="h-6 w-full rounded-xl bg-dark-400" />
             <div className="flex flex-col gap-2">

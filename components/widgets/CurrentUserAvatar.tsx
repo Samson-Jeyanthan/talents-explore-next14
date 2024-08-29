@@ -9,7 +9,7 @@ const CurrentUserAvatar = () => {
 
   return (
     <Link href={`/profile/${user.username}/${user.currentUserId}`}>
-      <Avatar className="size-9 cursor-pointer bg-dark-300 2xl:size-8">
+      <Avatar className="size-9 cursor-pointer bg-dark-300 2xl:size-9">
         <AvatarImage src={user.imageUrl ? user.imageUrl : ""} />
         <AvatarFallback className="text-light-900">
           {Array.from(user.firstName)[0]}
