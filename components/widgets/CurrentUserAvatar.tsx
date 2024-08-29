@@ -4,12 +4,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUserContext } from "@/context/AuthProvider";
 import Link from "next/link";
 
-const CurrentUserAvatar = ({ size }: { size?: string }) => {
+const CurrentUserAvatar = () => {
   const { user } = useUserContext();
 
   return (
     <Link href={`/profile/${user.username}/${user.currentUserId}`}>
-      <Avatar className={`${size} cursor-pointer bg-dark-300`}>
+      <Avatar className="size-9 cursor-pointer bg-dark-300 2xl:size-8">
         <AvatarImage src={user.imageUrl ? user.imageUrl : ""} />
         <AvatarFallback className="text-light-900">
           {Array.from(user.firstName)[0]}

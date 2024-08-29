@@ -3,7 +3,7 @@ import { LeftSidebar, Navbar } from "@/components/widgets";
 
 const layout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <main className="flex min-h-screen w-full">
+    <main className="flex min-h-screen w-full bg-dark-200">
       <LeftSidebar />
       <section className="relative flex w-full flex-col bg-dark-200">
         <Navbar />

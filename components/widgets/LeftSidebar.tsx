@@ -26,8 +26,8 @@ const LeftSidebar = () => {
   };
   return (
     <Drawer>
-      <aside className="lg:flex-between sticky top-0 hidden h-screen min-w-64 flex-col bg-dark-100 py-8">
-        <div className="flex-center w-full flex-col gap-8">
+      <aside className="lg:flex-between sticky left-0 top-0 hidden max-h-screen min-h-screen min-w-60 max-w-60 flex-col bg-dark-100 py-8 2xl:min-w-64 2xl:max-w-64">
+        <div className="flex-center w-full flex-col gap-5 2xl:gap-8">
           <Image
             src="/assets/images/te-logo-expanded-light.png"
             alt="TE-Logo"
@@ -35,7 +35,7 @@ const LeftSidebar = () => {
             height={30}
             className="h-auto w-[70%] object-contain"
           />
-          <ul className="flex w-full flex-col gap-4 p-3">
+          <ul className="flex w-full flex-col gap-2 p-3 2xl:gap-4">
             {SIDEBAR_ITEMS.map((item, index) => {
               const isActive = item.isLink
                 ? pathname === item.path || pathname.includes(item.path)

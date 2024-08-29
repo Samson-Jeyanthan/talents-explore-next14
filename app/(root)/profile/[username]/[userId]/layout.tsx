@@ -11,7 +11,7 @@ import { userPublicInfoAction } from "@/actions/user.action";
 import { getSession } from "@/lib/session";
 import { userPersonalInfoAction } from "@/actions/auth.action";
 
-type Props = {
+export type ProfileURLProps = {
   params: { userId: string; username: string };
 };
 
@@ -32,7 +32,7 @@ async function fetchUserData(userId: string, viewerId: string) {
 }
 
 export async function generateMetadata(
-  { params }: Props,
+  { params }: ProfileURLProps,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
   const userData = await fetchUserData(params.userId, params.username);
@@ -44,9 +44,9 @@ export async function generateMetadata(
     title:
       "Profile" +
       " | " +
-      userData.response.personalInfo.firstName +
+      userData?.response?.personalInfo?.firstName +
       " " +
-      userData.response.personalInfo.lastName,
+      userData?.response?.personalInfo?.lastName,
     // openGraph: {
     //   images: ["/some-specific-page-image.jpg", ...previousImages],
     // },
@@ -66,7 +66,7 @@ async function layout({
   const isOwnProfile = token === params.userId;
   return (
     <main className="flex-center">
-      <section className="relative flex w-full max-w-screen-xl flex-col items-center justify-center 2xl:max-w-[1200px]">
+      <section className="relative flex w-full max-w-screen-lg flex-col items-center justify-center 2xl:max-w-[1200px]">
         <ProfileCover
           coverPhoto={userData?.response?.personalInfo?.coverImage}
           isTalent={userData?.response?.isTalent}

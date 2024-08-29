@@ -8,7 +8,7 @@ const Navbar = () => {
       <ul className="flex-center gap-2 p-4">
         <Theme />
         <NotificationSheet />
-        <CurrentUserAvatar size="size-8" />
+        <CurrentUserAvatar />
       </ul>
     </nav>
   );
