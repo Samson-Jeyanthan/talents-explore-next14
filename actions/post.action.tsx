@@ -3,9 +3,8 @@
 import { revalidatePath } from "next/cache";
 import AllPostCard from "@/components/cards/AllPostCard";
 import { IPost } from "@/types/post.types";
-import { toast } from "sonner";
 
-export async function getUserAllPosts(
+export async function getUserAllPostsAction(
   userId: string | undefined,
   viewerId: string | undefined,
   pageNo: number,
@@ -16,14 +15,17 @@ export async function getUserAllPosts(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/profile/all?userId=${userId}&viewUserId=${viewerId}&pageNo=${pageNo}&pageSize=${pageSize}`
     );
     const res = await response.json();
-    // return res;
     if (res.status === "7400") {
       const data = res.response;
       return data.map((item: IPost, index: number) => (
         <AllPostCard key={item._id} allPostCard={item} index={index} />
       ));
     } else {
-      toast.error("Could not fetch post list", { duration: 4000 });
+      const data = {
+        status: 400,
+        message: "Could not fetch all posts data",
+      };
+      return data;
     }
   } catch {}
 }
@@ -82,4 +84,30 @@ export async function removeFromBestWorkAction(
     console.error(error);
     return error;
   }
+}
+
+export async function getUserCreditPostsAction(
+  userId: string | undefined,
+  viewerId: string | undefined,
+  pageNo: number,
+  pageSize: number
+) {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/profile/credit?userId=${userId}&viewUserId=${viewerId}&pageNo=${pageNo}&pageSize=${pageSize}`
+    );
+    const res = await response.json();
+    if (res.status === "7400") {
+      const data = res.response;
+      return data.map((item: IPost, index: number) => (
+        <AllPostCard key={item._id} allPostCard={item} index={index} />
+      ));
+    } else {
+      const data = {
+        status: 400,
+        message: "Could not fetch credit data",
+      };
+      return data;
+    }
+  } catch {}
 }

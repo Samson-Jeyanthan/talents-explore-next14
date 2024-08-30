@@ -4,11 +4,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 function loading() {
   const array = new Array(2).fill(null);
   return (
-    <div className="my-8 flex w-full flex-col gap-4">
+    <>
       {array.map((_, i) => (
         <div
           key={i}
-          className="flex w-full gap-4 rounded-[28px] bg-dark-300 p-2"
+          className="my-4 flex w-full gap-4 rounded-[28px] bg-dark-300 p-2"
         >
           <Skeleton className="h-48 w-80 rounded-2xl bg-dark-400" />
           <div className="flex w-full flex-col gap-3">
@@ -21,7 +21,7 @@ function loading() {
           </div>
         </div>
       ))}
-    </div>
+    </>
   );
 }
 
