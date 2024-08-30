@@ -64,6 +64,7 @@ export const Tabs = ({
             style={{
               transformStyle: "preserve-3d",
             }}
+            scroll={false}
           >
             {isActive && (
               <motion.div

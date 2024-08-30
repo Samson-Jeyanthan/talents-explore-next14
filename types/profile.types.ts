@@ -1,3 +1,76 @@
+export type TCurrentUserData = {
+  _id: string;
+  isTalent: boolean;
+  morePersonalInfo: {
+    bio: string;
+    ethnic: string;
+    featuredPhotos: [string];
+    socialLinks: [string];
+    _id: string;
+    ethnicId: string;
+  };
+  personalInfo: {
+    firstName: string;
+    lastName: string;
+    gender: string;
+    dob: string;
+    languageKnown: string;
+    professional: string;
+    profileImage: string;
+    coverImage: string;
+    shortBio: string;
+    language: string;
+    professionalId: string;
+  };
+  email: string;
+  userName: string;
+  callingCode: string | null;
+  mobile: number | string | null;
+  avgRating: number;
+  numberOfRating: number;
+  followers: number;
+  following: number;
+  location: string;
+  yourRating: number;
+};
+
+export type TPublicUserData = {
+  _id: string;
+  isTalent: boolean;
+  morePersonalInfo: {
+    bio: string;
+    ethnic: string;
+    featuredPhotos: [string];
+    socialLinks: [
+      {
+        type: string;
+        url: string;
+      },
+    ];
+    _id: string;
+  };
+  personalInfo: {
+    coverImage: string;
+    firstName: string;
+    lastName: string;
+    shortBio: string;
+    profileImage: string;
+    language: string;
+    professional: string;
+  };
+  location: string;
+  userName: string;
+  email: string;
+  callingCode: string | null;
+  mobile: number | string | null;
+  avgRating: number;
+  numberOfRating: number;
+  yourRating: number;
+  followers: number;
+  following: number;
+  isFollowing: boolean;
+};
+
 export interface IProfileSkills {
   _id: string;
   mainCategoryName: string;

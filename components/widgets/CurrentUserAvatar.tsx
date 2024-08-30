@@ -8,12 +8,12 @@ const CurrentUserAvatar = () => {
   const { user } = useUserContext();
 
   return (
-    <Link href={`/profile/${user.username}/${user.currentUserId}`}>
+    <Link href={`/profile/${user?.username}/${user?.currentUserId}`}>
       <Avatar className="size-9 cursor-pointer bg-dark-300 2xl:size-9">
-        <AvatarImage src={user.imageUrl ? user.imageUrl : ""} />
+        <AvatarImage src={user?.imageUrl ? user?.imageUrl : ""} />
         <AvatarFallback className="text-light-900">
-          {Array.from(user.firstName)[0]}
-          {Array.from(user.lastName)[0]}
+          {Array.from(user?.firstName)[0]}
+          {Array.from(user?.lastName)[0]}
         </AvatarFallback>
       </Avatar>
     </Link>
