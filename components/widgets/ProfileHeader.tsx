@@ -9,6 +9,7 @@ import { PhotoViewModal } from "../modals";
 import { Dialog } from "../ui/dialog";
 import ConnectionListModal from "../modals/ConnectionListModal";
 import { MessageIcon } from "@/public/assets/svgs";
+import { useUserContext } from "@/context/AuthProvider";
 
 const ProfileHeader = ({
   userData,
@@ -17,6 +18,7 @@ const ProfileHeader = ({
   userData: any;
   isOwnProfile: boolean;
 }) => {
+  const { isAuthenticated } = useUserContext();
   const [showDP, setShowDP] = useState(false);
   const [showConnection, setShowConnection] = useState(false);
   const [currentTab, setCurrentTab] = useState(0);
@@ -53,26 +55,29 @@ const ProfileHeader = ({
             </p>
           </div>
         </div>
-        <div className="flex-start gap-3 pt-3">
-          {isOwnProfile ? (
-            <Button className="shad-button_secondary w-36 rounded-full">
-              Edit Profile
-            </Button>
-          ) : (
-            <>
-              <Button className="shad-button_primary w-36 rounded-full">
-                Follow
+        {isAuthenticated ? (
+          <div className="flex-start gap-3 pt-3">
+            {isOwnProfile ? (
+              <Button className="shad-button_secondary w-36 rounded-full">
+                Edit Profile
               </Button>
-              <Button className="shad-button_secondary w-max rounded-full fill-white">
-                <MessageIcon />
-              </Button>
-            </>
-          )}
-          <ProfileOptions
-            profileOwnerId={userData?._id}
-            userName={userData?.userName}
-          />
-        </div>
+            ) : (
+              <>
+                <Button className="shad-button_primary w-36 rounded-full">
+                  Follow
+                </Button>
+                <Button className="shad-button_secondary w-max rounded-full fill-white">
+                  <MessageIcon />
+                </Button>
+              </>
+            )}
+            <ProfileOptions
+              profileOwnerId={userData?._id}
+              userName={userData?.userName}
+            />
+          </div>
+        ) : null}
+
         {/* <div className="text-sm text-light-900">Rate this Profile</div> */}
       </section>
 
