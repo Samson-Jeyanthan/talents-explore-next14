@@ -15,15 +15,11 @@ import {
   DrawerTrigger,
 } from "../ui/drawer";
 import { Button } from "../ui/button";
-import { deleteSession } from "@/lib/session";
+import { handleLogout } from "@/lib/functions/auth.functions";
 
 const LeftSidebar = () => {
   const pathname = usePathname();
 
-  const handleLogout = () => {
-    deleteSession();
-    localStorage.clear();
-  };
   return (
     <Drawer>
       <aside className="lg:flex-between sticky left-0 top-0 hidden max-h-screen min-h-screen min-w-60 max-w-60 flex-col bg-dark-100 py-8 2xl:min-w-64 2xl:max-w-64">

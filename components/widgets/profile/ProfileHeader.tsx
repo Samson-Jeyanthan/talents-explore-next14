@@ -2,12 +2,12 @@
 
 import Image from "next/image";
 import { GoDotFill } from "react-icons/go";
-import { Button } from "../ui/button";
-import { ProfileOptions } from "../options";
+import { Button } from "../../ui/button";
+import { ProfileOptions } from "../../options";
 import { useState } from "react";
-import { PhotoViewModal } from "../modals";
-import { Dialog } from "../ui/dialog";
-import ConnectionListModal from "../modals/ConnectionListModal";
+import { PhotoViewModal } from "../../modals";
+import { Dialog } from "../../ui/dialog";
+import ConnectionListModal from "../../modals/ConnectionListModal";
 import { MessageIcon } from "@/public/assets/svgs";
 import { useUserContext } from "@/context/AuthProvider";
 

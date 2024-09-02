@@ -87,3 +87,25 @@ export interface IProfileSkills {
   description: string;
   hashTags: [string];
 }
+
+export interface IAwardsOrCertificate {
+  _id: string;
+  name: string;
+  givenBy: string;
+  year: number;
+}
+
+export interface IEducation {
+  _id: string;
+  course: string;
+  institution: string;
+  from: number;
+  to: number;
+}
+
+export interface ILanguage {
+  _id: string;
+  languageId: string;
+  languageName: string;
+  level: string;
+}

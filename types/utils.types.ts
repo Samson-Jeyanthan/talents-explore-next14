@@ -35,3 +35,7 @@ export type TFetchDataArray = {
   _id: string;
   [key: string]: any;
 };
+
+export type TProfileURLProps = {
+  params: { userId: string; username: string };
+};

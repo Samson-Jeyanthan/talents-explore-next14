@@ -2,8 +2,15 @@
 
 import SkillCard from "@/components/cards/SkillCard";
 import { getSession } from "@/lib/session";
-import { IProfileSkills } from "@/types/profile.types";
+import {
+  IAwardsOrCertificate,
+  IEducation,
+  ILanguage,
+  IProfileSkills,
+} from "@/types/profile.types";
 import { userPersonalInfoAction } from "./auth.action";
+import { AwardCard, EducationCard } from "@/components/cards";
+import LanguageCard from "@/components/cards/LanguageCard";
 
 export const userPublicInfoAction = async (
   userId: string | undefined,
@@ -19,6 +26,28 @@ export const userPublicInfoAction = async (
     return error;
   }
 };
+
+export async function fetchUserDataAction(userId: string, viewerId: string) {
+  const token = await getSession();
+
+  let res;
+
+  if (token) {
+    if (token === userId) {
+      res = await userPersonalInfoAction(userId);
+    } else {
+      res = await userPublicInfoAction(userId, token);
+    }
+  } else {
+    res = await userPublicInfoAction(userId, viewerId);
+  }
+
+  if (res?.status === "7400") {
+    return res.response || res;
+  } else {
+    return undefined;
+  }
+}
 
 export async function userSkillsInfoAction(userId: string | undefined) {
   try {
@@ -41,24 +70,65 @@ export async function userSkillsInfoAction(userId: string | undefined) {
   } catch {}
 }
 
-export async function fetchUserDataAction(userId: string, viewerId: string) {
-  const token = await getSession();
-
-  let res;
-
-  if (token) {
-    if (token === userId) {
-      res = await userPersonalInfoAction(userId);
+export async function userAwardInfoAction(userId: string | undefined) {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/awardsOrCertificate/${userId}`
+    );
+    const res = await response.json();
+    if (res.status === "7400") {
+      const data = res.response;
+      return data.map((item: IAwardsOrCertificate, index: number) => (
+        <AwardCard key={item._id} userAwardCard={item} index={index} />
+      ));
     } else {
-      res = await userPublicInfoAction(userId, token);
+      const data = {
+        status: 400,
+        message: "Could not fetch award data",
+      };
+      return data;
     }
-  } else {
-    res = await userPublicInfoAction(userId, viewerId);
-  }
+  } catch {}
+}
 
-  if (res?.status === "7400") {
-    return res.response || res;
-  } else {
-    return undefined;
-  }
+export async function userEducationInfoAction(userId: string | undefined) {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/educations/${userId}`
+    );
+    const res = await response.json();
+    if (res.status === "7400") {
+      const data = res.response;
+      return data.map((item: IEducation, index: number) => (
+        <EducationCard key={item._id} userEducationCard={item} index={index} />
+      ));
+    } else {
+      const data = {
+        status: 400,
+        message: "Could not fetch education data",
+      };
+      return data;
+    }
+  } catch {}
+}
+
+export async function userLanguageInfoAction(userId: string | undefined) {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/languages/${userId}`
+    );
+    const res = await response.json();
+    if (res.status === "7400") {
+      const data = res.response;
+      return data.map((item: ILanguage, index: number) => (
+        <LanguageCard key={item._id} userLangCard={item} index={index} />
+      ));
+    } else {
+      const data = {
+        status: 400,
+        message: "Could not fetch education data",
+      };
+      return data;
+    }
+  } catch {}
 }

@@ -2,13 +2,13 @@
 
 import Image from "next/image";
 import { GoDotFill } from "react-icons/go";
-import { Button } from "../ui/button";
-import { ProfileOptions } from "../options";
+import { Button } from "../../ui/button";
+import { ProfileOptions } from "../../options";
 import { useState } from "react";
-import { Dialog } from "../ui/dialog";
-import { PhotoViewModal } from "../modals";
+import { Dialog } from "../../ui/dialog";
+import { PhotoViewModal } from "../../modals";
 import { MessageIcon } from "@/public/assets/svgs";
-import ConnectionListModal from "../modals/ConnectionListModal";
+import ConnectionListModal from "../../modals/ConnectionListModal";
 
 const NormalUserProfileHeader = ({
   userData,

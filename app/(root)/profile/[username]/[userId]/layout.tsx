@@ -3,20 +3,16 @@ import {
   ProfileCover,
   ProfileHeader,
   NormalUserProfileHeader,
+  ProfileTabs,
 } from "@/components/widgets";
-import { Tabs } from "@/components/widgets/ProfileTabs";
-
 import type { Metadata, ResolvingMetadata } from "next";
 import { fetchUserDataAction } from "@/actions/user.action";
 import { getSession } from "@/lib/session";
 import NotFound from "../../not-found";
-
-export type ProfileURLProps = {
-  params: { userId: string; username: string };
-};
+import { TProfileURLProps } from "@/types/utils.types";
 
 export async function generateMetadata(
-  { params }: ProfileURLProps,
+  { params }: TProfileURLProps,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
   const userData = await fetchUserDataAction(params.userId, params.username);
@@ -80,7 +76,7 @@ async function layout({
 
           <div className="flex-center w-full max-w-screen-xl flex-col bg-dark-200 pt-8">
             {userData?.isTalent ? (
-              <Tabs
+              <ProfileTabs
                 tabs={[
                   {
                     title: "Overview",

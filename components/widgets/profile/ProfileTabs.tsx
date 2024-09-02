@@ -13,7 +13,7 @@ type Tab = {
   href: string;
 };
 
-export const Tabs = ({
+const ProfileTabs = ({
   tabs: propTabs,
   containerClassName,
   activeTabClassName,
@@ -89,6 +89,8 @@ export const Tabs = ({
     </div>
   );
 };
+
+export default ProfileTabs;
 
 export const FadeInDiv = ({
   className,
