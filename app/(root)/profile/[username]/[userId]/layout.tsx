@@ -9,8 +9,7 @@ import { Tabs } from "@/components/widgets/ProfileTabs";
 import type { Metadata, ResolvingMetadata } from "next";
 import { fetchUserDataAction } from "@/actions/user.action";
 import { getSession } from "@/lib/session";
-import { notFound } from "next/navigation";
-// import { notFound } from "next/navigation";
+import NotFound from "../../not-found";
 
 export type ProfileURLProps = {
   params: { userId: string; username: string };
@@ -20,28 +19,28 @@ export async function generateMetadata(
   { params }: ProfileURLProps,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const res = await fetchUserDataAction(params.userId, params.username);
+  const userData = await fetchUserDataAction(params.userId, params.username);
 
   // optionally access and extend (rather than replace) parent metadata
   // const previousImages = (await parent).openGraph?.images || [];
 
-  if (!res) {
+  if (!userData) {
     return {
       title: "User Not Found",
     };
-  }
+  } else
+    return {
+      title:
+        userData?.personalInfo?.firstName +
+        " " +
+        userData?.personalInfo?.lastName +
+        "" +
+        "Profile",
 
-  return {
-    title:
-      "Profile" +
-      " | " +
-      res?.response?.personalInfo?.firstName +
-      " " +
-      res?.response?.personalInfo?.lastName,
-    // openGraph: {
-    //   images: ["/some-specific-page-image.jpg", ...previousImages],
-    // },
-  };
+      // openGraph: {
+      //   images: ["/some-specific-page-image.jpg", ...previousImages],
+      // },
+    };
 }
 
 async function layout({
@@ -52,40 +51,35 @@ async function layout({
   params: { userId: string; username: string };
 }) {
   await new Promise((resolve) => setTimeout(resolve, 1000));
-  const res = await fetchUserDataAction(params.userId, params.username);
+  const userData = await fetchUserDataAction(params.userId, params.username);
   const token = await getSession();
   const isOwnProfile = token === params.userId;
-
-  if (!res) {
-    notFound();
+  if (!userData) {
+    return <NotFound />;
   }
-
   return (
     <main className="flex-center">
       <section className="relative flex w-full max-w-screen-lg flex-col items-center justify-center 2xl:max-w-[1200px]">
         <ProfileCover
-          coverPhoto={res?.response?.personalInfo?.coverImage}
-          isTalent={res?.response?.isTalent}
-          avgRating={res?.response?.avgRating}
+          coverPhoto={userData?.personalInfo?.coverImage}
+          isTalent={userData?.isTalent}
+          avgRating={userData?.avgRating}
         />
 
         <div
-          className={`${res?.response?.isTalent ? "z-10 mt-[30vh]" : ""} flex-center  w-full flex-col`}
+          className={`${userData?.isTalent ? "z-10 mt-[30vh]" : ""} flex-center  w-full flex-col`}
         >
-          {res?.response?.isTalent ? (
-            <ProfileHeader
-              userData={res?.response}
-              isOwnProfile={isOwnProfile}
-            />
+          {userData?.isTalent ? (
+            <ProfileHeader userData={userData} isOwnProfile={isOwnProfile} />
           ) : (
             <NormalUserProfileHeader
-              userData={res?.response}
+              userData={userData}
               isOwnProfile={isOwnProfile}
             />
           )}
 
           <div className="flex-center w-full max-w-screen-xl flex-col bg-dark-200 pt-8">
-            {res?.response?.isTalent ? (
+            {userData?.isTalent ? (
               <Tabs
                 tabs={[
                   {

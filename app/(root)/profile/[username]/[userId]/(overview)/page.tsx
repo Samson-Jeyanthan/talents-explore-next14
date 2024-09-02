@@ -1,13 +1,17 @@
-// import { fetchUserDataAction } from "@/actions/user.action";
-import React from "react";
+import { TCurrentUserData, TPublicUserData } from "@/types/profile.types";
 import { ProfileURLProps } from "../layout";
+import { fetchUserDataAction } from "@/actions/user.action";
+import { BioDetails, MyPhotos } from "@/components/widgets";
 
 async function Overview({ params }: ProfileURLProps) {
-  // const res = await fetchUserDataAction(params.userId, params.username);
+  const userData: TCurrentUserData | TPublicUserData =
+    await fetchUserDataAction(params.userId, params.username);
+  if (!userData) return null;
+
   return (
-    <section className="mt-5 w-full text-center text-light-900">
-      {/* {res?.response?.personalInfo?.firstName} */}
-      overview
+    <section className="mt-5 w-full text-light-900">
+      <BioDetails userData={userData} />
+      <MyPhotos myPhotos={userData?.morePersonalInfo?.featuredPhotos} />
     </section>
   );
 }

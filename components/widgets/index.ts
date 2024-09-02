@@ -14,3 +14,5 @@ export { default as Notification } from "./NotificationSheet";
 export { default as ProfileHeader } from "./ProfileHeader";
 export { default as ProfileCover } from "./ProfileCover";
 export { default as NormalUserProfileHeader } from "./NormalUserProfileHeader";
+export { default as BioDetails } from "./BioDetails";
+export { default as MyPhotos } from "./MyPhotos";

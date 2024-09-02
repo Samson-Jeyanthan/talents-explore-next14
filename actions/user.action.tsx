@@ -43,28 +43,22 @@ export async function userSkillsInfoAction(userId: string | undefined) {
 
 export async function fetchUserDataAction(userId: string, viewerId: string) {
   const token = await getSession();
-  if (token !== "") {
+
+  let res;
+
+  if (token) {
     if (token === userId) {
-      const res = await userPersonalInfoAction(userId);
-      if (res.status === "7400") {
-        return res;
-      } else {
-        return undefined;
-      }
+      res = await userPersonalInfoAction(userId);
     } else {
-      const res = await userPublicInfoAction(userId, token);
-      if (res.status === "7400") {
-        return res;
-      } else {
-        return undefined;
-      }
+      res = await userPublicInfoAction(userId, token);
     }
   } else {
-    const res = await userPublicInfoAction(userId, viewerId);
-    if (res.status === "7400") {
-      return res;
-    } else {
-      return undefined;
-    }
+    res = await userPublicInfoAction(userId, viewerId);
+  }
+
+  if (res?.status === "7400") {
+    return res.response || res;
+  } else {
+    return undefined;
   }
 }
