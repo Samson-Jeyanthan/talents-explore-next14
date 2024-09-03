@@ -19,7 +19,7 @@ const BioDetails = ({
       <p>{userData?.location}</p>
       <p>{userData?.personalInfo?.language}</p>
       <p>{userData?.morePersonalInfo?.ethnic}</p>
-      <p className="w-1/2 text-justify">{userData?.morePersonalInfo?.bio}</p>
+      <p className="text-justify text-sm">{userData?.morePersonalInfo?.bio}</p>
     </section>
   );
 };
