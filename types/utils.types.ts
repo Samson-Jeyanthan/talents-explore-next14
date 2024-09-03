@@ -39,3 +39,11 @@ export type TFetchDataArray = {
 export type TProfileURLProps = {
   params: { userId: string; username: string };
 };
+
+export type TProfessionalDetailName =
+  | "education"
+  | "award"
+  | "language"
+  | "educationEdit"
+  | "awardEdit"
+  | "languageEdit";

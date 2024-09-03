@@ -71,6 +71,26 @@ export type TPublicUserData = {
   isFollowing: boolean;
 };
 
+export interface ITopPost {
+  _id: string;
+  isBestWork: boolean;
+  about: {
+    title: string;
+  };
+  media: [
+    {
+      url: string | null;
+      urlKey: string | null;
+      mediaType: string;
+      thumbnailUrl: string | null;
+      thumbnailUrlKey: string | null;
+    },
+  ];
+  postRating: number;
+  numberOfRating: number;
+  publishedAt: string;
+}
+
 export interface IProfileSkills {
   _id: string;
   mainCategoryName: string;

@@ -6,3 +6,4 @@ export { default as PhotoActionModal } from "./PhotoAction";
 export { default as ProfileOptionModal } from "./ProfileOption";
 export { default as ErrorAlert } from "./ErrorAlert";
 export { default as PhotoViewModal } from "./PhotoViewModal";
+export { default as ProfDetailsModal } from "./ProfDetailsModal";

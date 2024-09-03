@@ -129,6 +129,15 @@ body {
     @apply h-8 w-24 hover:bg-primary-500 hover:text-light-900 text-sm font-medium flex gap-2 !important;
   }
 
+  /* professional Info styles */
+  .professional-info-card-wrap {
+    @apply flex w-96 flex-col items-end gap-2;
+  }
+
+  .professional-info-card {
+    @apply flex w-[90%] relative flex-col gap-2 border-b-2 border-dark-300 p-2 pb-4 mr-2;
+  }
+
   /* posts related styles */
   .all-post-card-tags {
     @apply py-2 px-4 rounded-lg bg-dark-300 text-light-500 text-xs;

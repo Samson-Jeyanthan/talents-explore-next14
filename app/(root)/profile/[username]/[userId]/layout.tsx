@@ -30,7 +30,7 @@ export async function generateMetadata(
         userData?.personalInfo?.firstName +
         " " +
         userData?.personalInfo?.lastName +
-        "" +
+        " | " +
         "Profile",
 
       // openGraph: {
@@ -74,7 +74,7 @@ async function layout({
             />
           )}
 
-          <div className="flex-center w-full max-w-screen-xl flex-col bg-dark-200 pt-8">
+          <div className="flex-center w-full max-w-screen-xl flex-col bg-dark-200 px-4 pt-8 2xl:px-0">
             {userData?.isTalent ? (
               <ProfileTabs
                 tabs={[

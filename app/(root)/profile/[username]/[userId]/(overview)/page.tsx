@@ -7,6 +7,7 @@ import {
   EducationDetails,
   LanguageDetails,
   MyPhotos,
+  TopPosts,
 } from "@/components/widgets";
 
 async function Overview({ params }: TProfileURLProps) {
@@ -15,12 +16,18 @@ async function Overview({ params }: TProfileURLProps) {
   if (!userData) return null;
 
   return (
-    <section className="mt-5 w-full text-light-900">
-      <BioDetails userData={userData} />
-      <MyPhotos myPhotos={userData?.morePersonalInfo?.featuredPhotos} />
-      <AwardsAndCertificates params={params} />
-      <EducationDetails params={params} />
-      <LanguageDetails params={params} />
+    <section className="my-5 flex w-full flex-col gap-3 text-light-900">
+      <TopPosts params={params} />
+      <div className="flex flex-col gap-3 bg-dark-250 p-2">
+        <BioDetails userData={userData} />
+        <MyPhotos myPhotos={userData?.morePersonalInfo?.featuredPhotos} />
+      </div>
+
+      <div className="flex gap-3 rounded-3xl border-2 border-dark-300 bg-dark-300/20 p-3">
+        <EducationDetails params={params} />
+        <LanguageDetails params={params} />
+        <AwardsAndCertificates params={params} />
+      </div>
     </section>
   );
 }
