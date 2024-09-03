@@ -7,10 +7,15 @@ import {
   IEducation,
   ILanguage,
   IProfileSkills,
+  ITopPost,
 } from "@/types/profile.types";
 import { userPersonalInfoAction } from "./auth.action";
-import { AwardCard, EducationCard } from "@/components/cards";
-import LanguageCard from "@/components/cards/LanguageCard";
+import {
+  AwardCard,
+  EducationCard,
+  LanguageCard,
+} from "@/components/cards/ProfessionalDetailCards";
+import { TopPostCard } from "@/components/cards";
 
 export const userPublicInfoAction = async (
   userId: string | undefined,
@@ -47,6 +52,27 @@ export async function fetchUserDataAction(userId: string, viewerId: string) {
   } else {
     return undefined;
   }
+}
+
+export async function userTopPostInfoAction(userId: string | undefined) {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/profile/best-work?userId=${userId}&viewUserId=${""}&pageNo=${1}&pageSize=${3}`
+    );
+    const res = await response.json();
+    if (res.status === "7400") {
+      const data = res.response;
+      return data.map((item: ITopPost, index: number) => (
+        <TopPostCard key={item._id} userTopPostCard={item} index={index} />
+      ));
+    } else {
+      const data = {
+        status: 400,
+        message: "Could not fetch top post data",
+      };
+      return data;
+    }
+  } catch {}
 }
 
 export async function userSkillsInfoAction(userId: string | undefined) {
