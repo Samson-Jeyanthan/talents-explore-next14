@@ -1,6 +1,6 @@
 "use client";
 
-import { Spotlight } from "../ui/Spotlight";
+import { Spotlight } from "../../ui/Spotlight";
 import Image from "next/image";
 import { motion as m } from "framer-motion";
 
