@@ -47,7 +47,6 @@ export async function handleCommentSubmit(
     comment,
     revalidatePathURL
   );
-  console.log(res);
   if (res.status === "7400") {
     toast.success("You commented on this post", { duration: 4000 });
   } else {

@@ -1,6 +1,7 @@
 "use server";
 
 import axiosInstance from "@/lib/config/axiosInstance";
+import { revalidatePath } from "next/cache";
 
 export async function getFollowerList(
   userId: string | undefined,
@@ -88,6 +89,39 @@ export async function getProfileOverallRating(userId: string | undefined) {
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/rating/splitup/${userId}`
     );
     const res = await response.json();
+    return res;
+  } catch {}
+}
+
+export async function addPostRating(
+  userId: string | undefined,
+  postId: string | undefined,
+  postOwnerId: string,
+  rating: number,
+  revalidatePathURL: string
+) {
+  const formData = {
+    userId,
+    postId,
+    postOwnerId,
+    rating,
+  };
+
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/te-post/rating`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      }
+    );
+    const res = await response.json();
+    if (res.status === "7400") {
+      revalidatePath(revalidatePathURL);
+    }
     return res;
   } catch {}
 }

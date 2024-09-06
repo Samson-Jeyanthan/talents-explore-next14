@@ -80,7 +80,12 @@ const PostInfoHeader = ({ postData }: Props) => {
 
         <div className="flex items-center gap-3 text-sm text-light-500">
           <p>Rate this post</p>
-          <StarRating prevRatingValue={postData.yourRating} ratingFor="POST" />
+          <StarRating
+            prevRatingValue={postData.yourRating}
+            ratingFor="POST"
+            postId={postData._id}
+            authorId={postData.author._id}
+          />
         </div>
       </div>
     </section>

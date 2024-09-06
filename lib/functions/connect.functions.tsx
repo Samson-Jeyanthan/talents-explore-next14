@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  addPostRating,
   followUserAction,
   getProfileOverallRating,
   unFollowUserAction,
@@ -56,5 +57,42 @@ export async function fetchProfileOverallRating(
   if (res.status === "7400") {
     setOverallList(res.response);
     setIsOverallListLoading(false);
+  }
+}
+
+export async function handleAddRating(
+  userId: string | undefined,
+  postId: string | undefined,
+  authorId: string,
+  ratingFor: "PROFILE" | "POST" | "SHARE",
+  rating: number,
+  revalidatePathURL: string
+) {
+  let res: any = {};
+
+  if (ratingFor === "POST") {
+    res = await addPostRating(
+      userId,
+      postId,
+      authorId,
+      rating,
+      revalidatePathURL
+    );
+  }
+  if (res.status === "7400") {
+    toast.success(
+      `You have given ${rating} ⭐ to this ${
+        ratingFor === "POST"
+          ? " post"
+          : ratingFor === "SHARE"
+            ? " share"
+            : " profile"
+      }`,
+      {
+        duration: 4000,
+      }
+    );
+  } else {
+    toast.error("Something went wrong", { duration: 4000 });
   }
 }

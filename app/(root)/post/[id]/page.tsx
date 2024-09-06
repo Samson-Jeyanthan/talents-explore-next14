@@ -62,7 +62,7 @@ async function Post({ params }: TPostURLProps) {
         <div className="flex w-4/5 flex-col gap-6 rounded-[28px] border-2 border-solid border-dark-300 bg-dark-200/50 p-5 backdrop-blur-3xl">
           <PostInfoHeader postData={data} />
           <div className="flex items-start justify-between gap-8">
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-6">
               <PostInfo postData={data} />
               <RatingDetails postData={data} />
               <Comments
