@@ -6,20 +6,19 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "../ui/button";
 import { SendIcon } from "@/public/assets/svgs";
 import { Textarea } from "../ui/textarea";
+import { EmojisOptions } from "../options";
+import { handleCommentSubmit } from "@/lib/functions/post.functions";
 
 type Props = {
-  postId?: string;
+  postId: string;
   authorId?: string;
-  commentType?: "MODAL" | "PAGE";
+  commentType: "MODAL" | "PAGE";
 };
 
 const CommentInput = ({ postId, authorId, commentType }: Props) => {
   const { user } = useUserContext();
   const [commentValue, setCommentValue] = useState("");
-
   const textAreaRef = useRef<HTMLTextAreaElement>(null); // Reference to the textarea
-
-  const emojiList = ["😂", "❤️", "👍", "😢", "😡"];
 
   useEffect(() => {
     if (textAreaRef.current) {
@@ -29,31 +28,33 @@ const CommentInput = ({ postId, authorId, commentType }: Props) => {
       // Set height based on scrollHeight
       textAreaRef.current.style.height = `${textAreaRef.current.scrollHeight}px`;
     }
-  }, [commentValue]); // Adjust height whenever commentValue changes
+  }, [commentValue]);
 
   const handleEmojiClick = (emoji: string) => {
-    // Append the clicked emoji to the current textarea value
     setCommentValue((prev) => prev + emoji);
   };
 
+  const handleSubmit = () => {
+    if (commentValue) {
+      handleCommentSubmit(
+        user.currentUserId,
+        postId,
+        commentValue,
+        `/post/${postId}`
+      );
+    }
+    setCommentValue("");
+  };
+
   return (
-    <div className="flex h-auto w-full items-start gap-3">
+    <div className="flex h-auto w-full items-start gap-3 border-b border-solid border-dark-300 pb-4">
       <UserProfileImg
         userName={user.username}
         src={user.imageUrl}
         className="max-h-[34px] min-w-[34px] rounded-xl"
       />
-
-      {emojiList.map((emoji, index) => (
-        <div
-          key={index}
-          className="cursor-pointer text-xl"
-          onClick={() => handleEmojiClick(emoji)}
-        >
-          {emoji}
-        </div>
-      ))}
-      <div className="flex w-full flex-col items-end gap-2">
+      <EmojisOptions onClick={handleEmojiClick} />
+      <div className="flex w-full flex-col items-end gap-3">
         <Textarea
           ref={textAreaRef}
           placeholder="Add a comment"
@@ -61,10 +62,15 @@ const CommentInput = ({ postId, authorId, commentType }: Props) => {
           value={commentValue}
           onChange={(e) => setCommentValue(e.target.value)}
         />
-        <Button className="flex gap-2 rounded-full border-none bg-primary-500 fill-light-900 p-2 py-1 text-[13px] text-light-900">
-          Add
-          <SendIcon width="16px" height="16px" />
-        </Button>
+        {commentValue && (
+          <Button
+            className="flex h-8 gap-2 rounded-full border-none bg-primary-500 fill-light-900 px-3 text-[13px] text-light-900"
+            onClick={handleSubmit}
+          >
+            Add
+            <SendIcon width="16px" height="16px" />
+          </Button>
+        )}
       </div>
     </div>
   );

@@ -15,3 +15,4 @@ export { default as PinIcon } from "./PinIcon";
 export { default as WarningIcon } from "./WarningIcon";
 export { default as ShareIcon } from "./ShareIcon";
 export { default as SendIcon } from "./SendIcon";
+export { default as SmilyIcon } from "./SmilyIcon";

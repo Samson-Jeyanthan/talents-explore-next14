@@ -158,3 +158,33 @@ export async function getPostCommentsAction(
     }
   } catch {}
 }
+
+export async function addPostCommentAction(
+  userId: string,
+  postId: string,
+  comment: string,
+  revalidatePathURL: string
+) {
+  const formData = {
+    userId,
+    postId,
+    comment,
+  };
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/comments`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      }
+    );
+    const res = await response.json();
+    if (res.status === "7400") {
+      revalidatePath(revalidatePathURL);
+    }
+    return res;
+  } catch {}
+}

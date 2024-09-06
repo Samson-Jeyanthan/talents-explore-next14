@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  addPostCommentAction,
   addPostToBestWorkAction,
   removeFromBestWorkAction,
 } from "@/actions/post.action";
@@ -29,6 +30,26 @@ export async function handleRemoveFromProfile(
   console.log(res);
   if (res.status === "7400") {
     toast.success("Removed from top posts", { duration: 4000 });
+  } else {
+    toast.error("Something went wrong", { duration: 4000 });
+  }
+}
+
+export async function handleCommentSubmit(
+  userId: string,
+  postId: string,
+  comment: string,
+  revalidatePathURL: string
+) {
+  const res = await addPostCommentAction(
+    userId,
+    postId,
+    comment,
+    revalidatePathURL
+  );
+  console.log(res);
+  if (res.status === "7400") {
+    toast.success("You commented on this post", { duration: 4000 });
   } else {
     toast.error("Something went wrong", { duration: 4000 });
   }

@@ -13,6 +13,8 @@ import {
 import Image from "next/image";
 import { getSession } from "@/lib/session";
 
+export const revalidate = 1800;
+
 export async function generateMetadata(
   { params }: TPostURLProps,
   parent: ResolvingMetadata

@@ -17,11 +17,11 @@ export function getLinkCopied(url: string) {
     });
 }
 
+// getting date format like 2024 Jan 01
 export function getFormattedDate(date: string | null): string {
   if (!date) {
     return "";
   }
-
   const dt = new Date(date);
 
   if (isNaN(dt.getTime())) {
@@ -29,12 +29,27 @@ export function getFormattedDate(date: string | null): string {
   }
 
   const year = dt.getUTCFullYear();
-  const month = (dt.getUTCMonth() + 1).toString().padStart(2, "0"); // Months are 0-based, hence adding 1
+  const monthNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+  const month = monthNames[dt.getUTCMonth()]; // Get the month name from the array
   const day = dt.getUTCDate().toString().padStart(2, "0");
 
-  return `${year}-${month}-${day}`;
+  return `${year} ${month} ${day}`;
 }
 
+// formatting decimal number 4.3333 -> 4.3
 export function getFormattedDecimal(num: number): string {
   return Math.floor(num) === 0 ? "N/A" : num.toFixed(1);
 }
