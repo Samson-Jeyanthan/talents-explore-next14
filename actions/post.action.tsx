@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import AllPostCard from "@/components/cards/AllPostCard";
-import { IPost } from "@/types/post.types";
+import { IComments, IPost } from "@/types/post.types";
+import { CommentCard } from "@/components/cards";
 
 export async function getUserAllPostsAction(
   userId: string | undefined,
@@ -106,6 +107,52 @@ export async function getUserCreditPostsAction(
       const data = {
         status: 400,
         message: "Could not fetch credit data",
+      };
+      return data;
+    }
+  } catch {}
+}
+
+export async function getPostByIdAction(
+  postId: string | undefined,
+  userId: string | undefined
+) {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/${postId}/${userId}`
+    );
+    const res = await response.json();
+    if (res.status === "7400") {
+      const data = res.response;
+      return data;
+    } else {
+      const data = {
+        status: 400,
+        message: "Could not find post data",
+      };
+      return data;
+    }
+  } catch {}
+}
+
+export async function getPostCommentsAction(
+  postId: string | undefined,
+  userId: string | undefined
+) {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/comments?userId=${userId}&postId=${postId}&pageNo=${1}&pageSize=${10}`
+    );
+    const res = await response.json();
+    if (res.status === "7400") {
+      const data = res.response;
+      return data.map((item: IComments, index: number) => (
+        <CommentCard key={item._id} commentCard={item} index={index} />
+      ));
+    } else {
+      const data = {
+        status: 400,
+        message: "Could not find post data",
       };
       return data;
     }

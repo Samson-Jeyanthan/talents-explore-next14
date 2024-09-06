@@ -47,3 +47,8 @@ export type TProfessionalDetailName =
   | "educationEdit"
   | "awardEdit"
   | "languageEdit";
+
+export type TErrorData = {
+  status: number;
+  message: string;
+};

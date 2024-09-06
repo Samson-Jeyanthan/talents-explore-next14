@@ -22,3 +22,10 @@ export { default as AwardsAndCertificates } from "./profile/AwardsAndCertificate
 export { default as EducationDetails } from "./profile/EducationDetails";
 export { default as LanguageDetails } from "./profile/LanguageDetails";
 export { default as ProfDetailsHeader } from "./profile/ProfDetailsHeader";
+// post more details widgets
+export { default as MediaCarosel } from "./postMoreDetails/MediaCarosel";
+export { default as PostInfoHeader } from "./postMoreDetails/PostInfoHeader";
+export { default as PostInfo } from "./postMoreDetails/PostInfo";
+export { default as RatingDetails } from "./postMoreDetails/RatingDetails";
+export { default as TagsAndOtherInfo } from "./postMoreDetails/TagsAndOtherInfo";
+export { default as Comments } from "./postMoreDetails/Comments";

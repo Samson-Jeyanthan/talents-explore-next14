@@ -140,7 +140,7 @@ body {
 
   /* posts related styles */
   .all-post-card-tags {
-    @apply py-2 px-4 rounded-lg bg-dark-300 text-light-500 text-xs;
+    @apply py-2 px-4 rounded-lg bg-dark-300 text-light-500 text-xs w-max;
   }
 }
 
@@ -175,4 +175,12 @@ body {
 
 .test-drawer.active {
   transform: scale(0.99) translate(0, 0); /* Final state, full size and original position */
+}
+
+.comment-textarea-growth {
+  /* field-sizing: content;
+  /* line-height: 1.25rem;
+  max-height: 5lh;
+  height: 1lh;
+  min-height: 1lh; */
 }

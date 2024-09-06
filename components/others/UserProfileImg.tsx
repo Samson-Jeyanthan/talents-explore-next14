@@ -1,11 +1,14 @@
+import { cn } from "@/lib/utils";
 import Image from "next/image";
 
 const UserProfileImg = ({
   src,
   userName,
+  className,
 }: {
-  src?: string;
+  src?: string | null;
   userName: string;
+  className?: string;
 }) => {
   return (
     <>
@@ -15,7 +18,10 @@ const UserProfileImg = ({
         alt={userName}
         width={512}
         height={512}
-        className="size-12 rounded-full bg-dark-400 object-cover object-top"
+        className={cn(
+          "text-sm text-muted-foreground size-10 bg-dark-400 object-cover",
+          className
+        )}
       />
     </>
   );
