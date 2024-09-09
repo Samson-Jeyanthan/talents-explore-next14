@@ -3,15 +3,16 @@ import { TPostProps, TPostURLProps } from "@/types/post.types";
 import { Metadata, ResolvingMetadata } from "next";
 import NotFound from "./not-found";
 import {
+  BlurredMedia,
   Comments,
-  MediaCarosel,
   PostInfo,
   PostInfoHeader,
   RatingDetails,
   TagsAndOtherInfo,
 } from "@/components/widgets";
-import Image from "next/image";
 import { getSession } from "@/lib/session";
+import EmblaCarousel from "@/components/widgets/mediaCarousal/EmblaCarousal";
+import { EmblaOptionsType } from "embla-carousel";
 
 export const revalidate = 1800;
 
@@ -47,30 +48,29 @@ async function Post({ params }: TPostURLProps) {
     return <NotFound />;
   }
 
+  let loop = false;
+  data?.media?.length / 2 > 1 ? (loop = true) : (loop = false);
+  const OPTIONS: EmblaOptionsType = { loop: false };
+
   return (
     <section className="flex w-full justify-center">
       <section className="relative flex w-full flex-col items-center gap-3 2xl:max-w-[1300px]">
-        {data._id}
-        <MediaCarosel postData={data} />
-        <Image
-          src={data.media[0]?.url ? data?.media[0]?.url : ""}
-          width={200}
-          height={200}
-          className="fixed top-0 size-[40rem] opacity-30"
-          alt="blur-media-img"
-        />
-        <div className="flex w-4/5 flex-col gap-6 rounded-[28px] border-2 border-solid border-dark-300 bg-dark-200/50 p-5 backdrop-blur-3xl">
-          <PostInfoHeader postData={data} />
-          <div className="flex items-start justify-between gap-8">
-            <div className="flex flex-col gap-6">
-              <PostInfo postData={data} />
-              <RatingDetails postData={data} />
-              <Comments
-                numberOfComments={data.numberOfComments}
-                params={params}
-              />
+        <EmblaCarousel slides={data?.media} options={OPTIONS} />
+        <div className="relative h-auto w-4/5 items-center justify-center">
+          <BlurredMedia postData={data} />
+          <div className="z-10 flex w-full flex-col gap-6 rounded-[28px] border-2 border-solid border-dark-300 bg-dark-200/50 p-5 backdrop-blur-[80px]">
+            <PostInfoHeader postData={data} />
+            <div className="flex items-start justify-between gap-8">
+              <div className="flex flex-col gap-6">
+                <PostInfo postData={data} />
+                <RatingDetails postData={data} />
+                <Comments
+                  numberOfComments={data?.numberOfComments}
+                  params={params}
+                />
+              </div>
+              <TagsAndOtherInfo postData={data} />
             </div>
-            <TagsAndOtherInfo postData={data} />
           </div>
         </div>
       </section>
