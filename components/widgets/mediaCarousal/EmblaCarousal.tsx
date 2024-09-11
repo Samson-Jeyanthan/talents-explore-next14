@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   EmblaCarouselType,
   EmblaEventType,
@@ -18,6 +18,9 @@ import {
 } from "./EmblaCarouselDotButton";
 import Image from "next/image";
 import { useUtils } from "@/context/UtilsProvider";
+import { FullScreenIcon } from "@/public/assets/svgs";
+import { Dialog } from "@/components/ui/dialog";
+import { FullScreenModal } from "@/components/modals";
 
 const TWEEN_FACTOR_BASE = 0.52;
 
@@ -30,6 +33,7 @@ type PropType = {
 };
 
 const EmblaCarousel: React.FC<PropType> = (props) => {
+  const [isFullScreen, setIsFullScreen] = useState(false);
   const { setmdSelectedMediaIndex } = useUtils();
   const { slides, options } = props;
   const [emblaRef, emblaApi] = useEmblaCarousel(options);
@@ -90,8 +94,9 @@ const EmblaCarousel: React.FC<PropType> = (props) => {
             });
           }
 
-          const tweenValue = 1 - Math.abs(diffToTarget * tweenFactor.current);
+          const tweenValue = 1 - Math.abs(diffToTarget * 0.7);
           const scale = numberWithinRange(tweenValue, 0, 1).toString();
+          // const scale = 0.5;
           const tweenNode = tweenNodes.current[slideIndex];
           tweenNode.style.transform = `scale(${scale})`;
         });
@@ -120,46 +125,114 @@ const EmblaCarousel: React.FC<PropType> = (props) => {
     setmdSelectedMediaIndex(selectedIndex);
   }, [selectedIndex, setmdSelectedMediaIndex]);
 
+  const handleFullScreen = () => {
+    setIsFullScreen(true);
+    const elem = document.documentElement as HTMLElement & {
+      webkitRequestFullscreen?: () => Promise<void>;
+      msRequestFullscreen?: () => Promise<void>;
+    };
+
+    if (elem.requestFullscreen) {
+      elem.requestFullscreen();
+    } else if (elem.webkitRequestFullscreen) {
+      /* Safari */
+      elem.webkitRequestFullscreen();
+    } else if (elem.msRequestFullscreen) {
+      /* IE11 */
+      elem.msRequestFullscreen();
+    }
+  };
+
+  const handleMinScreen = () => {
+    const doc = document as Document & {
+      webkitExitFullscreen?: () => Promise<void>;
+      msExitFullscreen?: () => Promise<void>;
+    };
+
+    if (doc.fullscreenElement) {
+      if (doc.exitFullscreen) {
+        doc.exitFullscreen();
+      } else if (doc.webkitExitFullscreen) {
+        /* Safari */
+        doc.webkitExitFullscreen();
+      } else if (doc.msExitFullscreen) {
+        /* IE11 */
+        doc.msExitFullscreen();
+      }
+    }
+    setIsFullScreen(false);
+  };
+
   return (
-    <div className="embla">
-      <div className="embla__viewport" ref={emblaRef}>
-        <div className="embla__container">
-          {slides.map((media, index) => (
-            <div className="embla__slide" key={index}>
-              <Image
-                src={media.url}
-                width={1024}
-                height={1024}
-                alt="media"
-                className="embla__slide__number h-[30rem] w-full rounded-2xl bg-dark-100 object-contain"
-              />
-            </div>
-          ))}
+    <>
+      <div className="embla flex w-[86%] flex-col items-center justify-center">
+        <div className="embla__viewport" ref={emblaRef}>
+          <div className="embla__container">
+            {slides.map((media, index) => (
+              <div
+                className={`${options?.loop ? "embla__slide" : "embla__slide__for__two"}`}
+                key={index}
+              >
+                <div className="relative h-auto w-max">
+                  <Image
+                    src={media.url}
+                    width={1024}
+                    height={1024}
+                    alt="media"
+                    className="embla__slide__number h-[30rem] w-auto rounded-2xl bg-none object-contain"
+                  />
+                  {selectedIndex === index && (
+                    <div
+                      className="absolute bottom-3 right-3 grid size-[34px] cursor-pointer place-items-center rounded-full bg-dark-200 fill-light-900 pt-[2px]"
+                      onClick={handleFullScreen}
+                    >
+                      <FullScreenIcon width={"17px"} height={"17px"} />
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
 
-      <div className="embla__controls">
-        <div className="embla__buttons">
-          <PrevButton onClick={onPrevButtonClick} disabled={prevBtnDisabled} />
-          <NextButton onClick={onNextButtonClick} disabled={nextBtnDisabled} />
-        </div>
-
-        <div className="text-light-900">{selectedIndex + 1}</div>
-
-        {/* <div className="embla__dots">
-          {scrollSnaps.map((_, index) => (
-            <DotButton
-              key={index}
-              onClick={() => onDotButtonClick(index)}
-              className={"embla__dot".concat(
-                index === selectedIndex ? " embla__dot--selected" : ""
-              )}
+        <div className="embla__controls">
+          <div className="text-sm text-light-500">
+            {selectedIndex + 1} / {slides.length}
+          </div>
+          <div className="embla__buttons">
+            <PrevButton
+              onClick={onPrevButtonClick}
+              disabled={prevBtnDisabled}
             />
-          ))}
-        </div> */}
+            <NextButton
+              onClick={onNextButtonClick}
+              disabled={nextBtnDisabled}
+            />
+          </div>
+        </div>
       </div>
-    </div>
+      <Dialog open={isFullScreen}>
+        <FullScreenModal
+          mediaType="image"
+          mediaUrl={slides[selectedIndex]?.url}
+          onClose={handleMinScreen}
+        />
+      </Dialog>
+    </>
   );
 };
 
 export default EmblaCarousel;
+
+// dot buttons design
+/* <div className="embla__dots">
+  {scrollSnaps.map((_, index) => (
+    <DotButton
+      key={index}
+      onClick={() => onDotButtonClick(index)}
+      className={"embla__dot".concat(
+        index === selectedIndex ? " embla__dot--selected" : ""
+      )}
+    />
+  ))}
+</div>; */

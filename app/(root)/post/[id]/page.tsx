@@ -50,16 +50,17 @@ async function Post({ params }: TPostURLProps) {
 
   let loop = false;
   data?.media?.length / 2 > 1 ? (loop = true) : (loop = false);
-  const OPTIONS: EmblaOptionsType = { loop: false };
+  const OPTIONS: EmblaOptionsType = { loop };
 
   return (
-    <section className="flex w-full justify-center">
-      <section className="relative flex w-full flex-col items-center gap-3 2xl:max-w-[1300px]">
+    <section className="mt-4 flex w-full justify-center">
+      <section className="relative flex w-full flex-col items-center gap-3 p-3 2xl:max-w-[1300px]">
         <EmblaCarousel slides={data?.media} options={OPTIONS} />
-        <div className="relative h-auto w-4/5 items-center justify-center">
+        <div className="relative mt-4 h-auto w-[90%] items-center justify-center lg:w-[85%]">
           <BlurredMedia postData={data} />
           <div className="z-10 flex w-full flex-col gap-6 rounded-[28px] border-2 border-solid border-dark-300 bg-dark-200/50 p-5 backdrop-blur-[80px]">
             <PostInfoHeader postData={data} />
+
             <div className="flex items-start justify-between gap-8">
               <div className="flex flex-col gap-6">
                 <PostInfo postData={data} />
