@@ -8,9 +8,11 @@ const layout = async ({ children }: { children: React.ReactNode }) => {
   return (
     <main className="flex min-h-screen w-full bg-dark-200">
       {session ? <LeftSidebar /> : null}
-      <section className="relative flex w-full flex-col bg-dark-200">
+      <section className="relative flex w-full flex-col items-center bg-dark-200">
         {session ? <Navbar /> : null}
-        {children}
+        <div className="flex w-full max-w-[1300px] items-center justify-start">
+          {children}
+        </div>
       </section>
     </main>
   );

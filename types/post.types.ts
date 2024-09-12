@@ -165,3 +165,55 @@ export interface IComments {
     shortBio: string | null;
   };
 }
+
+export interface ISavedFolder {
+  status: 200 | 400;
+  _id: string;
+  collectionName: string;
+}
+
+export interface ISavedItem {
+  status: 200 | 400;
+  _id: string;
+  isBestWork: boolean;
+  media: [
+    {
+      _id: string;
+      type: "POST" | "SHARELINK";
+      userId: string;
+      postId: string;
+      mediaType: string;
+      url: string | null;
+      urlKey: string | null;
+      thumbnailUrl: string | null;
+      thumbnailUrlkey: string | null;
+      views: number;
+      status: 1;
+      createdAt: string;
+      updatedAt: string;
+    },
+  ];
+  author: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    profileImage: string | null;
+    userName: string;
+  };
+  about: {
+    title: string;
+    level: string;
+    mainCategoryId: string;
+    mainCategory: string;
+    subCategoryId: string;
+    subCategory: null;
+    skillId: string;
+    skill: string;
+    ownRating: number;
+  };
+  timeAgo: string;
+  publishedAt: string;
+  numberOfRating: number;
+  postRating: number;
+  shareLinkThumbnail: string | null;
+}

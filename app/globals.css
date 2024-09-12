@@ -105,6 +105,7 @@ body {
   }
 
   /* connection blocks */
+
   .connection-counting {
     @apply flex-center gap-[6px] text-light-900 bg-none px-3 py-1 cursor-pointer rounded-full hover:bg-dark-300 text-base font-medium;
   }
@@ -130,6 +131,7 @@ body {
   }
 
   /* professional Info styles */
+
   .professional-info-card-wrap {
     @apply flex w-96 flex-col items-end gap-2;
   }
@@ -139,8 +141,31 @@ body {
   }
 
   /* posts related styles */
+
   .all-post-card-tags {
     @apply py-2 px-4 rounded-lg bg-dark-300 text-light-500 text-xs w-max;
+  }
+
+  /* Saved collection styles */
+
+  .scf-general-image {
+    @apply max-h-[6.5rem] min-h-[6.5rem] min-w-[5.5rem] max-w-[5.5rem] rounded-2xl bg-dark-100 object-cover;
+  }
+
+  .scf-image-scale {
+    @apply absolute left-0 top-0 min-h-[7rem] max-h-[7rem] min-w-[6.2rem] max-w-[6.2rem] rounded-2xl bg-dark-100 object-cover;
+  }
+
+  .scf-back-image {
+    @apply absolute left-0 top-0 scf-general-image;
+  }
+
+  .scf-front-image {
+    @apply z-10 ml-3 mt-3 shadow-xl scf-general-image;
+  }
+
+  .scf-bg-blur-image {
+    @apply absolute top-0 left-0 h-[136px] w-full rounded-3xl bg-dark-100 object-cover;
   }
 }
 
