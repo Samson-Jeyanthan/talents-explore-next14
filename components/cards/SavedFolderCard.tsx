@@ -1,6 +1,6 @@
 import { ISavedFolder, ISavedItem } from "@/types/post.types";
 import { MotionDiv } from "../others/MotionDiv";
-import { getSavedFolderByIdAction } from "@/actions/save.action";
+import { getSavedItemsByFolderIdAction } from "@/actions/save.action";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -18,11 +18,12 @@ const variants = {
 };
 
 async function SavedFolderCard({ folderCard, userId, index }: Props) {
-  const itemsOfFolder: ISavedItem[] = await getSavedFolderByIdAction(
+  const itemsOfFolder: ISavedItem[] = await getSavedItemsByFolderIdAction(
     folderCard._id,
     userId,
     1,
-    2
+    2,
+    false
   );
 
   const media = itemsOfFolder[0]?.media[0];
@@ -43,8 +44,13 @@ async function SavedFolderCard({ folderCard, userId, index }: Props) {
       className="flex-center relative z-10 h-[138px] w-full rounded-3xl border border-solid border-dark-300"
     >
       <Link
-        href={"/saved-collection/" + folderCard.collectionName + folderCard._id}
-        className="z-10 flex size-full items-center justify-start gap-4 rounded-3xl bg-dark-200/85 p-3 backdrop-blur-[80px]"
+        href={
+          "/saved-collection/" +
+          folderCard.collectionName +
+          "/" +
+          folderCard._id
+        }
+        className="z-10 flex size-full items-center justify-start gap-4 rounded-3xl bg-dark-200/85 p-3 px-2 backdrop-blur-[80px]"
       >
         <div className="relative flex h-[120px] w-[110px] items-start justify-start">
           {itemsOfFolder.map((folderItem, folderIndex) => {
@@ -100,7 +106,7 @@ async function SavedFolderCard({ folderCard, userId, index }: Props) {
         />
       ) : (
         <Image
-          src={"/assets/images/sample-profile-cover-photo.jpg"}
+          src={"/assets/images/save-folder-default-bg.png"}
           width={512}
           height={512}
           alt={folderCard.collectionName}
@@ -108,7 +114,10 @@ async function SavedFolderCard({ folderCard, userId, index }: Props) {
         />
       )}
       <div className="absolute right-2 top-0 z-20">
-        <SaveFolderOptions />
+        <SaveFolderOptions
+          folderId={folderCard._id}
+          folderName={folderCard.collectionName}
+        />
       </div>
     </MotionDiv>
   );

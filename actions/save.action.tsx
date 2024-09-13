@@ -1,7 +1,7 @@
 "use server";
 
-import SavedFolderCard from "@/components/cards/SavedFolderCard";
-import { ISavedFolder } from "@/types/post.types";
+import { SavedItemCard, SavedFolderCard } from "@/components/cards";
+import { ISavedFolder, ISavedItem } from "@/types/post.types";
 
 export async function getAllSavedFoldersAction(
   userId: string | undefined,
@@ -32,11 +32,12 @@ export async function getAllSavedFoldersAction(
   } catch {}
 }
 
-export async function getSavedFolderByIdAction(
+export async function getSavedItemsByFolderIdAction(
   collectionId: string | undefined,
   userId: string | undefined,
   pageNo: number,
-  pageSize: number
+  pageSize: number,
+  returnAsCard: boolean
 ) {
   try {
     const response = await fetch(
@@ -45,7 +46,13 @@ export async function getSavedFolderByIdAction(
     const res = await response.json();
     if (res.status === "7400") {
       const data = res.response;
-      return data;
+      if (returnAsCard) {
+        return data.map((item: ISavedItem, index: number) => (
+          <SavedItemCard key={index} itemCard={item} index={index} />
+        ));
+      } else {
+        return data;
+      }
     } else {
       const data = {
         status: 400,

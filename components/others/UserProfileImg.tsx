@@ -14,7 +14,7 @@ const UserProfileImg = ({
     <>
       <Image
         // eslint-disable-next-line no-unneeded-ternary
-        src={src ? src : "/assets/images/default_profile_pic_2.png"}
+        src={src || "/assets/images/default_profile_pic_2.png"}
         alt={userName}
         width={512}
         height={512}

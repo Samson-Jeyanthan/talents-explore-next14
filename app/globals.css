@@ -153,7 +153,7 @@ body {
   }
 
   .scf-image-scale {
-    @apply absolute left-0 top-0 min-h-[7rem] max-h-[7rem] min-w-[6.2rem] max-w-[6.2rem] rounded-2xl bg-dark-100 object-cover;
+    @apply absolute left-0 top-0 min-h-[7.5rem] max-h-[7.5rem] min-w-[6.2rem] max-w-[6.2rem] rounded-2xl bg-dark-100 object-cover;
   }
 
   .scf-back-image {
