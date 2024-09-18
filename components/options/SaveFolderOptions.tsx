@@ -19,9 +19,14 @@ type Props = {
 
 const SaveFolderOptions = ({ folderId, folderName }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isFor, setIsFor] = useState("");
 
   const handleFolderOptionClick = (num: number) => {
     if (num === 0) {
+      setIsFor("EDIT");
+      setIsOpen(true);
+    } else if (num === 1) {
+      setIsFor("DELETE");
       setIsOpen(true);
     }
   };
@@ -48,13 +53,25 @@ const SaveFolderOptions = ({ folderId, folderName }: Props) => {
         </MenubarMenu>
       </Menubar>
 
-      <CRUDSaveFolderModal
-        isFor="EDIT"
-        isOpen={isOpen}
-        folderId={folderId}
-        folderName={folderName}
-        onClick={() => setIsOpen(false)}
-      />
+      {isFor === "EDIT" && (
+        <CRUDSaveFolderModal
+          isFor="EDIT"
+          isOpen={isOpen}
+          folderId={folderId}
+          folderName={folderName}
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      {isFor === "DELETE" && (
+        <CRUDSaveFolderModal
+          isFor="DELETE"
+          isOpen={isOpen}
+          folderId={folderId}
+          folderName={folderName}
+          onClick={() => setIsOpen(false)}
+        />
+      )}
     </>
   );
 };

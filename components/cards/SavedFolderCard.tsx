@@ -41,7 +41,7 @@ async function SavedFolderCard({ folderCard, userId, index }: Props) {
         duration: 0.3,
       }}
       viewport={{ amount: 0 }}
-      className="flex-center relative z-10 h-[138px] w-full rounded-3xl border border-solid border-dark-300"
+      className="flex-center relative z-10 mb-5 h-[140px] w-full min-w-[250px] max-w-full rounded-3xl border border-solid border-dark-300 2xl:max-w-[300px]"
     >
       <Link
         href={
@@ -50,9 +50,12 @@ async function SavedFolderCard({ folderCard, userId, index }: Props) {
           "/" +
           folderCard._id
         }
-        className="z-10 flex size-full items-center justify-start gap-4 rounded-3xl bg-dark-200/85 p-3 px-2 backdrop-blur-[80px]"
+        className="z-10 flex h-[140px] w-full items-center justify-start gap-3 rounded-3xl bg-dark-200/85 p-3 backdrop-blur-[80px] 2xl:max-w-[300px]"
       >
-        <div className="relative flex h-[120px] w-[110px] items-start justify-start">
+        <div className="relative flex h-[140px] w-[100px] items-center justify-center py-3">
+          {itemsOfFolder.length === 0 ? (
+            <div className="scf-image-scale bg-dark-200" />
+          ) : null}
           {itemsOfFolder.map((folderItem, folderIndex) => {
             return (
               <React.Fragment key={folderIndex}>
@@ -91,7 +94,7 @@ async function SavedFolderCard({ folderCard, userId, index }: Props) {
           })}
         </div>
 
-        <h2 className="text-lg font-medium text-light-900 first-letter:capitalize">
+        <h2 className="max-w-[180px] text-sm font-medium text-light-900 first-letter:capitalize lg:text-base xl:text-lg">
           {folderCard.collectionName}
         </h2>
       </Link>

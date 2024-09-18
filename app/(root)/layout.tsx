@@ -10,7 +10,7 @@ const layout = async ({ children }: { children: React.ReactNode }) => {
       {session ? <LeftSidebar /> : null}
       <section className="relative flex w-full flex-col items-center bg-dark-200">
         {session ? <Navbar /> : null}
-        <div className="flex w-full max-w-screen-xl items-center justify-start px-8 pb-8 2xl:px-0">
+        <div className="flex w-full max-w-screen-xl items-start justify-center px-4 pb-8 3xl:p-0">
           {children}
         </div>
       </section>

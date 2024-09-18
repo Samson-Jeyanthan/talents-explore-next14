@@ -20,7 +20,12 @@ const SavedCollection = async () => {
       {data?.length === 0 ? (
         <p>No folders have been create {data?.length}</p>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 2xl:grid-cols-4">
+        <div
+          className="
+          saved-collection-container
+        
+        "
+        >
           {data}
         </div>
       )}
@@ -31,3 +36,5 @@ const SavedCollection = async () => {
 export default SavedCollection;
 
 // <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-[repeat(auto-fit,minmax(300px,1fr))]">
+
+// w-full columns-1 gap-x-3 sm:columns-2 md:columns-3 xl:columns-4

@@ -2,6 +2,7 @@
 
 import { SavedItemCard, SavedFolderCard } from "@/components/cards";
 import { ISavedFolder, ISavedItem } from "@/types/post.types";
+import { revalidatePath } from "next/cache";
 
 export async function getAllSavedFoldersAction(
   userId: string | undefined,
@@ -59,5 +60,25 @@ export async function getSavedItemsByFolderIdAction(
       };
       return data;
     }
+  } catch {}
+}
+
+export async function deleteSaveCollectionFolderAction(
+  collectionId: string,
+  revalidatePathURL: string
+) {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/collection/${collectionId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    const res = await response.json();
+    revalidatePath(revalidatePathURL);
+    return res;
   } catch {}
 }
