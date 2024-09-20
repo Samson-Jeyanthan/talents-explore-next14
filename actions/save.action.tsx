@@ -63,6 +63,54 @@ export async function getSavedItemsByFolderIdAction(
   } catch {}
 }
 
+export async function createSaveCollectionFolderAction(
+  userId: string,
+  collectionName: string,
+  revalidatePathURL: string
+) {
+  const formData = {
+    userId,
+    collectionName,
+  };
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/collection`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      }
+    );
+    const res = await response.json();
+    revalidatePath(revalidatePathURL);
+    return res;
+  } catch {}
+}
+
+export async function editSaveCollectionFolderAction(
+  collectionId: string,
+  collectionName: string,
+  revalidatePathURL: string
+) {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/collection/${collectionId}/${collectionName}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: collectionName }),
+      }
+    );
+    const res = await response.json();
+    revalidatePath(revalidatePathURL);
+    return res;
+  } catch {}
+}
+
 export async function deleteSaveCollectionFolderAction(
   collectionId: string,
   revalidatePathURL: string

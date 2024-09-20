@@ -1,4 +1,5 @@
 import { getAllSavedFoldersAction } from "@/actions/save.action";
+import { CreateSaveFolder } from "@/components/buttons";
 import { getSession } from "@/lib/session";
 import { Metadata } from "next";
 
@@ -14,8 +15,9 @@ const SavedCollection = async () => {
 
   return (
     <section className="mt-8 flex w-full flex-col gap-8">
-      <h1 className="text-3xl font-semibold text-light-900">
+      <h1 className="flex-between text-3xl font-semibold text-light-900">
         Saved Collection
+        <CreateSaveFolder />
       </h1>
       {data?.length === 0 ? (
         <p>No folders have been create {data?.length}</p>

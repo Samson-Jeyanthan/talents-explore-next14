@@ -5,7 +5,11 @@ import {
   addPostToBestWorkAction,
   removeFromBestWorkAction,
 } from "@/actions/post.action";
-import { deleteSaveCollectionFolderAction } from "@/actions/save.action";
+import {
+  createSaveCollectionFolderAction,
+  deleteSaveCollectionFolderAction,
+  editSaveCollectionFolderAction,
+} from "@/actions/save.action";
 import { toast } from "sonner";
 
 export async function handlePinnedToProfile(
@@ -55,6 +59,40 @@ export async function handleCommentSubmit(
   }
 }
 
+export async function handleCreateSaveCollection(
+  userId: string,
+  collectionName: string,
+  revalidatePathURL: string
+) {
+  const res = await createSaveCollectionFolderAction(
+    userId,
+    collectionName,
+    revalidatePathURL
+  );
+  if (res.status === "7400") {
+    toast.success("Folder created successfully", { duration: 4000 });
+  } else {
+    toast.error("Something went wrong", { duration: 4000 });
+  }
+}
+
+export async function handleEditSaveCollection(
+  collectionId: string,
+  collectionName: string,
+  revalidatePathURL: string
+) {
+  const res = await editSaveCollectionFolderAction(
+    collectionId,
+    collectionName,
+    revalidatePathURL
+  );
+  if (res.status === "7400") {
+    toast.success("Folder renamed successfully", { duration: 4000 });
+  } else {
+    toast.error("Something went wrong", { duration: 4000 });
+  }
+}
+
 export async function handleDeleteSaveCollection(collectionId: string) {
   const res = await deleteSaveCollectionFolderAction(
     collectionId,
@@ -62,7 +100,7 @@ export async function handleDeleteSaveCollection(collectionId: string) {
   );
   console.log(res);
   if (res.status === "7400") {
-    toast.success("Folder deleted", { duration: 4000 });
+    toast.success("Folder deleted successfully", { duration: 4000 });
   } else {
     toast.error("Something went wrong", { duration: 4000 });
   }
