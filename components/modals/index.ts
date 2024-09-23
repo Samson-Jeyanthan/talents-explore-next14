@@ -5,3 +5,8 @@ export { default as CropImgModal } from "./CropImg";
 export { default as PhotoActionModal } from "./PhotoAction";
 export { default as ProfileOptionModal } from "./ProfileOption";
 export { default as ErrorAlert } from "./ErrorAlert";
+export { default as PhotoViewModal } from "./PhotoViewModal";
+export { default as ProfDetailsModal } from "./ProfDetailsModal";
+export { default as FullScreenModal } from "./FullScreenModal";
+export { default as CRUDSaveFolderModal } from "./CRUDSaveFolder";
+export { default as SaveCollectionModal } from "./SaveCollection";
