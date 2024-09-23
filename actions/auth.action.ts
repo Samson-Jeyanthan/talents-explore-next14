@@ -124,14 +124,8 @@ export const resetPasswordAction = async (formData: unknown) => {
 
 export const userPersonalInfoAction = async (userId: string | undefined) => {
   try {
-    // const response = await axiosInstance.get(`/user/${userId}`);
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/${userId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${userId}`,
-        },
-      }
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/${userId}`
     );
     return await response.json();
   } catch (error) {
