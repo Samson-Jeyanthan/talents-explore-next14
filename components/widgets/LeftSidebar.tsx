@@ -22,7 +22,7 @@ const LeftSidebar = () => {
 
   return (
     <Drawer>
-      <aside className="lg:flex-between sticky left-0 top-0 hidden max-h-screen min-h-screen min-w-60 max-w-60 flex-col bg-dark-100 py-8 2xl:min-w-64 2xl:max-w-64">
+      <aside className="sticky left-0 top-0 hidden max-h-screen min-h-screen min-w-60 max-w-60 flex-col items-center justify-between bg-dark-100 py-8 min-[1000px]:flex 2xl:min-w-64">
         <div className="flex-center w-full flex-col gap-5 2xl:gap-8">
           <Image
             src="/assets/images/te-logo-expanded-light.png"

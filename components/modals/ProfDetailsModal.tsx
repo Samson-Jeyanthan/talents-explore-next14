@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import {
   DialogClose,
@@ -9,7 +11,6 @@ import {
 import { MdClose } from "react-icons/md";
 import { TProfessionalDetailName } from "@/types/utils.types";
 import { useState } from "react";
-import { FormInput } from "../inputs";
 import { IEducation } from "@/types/profile.types";
 
 type Prop = {
@@ -29,18 +30,18 @@ const ProfDetailsModal = ({
 }: Prop) => {
   const [values, setValues] = useState({
     // education
-    courseName: (dataArray && dataArray[selectedIndex].course) || "",
-    institutionName: (dataArray && dataArray[selectedIndex].institution) || "",
-    educationFrom: (dataArray && dataArray[selectedIndex].from) || "",
-    educationTo: (dataArray && dataArray[selectedIndex].to) || "",
+    courseName: (dataArray && dataArray[selectedIndex]?.course) || "",
+    institutionName: (dataArray && dataArray[selectedIndex]?.institution) || "",
+    educationFrom: (dataArray && dataArray[selectedIndex]?.from) || "",
+    educationTo: (dataArray && dataArray[selectedIndex]?.to) || "",
     // award
-    awardName: (dataArray && dataArray[selectedIndex].name) || "",
-    awardGivenBy: (dataArray && dataArray[selectedIndex].givenBy) || "",
-    awardDate: (dataArray && dataArray[selectedIndex].year) || "",
+    awardName: (dataArray && dataArray[selectedIndex]?.name) || "",
+    awardGivenBy: (dataArray && dataArray[selectedIndex]?.givenBy) || "",
+    awardDate: (dataArray && dataArray[selectedIndex]?.year) || "",
     // language
-    languageId: (dataArray && dataArray[selectedIndex].languageId) || "",
-    languageName: (dataArray && dataArray[selectedIndex].languageName) || "",
-    languageLevel: (dataArray && dataArray[selectedIndex].level) || "",
+    languageId: (dataArray && dataArray[selectedIndex]?.languageId) || "",
+    languageName: (dataArray && dataArray[selectedIndex]?.languageName) || "",
+    languageLevel: (dataArray && dataArray[selectedIndex]?.level) || "",
   });
 
   const getTitle = () => {

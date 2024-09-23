@@ -13,3 +13,8 @@ export { default as MessageIcon } from "./MessageIcon";
 export { default as MultiPostIcon } from "./MultiPostIcon";
 export { default as PinIcon } from "./PinIcon";
 export { default as WarningIcon } from "./WarningIcon";
+export { default as ShareIcon } from "./ShareIcon";
+export { default as SendIcon } from "./SendIcon";
+export { default as SmilyIcon } from "./SmilyIcon";
+export { default as FullScreenIcon } from "./FullScreenIcon";
+export { default as MinScreenIcon } from "./MinScreenIcon";

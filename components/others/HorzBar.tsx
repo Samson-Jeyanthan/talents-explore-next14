@@ -10,7 +10,7 @@ interface HorzBarProps {
 
 const HorzBar = ({ ratingCounts }: HorzBarProps) => {
   return (
-    <div className="my-1 mb-2 flex w-4/5 flex-col items-start justify-center gap-2.5">
+    <div className="my-1 mb-2 flex w-[350px] flex-col items-start justify-center gap-2.5">
       {ratingCounts.map((item: any, index: number) => (
         <div
           key={index}
