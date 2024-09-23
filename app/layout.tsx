@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { ThemeProvider } from "@/context/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
 import AuthProvider from "@/context/AuthProvider";
+import { UtilsProvider } from "@/context/UtilsProvider";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -27,7 +28,9 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning={true}>
       <body className={`${poppins.variable}`}>
         <AuthProvider>
-          <ThemeProvider>{children}</ThemeProvider>
+          <UtilsProvider>
+            <ThemeProvider>{children}</ThemeProvider>
+          </UtilsProvider>
           <Toaster position="top-right" />
         </AuthProvider>
       </body>
