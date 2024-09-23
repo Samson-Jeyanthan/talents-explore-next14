@@ -35,3 +35,20 @@ export type TFetchDataArray = {
   _id: string;
   [key: string]: any;
 };
+
+export type TProfileURLProps = {
+  params: { userId: string; username: string };
+};
+
+export type TProfessionalDetailName =
+  | "education"
+  | "award"
+  | "language"
+  | "educationEdit"
+  | "awardEdit"
+  | "languageEdit";
+
+export type TErrorData = {
+  status: number;
+  message: string;
+};
