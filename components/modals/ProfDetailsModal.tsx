@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import {
   DialogClose,
@@ -9,7 +11,6 @@ import {
 import { MdClose } from "react-icons/md";
 import { TProfessionalDetailName } from "@/types/utils.types";
 import { useState } from "react";
-import { FormInput } from "../inputs";
 import { IEducation } from "@/types/profile.types";
 
 type Prop = {

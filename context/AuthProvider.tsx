@@ -38,39 +38,47 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const checkAuthUser = async () => {
     setIsLoading(true);
     const token = await verifySession();
+
+    if (!token) {
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      if (token) {
-        const decodedJWTToken = jwtDecode(token);
-        const res = await userPersonalInfoAction(decodedJWTToken?.sub);
-        console.log(res, "res");
-        if (res.status === "7400") {
-          if (res?.response?.personalInfo?.firstName) {
-            setUser({
-              currentUserId: res?.response?._id,
-              firstName: res?.response?.personalInfo?.firstName,
-              lastName: res?.response?.personalInfo?.lastName,
-              username: res?.response?.userName,
-              email: res?.response?.email,
-              imageUrl: res?.response?.personalInfo?.profileImage,
-              isTalent: res?.response?.isTalent,
-            });
-            setIsAuthenticated(true);
-            setIsLoading(false);
-          } else {
-            router.push(`/complete-profile/${decodedJWTToken?.sub}`);
-            toast.info("Please complete your profile", {
-              duration: 5000,
-            });
-            setIsLoading(false);
-          }
+      const decodedJWTToken = jwtDecode(token);
+      const res = await userPersonalInfoAction(decodedJWTToken?.sub);
+
+      if (res.status === "7400") {
+        if (res?.response?.personalInfo?.firstName) {
+          setUser({
+            currentUserId: res?.response?._id,
+            firstName: res?.response?.personalInfo?.firstName,
+            lastName: res?.response?.personalInfo?.lastName,
+            username: res?.response?.userName,
+            email: res?.response?.email,
+            imageUrl: res?.response?.personalInfo?.profileImage,
+            isTalent: res?.response?.isTalent,
+          });
+          setIsAuthenticated(true);
         } else {
-          toast.error("Couldn't fetch user details", {
+          router.push(`/complete-profile/${decodedJWTToken?.sub}`);
+          toast.info("Please complete your profile", {
             duration: 5000,
           });
-          setIsLoading(false);
         }
+      } else {
+        toast.error("Couldn't fetch user details", {
+          duration: 5000,
+        });
       }
-    } catch {}
+    } catch (error) {
+      console.error("Error checking auth user:", error);
+      toast.error("Error checking auth user", {
+        duration: 5000,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {

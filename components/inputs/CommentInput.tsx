@@ -47,14 +47,18 @@ const CommentInput = ({ postId, authorId, commentType }: Props) => {
   };
 
   return (
-    <div className="flex h-auto w-full items-start gap-3 border-b border-solid border-dark-300 pb-4">
+    <div
+      className={`${commentType === "MODAL" ? "border-t px-4 pb-1 pt-3" : "border-b pb-4"} flex h-auto w-full items-start gap-3 border-solid border-dark-300`}
+    >
       <UserProfileImg
         userName={user.username}
         src={user.imageUrl}
         className="max-h-[34px] min-w-[34px] rounded-xl"
       />
       <EmojisOptions onClick={handleEmojiClick} />
-      <div className="flex w-full flex-col items-end gap-3">
+      <div
+        className={`${commentType === "MODAL" ? "" : "flex-col"} flex w-full items-end gap-3`}
+      >
         <Textarea
           ref={textAreaRef}
           placeholder="Add a comment"

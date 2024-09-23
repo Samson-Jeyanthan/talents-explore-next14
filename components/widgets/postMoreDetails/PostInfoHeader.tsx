@@ -1,11 +1,13 @@
 import { PostUtilsButton } from "@/components/buttons";
 import { StarRating } from "@/components/inputs";
+import { SaveCollectionModal } from "@/components/modals";
 import { PostOptions } from "@/components/options";
 import UserProfileImg from "@/components/others/UserProfileImg";
 import { getFormattedDate, getFormattedDecimal } from "@/lib/utils";
 import { StarIcon } from "@/public/assets/svgs";
 import { TPostProps } from "@/types/post.types";
 import Link from "next/link";
+import React from "react";
 import { FaLocationDot } from "react-icons/fa6";
 import { IoCalendar } from "react-icons/io5";
 
@@ -22,7 +24,7 @@ const PostInfoHeader = ({ postData }: Props) => {
           {postData.about.title}
         </h1>
         <div className="flex gap-3">
-          <PostUtilsButton buttonFor="SAVE" className="px-3 py-2" />
+          <SaveCollectionModal postId={postData._id} />
           <PostUtilsButton buttonFor="SHARE" className="p-3" />
           <PostOptions
             authorId={postData.author._id}

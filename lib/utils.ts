@@ -53,3 +53,7 @@ export function getFormattedDate(date: string | null): string {
 export function getFormattedDecimal(num: number): string {
   return Math.floor(num) === 0 ? "N/A" : num.toFixed(1);
 }
+
+export function decodeString(encodedStr: string): string {
+  return decodeURIComponent(encodedStr);
+}

@@ -185,3 +185,24 @@ export const PROFILE_OPTIONS: IProfileOptions[] = [
     isRed: true,
   },
 ];
+
+interface ISavedFolderOptions {
+  name: string;
+  icon: IconType | React.ComponentType<TConvertedSvgJsxProps>;
+  height: string | undefined;
+  isRed?: boolean;
+}
+
+export const SAVED_FOLDER_OPTIONS: ISavedFolderOptions[] = [
+  {
+    name: "Rename",
+    icon: MdModeEdit,
+    height: undefined,
+  },
+  {
+    name: "Delete Folder",
+    icon: MdDelete,
+    height: undefined,
+    isRed: true,
+  },
+];

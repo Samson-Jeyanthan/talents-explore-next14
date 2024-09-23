@@ -29,3 +29,5 @@ export { default as PostInfo } from "./postMoreDetails/PostInfo";
 export { default as RatingDetails } from "./postMoreDetails/RatingDetails";
 export { default as TagsAndOtherInfo } from "./postMoreDetails/TagsAndOtherInfo";
 export { default as Comments } from "./postMoreDetails/Comments";
+// media widgets
+export { default as VideoAsImage } from "./mediaCarousal/VideoAsImage";
