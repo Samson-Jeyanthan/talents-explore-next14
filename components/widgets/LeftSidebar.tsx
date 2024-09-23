@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { SIDEBAR_ITEMS } from "@/constants";
 import Image from "next/image";
 import Link from "next/link";
@@ -19,6 +19,12 @@ import { handleLogout } from "@/lib/functions/auth.functions";
 
 const LeftSidebar = () => {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogoutClick = async () => {
+    await handleLogout();
+    router.push("/sign-in");
+  };
 
   return (
     <Drawer>
@@ -61,7 +67,7 @@ const LeftSidebar = () => {
         </div>
         <div
           className="leftsidebar-link flex-center w-[90%] border border-solid border-dark-250"
-          onClick={handleLogout}
+          onClick={handleLogoutClick}
         >
           <AiOutlineLogout className="text-lg" />
           Logout
