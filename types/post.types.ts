@@ -167,9 +167,9 @@ export interface IComments {
 }
 
 export interface ISavedFolder {
-  status: 200 | 400;
   _id: string;
   collectionName: string;
+  status: boolean;
 }
 
 export interface ISavedItem {

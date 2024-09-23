@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 const SavedCollection = async () => {
   const session = await getSession();
-  const data = await getAllSavedFoldersAction(session, 0);
+  const data = await getAllSavedFoldersAction(session, 0, true);
   if (data.status === 400) return null;
 
   return (
