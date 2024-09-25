@@ -105,7 +105,7 @@ body {
 
   /* navigation link */
   .leftsidebar-link {
-    @apply flex-start cursor-pointer gap-4 rounded-full fill-light-600 p-3 px-4 text-sm text-light-600 hover:bg-dark-250 hover:fill-light-900 hover:text-light-900;
+    @apply flex-start cursor-pointer gap-4 rounded-full fill-light-600 p-3 px-4 text-sm text-light-600 max-lg:rounded-lg hover:bg-dark-250 hover:fill-light-900 hover:text-light-900;
   }
 
   /* connection blocks */
