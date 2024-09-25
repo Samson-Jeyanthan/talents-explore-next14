@@ -86,7 +86,7 @@ const OTP = ({ userId, isSignup, setIsOpen, setVerifiedUserId }: TOTPProps) => {
           };
           const res = await handleVerifyEmailOtp(formData);
           if (res) {
-            router.push(`/complete-profile/${res}`);
+            router.push("/complete-profile/");
           } else {
             setError("Invalid OTP");
             setIsTimerRunning(false);
