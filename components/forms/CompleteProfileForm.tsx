@@ -103,10 +103,7 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
     };
     console.log(formData, "formData");
 
-    const res = await completeProfileAction(
-      "66a86e4be83cd9d78b914b50",
-      formData
-    );
+    const res = await completeProfileAction(user.currentUserId, formData);
 
     if (res.status === "7400") {
       toast.success("Profile Updated Successfully", { duration: 5000 });
