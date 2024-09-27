@@ -4,8 +4,7 @@ import { fetchUserDataAction } from "@/actions/user.action";
 import {
   AwardsAndCertificates,
   BioDetails,
-  EducationDetails,
-  LanguageDetails,
+  LanguageEducationDetails,
   MyPhotos,
   TopPosts,
 } from "@/components/widgets";
@@ -16,16 +15,17 @@ async function Overview({ params }: TProfileURLProps) {
   if (!userData) return null;
 
   return (
-    <section className="my-5 flex w-full flex-col gap-3 text-light-900">
-      <TopPosts params={params} />
-      <div className="flex flex-col gap-3 bg-dark-250 p-2">
+    <section className="flex w-full gap-3 text-light-900">
+      <div className="flex w-[22rem] min-w-[22rem] flex-col gap-6 rounded-3xl border-2 border-dark-300 bg-dark-250 p-4">
         <BioDetails userData={userData} />
         <MyPhotos myPhotos={userData?.morePersonalInfo?.featuredPhotos} />
       </div>
-
-      <div className="flex gap-3 rounded-3xl border-2 border-dark-300 bg-dark-300/20 p-3">
-        <EducationDetails params={params} />
-        <LanguageDetails params={params} />
+      <div className="flex w-full flex-col gap-6 rounded-3xl border-2 border-dark-300 bg-dark-250 p-4">
+        <TopPosts params={params} />
+        <p className="text-justify text-sm text-light-800">
+          {userData?.morePersonalInfo?.bio}
+        </p>
+        <LanguageEducationDetails params={params} />
         <AwardsAndCertificates params={params} />
       </div>
     </section>

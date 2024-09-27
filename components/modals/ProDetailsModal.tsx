@@ -21,7 +21,7 @@ type Prop = {
   selectedIndex: number;
 };
 
-const ProfDetailsModal = ({
+const ProDetailsModal = ({
   isEdit,
   detailModalFor,
   onClick,
@@ -85,4 +85,4 @@ const ProfDetailsModal = ({
   );
 };
 
-export default ProfDetailsModal;
+export default ProDetailsModal;

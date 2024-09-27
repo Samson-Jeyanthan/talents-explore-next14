@@ -44,7 +44,7 @@ const ProfileTabs = ({
   return (
     <div
       className={cn(
-        "flex flex-row items-center gap-4 justify-center [perspective:1000px] relative overflow-auto sm:overflow-visible no-visible-scrollbar max-w-max w-full",
+        "flex flex-row items-center gap-2 sm:gap-4 justify-center [perspective:1000px] relative overflow-auto sm:overflow-visible no-visible-scrollbar w-full",
         containerClassName
       )}
     >
@@ -60,7 +60,10 @@ const ProfileTabs = ({
             }}
             // onMouseEnter={() => setHovering(true)}
             // onMouseLeave={() => setHovering(false)}
-            className={cn("relative px-4 py-2 rounded-full", tabClassName)}
+            className={cn(
+              "relative px-3 sm:px-4 py-2 rounded-full",
+              tabClassName
+            )}
             style={{
               transformStyle: "preserve-3d",
             }}
@@ -78,7 +81,7 @@ const ProfileTabs = ({
             )}
             <span
               className={cn(
-                `${isActive ? "text-light-900" : "text-light-600"} relative block text-sm`
+                `${isActive ? "text-light-900" : "text-light-600"} relative block text-sm w-max`
               )}
             >
               {tab.title}

@@ -1,3 +1,4 @@
+import { QuillIcon } from "@/public/assets/svgs";
 import { TCurrentUserData, TPublicUserData } from "@/types/profile.types";
 import { FiUser } from "react-icons/fi";
 
@@ -8,18 +9,40 @@ const BioDetails = ({
 }) => {
   return (
     <section className="flex flex-col gap-2">
-      <h1>Bio Details</h1>
-      <div>
-        <FiUser />
-        <div>
-          <p>{userData?.personalInfo?.firstName}</p>
-          <p>{userData?.personalInfo?.lastName}</p>
-        </div>
+      <div className="profile-detail-heading mb-3">
+        <QuillIcon width="18px" height="18px" />
+        Bio Details
       </div>
-      <p>{userData?.location}</p>
-      <p>{userData?.personalInfo?.language}</p>
-      <p>{userData?.morePersonalInfo?.ethnic}</p>
-      <p className="text-justify text-sm">{userData?.morePersonalInfo?.bio}</p>
+
+      <div className="bio-element-wrap">
+        <span className="bio-details-icon">
+          <FiUser className="text-2xl" />
+        </span>
+        <p>
+          {userData?.personalInfo?.firstName} {userData?.personalInfo?.lastName}
+        </p>
+      </div>
+
+      <div className="bio-element-wrap items-start">
+        <span className="bio-details-icon">
+          <FiUser className="text-2xl" />
+        </span>
+        <p className="pt-2">{userData?.location}</p>
+      </div>
+
+      <div className="bio-element-wrap">
+        <span className="bio-details-icon">
+          <FiUser className="text-2xl" />
+        </span>
+        <p>{userData?.personalInfo?.language}</p>
+      </div>
+
+      <div className="bio-element-wrap">
+        <span className="bio-details-icon">
+          <FiUser className="text-2xl" />
+        </span>
+        <p>{userData?.morePersonalInfo?.ethnic}</p>
+      </div>
     </section>
   );
 };

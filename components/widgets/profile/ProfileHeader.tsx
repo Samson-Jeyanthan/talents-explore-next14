@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { GoDotFill } from "react-icons/go";
 import { Button } from "../../ui/button";
 import { ProfileOptions } from "../../options";
 import { useState } from "react";
@@ -33,24 +32,22 @@ const ProfileHeader = ({
   };
 
   return (
-    <header className="-mt-1 flex w-full flex-col bg-gradient-to-b from-[rgb(17,19,27,0.45)] to-[rgba(17,19,27)] p-2 backdrop-blur-lg 2xl:-mt-10 2xl:p-0">
-      <section className="flex items-start justify-between p-3 py-2 2xl:p-3">
+    <header className="flex w-full flex-col bg-gradient-to-b from-[rgb(17,19,27,0.45)] to-[rgba(17,19,27)] p-2 backdrop-blur-lg 2xl:-mt-10 2xl:p-0">
+      <section className="flex items-start justify-between p-2 sm:p-3 2xl:p-3">
         <div className="flex-start gap-5">
           <Image
             src={`${userData?.personalInfo?.profileImage ? userData?.personalInfo?.profileImage : "/assets/images/default_profile_pic_2.png"}`}
             width={1024}
             height={1024}
             alt="profile photo"
-            className="size-24 cursor-pointer rounded-full bg-dark-400 object-cover"
+            className="size-16 cursor-pointer rounded-full bg-dark-400 object-cover xl:size-24"
             onClick={handleShowDP}
           />
-          <div className="flex flex-col gap-1">
-            <h1 className="text-5xl font-semibold capitalize text-light-900">
-              {userData?.personalInfo?.firstName}{" "}
-              {userData?.personalInfo?.lastName}
+          <div className="flex flex-col gap-2">
+            <h1 className="text-[22px] font-semibold lowercase text-light-900 sm:text-3xl 2xl:text-4xl">
+              @{userData?.userName}
             </h1>
             <p className="flex-start gap-1 text-sm text-light-900">
-              @{userData?.userName} <GoDotFill className="text-[8px]" />{" "}
               {userData?.personalInfo?.professional}
             </p>
           </div>
@@ -81,9 +78,9 @@ const ProfileHeader = ({
         {/* <div className="text-sm text-light-900">Rate this Profile</div> */}
       </section>
 
-      <section className="flex items-start justify-between p-0">
+      <section className="flex items-start justify-between">
         <div className="flex flex-col gap-2">
-          <div className="flex-start">
+          <div className="flex-center sm:flex-start">
             <h4
               className="connection-counting"
               onClick={() => handleConnectionModalOpen(0)}
@@ -110,7 +107,7 @@ const ProfileHeader = ({
           </div>
 
           {userData?.personalInfo?.shortBio && (
-            <p className="w-96 pl-3 text-xs text-light-600">
+            <p className="max-w-96 pl-3 text-xs text-light-600">
               {userData?.personalInfo?.shortBio}
             </p>
           )}

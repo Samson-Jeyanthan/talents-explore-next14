@@ -10,6 +10,7 @@ export { default as LeftSidebar } from "./LeftSidebar";
 export { default as Navbar } from "./Navbar";
 export { default as CurrentUserAvatar } from "./CurrentUserAvatar";
 export { default as Notification } from "./NotificationSheet";
+export { default as Footer } from "./Footer";
 // profile widgets
 export { default as ProfileCover } from "./profile/ProfileCover";
 export { default as NormalUserProfileHeader } from "./profile/NormalUserProfileHeader";
@@ -19,6 +20,7 @@ export { default as TopPosts } from "./profile/TopPosts";
 export { default as BioDetails } from "./profile/BioDetails";
 export { default as MyPhotos } from "./profile/MyPhotos";
 export { default as AwardsAndCertificates } from "./profile/AwardsAndCertificates";
+export { default as LanguageEducationDetails } from "./profile/LanguageEducationDetails";
 export { default as EducationDetails } from "./profile/EducationDetails";
 export { default as LanguageDetails } from "./profile/LanguageDetails";
 export { default as ProfDetailsHeader } from "./profile/ProfDetailsHeader";

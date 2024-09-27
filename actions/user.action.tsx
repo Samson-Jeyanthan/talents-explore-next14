@@ -105,7 +105,12 @@ export async function userAwardInfoAction(userId: string | undefined) {
     if (res.status === "7400") {
       const data = res.response;
       return data.map((item: IAwardsOrCertificate, index: number) => (
-        <AwardCard key={item._id} userAwardCard={item} index={index} />
+        <AwardCard
+          key={item._id}
+          userAwardCard={item}
+          index={index}
+          length={data.length}
+        />
       ));
     } else {
       const data = {
@@ -126,7 +131,12 @@ export async function userEducationInfoAction(userId: string | undefined) {
     if (res.status === "7400") {
       const data = res.response;
       return data.map((item: IEducation, index: number) => (
-        <EducationCard key={item._id} userEducationCard={item} index={index} />
+        <EducationCard
+          key={item._id}
+          userEducationCard={item}
+          index={index}
+          length={data.length}
+        />
       ));
     } else {
       const data = {
@@ -147,7 +157,12 @@ export async function userLanguageInfoAction(userId: string | undefined) {
     if (res.status === "7400") {
       const data = res.response;
       return data.map((item: ILanguage, index: number) => (
-        <LanguageCard key={item._id} userLangCard={item} index={index} />
+        <LanguageCard
+          key={item._id}
+          userLangCard={item}
+          index={index}
+          length={data.length}
+        />
       ));
     } else {
       const data = {

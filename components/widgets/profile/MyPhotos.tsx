@@ -1,5 +1,6 @@
 "use client";
 
+import { CameraIcon } from "@/public/assets/svgs";
 import Image from "next/image";
 
 interface MyPhotosProps {
@@ -8,7 +9,10 @@ interface MyPhotosProps {
 
 const MyPhotos = ({ myPhotos }: MyPhotosProps) => {
   return (
-    <section className="">
+    <section className="flex flex-col gap-2">
+      <div className="profile-detail-heading">
+        <CameraIcon width="21px" height="21px" /> My Photos
+      </div>
       <div className="flex items-center gap-2">
         {myPhotos?.map((photo, index) => (
           <Image

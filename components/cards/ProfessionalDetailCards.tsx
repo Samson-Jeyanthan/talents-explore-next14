@@ -4,21 +4,24 @@ import {
   IAwardsOrCertificate,
 } from "@/types/profile.types";
 import { MotionDiv } from "../others/MotionDiv";
-import ProfessionInfoBtn from "../buttons/ProfessionInfoBtn";
+import { ProfessionInfoEditBtn } from "../buttons";
 
 interface EProp {
   userEducationCard: IEducation;
   index: number;
+  length: number;
 }
 
 interface LProp {
   userLangCard: ILanguage;
   index: number;
+  length: number;
 }
 
 interface AProp {
   userAwardCard: IAwardsOrCertificate;
   index: number;
+  length: number;
 }
 
 const variants = {
@@ -26,7 +29,7 @@ const variants = {
   visible: { opacity: 1 },
 };
 
-export const EducationCard = ({ userEducationCard, index }: EProp) => {
+export const EducationCard = ({ userEducationCard, index, length }: EProp) => {
   return (
     <MotionDiv
       variants={variants}
@@ -38,7 +41,7 @@ export const EducationCard = ({ userEducationCard, index }: EProp) => {
         duration: 0.3,
       }}
       viewport={{ amount: 0 }}
-      className="professional-info-card"
+      className={`${index < length - 1 ? "border-b-2 border-dark-400" : ""} professional-info-card`}
     >
       <h1 className="max-w-[85%] text-sm text-light-900">
         {userEducationCard.course}
@@ -51,12 +54,12 @@ export const EducationCard = ({ userEducationCard, index }: EProp) => {
         <p>-</p>
         <p>{userEducationCard.to}</p>
       </div>
-      <ProfessionInfoBtn />
+      <ProfessionInfoEditBtn />
     </MotionDiv>
   );
 };
 
-export const LanguageCard = ({ userLangCard, index }: LProp) => {
+export const LanguageCard = ({ userLangCard, index, length }: LProp) => {
   return (
     <MotionDiv
       variants={variants}
@@ -68,18 +71,18 @@ export const LanguageCard = ({ userLangCard, index }: LProp) => {
         duration: 0.3,
       }}
       viewport={{ amount: 0 }}
-      className="professional-info-card"
+      className={`${index < length - 1 ? "border-b-2 border-dark-400" : ""}  professional-info-card`}
     >
       <h1 className="max-w-[85%] text-sm text-light-900">
         {userLangCard.languageName}
       </h1>
       <p className="text-xs text-light-500">{userLangCard.level}</p>
-      <ProfessionInfoBtn />
+      <ProfessionInfoEditBtn />
     </MotionDiv>
   );
 };
 
-export const AwardCard = ({ userAwardCard, index }: AProp) => {
+export const AwardCard = ({ userAwardCard, index, length }: AProp) => {
   return (
     <MotionDiv
       variants={variants}
@@ -91,14 +94,15 @@ export const AwardCard = ({ userAwardCard, index }: AProp) => {
         duration: 0.3,
       }}
       viewport={{ amount: 0 }}
-      className="professional-info-card"
+      className={`${index < length - 1 ? "border-b-2 border-dark-400" : ""} 
+      professional-info-card`}
     >
       <h1 className="max-w-[85%] text-sm text-light-900">
         {userAwardCard.name}
       </h1>
       <p className="text-xs text-light-500">{userAwardCard.givenBy}</p>
       <p className="text-xs text-light-500">{userAwardCard.year}</p>
-      <ProfessionInfoBtn />
+      <ProfessionInfoEditBtn />
     </MotionDiv>
   );
 };
