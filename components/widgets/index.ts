@@ -21,8 +21,6 @@ export { default as BioDetails } from "./profile/BioDetails";
 export { default as MyPhotos } from "./profile/MyPhotos";
 export { default as AwardsAndCertificates } from "./profile/AwardsAndCertificates";
 export { default as LanguageEducationDetails } from "./profile/LanguageEducationDetails";
-export { default as EducationDetails } from "./profile/EducationDetails";
-export { default as LanguageDetails } from "./profile/LanguageDetails";
 export { default as ProfDetailsHeader } from "./profile/ProfDetailsHeader";
 // post more details widgets
 export { default as BlurredMedia } from "./postMoreDetails/BlurredMedia";

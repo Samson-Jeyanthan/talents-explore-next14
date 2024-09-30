@@ -16,7 +16,7 @@ const BioDetails = ({
 
       <div className="bio-element-wrap">
         <span className="bio-details-icon">
-          <FiUser className="text-2xl" />
+          <FiUser />
         </span>
         <p>
           {userData?.personalInfo?.firstName} {userData?.personalInfo?.lastName}
@@ -25,21 +25,21 @@ const BioDetails = ({
 
       <div className="bio-element-wrap items-start">
         <span className="bio-details-icon">
-          <FiUser className="text-2xl" />
+          <FiUser />
         </span>
         <p className="pt-2">{userData?.location}</p>
       </div>
 
       <div className="bio-element-wrap">
         <span className="bio-details-icon">
-          <FiUser className="text-2xl" />
+          <FiUser />
         </span>
         <p>{userData?.personalInfo?.language}</p>
       </div>
 
       <div className="bio-element-wrap">
         <span className="bio-details-icon">
-          <FiUser className="text-2xl" />
+          <FiUser />
         </span>
         <p>{userData?.morePersonalInfo?.ethnic}</p>
       </div>

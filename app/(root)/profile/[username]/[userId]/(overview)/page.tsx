@@ -16,13 +16,13 @@ async function Overview({ params }: TProfileURLProps) {
 
   return (
     <section className="flex w-full gap-3 text-light-900">
-      <div className="flex w-[22rem] min-w-[22rem] flex-col gap-6 rounded-3xl border-2 border-dark-300 bg-dark-250 p-4">
+      <div className="flex w-[21rem] min-w-[21rem] flex-col gap-10 rounded-3xl border-2 border-dark-300 bg-dark-250 p-4">
         <BioDetails userData={userData} />
         <MyPhotos myPhotos={userData?.morePersonalInfo?.featuredPhotos} />
       </div>
-      <div className="flex w-full flex-col gap-6 rounded-3xl border-2 border-dark-300 bg-dark-250 p-4">
+      <div className="flex w-full flex-col gap-10 rounded-3xl border-2 border-dark-300 bg-dark-250 p-4">
         <TopPosts params={params} />
-        <p className="text-justify text-sm text-light-800">
+        <p className="w-5/6 text-justify text-[13px] text-light-500">
           {userData?.morePersonalInfo?.bio}
         </p>
         <LanguageEducationDetails params={params} />
