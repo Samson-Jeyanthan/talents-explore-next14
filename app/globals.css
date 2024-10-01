@@ -108,8 +108,12 @@ body {
     @apply flex-start cursor-pointer gap-4 rounded-full fill-light-600 p-3 px-4 text-sm text-light-600 max-lg:rounded-lg hover:bg-dark-250 hover:fill-light-900 hover:text-light-900;
   }
 
-  /* connection blocks */
+  /* options, widgets and more */
+  .menubar-options-item {
+    @apply w-full cursor-pointer gap-3 rounded bg-dark-300 fill-light-600 text-base text-light-600 hover:bg-dark-400 hover:fill-light-900 hover:text-light-900;
+  }
 
+  /* connection blocks */
   .connection-counting {
     @apply flex-center gap-[6px] text-light-900 bg-none px-3 py-1 cursor-pointer rounded-full hover:bg-dark-300 text-base font-medium;
   }
@@ -134,24 +138,33 @@ body {
     @apply h-8 w-24 hover:bg-primary-500 hover:text-light-900 text-sm font-medium flex gap-2 !important;
   }
 
-  /* professional Info styles */
+  /*profile details styles */
+  .profile-detail-heading {
+    @apply flex w-full items-center gap-3 pb-2.5 text-[14px] text-light-850 fill-light-850 border-b-2 border-solid border-dark-400;
+  }
+
+  .bio-element-wrap {
+    @apply flex items-center gap-3 text-[13px] text-light-850;
+  }
+
+  .bio-details-icon {
+    @apply flex-center size-9 min-w-9 rounded-xl border text-xl border-light-500/40 text-light-500/50;
+  }
 
   .professional-info-card-wrap {
     @apply flex w-96 flex-col items-end gap-2;
   }
 
   .professional-info-card {
-    @apply flex w-[90%] relative flex-col gap-2 border-b-2 border-dark-300 p-2 pb-4 mr-2;
+    @apply flex w-full relative flex-col gap-2 px-2 py-2.5;
   }
 
   /* posts related styles */
-
   .all-post-card-tags {
     @apply py-2 px-4 rounded-lg bg-dark-300 text-light-500 text-xs w-max;
   }
 
   /* Saved collection styles */
-
   .scf-general-image {
     @apply max-h-[6.5rem] min-h-[6.5rem] min-w-[5.5rem] max-w-[5.5rem] rounded-2xl bg-dark-100 object-cover;
   }

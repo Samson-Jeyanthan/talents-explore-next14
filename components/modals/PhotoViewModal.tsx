@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import {
   DialogClose,
   DialogContent,
@@ -17,7 +16,7 @@ const PhotoViewModal = ({
 }) => {
   return (
     <>
-      <DialogOverlay className={cn("bg-black/10 backdrop-blur-sm")} />
+      <DialogOverlay />
       <DialogContent
         className="flex rounded-xl border-none"
         aria-describedby={undefined}

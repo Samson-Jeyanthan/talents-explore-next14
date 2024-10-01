@@ -4,8 +4,7 @@ import { fetchUserDataAction } from "@/actions/user.action";
 import {
   AwardsAndCertificates,
   BioDetails,
-  EducationDetails,
-  LanguageDetails,
+  LanguageEducationDetails,
   MyPhotos,
   TopPosts,
 } from "@/components/widgets";
@@ -15,20 +14,26 @@ async function Overview({ params }: TProfileURLProps) {
     await fetchUserDataAction(params.userId, params.username);
   if (!userData) return null;
 
+  const isTalent = userData?.isTalent;
+
   return (
-    <section className="my-5 flex w-full flex-col gap-3 text-light-900">
-      {userData?.isTalent && <TopPosts params={params} />}
-      <div className="flex flex-col gap-3 bg-dark-250 p-2">
+    <section className="flex w-full gap-3 text-light-900">
+      <div
+        className={`${isTalent ? "border-2 border-dark-300 bg-dark-250 p-4" : "p-2"} flex w-[21rem] min-w-[21rem] flex-col gap-10 rounded-3xl`}
+      >
         <BioDetails userData={userData} />
-        {userData?.isTalent && (
+        {isTalent && (
           <MyPhotos myPhotos={userData?.morePersonalInfo?.featuredPhotos} />
         )}
       </div>
 
-      {userData?.isTalent && (
-        <div className="flex gap-3 rounded-3xl border-2 border-dark-300 bg-dark-300/20 p-3">
-          <EducationDetails params={params} />
-          <LanguageDetails params={params} />
+      {isTalent && (
+        <div className="flex w-full flex-col gap-10 rounded-3xl border-2 border-dark-300 bg-dark-250 p-4">
+          <TopPosts params={params} />
+          <p className="w-5/6 text-justify text-[13px] text-light-500">
+            {userData?.morePersonalInfo?.bio}
+          </p>
+          <LanguageEducationDetails params={params} />
           <AwardsAndCertificates params={params} />
         </div>
       )}

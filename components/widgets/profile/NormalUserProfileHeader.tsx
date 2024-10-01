@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { GoDotFill } from "react-icons/go";
 import { Button } from "../../ui/button";
 import { ProfileOptions } from "../../options";
 import { useState } from "react";
@@ -51,11 +50,9 @@ const NormalUserProfileHeader = ({
 
         <div className="flex flex-col gap-1">
           <h1 className="text-4xl font-semibold text-light-900">
-            {userData?.personalInfo?.firstName}{" "}
-            {userData?.personalInfo?.lastName}
+            @{userData?.userName}
           </h1>
           <p className="flex-start gap-1 text-sm text-light-900">
-            @{userData?.userName} <GoDotFill className="text-[8px]" />{" "}
             {userData?.personalInfo?.professional}
           </p>
           {userData?.personalInfo?.shortBio && (
