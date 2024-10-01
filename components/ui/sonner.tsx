@@ -18,6 +18,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
             "bg-light-900 dark:bg-dark-100 text-green-400 border-2 border-[#fafafa] dark:border-[#161616] font-poppins font-regular",
           error:
             "bg-light-900 dark:bg-dark-100 text-red-400 border-2 border-[#fafafa] dark:border-[#161616] font-poppins font-regular",
+          info: "bg-light-900 dark:bg-dark-100 text-amber-400 border-2 border-[#fafafa] dark:border-[#161616] font-poppins font-regular",
           description: "group-[.toast]:text-muted-foreground",
           actionButton:
             "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground",

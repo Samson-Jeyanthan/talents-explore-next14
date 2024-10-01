@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { SIDEBAR_ITEMS } from "@/constants";
 import Image from "next/image";
 import Link from "next/link";
@@ -15,21 +15,29 @@ import {
   DrawerTrigger,
 } from "../ui/drawer";
 import { Button } from "../ui/button";
+import { handleLogout } from "@/lib/functions/auth.functions";
 
 const LeftSidebar = () => {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogoutClick = async () => {
+    await handleLogout();
+    router.push("/sign-in");
+  };
+
   return (
     <Drawer>
-      <aside className="lg:flex-between sticky top-0 hidden h-screen min-w-64 flex-col bg-dark-100 py-8">
-        <div className="flex-center w-full flex-col gap-8">
+      <aside className="sticky left-0 top-0 max-h-screen min-h-screen flex-col items-center justify-between bg-dark-100 py-8 max-sm:hidden min-[1000px]:flex xl:min-w-60 xl:max-w-60 2xl:min-w-64">
+        <div className="flex-center w-full flex-col gap-5 2xl:gap-8">
           <Image
             src="/assets/images/te-logo-expanded-light.png"
             alt="TE-Logo"
             width={200}
             height={30}
-            className="h-auto w-[70%] object-contain"
+            className="h-auto w-[70%] object-contain max-lg:hidden"
           />
-          <ul className="flex w-full flex-col gap-4 p-3">
+          <ul className="flex w-full flex-col gap-3 p-3 2xl:gap-4">
             {SIDEBAR_ITEMS.map((item, index) => {
               const isActive = item.isLink
                 ? pathname === item.path || pathname.includes(item.path)
@@ -42,14 +50,14 @@ const LeftSidebar = () => {
                       className={`${isActive ? "bg-dark-250 fill-light-900 text-light-900" : ""} leftsidebar-link w-full `}
                     >
                       <item.icon width="20px" height="20px" />
-                      {item.name}
+                      <p className="max-lg:hidden">{item.name}</p>
                     </Link>
                   ) : (
                     <DrawerTrigger
                       className={`${isActive ? "bg-dark-250 fill-light-900 text-light-900" : ""} leftsidebar-link w-full `}
                     >
                       <item.icon width="20px" height="20px" />
-                      {item.name}
+                      <p className="max-lg:hidden">{item.name}</p>
                     </DrawerTrigger>
                   )}
                 </li>
@@ -57,9 +65,15 @@ const LeftSidebar = () => {
             })}
           </ul>
         </div>
-        <div className="leftsidebar-link flex-center w-[90%] border border-solid border-dark-250">
-          <AiOutlineLogout className="text-lg" />
-          Logout
+        
+        <div className="flex-center w-full p-2">
+          <Button
+            className="leftsidebar-link flex-center w-auto border border-solid border-dark-250 lg:w-[90%]"
+            onClick={handleLogoutClick}
+          >
+            <AiOutlineLogout className="text-lg" />
+            <p className="max-lg:hidden">Logout</p>
+          </Button>
         </div>
       </aside>
 

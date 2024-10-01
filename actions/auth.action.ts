@@ -51,6 +51,7 @@ export const completeProfileAction = async (
       `/user/personalInfo/${userId}`,
       formData
     );
+    await storeIsAbout(true);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -78,7 +79,8 @@ export const signinAction = async (formData: unknown) => {
         await storeIsAbout(false);
         await createSession(res.response.accessToken);
       }
-      return res;
+
+      return userDetailsRes; // returning user personal data
     } else {
       return false;
     }
@@ -124,14 +126,8 @@ export const resetPasswordAction = async (formData: unknown) => {
 
 export const userPersonalInfoAction = async (userId: string | undefined) => {
   try {
-    // const response = await axiosInstance.get(`/user/${userId}`);
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/${userId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${userId}`,
-        },
-      }
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/${userId}`
     );
     return await response.json();
   } catch (error) {
@@ -147,8 +143,20 @@ export const checkIsAboutAction = async (token: any) => {
   const userFirstName = userPersonalInfo?.firstName;
 
   if (userFirstName) {
+    await storeIsAbout(true);
     return true;
   } else {
+    await storeIsAbout(false);
     return false;
   }
+};
+
+export const logoutAction = async (userId: string) => {
+  const refreshToken = "";
+  try {
+    const response = await axiosInstance.post(
+      `/auth/logout?userId=${userId}&refreshToken=${refreshToken}&from_all={true}`
+    );
+    console.log(response, "logout res");
+  } catch {}
 };

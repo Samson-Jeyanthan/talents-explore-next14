@@ -23,8 +23,10 @@ import { toast } from "sonner";
 import TransparentLoader from "../ui/transparent-loader";
 import { getFileUpload } from "@/lib/utils/getFileUpload";
 import { useRouter } from "next/navigation";
+import { useUserContext } from "@/context/AuthProvider";
 
 const CompleteProfileForm = ({ langData, professionData }: any) => {
+  const { user, setUser } = useUserContext();
   const router = useRouter();
   const LangOptions = langData.response.map((item: any) => ({
     _id: item._id,
@@ -101,12 +103,18 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
     };
     console.log(formData, "formData");
 
-    const res = await completeProfileAction(
-      "66a86e4be83cd9d78b914b50",
-      formData
-    );
+    const res = await completeProfileAction(user.currentUserId, formData);
 
     if (res.status === "7400") {
+      setUser({
+        currentUserId: user.currentUserId,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        username: user.username,
+        email: user.email,
+        imageUrl: formData.profileImage,
+        isTalent: false,
+      });
       toast.success("Profile Updated Successfully", { duration: 5000 });
       router.push("/onboarding");
     } else {

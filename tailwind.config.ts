@@ -11,9 +11,14 @@ module.exports = {
     container: {
       center: true,
       padding: "2rem",
-      screens: {
-        "2xl": "1400px",
-      },
+    },
+    screens: {
+      sm: "640px",
+      md: "768px",
+      lg: "1024px",
+      xl: "1300px",
+      "2xl": "1400px",
+      "3xl": "1580px",
     },
     extend: {
       colors: {
@@ -40,6 +45,8 @@ module.exports = {
           150: "rgba(255, 187, 0, 0.1)", // yellow off
           200: "#eb2727", // red
           250: "rgba(235, 39, 39, 0.06)", // red off
+          300: "#16a34a", // green
+          350: "rgba(22, 163, 74, 0.1)", // green off
         },
       },
       animation: {
