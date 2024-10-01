@@ -54,18 +54,21 @@ async function layout({
   if (!userData) {
     return <NotFound />;
   }
+
+  const isTalent = userData?.isTalent;
+
   return (
     <main className="relative flex w-full flex-col items-center justify-center gap-6">
       <ProfileCover
         coverPhoto={userData?.personalInfo?.coverImage}
-        isTalent={userData?.isTalent}
+        isTalent={isTalent}
         avgRating={userData?.avgRating}
       />
 
       <section
-        className={`${userData?.isTalent ? "z-10 -mt-12" : ""} flex-center w-full flex-col`}
+        className={`${isTalent ? "z-10 -mt-12" : "-mt-4"} flex-center w-full flex-col`}
       >
-        {userData?.isTalent ? (
+        {isTalent ? (
           <ProfileHeader userData={userData} isOwnProfile={isOwnProfile} />
         ) : (
           <NormalUserProfileHeader
@@ -75,7 +78,7 @@ async function layout({
         )}
 
         <div className="flex-center w-full max-w-screen-xl flex-col gap-6 bg-dark-200 pt-8">
-          {userData?.isTalent ? (
+          {isTalent ? (
             <ProfileTabs
               tabs={[
                 {
