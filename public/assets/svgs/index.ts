@@ -18,3 +18,6 @@ export { default as SendIcon } from "./SendIcon";
 export { default as SmilyIcon } from "./SmilyIcon";
 export { default as FullScreenIcon } from "./FullScreenIcon";
 export { default as MinScreenIcon } from "./MinScreenIcon";
+export { default as QuillIcon } from "./QuillIcon";
+export { default as GraduationIcon } from "./GraduationIcon";
+export { default as AwardsIcon } from "./AwardsIcon";

@@ -4,6 +4,7 @@ import {
   ProfileHeader,
   NormalUserProfileHeader,
   ProfileTabs,
+  Footer,
 } from "@/components/widgets";
 import type { Metadata, ResolvingMetadata } from "next";
 import { fetchUserDataAction } from "@/actions/user.action";
@@ -54,57 +55,56 @@ async function layout({
     return <NotFound />;
   }
   return (
-    <main className="flex-center">
-      <section className="relative flex w-full max-w-screen-lg flex-col items-center justify-center 2xl:max-w-[1200px]">
-        <ProfileCover
-          coverPhoto={userData?.personalInfo?.coverImage}
-          isTalent={userData?.isTalent}
-          avgRating={userData?.avgRating}
-        />
+    <main className="relative flex w-full flex-col items-center justify-center gap-6">
+      <ProfileCover
+        coverPhoto={userData?.personalInfo?.coverImage}
+        isTalent={userData?.isTalent}
+        avgRating={userData?.avgRating}
+      />
 
-        <div
-          className={`${userData?.isTalent ? "z-10 mt-[30vh]" : ""} flex-center  w-full flex-col`}
-        >
+      <section
+        className={`${userData?.isTalent ? "z-10 -mt-12" : ""} flex-center w-full flex-col`}
+      >
+        {userData?.isTalent ? (
+          <ProfileHeader userData={userData} isOwnProfile={isOwnProfile} />
+        ) : (
+          <NormalUserProfileHeader
+            userData={userData}
+            isOwnProfile={isOwnProfile}
+          />
+        )}
+
+        <div className="flex-center w-full max-w-screen-xl flex-col gap-6 bg-dark-200 pt-8">
           {userData?.isTalent ? (
-            <ProfileHeader userData={userData} isOwnProfile={isOwnProfile} />
-          ) : (
-            <NormalUserProfileHeader
-              userData={userData}
-              isOwnProfile={isOwnProfile}
+            <ProfileTabs
+              tabs={[
+                {
+                  title: "Overview",
+                  value: "overview",
+                  href: `/profile/${params.username}/${params.userId}/`,
+                },
+                {
+                  title: "All Posts",
+                  value: "all-posts",
+                  href: `/profile/${params.username}/${params.userId}/all-posts`,
+                },
+                {
+                  title: "Credits",
+                  value: "credits",
+                  href: `/profile/${params.username}/${params.userId}/credits`,
+                },
+                {
+                  title: "Skills",
+                  value: "skills",
+                  href: `/profile/${params.username}/${params.userId}/skills`,
+                },
+              ]}
             />
-          )}
-
-          <div className="flex-center w-full max-w-screen-xl flex-col bg-dark-200 px-4 pt-8 2xl:px-0">
-            {userData?.isTalent ? (
-              <ProfileTabs
-                tabs={[
-                  {
-                    title: "Overview",
-                    value: "overview",
-                    href: `/profile/${params.username}/${params.userId}/`,
-                  },
-                  {
-                    title: "All Posts",
-                    value: "all-posts",
-                    href: `/profile/${params.username}/${params.userId}/all-posts`,
-                  },
-                  {
-                    title: "Credits",
-                    value: "credits",
-                    href: `/profile/${params.username}/${params.userId}/credits`,
-                  },
-                  {
-                    title: "Skills",
-                    value: "skills",
-                    href: `/profile/${params.username}/${params.userId}/skills`,
-                  },
-                ]}
-              />
-            ) : null}
-            {children}
-          </div>
+          ) : null}
+          {children}
         </div>
       </section>
+      <Footer />
     </main>
   );
 }

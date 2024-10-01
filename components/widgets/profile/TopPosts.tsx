@@ -5,7 +5,7 @@ const TopPosts = async ({ params }: TProfileURLProps) => {
   const data = await userTopPostInfoAction(params.userId);
   if (data?.status === 400) return null;
 
-  return <div>{data}</div>;
+  return <div className="flex gap-3">{data}</div>;
 };
 
 export default TopPosts;

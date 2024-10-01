@@ -28,14 +28,14 @@ const LeftSidebar = () => {
 
   return (
     <Drawer>
-      <aside className="sticky left-0 top-0 max-h-screen min-h-screen flex-col items-center justify-between bg-dark-100 py-8 max-sm:hidden min-[1000px]:flex xl:min-w-60 xl:max-w-60 2xl:min-w-64">
+      <aside className="sticky left-0 top-0 flex max-h-screen min-h-screen min-w-60 max-w-60 flex-col items-center justify-between bg-dark-100 py-8 max-lg:min-w-20 max-sm:hidden ">
         <div className="flex-center w-full flex-col gap-5 2xl:gap-8">
           <Image
             src="/assets/images/te-logo-expanded-light.png"
             alt="TE-Logo"
             width={200}
             height={30}
-            className="h-auto w-[70%] object-contain max-lg:hidden"
+            className="h-auto w-3/5 object-contain max-lg:hidden 2xl:w-[70%]"
           />
           <ul className="flex w-full flex-col gap-3 p-3 2xl:gap-4">
             {SIDEBAR_ITEMS.map((item, index) => {
@@ -49,14 +49,14 @@ const LeftSidebar = () => {
                       href={item.path}
                       className={`${isActive ? "bg-dark-250 fill-light-900 text-light-900" : ""} leftsidebar-link w-full `}
                     >
-                      <item.icon width="20px" height="20px" />
+                      <item.icon width="19px" height="19px" />
                       <p className="max-lg:hidden">{item.name}</p>
                     </Link>
                   ) : (
                     <DrawerTrigger
                       className={`${isActive ? "bg-dark-250 fill-light-900 text-light-900" : ""} leftsidebar-link w-full `}
                     >
-                      <item.icon width="20px" height="20px" />
+                      <item.icon width="19px" height="19px" />
                       <p className="max-lg:hidden">{item.name}</p>
                     </DrawerTrigger>
                   )}
@@ -65,7 +65,7 @@ const LeftSidebar = () => {
             })}
           </ul>
         </div>
-        
+
         <div className="flex-center w-full p-2">
           <Button
             className="leftsidebar-link flex-center w-auto border border-solid border-dark-250 lg:w-[90%]"
