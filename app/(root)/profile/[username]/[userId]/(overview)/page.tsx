@@ -22,14 +22,17 @@ async function Overview({ params }: TProfileURLProps) {
           <MyPhotos myPhotos={userData?.morePersonalInfo?.featuredPhotos} />
         )}
       </div>
-      <div className="flex w-full flex-col gap-10 rounded-3xl border-2 border-dark-300 bg-dark-250 p-4">
-        <TopPosts params={params} />
-        <p className="w-5/6 text-justify text-[13px] text-light-500">
-          {userData?.morePersonalInfo?.bio}
-        </p>
-        <LanguageEducationDetails params={params} />
-        <AwardsAndCertificates params={params} />
-      </div>
+
+      {userData?.isTalent && (
+        <div className="flex w-full flex-col gap-10 rounded-3xl border-2 border-dark-300 bg-dark-250 p-4">
+          <TopPosts params={params} />
+          <p className="w-5/6 text-justify text-[13px] text-light-500">
+            {userData?.morePersonalInfo?.bio}
+          </p>
+          <LanguageEducationDetails params={params} />
+          <AwardsAndCertificates params={params} />
+        </div>
+      )}
     </section>
   );
 }
