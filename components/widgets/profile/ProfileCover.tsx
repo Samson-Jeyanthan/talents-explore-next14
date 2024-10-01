@@ -36,7 +36,7 @@ const ProfileCover = async ({
         width={2048}
         height={1024}
         alt="cover photo"
-        className={`${isTalent ? "h-[40vh] 2xl:h-[35vh]" : "h-[30vh]"} w-full rounded-2xl bg-dark-400 object-cover`}
+        className={`${isTalent ? "h-[40vh] 2xl:h-[35vh]" : "h-[40vh]"} w-full rounded-2xl bg-dark-400 object-cover`}
       />
     </div>
   );
