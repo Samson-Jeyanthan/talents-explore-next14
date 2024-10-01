@@ -17,17 +17,21 @@ async function Overview({ params }: TProfileURLProps) {
 
   return (
     <section className="my-5 flex w-full flex-col gap-3 text-light-900">
-      <TopPosts params={params} />
+      {userData?.isTalent && <TopPosts params={params} />}
       <div className="flex flex-col gap-3 bg-dark-250 p-2">
         <BioDetails userData={userData} />
-        <MyPhotos myPhotos={userData?.morePersonalInfo?.featuredPhotos} />
+        {userData?.isTalent && (
+          <MyPhotos myPhotos={userData?.morePersonalInfo?.featuredPhotos} />
+        )}
       </div>
 
-      <div className="flex gap-3 rounded-3xl border-2 border-dark-300 bg-dark-300/20 p-3">
-        <EducationDetails params={params} />
-        <LanguageDetails params={params} />
-        <AwardsAndCertificates params={params} />
-      </div>
+      {userData?.isTalent && (
+        <div className="flex gap-3 rounded-3xl border-2 border-dark-300 bg-dark-300/20 p-3">
+          <EducationDetails params={params} />
+          <LanguageDetails params={params} />
+          <AwardsAndCertificates params={params} />
+        </div>
+      )}
     </section>
   );
 }
