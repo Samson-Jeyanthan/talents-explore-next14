@@ -106,7 +106,6 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
     const res = await completeProfileAction(user.currentUserId, formData);
 
     if (res.status === "7400") {
-      toast.success("Profile Updated Successfully", { duration: 5000 });
       setUser({
         currentUserId: user.currentUserId,
         firstName: formData.firstName,
@@ -116,6 +115,7 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
         imageUrl: formData.profileImage,
         isTalent: false,
       });
+      toast.success("Profile Updated Successfully", { duration: 5000 });
       router.push("/onboarding");
     } else {
       toast.error("Profile Update Failed", { duration: 4000 });

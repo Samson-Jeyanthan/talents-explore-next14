@@ -18,7 +18,9 @@ async function Overview({ params }: TProfileURLProps) {
     <section className="flex w-full gap-3 text-light-900">
       <div className="flex w-[21rem] min-w-[21rem] flex-col gap-10 rounded-3xl border-2 border-dark-300 bg-dark-250 p-4">
         <BioDetails userData={userData} />
-        <MyPhotos myPhotos={userData?.morePersonalInfo?.featuredPhotos} />
+        {userData?.isTalent && (
+          <MyPhotos myPhotos={userData?.morePersonalInfo?.featuredPhotos} />
+        )}
       </div>
       <div className="flex w-full flex-col gap-10 rounded-3xl border-2 border-dark-300 bg-dark-250 p-4">
         <TopPosts params={params} />
