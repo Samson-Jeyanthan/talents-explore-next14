@@ -14,7 +14,7 @@ import {
 } from "@/types/auth.types";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "sonner";
-import { deleteSession } from "../session";
+import { deleteSession, verifySession } from "../session";
 
 // signup otp function
 export async function handleVerifyEmailOtp(formData: TVerifyOTPProps) {
@@ -133,4 +133,11 @@ export async function handleClearStorage() {
 export async function handleLogout() {
   await deleteSession();
   localStorage.clear();
+}
+
+// check for token
+export async function checkForToken() {
+  const token = await verifySession();
+  const decodedJWTToken = jwtDecode(token);
+  return decodedJWTToken?.sub;
 }
