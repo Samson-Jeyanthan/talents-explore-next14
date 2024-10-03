@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { SIDEBAR_ITEMS } from "@/constants";
 import Image from "next/image";
@@ -12,7 +12,6 @@ import {
   DrawerDescription,
   DrawerHeader,
   DrawerTitle,
-  DrawerTrigger,
 } from "../ui/drawer";
 import { Button } from "../ui/button";
 import { handleLogout } from "@/lib/functions/auth.functions";
@@ -20,6 +19,7 @@ import { handleLogout } from "@/lib/functions/auth.functions";
 const LeftSidebar = () => {
   const pathname = usePathname();
   const router = useRouter();
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const handleLogoutClick = async () => {
     await handleLogout();
@@ -27,7 +27,7 @@ const LeftSidebar = () => {
   };
 
   return (
-    <Drawer>
+    <>
       <aside className="sticky left-0 top-0 flex max-h-screen min-h-screen min-w-60 max-w-60 flex-col items-center justify-between bg-dark-100 py-8 max-lg:min-w-20 max-sm:hidden ">
         <div className="flex-center w-full flex-col gap-5 2xl:gap-8">
           <Image
@@ -53,12 +53,13 @@ const LeftSidebar = () => {
                       <p className="max-lg:hidden">{item.name}</p>
                     </Link>
                   ) : (
-                    <DrawerTrigger
+                    <div
                       className={`${isActive ? "bg-dark-250 fill-light-900 text-light-900" : ""} leftsidebar-link w-full `}
+                      onClick={() => setDrawerOpen(true)}
                     >
                       <item.icon width="19px" height="19px" />
                       <p className="max-lg:hidden">{item.name}</p>
-                    </DrawerTrigger>
+                    </div>
                   )}
                 </li>
               );
@@ -77,17 +78,21 @@ const LeftSidebar = () => {
         </div>
       </aside>
 
-      <DrawerContent className="flex-start h-2/5 gap-6 border-none bg-dark-200">
-        <DrawerHeader>
-          <DrawerTitle>Are you absolutely sure?</DrawerTitle>
-          <DrawerDescription>This action cannot be undone.</DrawerDescription>
-        </DrawerHeader>
-        <div className="flex w-72 flex-col gap-6">
-          <Button className="shad-button_primary w-full">Create Post</Button>
-          <Button className="shad-button_primary w-full">Share Anything</Button>
-        </div>
-      </DrawerContent>
-    </Drawer>
+      <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+        <DrawerContent className="flex-start h-2/5 gap-6 border-none bg-dark-200">
+          <DrawerHeader>
+            <DrawerTitle>Are you absolutely sure?</DrawerTitle>
+            <DrawerDescription>This action cannot be undone.</DrawerDescription>
+          </DrawerHeader>
+          <div className="flex w-72 flex-col gap-6">
+            <Button className="shad-button_primary w-full">Create Post</Button>
+            <Button className="shad-button_primary w-full">
+              Share Anything
+            </Button>
+          </div>
+        </DrawerContent>
+      </Drawer>
+    </>
   );
 };
 

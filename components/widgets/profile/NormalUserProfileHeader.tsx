@@ -24,7 +24,7 @@ const NormalUserProfileHeader = ({
   };
 
   const handleConnectionModalOpen = () => {
-    setShowConnection(!showConnection);
+    if (userData?.following !== 0) setShowConnection(!showConnection);
   };
 
   return (

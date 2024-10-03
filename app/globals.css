@@ -26,7 +26,7 @@ body {
   }
 
   .no-focus {
-    @apply ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 !important;
+    @apply ring-0 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 !important;
   }
 
   .camera-button {
@@ -110,7 +110,11 @@ body {
 
   /* options, widgets and more */
   .menubar-options-item {
-    @apply w-full cursor-pointer gap-3 rounded bg-dark-300 fill-light-600 text-base text-light-600 hover:bg-dark-400 hover:fill-light-900 hover:text-light-900;
+    @apply w-full cursor-pointer gap-3 rounded bg-dark-300 fill-light-600 text-base text-light-600 hover:bg-dark-400 hover:fill-light-900 hover:text-light-900 !important;
+  }
+
+  .modal-content-container {
+    @apply flex flex-col w-full max-w-96 border-none gap-3 rounded-2xl bg-dark-250 pt-3 p-4 !important;
   }
 
   /* connection blocks */

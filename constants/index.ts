@@ -17,6 +17,12 @@ import { TbSunHigh } from "react-icons/tb";
 import { AiOutlineLink } from "react-icons/ai";
 import { MdDelete, MdModeEdit } from "react-icons/md";
 
+export const LEVEL_VALUES = [
+  { _id: "beginner", name: "Beginner" },
+  { _id: "intermediate", name: "Intermediate" },
+  { _id: "advanced", name: "Advanced" },
+];
+
 export const GENDER_VALUES = [
   {
     id: "male",

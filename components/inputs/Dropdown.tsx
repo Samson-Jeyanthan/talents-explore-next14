@@ -22,6 +22,7 @@ type TDropdownProps = {
   options: { _id: string; name: string }[];
   value: string | boolean | undefined;
   formDescription?: string;
+  isModal?: boolean;
 };
 
 const Dropdown = ({
@@ -32,6 +33,7 @@ const Dropdown = ({
   options,
   value,
   formDescription,
+  isModal,
 }: TDropdownProps) => {
   return (
     <FormField
@@ -50,7 +52,9 @@ const Dropdown = ({
                   </p>
                 )}
               </SelectTrigger>
-              <SelectContent className="shad-auth_form_select_option">
+              <SelectContent
+                className={`${isModal ? "z-[125]" : ""} shad-auth_form_select_option`}
+              >
                 {options.map((option, index) => (
                   <SelectItem
                     key={index}
