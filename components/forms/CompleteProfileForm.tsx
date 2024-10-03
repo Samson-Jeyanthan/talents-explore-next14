@@ -130,7 +130,7 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
           onSubmit={form.handleSubmit(onSubmit)}
           className="mt-4 flex w-full flex-col gap-5"
         >
-          <div className="relative flex w-full">
+          <div className="flex w-full flex-col gap-6">
             <FormField
               control={form.control}
               name="coverPhoto"
@@ -147,7 +147,7 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
             />
           </div>
 
-          <div className="mt-20 flex w-full max-w-screen-md flex-col gap-6">
+          <div className="mt-4 flex w-full max-w-screen-md flex-col gap-6">
             <div className="flex w-full gap-4">
               <FormInput
                 form={form}
@@ -163,6 +163,20 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
                 inputType="text"
                 placeholder="Doe"
               />
+            </div>
+
+            <div className="flex w-full flex-col gap-1">
+              <label className="shad-auth_form_label">Username</label>
+              <div className="shad-auth_form_input flex-start gap-4 rounded-md p-2 px-3 text-sm">
+                {user.username}
+              </div>
+            </div>
+
+            <div className="flex w-full flex-col gap-1">
+              <label className="shad-auth_form_label">Email</label>
+              <div className="shad-auth_form_input flex-start gap-4 rounded-md p-2 px-3 text-sm">
+                {user.email}
+              </div>
             </div>
 
             <CheckboxInput
@@ -183,7 +197,7 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
             <Dropdown
               form={form}
               value={form.getValues("knownLanguage")}
-              formLabel="Known Language"
+              formLabel="Native Language"
               inputName="knownLanguage"
               placeholder="Select your native language"
               formDescription="Let us know the language you speak so we can connect you with people who share your interests and culture."

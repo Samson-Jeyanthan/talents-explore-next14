@@ -56,13 +56,11 @@ export async function storeIsAbout(isOk: boolean) {
       expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
       httpOnly: true,
     });
-    return 200;
   } else {
     cookies().set("isAbout", "false", {
-      expires: new Date(Date.now() + 10 * 60 * 1000),
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
       httpOnly: true,
     });
-    return 400;
   }
 }
 

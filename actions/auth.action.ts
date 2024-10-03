@@ -143,10 +143,8 @@ export const checkIsAboutAction = async (token: any) => {
   const userFirstName = userPersonalInfo?.firstName;
 
   if (userFirstName) {
-    await storeIsAbout(true);
     return true;
   } else {
-    await storeIsAbout(false);
     return false;
   }
 };
