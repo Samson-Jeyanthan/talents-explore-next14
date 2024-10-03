@@ -6,7 +6,6 @@ import {
   resendOtpAction,
   verifyForgotPasswordAction,
 } from "@/actions/auth.action";
-
 import {
   TOTPProps,
   TVerifyForgotPasswordOtpProps,
@@ -138,6 +137,10 @@ export async function handleLogout() {
 // check for token
 export async function checkForToken() {
   const token = await verifySession();
-  const decodedJWTToken = jwtDecode(token);
-  return decodedJWTToken?.sub;
+  if (token === "") {
+    return false;
+  } else {
+    const decodedJWTToken = jwtDecode(token);
+    return decodedJWTToken?.sub;
+  }
 }
