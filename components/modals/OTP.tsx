@@ -100,7 +100,7 @@ const OTP = ({ userId, isSignup, setIsOpen, setVerifiedUserId }: TOTPProps) => {
   const handleOTPStates = () => {
     localStorage.setItem("countdown", "");
     setIsTimerRunning(true);
-    setCountdown(1 * 40); // 10 min 10*60
+    setCountdown(1 * 40); // 10 min 10 * 60
     setError(null);
   };
 
@@ -192,12 +192,14 @@ const OTP = ({ userId, isSignup, setIsOpen, setVerifiedUserId }: TOTPProps) => {
             </p>
           </div>
 
-          <p
-            className="font-regular my-4 mb-1 cursor-pointer text-light-700 hover:text-light-900"
-            onClick={handleCancel}
-          >
-            Cancel
-          </p>
+          {!isSignup && (
+            <p
+              className="font-regular my-4 mb-1 cursor-pointer text-light-700 hover:text-light-900"
+              onClick={handleCancel}
+            >
+              Cancel
+            </p>
+          )}
         </form>
       </DialogContent>
     </>
