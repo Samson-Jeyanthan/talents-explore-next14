@@ -1,6 +1,5 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import React, { useRef } from "react";
 import {
   DialogClose,
@@ -21,7 +20,7 @@ const PhotoAction = ({
 
   return (
     <>
-      <DialogOverlay className={cn("bg-black/10 backdrop-blur-sm")} />
+      <DialogOverlay />
       <DialogContent
         className="flex max-w-96 flex-col items-center gap-3 rounded-2xl border-none bg-dark-250 p-5"
         aria-describedby={undefined}

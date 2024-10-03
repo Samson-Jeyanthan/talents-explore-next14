@@ -56,6 +56,38 @@ const ProfilePhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
 
   return (
     <>
+      <div className="flex-center relative size-36 rounded-full bg-dark-400">
+        <input
+          type="file"
+          ref={photoRef}
+          hidden
+          onChange={handleInputChange}
+          accept="image/jpeg,image/jpg,image/png,image/webp"
+        />
+        <Image
+          src={
+            finalCropImage ||
+            mediaUrl ||
+            "/assets/images/default_profile_pic.png"
+          }
+          alt="profile_pic"
+          width={512}
+          height={512}
+          className="size-36 rounded-full object-cover"
+        />
+
+        <div
+          className="camera-button !bottom-0 !right-1 !rounded-full fill-white text-white"
+          onClick={handleInputBtn}
+        >
+          {finalCropImage || mediaUrl ? (
+            <MdEdit fill="white" />
+          ) : (
+            <CameraIcon fill="white" width="21px" height="21px" />
+          )}
+        </div>
+      </div>
+
       <ErrorAlert
         isOpen={Boolean(error)}
         title="OOPS! Something went wrong"
@@ -79,38 +111,6 @@ const ProfilePhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
           onDelete={handleDelete}
         />
       </Dialog>
-      <div className="flex-center absolute -bottom-16 left-8 h-[9.3rem] w-28 rounded-lg bg-dark-400">
-        <input
-          type="file"
-          ref={photoRef}
-          hidden
-          onChange={handleInputChange}
-          accept="image/jpeg,image/jpg,image/png,image/webp"
-        />
-        <Image
-          src={
-            finalCropImage ||
-            mediaUrl ||
-            "/assets/images/default_profile_pic.png"
-          }
-          alt="camera_icon"
-          width={120}
-          height={120}
-          className="rounded-lg object-cover"
-        />
-        <div className="relative flex size-full">
-          <div
-            className="camera-button fill-white text-white"
-            onClick={handleInputBtn}
-          >
-            {finalCropImage || mediaUrl ? (
-              <MdEdit fill="white" />
-            ) : (
-              <CameraIcon fill="white" width="21px" height="21px" />
-            )}
-          </div>
-        </div>
-      </div>
     </>
   );
 };

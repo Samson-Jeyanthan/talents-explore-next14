@@ -8,7 +8,6 @@ import {
   DialogOverlay,
   DialogClose,
 } from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
 import { TCropImgModalProps } from "@/types/utils.types";
 import Cropper from "react-easy-crop";
 import { IoMdClose } from "react-icons/io";
@@ -71,7 +70,7 @@ const CropImg = ({
 
   return (
     <>
-      <DialogOverlay className={cn("bg-black/10 backdrop-blur-sm")} />
+      <DialogOverlay />
       <DialogContent
         className="gap-0 rounded-2xl border-none bg-dark-250 p-0"
         aria-describedby={undefined}
@@ -95,7 +94,7 @@ const CropImg = ({
               image={media.preview}
               crop={crop}
               zoom={zoom}
-              aspect={5.8 / 2}
+              aspect={6.2 / 2}
               onCropChange={setCrop}
               onZoomChange={setZoom}
               onCropComplete={onCropComplete}
@@ -109,7 +108,8 @@ const CropImg = ({
               image={media.preview}
               crop={crop}
               zoom={zoom}
-              aspect={3 / 4}
+              cropShape="round"
+              aspect={1}
               onCropChange={setCrop}
               onZoomChange={setZoom}
               onCropComplete={onCropComplete}

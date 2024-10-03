@@ -57,32 +57,7 @@ const CoverPhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
 
   return (
     <>
-      <ErrorAlert
-        isOpen={Boolean(error)}
-        title="OOPS! Something went wrong"
-        error={error}
-        onClick={handleOkClick}
-      />
-      <Dialog
-        open={isOpen && media && !error}
-        onOpenChange={() => setIsOpen(false)}
-      >
-        <CropImgModal
-          modalFor="cover"
-          media={media}
-          handleCropComplete={handleCropComplete}
-        />
-      </Dialog>
-      <Dialog open={isActionOpen} onOpenChange={() => setIsActionOpen(false)}>
-        <PhotoActionModal
-          photoActionFor="cover"
-          onInputChange={handleInputChange}
-          onDelete={handleDelete}
-        />
-      </Dialog>
-      <div
-        className={`flex-center relative flex ${finalCropImage ? "h-auto" : "h-96"} max-h-96 min-h-48 w-full rounded-lg bg-dark-300`}
-      >
+      <div className="flex-center relative flex h-[22.5rem] max-h-[22.5rem] w-full rounded-xl bg-dark-300">
         <input
           type="file"
           ref={photoRef}
@@ -95,9 +70,9 @@ const CoverPhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
           <Image
             src={finalCropImage}
             alt="cropped-cover-image"
-            width={1000}
-            height={1000}
-            className="size-full rounded-lg object-cover"
+            width={1024}
+            height={1024}
+            className="size-full rounded-xl object-cover"
           />
         ) : (
           <p className="text-center text-sm text-light-500">
@@ -121,6 +96,30 @@ const CoverPhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
           {finalCropImage ? "Edit Cover Photo" : "Add Cover Photo"}
         </div>
       </div>
+
+      <ErrorAlert
+        isOpen={Boolean(error)}
+        title="OOPS! Something went wrong"
+        error={error}
+        onClick={handleOkClick}
+      />
+      <Dialog
+        open={isOpen && media && !error}
+        onOpenChange={() => setIsOpen(false)}
+      >
+        <CropImgModal
+          modalFor="cover"
+          media={media}
+          handleCropComplete={handleCropComplete}
+        />
+      </Dialog>
+      <Dialog open={isActionOpen} onOpenChange={() => setIsActionOpen(false)}>
+        <PhotoActionModal
+          photoActionFor="cover"
+          onInputChange={handleInputChange}
+          onDelete={handleDelete}
+        />
+      </Dialog>
     </>
   );
 };
