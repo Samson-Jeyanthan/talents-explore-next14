@@ -1,9 +1,9 @@
 import { getUserAllPostsAction } from "@/actions/post.action";
-import { ProfileURLProps } from "../layout";
 import { getSession } from "@/lib/session";
+import { TProfileURLProps } from "@/types/utils.types";
 import AlertNote from "@/components/others/AlertNote";
 
-async function AllPosts({ params }: ProfileURLProps) {
+async function AllPosts({ params }: TProfileURLProps) {
   const token = await getSession();
   const data = await getUserAllPostsAction(params.userId, token, 1, 5);
 

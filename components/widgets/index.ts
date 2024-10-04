@@ -22,6 +22,7 @@ export { default as MyPhotos } from "./profile/MyPhotos";
 export { default as AwardsAndCertificates } from "./profile/AwardsAndCertificates";
 export { default as LanguageEducationDetails } from "./profile/LanguageEducationDetails";
 export { default as ProfDetailsHeader } from "./profile/ProfDetailsHeader";
+export { default as Contact } from "./profile/Contact";
 // post more details widgets
 export { default as BlurredMedia } from "./postMoreDetails/BlurredMedia";
 export { default as PostInfoHeader } from "./postMoreDetails/PostInfoHeader";
@@ -29,5 +30,6 @@ export { default as PostInfo } from "./postMoreDetails/PostInfo";
 export { default as RatingDetails } from "./postMoreDetails/RatingDetails";
 export { default as TagsAndOtherInfo } from "./postMoreDetails/TagsAndOtherInfo";
 export { default as Comments } from "./postMoreDetails/Comments";
-// media widgets
+// carousel widgets
 export { default as VideoAsImage } from "./mediaCarousal/VideoAsImage";
+export { default as TopPostsCarousel } from "./mediaCarousal/TopPostsCarousel";

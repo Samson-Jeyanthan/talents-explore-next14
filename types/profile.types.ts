@@ -5,7 +5,12 @@ export type TCurrentUserData = {
     bio: string;
     ethnic: string;
     featuredPhotos: [string];
-    socialLinks: [string];
+    socialLinks: [
+      {
+        type: string;
+        url: string;
+      },
+    ];
     _id: string;
     ethnicId: string;
   };
