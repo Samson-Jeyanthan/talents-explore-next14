@@ -74,7 +74,6 @@ const ProDetailsModal = ({
 
   useEffect(() => {
     fetchLangData();
-    console.log(langData, "langData");
   }, []);
 
   const languageForm = useForm<z.infer<typeof languageValidation>>({

@@ -24,9 +24,9 @@ async function Overview({ params }: TProfileURLProps) {
   return (
     <section className="flex w-full max-w-screen-xl gap-3 overflow-x-hidden text-light-850">
       <div
-        className={`${isTalent ? "border-2 border-dark-300 bg-dark-250 p-4" : "p-2"} flex w-[21rem] min-w-[21rem] flex-col gap-10 rounded-3xl`}
+        className={`${isTalent ? "w-72 min-w-72 border-2 border-dark-300 bg-dark-250 p-4 2xl:w-[21rem] 2xl:min-w-[21rem]" : "w-[21rem] min-w-[21rem] p-2"} flex flex-col gap-10 rounded-3xl `}
       >
-        <BioDetails userData={userData} />
+        <BioDetails userData={userData} isOwnProfile={isOwnProfile} />
         {isTalent && (
           <>
             <Contact userData={userData} />

@@ -14,7 +14,7 @@ const ProfileCover = async ({
 
   return (
     <div
-      className={`${isTalent ? "sticky top-16 z-0" : ""} w-full rounded-2xl`}
+      className={`${isTalent ? "sticky top-14 z-0 2xl:top-16" : ""} w-full rounded-2xl`}
     >
       {isTalent ? (
         <div className="flex-center absolute top-8 gap-3 rounded-r-lg bg-dark-200 fill-custom-100 px-5 py-3 text-light-900">
@@ -36,7 +36,7 @@ const ProfileCover = async ({
         width={2048}
         height={1024}
         alt="cover photo"
-        className={`${isTalent ? "h-52 lg:h-[40vh] 2xl:h-[35vh]" : "h-[30vh]"} w-full rounded-2xl bg-dark-400 object-cover`}
+        className={`${isTalent ? "h-52 lg:h-[35vh] 2xl:h-[35vh]" : "h-[30vh]"} w-full rounded-2xl bg-dark-400 object-cover`}
       />
     </div>
   );

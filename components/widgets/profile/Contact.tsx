@@ -1,6 +1,12 @@
-import { QuillIcon } from "@/public/assets/svgs";
-import { TCurrentUserData, TPublicUserData } from "@/types/profile.types";
 import React from "react";
+import { EmptyDetails } from "@/components/others";
+import {
+  EnvelopeIcon,
+  PhoneBookIcon,
+  PhoneIcon,
+  SocialMediaIcon,
+} from "@/public/assets/svgs";
+import { TCurrentUserData, TPublicUserData } from "@/types/profile.types";
 import { FiUser } from "react-icons/fi";
 
 const Contact = ({
@@ -11,36 +17,40 @@ const Contact = ({
   return (
     <section className="flex flex-col gap-2">
       <div className="profile-detail-heading mb-3">
-        <QuillIcon width="18px" height="18px" />
+        <PhoneBookIcon width="20px" height="20px" />
         Contact & Social Media
       </div>
 
-      {/* <div className="flex flex-col gap-1"> */}
-      <h3 className="text-sm">Contact</h3>
+      <h3 className="text-[13px]">Contact</h3>
 
       <div className="flex flex-col gap-2">
         <div className="bio-element-wrap">
           <span className="bio-details-icon">
-            <FiUser />
+            <EnvelopeIcon width="16px" height="16px" />
           </span>
           <p>{userData?.email}</p>
         </div>
       </div>
-      {/* </div> */}
 
+      {/* {userData?.mobile && ( */}
       <div className="bio-element-wrap">
         <span className="bio-details-icon">
-          <FiUser />
+          <PhoneIcon width="16px" height="16px" />
         </span>
         <p>
           {userData?.callingCode} {userData?.mobile}
         </p>
       </div>
+      {/* )} */}
 
-      <h3 className="mt-3 text-sm">Social Media</h3>
+      <h3 className="mt-4 text-[13px]">Social Media</h3>
 
       {userData?.morePersonalInfo?.socialLinks?.length > 0 ? null : (
-        <p>No social media links</p>
+        <EmptyDetails
+          Icon={SocialMediaIcon}
+          text="There are no social media links"
+          size="64px"
+        />
       )}
 
       {userData?.morePersonalInfo?.socialLinks?.map((mediaLink, index) => (

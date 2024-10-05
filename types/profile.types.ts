@@ -62,6 +62,7 @@ export type TPublicUserData = {
     profileImage: string;
     language: string;
     professional: string;
+    dob: string;
   };
   location: string;
   userName: string;

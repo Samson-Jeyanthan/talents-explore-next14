@@ -29,7 +29,7 @@ const MyPhotos = ({ myPhotos }: MyPhotosProps) => {
             alt="my photo"
             width={1024}
             height={1024}
-            className="size-[12.5rem] min-w-[12.5rem] cursor-pointer rounded-xl object-cover"
+            className="size-36 min-w-36 cursor-pointer rounded-xl object-cover 2xl:size-[12.5rem] 2xl:min-w-[12.5rem]"
             onClick={() => handleSelectImg(myPhotos[0])}
           />
         )}

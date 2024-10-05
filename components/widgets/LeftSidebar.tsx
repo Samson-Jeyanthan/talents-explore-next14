@@ -28,16 +28,16 @@ const LeftSidebar = () => {
 
   return (
     <>
-      <aside className="sticky left-0 top-0 flex max-h-screen min-h-screen min-w-60 max-w-60 flex-col items-center justify-between bg-dark-100 py-8 max-lg:min-w-20 max-sm:hidden ">
+      <aside className="sticky left-0 top-0 flex max-h-screen min-h-screen min-w-60 max-w-60 flex-col items-center justify-between bg-dark-100 py-6 max-lg:min-w-20 max-sm:hidden 2xl:py-8">
         <div className="flex-center w-full flex-col gap-5 2xl:gap-8">
           <Image
             src="/assets/images/te-logo-expanded-light.png"
             alt="TE-Logo"
             width={200}
             height={30}
-            className="h-auto w-3/5 object-contain max-lg:hidden 2xl:w-[70%]"
+            className="h-auto w-4/6 object-contain max-lg:hidden 2xl:w-[70%]"
           />
-          <ul className="flex w-full flex-col gap-3 p-3 2xl:gap-4">
+          <ul className="flex w-full flex-col gap-2 p-3 2xl:gap-4">
             {SIDEBAR_ITEMS.map((item, index) => {
               const isActive = item.isLink
                 ? pathname === item.path || pathname.includes(item.path)

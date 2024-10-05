@@ -7,10 +7,26 @@ import {
   MenubarMenu,
   MenubarTrigger,
 } from "@/components/ui/menubar";
+import {
+  IAwardsOrCertificate,
+  IEducation,
+  ILanguage,
+} from "@/types/profile.types";
+import { useState } from "react";
 import { HiOutlinePencil } from "react-icons/hi2";
 import { MdDelete, MdModeEdit } from "react-icons/md";
+import { ProInfoDeleteAlert } from "../alerts";
 
-const ProInfoEditOptions = () => {
+type Props = {
+  id: string;
+  cardName: "award" | "education" | "language";
+  data?: IEducation[] | ILanguage[] | IAwardsOrCertificate[];
+};
+
+const ProInfoEditOptions = ({ id, cardName, data }: Props) => {
+  const [isDelete, setIsDelete] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
+
   return (
     <>
       <Menubar className="relative m-0 size-min border-none p-0">
@@ -21,14 +37,14 @@ const ProInfoEditOptions = () => {
           <MenubarContent className="absolute -right-5 min-w-36 gap-10 rounded-lg border border-solid border-dark-400 bg-dark-300 p-2 shadow-xl shadow-dark-100/25">
             <MenubarItem
               className="menubar-options-item"
-              //   onClick={() => handleProfileOptionClick(item.id)}
+              onClick={() => setIsEdit(true)}
             >
               <MdModeEdit />
               <p className="text-xs">Edit</p>
             </MenubarItem>
             <MenubarItem
               className="menubar-options-item !text-custom-200"
-              //   onClick={() => handleProfileOptionClick(item.id)}
+              onClick={() => setIsDelete(true)}
             >
               <MdDelete />
               <p className="text-xs">Delete</p>
@@ -36,6 +52,14 @@ const ProInfoEditOptions = () => {
           </MenubarContent>
         </MenubarMenu>
       </Menubar>
+
+      {isDelete && (
+        <ProInfoDeleteAlert
+          isOpen={isDelete}
+          modalFor={cardName}
+          onCancel={() => setIsDelete(false)}
+        />
+      )}
     </>
   );
 };

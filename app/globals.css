@@ -127,7 +127,7 @@ body {
   }
 
   .connection-modal-content {
-    @apply flex max-h-[78vh] min-h-[78vh] max-w-[25rem] flex-col items-center gap-0 rounded-xl border-none bg-dark-250 p-0 pb-2 2xl:max-w-[30rem] 2xl:max-h-[75vh] 2xl:min-h-[75vh] !important;
+    @apply flex h-[85vh] max-w-[25rem] flex-col items-center gap-0 rounded-2xl border-none bg-dark-250 p-0 pb-2 2xl:max-w-[30rem] 2xl:h-[75vh] !important;
   }
 
   .active-connection-tab {
@@ -135,7 +135,7 @@ body {
   }
 
   .default-connection-tab {
-    @apply flex-center w-full py-4 pt-5 cursor-pointer;
+    @apply flex-center w-full py-4 pt-5 text-[15px] cursor-pointer;
   }
 
   .connection-btn {
@@ -148,11 +148,11 @@ body {
   }
 
   .bio-element-wrap {
-    @apply flex items-center gap-3 text-[13px] text-light-850;
+    @apply flex items-center gap-3 text-[13px] text-light-800;
   }
 
   .bio-details-icon {
-    @apply flex-center size-9 min-w-9 rounded-xl border text-xl border-light-500/40 text-light-500/50;
+    @apply flex-center size-9 min-w-9 rounded-xl border text-xl border-light-500/40 fill-light-500/50 text-light-500/50;
   }
 
   .professional-info-card-wrap {

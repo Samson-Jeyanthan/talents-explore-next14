@@ -184,3 +184,5 @@ export async function userLanguageInfoAction(userId: string | undefined) {
     }
   } catch {}
 }
+
+export async function userLanguageInfoUpdateAction() {}
