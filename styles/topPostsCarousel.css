@@ -11,6 +11,13 @@
   --slide-spacing: 1rem;
   --slide-size: 42%;
 }
+.embla__two {
+  max-width: 60rem;
+  margin: auto;
+  --slide-height: 14rem;
+  --slide-spacing: 1rem;
+  --slide-size: 50%;
+}
 .embla__viewport {
   overflow: hidden;
 }

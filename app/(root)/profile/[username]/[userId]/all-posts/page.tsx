@@ -12,7 +12,7 @@ async function AllPosts({ params }: TProfileURLProps) {
   }
 
   return (
-    <section className="my-8 flex flex-col gap-4">
+    <section className="my-8 flex min-h-96 flex-col gap-4">
       {data.length > 0 ? data : <p className="text-light-900">NO DATA FOUND</p>}
     </section>
   );

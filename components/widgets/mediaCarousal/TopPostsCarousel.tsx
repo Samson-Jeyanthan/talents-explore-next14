@@ -15,9 +15,10 @@ import { ITopPost } from "@/types/profile.types";
 type PropType = {
   slides: ITopPost[];
   options?: EmblaOptionsType;
+  length: number;
 };
 
-const TopPostsCarousel = ({ slides, options }: PropType) => {
+const TopPostsCarousel = ({ slides, options, length }: PropType) => {
   const [emblaRef, emblaApi] = useEmblaCarousel(options);
 
   const {
@@ -28,7 +29,7 @@ const TopPostsCarousel = ({ slides, options }: PropType) => {
   } = usePrevNextButtons(emblaApi);
 
   return (
-    <section className="embla">
+    <section className={`${length === 2 ? "embla__two" : "embla"}`}>
       <div className="embla__viewport" ref={emblaRef}>
         <div className="embla__container">
           {slides.map((item, index) => (
@@ -39,12 +40,20 @@ const TopPostsCarousel = ({ slides, options }: PropType) => {
         </div>
       </div>
 
-      <div className="embla__controls">
-        <div className="embla__buttons">
-          <PrevButton onClick={onPrevButtonClick} disabled={prevBtnDisabled} />
-          <NextButton onClick={onNextButtonClick} disabled={nextBtnDisabled} />
+      {length > 1 && (
+        <div className="embla__controls">
+          <div className="embla__buttons">
+            <PrevButton
+              onClick={onPrevButtonClick}
+              disabled={prevBtnDisabled}
+            />
+            <NextButton
+              onClick={onNextButtonClick}
+              disabled={nextBtnDisabled}
+            />
+          </div>
         </div>
-      </div>
+      )}
     </section>
   );
 };

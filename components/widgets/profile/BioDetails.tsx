@@ -35,14 +35,14 @@ const BioDetails = ({ userData, isOwnProfile }: Props) => {
         <span className="bio-details-icon">
           <LocationIcon width="16px" height="16px" />
         </span>
-        <p className="pt-2">{userData?.location}</p>
+        <p className="line-clamp-3 pt-2">{userData?.location}</p>
       </div>
 
       <div className="bio-element-wrap">
         <span className="bio-details-icon">
           <CalendarIcon width="16px" height="16px" />
         </span>
-        <p>{getFormattedDate(userData?.personalInfo?.dob)}</p>
+        <p>DOB - {getFormattedDate(userData?.personalInfo?.dob)}</p>
       </div>
 
       <div className="bio-element-wrap">

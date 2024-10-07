@@ -29,3 +29,4 @@ export { default as EthnicIcon } from "./EthnicIcon";
 export { default as PhoneIcon } from "./PhoneIcon";
 export { default as PhoneBookIcon } from "./PhoneBookIcon";
 export { default as CalendarIcon } from "./CalendarIcon";
+export { default as PostIcon } from "./PostIcon";
