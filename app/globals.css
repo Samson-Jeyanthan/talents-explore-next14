@@ -105,7 +105,7 @@ body {
 
   /* navigation link */
   .leftsidebar-link {
-    @apply flex-start cursor-pointer gap-4 rounded-full fill-light-600 p-3 px-4 text-sm text-light-600 max-lg:rounded-lg hover:bg-dark-250 hover:fill-light-900 hover:text-light-900;
+    @apply flex-start cursor-pointer gap-4 rounded-lg fill-light-600 p-3 px-4 text-[13px] text-light-600 max-lg:rounded-lg hover:bg-dark-250 hover:fill-light-900 hover:text-light-900;
   }
 
   /* options, widgets and more */
@@ -187,6 +187,11 @@ body {
 
   .scf-bg-blur-image {
     @apply absolute top-0 left-1 h-[136px] w-full max-w-[290px] rounded-3xl bg-dark-100 object-cover;
+  }
+
+  /* Other styles */
+  .container-wrapper {
+    @apply relative flex-center max-w-5xl 2xl:max-w-[1200px] p-4 pt-0 3xl:p-0 2xl:py-8;
   }
 }
 

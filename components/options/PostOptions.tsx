@@ -13,7 +13,7 @@ import {
   handlePinnedToProfile,
   handleRemoveFromProfile,
 } from "@/lib/functions/post.functions";
-import { getLinkCopied } from "@/lib/utils";
+import { cn, getLinkCopied } from "@/lib/utils";
 import React, { useState } from "react";
 import { BsThreeDotsVertical } from "react-icons/bs";
 
@@ -21,9 +21,10 @@ type Prop = {
   authorId: string;
   postId: string;
   isBestWork: boolean;
+  className?: string;
 };
 
-const PostOptions = ({ authorId, postId, isBestWork }: Prop) => {
+const PostOptions = ({ authorId, postId, isBestWork, className }: Prop) => {
   const { user } = useUserContext();
   const isOwnPost = authorId === user?.currentUserId;
   const [isPinned, setIsPinned] = useState(isBestWork);
@@ -52,9 +53,9 @@ const PostOptions = ({ authorId, postId, isBestWork }: Prop) => {
   };
 
   return (
-    <Menubar className="relative rounded-full border-none bg-dark-300 p-0">
+    <Menubar className={cn(`rounded-full bg-dark-300 ${className}`)}>
       <MenubarMenu>
-        <MenubarTrigger className="cursor-pointer rounded-lg text-lg text-light-800 hover:text-light-900">
+        <MenubarTrigger className="cursor-pointer rounded-lg text-lg text-light-700 hover:text-light-900">
           <BsThreeDotsVertical />
         </MenubarTrigger>
         <MenubarContent className="absolute -right-5 min-w-36 gap-10 rounded-lg border border-solid border-dark-400 bg-dark-300 p-2 shadow-xl shadow-dark-100/25">

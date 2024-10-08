@@ -11,6 +11,7 @@ export { default as Navbar } from "./Navbar";
 export { default as CurrentUserAvatar } from "./CurrentUserAvatar";
 export { default as Notification } from "./NotificationSheet";
 export { default as Footer } from "./Footer";
+export { default as RightSidebar } from "./RightSidebar";
 // profile widgets
 export { default as ProfileCover } from "./profile/ProfileCover";
 export { default as NormalUserProfileHeader } from "./profile/NormalUserProfileHeader";
