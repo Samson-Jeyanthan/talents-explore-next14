@@ -44,7 +44,7 @@ export interface IPost {
       thumbnailUrl: string;
       thumbnailUrlkey: string;
       views: number;
-      status: 1;
+      status: number;
       createdAt: string;
       updatedAt: string;
     },

@@ -37,7 +37,7 @@ const LeftSidebar = () => {
             height={30}
             className="h-auto w-4/6 object-contain max-lg:hidden 2xl:w-[70%]"
           />
-          <ul className="flex w-full flex-col gap-2 p-3 2xl:gap-4">
+          <ul className="flex w-full flex-col gap-2 p-3 2xl:gap-3">
             {SIDEBAR_ITEMS.map((item, index) => {
               const isActive = item.isLink
                 ? pathname === item.path || pathname.includes(item.path)
