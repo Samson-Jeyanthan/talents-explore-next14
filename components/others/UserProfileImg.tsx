@@ -19,7 +19,7 @@ const UserProfileImg = ({
         width={512}
         height={512}
         className={cn(
-          "text-sm text-muted-foreground size-10 rounded-full bg-dark-400 object-cover",
+          "text-sm text-muted-foreground size-10 min-w-10 min-h-10 rounded-full bg-dark-400 object-cover",
           className
         )}
       />

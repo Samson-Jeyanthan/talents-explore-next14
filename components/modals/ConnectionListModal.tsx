@@ -1,6 +1,5 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import {
   DialogClose,
   DialogContent,
@@ -27,34 +26,34 @@ function ConnectionListModal({
 }) {
   return (
     <>
-      <DialogOverlay className={cn("bg-black/10 backdrop-blur-sm")} />
+      <DialogOverlay />
       <DialogContent
         className="connection-modal-content"
         aria-describedby={undefined}
       >
-        <DialogTitle className="sticky top-0 z-10 flex h-max w-full items-center justify-between rounded-xl bg-dark-250">
+        <DialogTitle className="sticky top-0 z-10 flex h-max w-full items-center justify-between rounded-2xl bg-dark-250 shadow-sm">
           {isTalent ? (
             <>
-              <p
+              <h3
                 className={`${currentTab === 0 ? "active-connection-tab" : "text-light-600"} default-connection-tab`}
                 onClick={() => setCuurentTab && setCuurentTab(0)}
               >
                 Ratings
-              </p>
-              <p
+              </h3>
+              <h3
                 className={`${currentTab === 1 ? "active-connection-tab" : "text-light-600"} default-connection-tab`}
                 onClick={() => setCuurentTab && setCuurentTab(1)}
               >
                 Followers
-              </p>
+              </h3>
             </>
           ) : null}
-          <p
+          <h3
             className={`${currentTab === 2 ? "active-connection-tab" : "text-light-600"} default-connection-tab`}
             onClick={() => setCuurentTab && setCuurentTab(2)}
           >
             Following
-          </p>
+          </h3>
         </DialogTitle>
 
         <div className="z-0 flex w-full flex-col items-center gap-4 overflow-y-scroll p-4">

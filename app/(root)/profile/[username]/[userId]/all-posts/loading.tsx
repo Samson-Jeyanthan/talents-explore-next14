@@ -10,9 +10,9 @@ function loading() {
           key={i}
           className="flex w-full gap-4 rounded-[28px] bg-dark-300 p-2"
         >
-          <Skeleton className="h-48 w-80 rounded-2xl bg-dark-400" />
+          <Skeleton className="h-52 w-80 rounded-2xl bg-dark-400" />
           <div className="flex w-full flex-col gap-3">
-            <Skeleton className="h-6 w-full rounded-xl bg-dark-400" />
+            <Skeleton className="h-5 w-full rounded-xl bg-dark-400" />
             <div className="flex flex-col gap-2">
               <Skeleton className="h-3 w-80 rounded-xl bg-dark-400" />
               <Skeleton className="h-3 w-80 rounded-xl bg-dark-400" />

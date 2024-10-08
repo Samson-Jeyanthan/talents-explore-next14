@@ -54,7 +54,10 @@ export async function fetchUserDataAction(userId: string, viewerId: string) {
   }
 }
 
-export async function userTopPostInfoAction(userId: string | undefined) {
+export async function userTopPostInfoAction(
+  userId: string | undefined,
+  returnAsCard: boolean
+) {
   try {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/profile/best-work?userId=${userId}&viewUserId=${""}&pageNo=${1}&pageSize=${3}`
@@ -62,9 +65,17 @@ export async function userTopPostInfoAction(userId: string | undefined) {
     const res = await response.json();
     if (res.status === "7400") {
       const data = res.response;
-      return data.map((item: ITopPost, index: number) => (
-        <TopPostCard key={item._id} userTopPostCard={item} index={index} />
-      ));
+      if (returnAsCard) {
+        return data.map((item: ITopPost, index: number) => (
+          <TopPostCard key={item._id} userTopPostCard={item} index={index} />
+        ));
+      } else {
+        const result = {
+          status: 200,
+          response: data,
+        };
+        return result;
+      }
     } else {
       const data = {
         status: 400,
@@ -173,3 +184,5 @@ export async function userLanguageInfoAction(userId: string | undefined) {
     }
   } catch {}
 }
+
+export async function userLanguageInfoUpdateAction() {}

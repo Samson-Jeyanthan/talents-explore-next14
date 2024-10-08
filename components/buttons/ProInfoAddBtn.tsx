@@ -28,7 +28,7 @@ const ProInfoAddBtn = ({ detailName, dataArray }: Prop) => {
           detailModalFor={detailName}
           onClick={() => setOpen(!open)}
           dataArray={dataArray}
-          selectedIndex={0}
+          selectedIndex={dataArray.length}
         />
       </Dialog>
     </>

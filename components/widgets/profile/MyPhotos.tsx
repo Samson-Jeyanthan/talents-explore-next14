@@ -4,7 +4,7 @@ import { PhotoViewModal } from "@/components/modals";
 import { Dialog } from "@/components/ui/dialog";
 import { CameraIcon } from "@/public/assets/svgs";
 import Image from "next/image";
-import { useState } from "react";
+import React, { useState } from "react";
 
 interface MyPhotosProps {
   myPhotos: string[];
@@ -29,7 +29,7 @@ const MyPhotos = ({ myPhotos }: MyPhotosProps) => {
             alt="my photo"
             width={1024}
             height={1024}
-            className="size-[12.5rem] min-w-[12.5rem] cursor-pointer rounded-xl object-cover"
+            className="size-36 min-w-36 cursor-pointer rounded-xl object-cover 2xl:size-[12.5rem] 2xl:min-w-[12.5rem]"
             onClick={() => handleSelectImg(myPhotos[0])}
           />
         )}
@@ -38,10 +38,9 @@ const MyPhotos = ({ myPhotos }: MyPhotosProps) => {
           {myPhotos?.map((photo, index) => {
             if (!photo) return null;
             return (
-              <>
+              <React.Fragment key={index}>
                 {index !== 0 && (
                   <Image
-                    key={index}
                     src={photo}
                     alt="my photo"
                     width={1024}
@@ -50,7 +49,7 @@ const MyPhotos = ({ myPhotos }: MyPhotosProps) => {
                     onClick={() => handleSelectImg(photo)}
                   />
                 )}
-              </>
+              </React.Fragment>
             );
           })}
         </div>

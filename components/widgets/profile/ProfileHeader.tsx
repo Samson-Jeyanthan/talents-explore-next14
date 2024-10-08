@@ -17,7 +17,7 @@ const ProfileHeader = ({
   userData: any;
   isOwnProfile: boolean;
 }) => {
-  const { isAuthenticated } = useUserContext();
+  const { user } = useUserContext();
   const [showDP, setShowDP] = useState(false);
   const [showConnection, setShowConnection] = useState(false);
   const [currentTab, setCurrentTab] = useState(0);
@@ -32,8 +32,8 @@ const ProfileHeader = ({
   };
 
   return (
-    <header className="flex w-full flex-col bg-gradient-to-b from-[rgb(17,19,27,0.45)] to-[rgba(17,19,27)] p-2 backdrop-blur-lg 2xl:-mt-10 2xl:p-0">
-      <section className="flex items-start justify-between p-2 sm:p-3 2xl:p-3">
+    <header className="flex w-full flex-col bg-gradient-to-b from-[rgb(17,19,27,0.45)] to-[rgba(17,19,27)] p-2 pt-1 backdrop-blur-lg 2xl:-mt-10 2xl:p-0">
+      <section className="flex items-start justify-between p-2 2xl:p-3">
         <div className="flex-start gap-5">
           <Image
             src={`${userData?.personalInfo?.profileImage ? userData?.personalInfo?.profileImage : "/assets/images/default_profile_pic_2.png"}`}
@@ -52,8 +52,8 @@ const ProfileHeader = ({
             </p>
           </div>
         </div>
-        {isAuthenticated ? (
-          <div className="flex-start gap-3 pt-3">
+        {user.currentUserId ? (
+          <div className="flex-start gap-3 pt-2 2xl:pt-3">
             {isOwnProfile ? (
               <Button className="shad-button_secondary w-36 rounded-full">
                 Edit Profile
@@ -79,7 +79,7 @@ const ProfileHeader = ({
       </section>
 
       <section className="flex items-start justify-between">
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1 2xl:gap-2">
           <div className="flex-center sm:flex-start">
             <h4
               className="connection-counting"

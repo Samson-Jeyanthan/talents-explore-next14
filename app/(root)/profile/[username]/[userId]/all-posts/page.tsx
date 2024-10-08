@@ -1,9 +1,9 @@
 import { getUserAllPostsAction } from "@/actions/post.action";
-import { ProfileURLProps } from "../layout";
 import { getSession } from "@/lib/session";
+import { TProfileURLProps } from "@/types/utils.types";
 import AlertNote from "@/components/others/AlertNote";
 
-async function AllPosts({ params }: ProfileURLProps) {
+async function AllPosts({ params }: TProfileURLProps) {
   const token = await getSession();
   const data = await getUserAllPostsAction(params.userId, token, 1, 5);
 
@@ -12,7 +12,7 @@ async function AllPosts({ params }: ProfileURLProps) {
   }
 
   return (
-    <section className="my-8 flex flex-col gap-4">
+    <section className="my-8 flex min-h-96 flex-col gap-4">
       {data.length > 0 ? data : <p className="text-light-900">NO DATA FOUND</p>}
     </section>
   );
