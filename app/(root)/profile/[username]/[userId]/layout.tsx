@@ -59,7 +59,9 @@ async function layout({
   const isLoggedIn = token === "";
 
   return (
-    <main className={`${isLoggedIn && "pt-6"} container-wrapper flex-col gap-6`}>
+    <main
+      className={`${isLoggedIn && "pt-6"} container-wrapper flex-col gap-6 pb-6`}
+    >
       <ProfileCover
         coverPhoto={userData?.personalInfo?.coverImage}
         isTalent={isTalent}

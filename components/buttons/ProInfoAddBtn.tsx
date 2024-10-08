@@ -5,6 +5,7 @@ import { ProDetailsModal } from "../modals";
 import { Dialog } from "../ui/dialog";
 import { TProfessionalDetailName } from "@/types/utils.types";
 import { IEducation } from "@/types/profile.types";
+import { useUserContext } from "@/context/AuthProvider";
 
 type Prop = {
   detailName: TProfessionalDetailName;
@@ -13,14 +14,17 @@ type Prop = {
 
 const ProInfoAddBtn = ({ detailName, dataArray }: Prop) => {
   const [open, setOpen] = useState(false);
+  const { user } = useUserContext();
   return (
     <>
-      <p
-        className="cursor-pointer text-xs text-custom-100"
-        onClick={() => setOpen(!open)}
-      >
-        + ADD
-      </p>
+      {user.currentUserId && (
+        <p
+          className="cursor-pointer text-xs text-custom-100"
+          onClick={() => setOpen(!open)}
+        >
+          + ADD
+        </p>
+      )}
 
       <Dialog open={open}>
         <ProDetailsModal
