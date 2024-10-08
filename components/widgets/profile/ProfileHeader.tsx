@@ -9,12 +9,14 @@ import { Dialog } from "../../ui/dialog";
 import ConnectionListModal from "../../modals/ConnectionListModal";
 import { MessageIcon } from "@/public/assets/svgs";
 import { useUserContext } from "@/context/AuthProvider";
+import { StarRating } from "@/components/inputs";
+import { TCurrentUserData, TPublicUserData } from "@/types/profile.types";
 
 const ProfileHeader = ({
   userData,
   isOwnProfile,
 }: {
-  userData: any;
+  userData: TCurrentUserData | TPublicUserData;
   isOwnProfile: boolean;
 }) => {
   const { user } = useUserContext();
@@ -63,8 +65,8 @@ const ProfileHeader = ({
                 <Button className="shad-button_primary w-36 rounded-full">
                   Follow
                 </Button>
-                <Button className="shad-button_secondary w-max rounded-full fill-white">
-                  <MessageIcon />
+                <Button className="shad-button_secondary rounded-full fill-white !px-3">
+                  <MessageIcon width="22px" height="22px" />
                 </Button>
               </>
             )}
@@ -74,8 +76,6 @@ const ProfileHeader = ({
             />
           </div>
         ) : null}
-
-        {/* <div className="text-sm text-light-900">Rate this Profile</div> */}
       </section>
 
       <section className="flex items-start justify-between">
@@ -112,6 +112,18 @@ const ProfileHeader = ({
             </p>
           )}
         </div>
+
+        {user.currentUserId ? (
+          <div className="flex items-center gap-2 pr-3 text-sm text-light-500">
+            <p>Rate {isOwnProfile ? "your" : "this"} profile</p>
+            <StarRating
+              prevRatingValue={userData.yourRating}
+              ratingFor="PROFILE"
+              authorId={userData._id}
+              revalidatePath={`/profile/${userData.userName}/${userData._id}`}
+            />
+          </div>
+        ) : null}
       </section>
 
       {showDP && (
