@@ -191,7 +191,7 @@ body {
 
   /* Other styles */
   .container-wrapper {
-    @apply relative flex-center max-w-5xl 2xl:max-w-[1200px] p-4 pt-0 3xl:p-0 2xl:py-8;
+    @apply relative flex-center w-full max-w-5xl 2xl:max-w-[1200px] p-4 pt-0 3xl:p-0 2xl:py-8;
   }
 }
 

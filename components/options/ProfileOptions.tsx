@@ -35,9 +35,9 @@ const ProfileOptions = ({ profileOwnerId, userName }: Prop) => {
   };
 
   return (
-    <Menubar className="relative rounded-full border-none bg-dark-300 p-0">
+    <Menubar className="relative !h-10 !w-10 rounded-full border-none bg-dark-300 p-3">
       <MenubarMenu>
-        <MenubarTrigger className="cursor-pointer rounded-lg text-lg text-light-800 hover:text-light-900">
+        <MenubarTrigger className="mr-2 size-full cursor-pointer rounded-lg text-lg text-light-800 hover:text-light-900">
           <BsThreeDotsVertical />
         </MenubarTrigger>
         <MenubarContent className="absolute -right-5 min-w-36 gap-10 rounded-lg border border-solid border-dark-400 bg-dark-300 p-2 shadow-xl shadow-dark-100/25">

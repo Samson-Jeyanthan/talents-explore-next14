@@ -63,8 +63,8 @@ const ProfileHeader = ({
                 <Button className="shad-button_primary w-36 rounded-full">
                   Follow
                 </Button>
-                <Button className="shad-button_secondary w-max rounded-full fill-white">
-                  <MessageIcon />
+                <Button className="shad-button_secondary rounded-full fill-white !px-3">
+                  <MessageIcon width="22px" height="22px" />
                 </Button>
               </>
             )}

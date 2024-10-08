@@ -53,7 +53,9 @@ const PostOptions = ({ authorId, postId, isBestWork, className }: Prop) => {
   };
 
   return (
-    <Menubar className={cn(`rounded-full bg-dark-300 ${className}`)}>
+    <Menubar
+      className={cn(`rounded-full bg-dark-300 border-none ${className}`)}
+    >
       <MenubarMenu>
         <MenubarTrigger className="cursor-pointer rounded-lg text-lg text-light-700 hover:text-light-900">
           <BsThreeDotsVertical />

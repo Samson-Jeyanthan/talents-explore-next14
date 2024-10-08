@@ -56,13 +56,15 @@ async function layout({
   }
 
   const isTalent = userData?.isTalent;
+  const isLoggedIn = token === "";
 
   return (
-    <main className="relative flex w-full flex-col items-center justify-center gap-6">
+    <main className={`${isLoggedIn && "pt-6"} container-wrapper flex-col gap-6`}>
       <ProfileCover
         coverPhoto={userData?.personalInfo?.coverImage}
         isTalent={isTalent}
         avgRating={userData?.avgRating}
+        isLoggedIn={isLoggedIn}
       />
 
       <section
