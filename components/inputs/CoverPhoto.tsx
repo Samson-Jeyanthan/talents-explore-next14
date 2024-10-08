@@ -66,11 +66,11 @@ const CoverPhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
           accept="image/jpeg,image/jpg,image/png,image/webp"
         />
 
-        {finalCropImage ? (
+        {finalCropImage || mediaUrl ? (
           <Image
-            src={finalCropImage}
+            src={finalCropImage || mediaUrl || ""}
             alt="cropped-cover-image"
-            width={1024}
+            width={2048}
             height={1024}
             className="size-full rounded-xl object-cover"
           />
@@ -93,7 +93,7 @@ const CoverPhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
           ) : (
             <CameraIcon fill="white" width="21px" height="21px" />
           )}
-          {finalCropImage ? "Edit Cover Photo" : "Add Cover Photo"}
+          {finalCropImage || mediaUrl ? "Edit Cover Photo" : "Add Cover Photo"}
         </div>
       </div>
 

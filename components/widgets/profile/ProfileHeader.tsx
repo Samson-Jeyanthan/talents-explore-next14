@@ -11,6 +11,7 @@ import { MessageIcon } from "@/public/assets/svgs";
 import { useUserContext } from "@/context/AuthProvider";
 import { StarRating } from "@/components/inputs";
 import { TCurrentUserData, TPublicUserData } from "@/types/profile.types";
+import { useRouter } from "next/navigation";
 
 const ProfileHeader = ({
   userData,
@@ -20,6 +21,7 @@ const ProfileHeader = ({
   isOwnProfile: boolean;
 }) => {
   const { user } = useUserContext();
+  const router = useRouter();
   const [showDP, setShowDP] = useState(false);
   const [showConnection, setShowConnection] = useState(false);
   const [currentTab, setCurrentTab] = useState(0);
@@ -57,7 +59,10 @@ const ProfileHeader = ({
         {user.currentUserId ? (
           <div className="flex-start gap-3 pt-2 2xl:pt-3">
             {isOwnProfile ? (
-              <Button className="shad-button_secondary w-36 rounded-full">
+              <Button
+                className="shad-button_secondary w-36 rounded-full"
+                onClick={() => router.push(`/profile/edit/${userData?._id}`)}
+              >
                 Edit Profile
               </Button>
             ) : (

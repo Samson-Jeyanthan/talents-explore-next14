@@ -17,6 +17,7 @@ import { HiOutlinePencil } from "react-icons/hi2";
 import { MdDelete, MdModeEdit } from "react-icons/md";
 import { ProInfoDeleteAlert } from "../alerts";
 import { useUserContext } from "@/context/AuthProvider";
+import { useParams } from "next/navigation";
 
 type Props = {
   id: string;
@@ -26,12 +27,14 @@ type Props = {
 
 const ProInfoEditOptions = ({ id, cardName, data }: Props) => {
   const { user } = useUserContext();
+  const params = useParams<{ username: string; userId: string }>();
+  const isOwnProfile = user.currentUserId === params.userId;
   const [isDelete, setIsDelete] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
 
   return (
     <>
-      {user.currentUserId && (
+      {isOwnProfile && (
         <Menubar className="relative m-0 size-min border-none p-0">
           <MenubarMenu>
             <MenubarTrigger className="cursor-pointer text-sm text-light-500 hover:text-light-900">
