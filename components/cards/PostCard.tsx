@@ -7,6 +7,7 @@ import { getFormattedDecimal } from "@/lib/utils";
 import { PostOptions } from "../options";
 import Image from "next/image";
 import { PostUtilsButton } from "../buttons";
+import VideoCard from "../video/VideoCard";
 
 interface Props {
   postFeedCard: IPost;
@@ -82,20 +83,24 @@ const PostCard = ({ postFeedCard, index }: Props) => {
       </Link>
 
       <div className="flex gap-1">
-        {postFeedCard.media.map((item, index) => (
-          <Image
-            src={
-              item.mediaType === "image"
-                ? item.url
-                : "/assets/images/sample-post-img.jpg"
-            }
-            key={index}
-            width={500}
-            height={500}
-            alt="post"
-            className="max-h-[30rem] w-full rounded-xl bg-dark-200 object-contain"
-          />
-        ))}
+        {postFeedCard.media.map((item, index) =>
+          item.mediaType === "video" ? (
+            <VideoCard
+              key={index}
+              videoUrl={item.url}
+              thumbnailUrl={item.thumbnailUrl}
+            />
+          ) : (
+            <Image
+              src={item.url}
+              key={index}
+              width={500}
+              height={500}
+              alt="post"
+              className="max-h-[30rem] w-full rounded-xl bg-dark-200 object-contain"
+            />
+          )
+        )}
       </div>
 
       <div className="flex gap-2">

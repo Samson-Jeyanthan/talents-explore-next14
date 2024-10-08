@@ -29,7 +29,7 @@ export async function middleware(request: NextRequest) {
     }
   } else {
     console.log("logged in");
-    if (isAbout === false) {
+    if (!isAbout) {
       return NextResponse.rewrite(new URL("/complete-profile", request.url));
     }
 
