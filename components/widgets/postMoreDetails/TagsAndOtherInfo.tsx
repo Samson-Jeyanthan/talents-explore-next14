@@ -33,9 +33,9 @@ const TagsAndOtherInfo = ({ postData }: Props) => {
         <div className="flex flex-col gap-2">
           <h2 className="font-medium text-light-900">Tagged People</h2>
           <div className="flex flex-wrap gap-2 text-[13px] lowercase">
-            {postData.about.peopleTag.map((tag) => (
+            {postData.about.peopleTag.map((tag, index) => (
               <Link
-                key={tag._id}
+                key={index}
                 href={`/profile/${tag.userName}/${tag._id}`}
                 className="hover:text-light-900"
               >
@@ -58,16 +58,16 @@ const TagsAndOtherInfo = ({ postData }: Props) => {
                   className={`flex flex-col gap-1 text-[13px] ${isLast ? "pt-3" : "border-b border-solid border-dark-300 py-3"} ${index === 0 && "pt-0"}`}
                 >
                   <p className="text-light-700 first-letter:capitalize">
-                    {credit.creditTitle}
+                    {credit?.creditTitle}
                   </p>
                   <div className="flex flex-wrap gap-2 lowercase">
-                    {credit.peopleTag.map((tag) => (
+                    {credit?.peopleTag.map((tag, index) => (
                       <Link
-                        key={tag._id}
-                        href={`/profile/${tag.userName}/${tag._id}`}
+                        key={index}
+                        href={`/profile/${tag?.userName}/${tag?._id}`}
                         className="hover:text-light-900"
                       >
-                        @{tag.userName}
+                        @{tag?.userName}
                       </Link>
                     ))}
                   </div>
@@ -87,7 +87,7 @@ const TagsAndOtherInfo = ({ postData }: Props) => {
               return (
                 <p
                   key={index}
-                  className={`text-[13px] capitalize text-light-500 ${isLast ? "pt-3" : "border-b border-solid border-dark-300 py-3"} ${index === 0 && "pt-0"}`}
+                  className={`text-[13px] capitalize text-light-500 ${isLast ? `${index === 0 ? "pt-0" : "pt-3"}` : "border-b border-solid border-dark-300 py-3"} `}
                 >
                   {tool.toolName} - {tool.level}
                 </p>
@@ -101,3 +101,10 @@ const TagsAndOtherInfo = ({ postData }: Props) => {
 };
 
 export default TagsAndOtherInfo;
+
+// <FaTags style={{ fontSize: "1.6rem", marginBottom: "5px" }} />
+// No Credits or Tags provided
+// <BsTools
+// style={{ fontSize: "1.6rem", marginBottom: "5px" }}
+// />
+// No tools provided
