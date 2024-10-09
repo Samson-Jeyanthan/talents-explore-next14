@@ -2,59 +2,45 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url("./theme.css");
-
-.mdp-embla {
-  max-width: 40rem;
+.pf-embla {
+  max-width: 48rem;
   margin: auto;
-  --mdp-slide-height: 34rem;
-  /* --slide-spacing: 0rem; */
-  /* --slide-size: 50%; */
+  --slide-height: 19rem;
+  --slide-spacing: 1rem;
+  --slide-size: 100%;
 }
-
-.mdp-embla__viewport {
+.pf-embla__viewport {
   overflow: hidden;
 }
-
-.mdp-embla__container {
+.pf-embla__container {
   display: flex;
   touch-action: pan-y pinch-zoom;
-  /* margin-left: calc(var(--slide-spacing) * -1); */
+  margin-left: calc(var(--slide-spacing) * -1);
 }
-
-.mdp-embla__slide {
-  display: grid;
-  place-items: center;
-  transform: translate3d(50, 50, 50);
-  flex: 0 0 50%;
-  min-width: 0;
-}
-
-.mdp-embla__slide__for__two {
+.pf-embla__slide {
   transform: translate3d(0, 0, 0);
-  flex: 0 0 80%;
+  flex: 0 0 var(--slide-size);
   min-width: 0;
+  padding-left: var(--slide-spacing);
 }
-
-.mdp-embla__slide__number {
+.pf-embla__slide__number {
   box-shadow: inset 0 0 0 0.2rem var(--detail-medium-contrast);
-  font-size: 8rem;
+  border-radius: 1.8rem;
+  font-size: 4rem;
   font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: var(--mdp-slide-height);
+  height: var(--slide-height);
   user-select: none;
 }
-
-.mdp-embla__buttons {
+.pf-embla__buttons {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 0.6rem;
   align-items: center;
 }
-
-.embla__button {
+.pf-embla__button {
   -webkit-tap-highlight-color: rgba(var(--text-high-contrast-rgb-value), 0.5);
   -webkit-appearance: none;
   appearance: none;
@@ -76,18 +62,12 @@
   align-items: center;
   justify-content: center;
 }
-
-.embla__button:disabled {
+.pf-embla__button:disabled {
   color: var(--detail-high-contrast);
 }
-
-.embla__button__svg {
+.pf-embla__button__svg {
   width: 35%;
   height: 35%;
-}
-
-.mdp-embla__slide__number {
-  backface-visibility: hidden;
 }
 
 @layer utilities {
@@ -95,7 +75,7 @@
     @apply size-9 rounded-full bg-none border-2 border-solid border-dark-400 hover:border-none hover:bg-light-900 p-1 font-bold text-xl text-light-500 hover:text-dark-100;
   }
 
-  .mdp-embla__controls {
-    @apply flex gap-2 items-center justify-between mt-8 w-full;
+  .pf-embla__controls {
+    @apply flex gap-2 items-center justify-between mt-8 w-[95%];
   }
 }

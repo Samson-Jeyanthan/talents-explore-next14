@@ -5,9 +5,8 @@ import Link from "next/link";
 import { StarIcon } from "@/public/assets/svgs";
 import { getFormattedDecimal } from "@/lib/utils";
 import { PostOptions } from "../options";
-import Image from "next/image";
 import { PostUtilsButton } from "../buttons";
-import VideoCard from "../video/VideoCard";
+import { PostFeedCarousel } from "../widgets";
 
 interface Props {
   postFeedCard: IPost;
@@ -82,26 +81,10 @@ const PostCard = ({ postFeedCard, index }: Props) => {
         {postFeedCard.about.title}
       </Link>
 
-      <div className="flex gap-1">
-        {postFeedCard.media.map((item, index) =>
-          item.mediaType === "video" ? (
-            <VideoCard
-              key={index}
-              videoUrl={item.url}
-              thumbnailUrl={item.thumbnailUrl}
-            />
-          ) : (
-            <Image
-              src={item.url}
-              key={index}
-              width={500}
-              height={500}
-              alt="post"
-              className="max-h-[30rem] w-full rounded-xl bg-dark-200 object-contain"
-            />
-          )
-        )}
-      </div>
+      <PostFeedCarousel
+        slides={postFeedCard.media}
+        length={postFeedCard.media.length}
+      />
 
       <div className="flex gap-2">
         <PostUtilsButton buttonFor="COMMENT" size="19px" />
