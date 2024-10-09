@@ -4,25 +4,25 @@
 
 @import url("./theme.css");
 
-.embla {
+.mdp-embla {
   max-width: 40rem;
   margin: auto;
-  --slide-height: 34rem;
-  --slide-spacing: 0rem;
-  --slide-size: 50%;
+  --mdp-slide-height: 34rem;
+  /* --slide-spacing: 0rem; */
+  /* --slide-size: 50%; */
 }
 
-.embla__viewport {
+.mdp-embla__viewport {
   overflow: hidden;
 }
 
-.embla__container {
+.mdp-embla__container {
   display: flex;
   touch-action: pan-y pinch-zoom;
   /* margin-left: calc(var(--slide-spacing) * -1); */
 }
 
-.embla__slide {
+.mdp-embla__slide {
   display: grid;
   place-items: center;
   transform: translate3d(50, 50, 50);
@@ -30,24 +30,24 @@
   min-width: 0;
 }
 
-.embla__slide__for__two {
+.mdp-embla__slide__for__two {
   transform: translate3d(0, 0, 0);
   flex: 0 0 80%;
   min-width: 0;
 }
 
-.embla__slide__number {
+.mdp-embla__slide__number {
   box-shadow: inset 0 0 0 0.2rem var(--detail-medium-contrast);
   font-size: 8rem;
   font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: var(--slide-height);
+  height: var(--mdp-slide-height);
   user-select: none;
 }
 
-.embla__buttons {
+.mdp-embla__buttons {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 0.6rem;
@@ -128,7 +128,7 @@
   box-shadow: inset 0 0 0 0.2rem rgb(54, 49, 61);
 }
 
-.embla__slide__number {
+.mdp-embla__slide__number {
   backface-visibility: hidden;
 }
 
@@ -137,7 +137,7 @@
     @apply size-9 rounded-full bg-none border-2 border-solid border-dark-400 hover:border-none hover:bg-light-900 p-1 font-bold text-xl text-light-500 hover:text-dark-100;
   }
 
-  .embla__controls {
-    @apply flex gap-2 items-center justify-between mt-8 w-[90%];
+  .mdp-embla__controls {
+    @apply flex gap-2 items-center justify-between mt-8 w-full;
   }
 }

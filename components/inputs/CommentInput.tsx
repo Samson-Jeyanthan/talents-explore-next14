@@ -53,7 +53,7 @@ const CommentInput = ({ postId, authorId, commentType }: Props) => {
       <UserProfileImg
         userName={user.username}
         src={user.imageUrl}
-        className="max-h-[34px] min-w-[34px] rounded-xl"
+        className="!size-[34px] max-h-[34px] !min-w-[34px] rounded-lg"
       />
       <EmojisOptions onClick={handleEmojiClick} />
       <div
