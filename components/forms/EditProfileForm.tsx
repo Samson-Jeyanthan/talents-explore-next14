@@ -18,6 +18,8 @@ import {
 } from "../inputs";
 import { GENDER_VALUES } from "@/constants";
 import { Button } from "../ui/button";
+import { useRouter } from "next/navigation";
+import { useUserContext } from "@/context/AuthProvider";
 
 type Props = {
   langData: any;
@@ -26,6 +28,8 @@ type Props = {
 };
 
 const EditProfileForm = ({ langData, professionData, userData }: Props) => {
+  const router = useRouter();
+  const { user } = useUserContext();
   const LangOptions = langData.response.map((item: any) => ({
     _id: item._id,
     name: item.language,
@@ -148,11 +152,20 @@ const EditProfileForm = ({ langData, professionData, userData }: Props) => {
             />
           </div>
 
-          <div className="flex w-full justify-end">
+          <div className="my-3 mb-5 flex w-full justify-end gap-3">
+            <Button
+              className="shad-button_secondary w-40"
+              type="button"
+              onClick={() =>
+                router.push(`/profile/${user.username}/${user.currentUserId}`)
+              }
+            >
+              Cancel
+            </Button>
             <Button
               type="submit"
               disabled={form.formState.isSubmitting}
-              className="shad-button_primary mt-4 w-40"
+              className="shad-button_primary w-40"
             >
               {form.formState.isSubmitting
                 ? "Updating Profile..."

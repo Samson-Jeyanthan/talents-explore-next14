@@ -15,6 +15,7 @@ const ProfilePhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
     useCoverAndProfilePic();
   const [isOpen, setIsOpen] = useState(false);
   const [isActionOpen, setIsActionOpen] = useState(false);
+  const [prevMedia, setPrevMedia] = useState(mediaUrl || null);
   const [finalCropImage, setFinalCropImage] = useState(null);
 
   // handle image input change
@@ -34,16 +35,17 @@ const ProfilePhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
 
   // handle the photo action modal open and input change
   const handleInputBtn = () => {
-    if (finalCropImage === null) {
-      photoRef.current?.click();
-    } else {
+    if (finalCropImage || prevMedia) {
       setIsActionOpen(true);
+    } else {
+      photoRef.current?.click();
     }
   };
 
   // delete the cropped photo
   const handleDelete = () => {
     setFinalCropImage(null);
+    setPrevMedia(null);
     setIsActionOpen(false);
   };
 
@@ -56,7 +58,7 @@ const ProfilePhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
 
   return (
     <>
-      <div className="flex-center relative size-36 rounded-full bg-dark-400">
+      <div className="flex-center relative -mt-20 ml-12 size-36 rounded-full bg-dark-400 shadow-sm">
         <input
           type="file"
           ref={photoRef}
@@ -67,8 +69,8 @@ const ProfilePhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
         <Image
           src={
             finalCropImage ||
-            mediaUrl ||
-            "/assets/images/default_profile_pic.png"
+            prevMedia ||
+            "/assets/images/default_profile_pic_2.png"
           }
           alt="profile_pic"
           width={512}
@@ -80,7 +82,7 @@ const ProfilePhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
           className="camera-button !bottom-0 !right-1 !rounded-full fill-white text-white"
           onClick={handleInputBtn}
         >
-          {finalCropImage || mediaUrl ? (
+          {finalCropImage || prevMedia ? (
             <MdEdit fill="white" />
           ) : (
             <CameraIcon fill="white" width="21px" height="21px" />

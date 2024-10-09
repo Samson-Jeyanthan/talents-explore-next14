@@ -212,3 +212,40 @@ export const SAVED_FOLDER_OPTIONS: ISavedFolderOptions[] = [
     isRed: true,
   },
 ];
+
+interface IFooterLinks {
+  name: string;
+  path: string;
+}
+
+export const FOOTER_LINKS: IFooterLinks[] = [
+  {
+    name: "Terms & Conditions",
+    path: "https://talentsexplore.com/terms-and-conditions",
+  },
+  {
+    name: "Privacy Policy",
+    path: "https://talentsexplore.com/privacy-policy",
+  },
+  {
+    name: "Branded Policy",
+    path: "https://talentsexplore.com/branded-policy",
+  },
+  {
+    name: "Cookies",
+    path: "https://talentsexplore.com/cookies-policy",
+  },
+  {
+    name: "Community",
+    path: "https://talentsexplore.com/community-guidelines",
+  },
+  {
+    name: "Intellectual Property",
+    path: "https://talentsexplore.com/intellectual-property-policy",
+  },
+];
+
+
+
+
+
