@@ -13,7 +13,7 @@ const layout = async ({ children }: Props) => {
       {session ? <LeftSidebar /> : null}
       <section className="relative flex w-full flex-col items-center bg-dark-200">
         {session ? <Navbar /> : null}
-        <div className="w-full">{children}</div>
+        <div className="flex-center w-full">{children}</div>
       </section>
     </main>
   );

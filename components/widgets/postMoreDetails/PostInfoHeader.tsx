@@ -16,7 +16,7 @@ type Props = {
 };
 
 const PostInfoHeader = ({ postData }: Props) => {
-  const profileLink = `/profile/${postData.author.userName}/${postData.author._id}`;
+  const profileLink = `/profile/${postData?.author?.userName}/${postData?.author?._id}`;
   return (
     <section className="flex flex-col text-light-900">
       <div className="flex-between gap-2 border-b-2 border-solid border-dark-300 pb-6 pt-1">
@@ -30,6 +30,7 @@ const PostInfoHeader = ({ postData }: Props) => {
             authorId={postData.author._id}
             postId={postData._id}
             isBestWork={postData.isBestWork}
+            className="flex-center !size-[42px] space-x-1 !px-2"
           />
         </div>
       </div>
@@ -39,17 +40,17 @@ const PostInfoHeader = ({ postData }: Props) => {
           <div className="flex items-start gap-3">
             <Link href={profileLink}>
               <UserProfileImg
-                src={postData.author.profileImage}
-                userName={postData.author.userName}
+                src={postData?.author?.profileImage}
+                userName={postData?.author?.userName}
                 className="size-20 rounded-2xl"
               />
             </Link>
             <div className="flex flex-col gap-1">
               <Link href={profileLink} className="text-xl font-medium">
-                {postData.author.firstName} {postData.author.lastName}
+                {postData?.author?.firstName} {postData?.author?.lastName}
               </Link>
               <Link href={profileLink} className="text-sm">
-                @{postData.author.userName}
+                @{postData?.author?.userName}
               </Link>
             </div>
           </div>
@@ -57,25 +58,25 @@ const PostInfoHeader = ({ postData }: Props) => {
           <div className="flex gap-2 text-xs text-light-500">
             <p className="flex items-center gap-1">
               <FaLocationDot />
-              {postData.about.country} - {postData.about.state}
+              {postData?.about.country} - {postData?.about.state}
             </p>
             <p className="flex items-center gap-1">
               <IoCalendar />
-              {getFormattedDate(postData.publishedAt)}
+              {getFormattedDate(postData?.publishedAt)}
             </p>
           </div>
 
           <div className="flex gap-2">
             <span className="all-post-card-tags">
-              {postData.about.mainCategory}
+              {postData?.about.mainCategory}
             </span>
             <span className="all-post-card-tags">
-              {postData.about.subCategory}
+              {postData?.about.subCategory}
             </span>
-            <span className="all-post-card-tags">{postData.about.skill}</span>
+            <span className="all-post-card-tags">{postData?.about.skill}</span>
             <span className="all-post-card-tags flex items-center gap-2 fill-custom-100">
               <StarIcon width="14px" height="14px" />
-              {getFormattedDecimal(postData.postRating)}
+              {getFormattedDecimal(postData?.postRating)}
             </span>
           </div>
         </div>
@@ -83,10 +84,11 @@ const PostInfoHeader = ({ postData }: Props) => {
         <div className="flex items-center gap-3 text-sm text-light-500">
           <p>Rate this post</p>
           <StarRating
-            prevRatingValue={postData.yourRating}
+            prevRatingValue={postData?.yourRating}
             ratingFor="POST"
-            postId={postData._id}
-            authorId={postData.author._id}
+            postId={postData?._id}
+            authorId={postData?.author._id}
+            revalidatePath={`/post/${postData?._id}`}
           />
         </div>
       </div>

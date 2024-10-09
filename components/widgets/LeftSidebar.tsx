@@ -15,14 +15,25 @@ import {
 } from "../ui/drawer";
 import { Button } from "../ui/button";
 import { handleLogout } from "@/lib/functions/auth.functions";
+import { useUserContext } from "@/context/AuthProvider";
 
 const LeftSidebar = () => {
+  const { setUser } = useUserContext();
   const pathname = usePathname();
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const handleLogoutClick = async () => {
     await handleLogout();
+    setUser({
+      currentUserId: "",
+      email: "",
+      username: "",
+      firstName: "",
+      imageUrl: "",
+      isTalent: false,
+      lastName: "",
+    });
     router.push("/sign-in");
   };
 
