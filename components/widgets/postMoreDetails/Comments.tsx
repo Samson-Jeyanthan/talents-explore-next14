@@ -7,7 +7,7 @@ type Props = {
 };
 
 const Comments = async ({ params, numberOfComments }: Props) => {
-  const data = await getPostCommentsAction(params.id, " ");
+  const data = await getPostCommentsAction(params.id, "_", 1);
   if (data?.status === 400) return <p>Could not fetch comment data</p>;
   return (
     <section className="flex flex-col gap-2">

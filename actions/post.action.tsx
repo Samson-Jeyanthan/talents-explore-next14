@@ -137,11 +137,12 @@ export async function getPostByIdAction(
 
 export async function getPostCommentsAction(
   postId: string | undefined,
-  userId: string | undefined
+  userId: string | undefined,
+  pageNo: number
 ) {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/comments?userId=${userId}&postId=${postId}&pageNo=${1}&pageSize=${10}`
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/comments?userId=${userId}&postId=${postId}&pageNo=${pageNo}&pageSize=${20}`
     );
     const res = await response.json();
     if (res.status === "7400") {

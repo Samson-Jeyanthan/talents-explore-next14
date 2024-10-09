@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url("./theme.css");
-
 .embla {
   max-width: 50.5rem;
   margin: auto;
@@ -27,10 +25,11 @@
   margin-left: calc(var(--slide-spacing) * -1);
 }
 .embla__slide {
-  transform: translate3d(0, 0, 0);
+  display: grid;
+  place-items: center;
+  transform: translate3d(50, 50, 50);
   flex: 0 0 var(--slide-size);
   min-width: 0;
-  padding-left: var(--slide-spacing);
 }
 .embla__slide__number {
   box-shadow: inset 0 0 0 0.2rem var(--detail-medium-contrast);
@@ -127,9 +126,5 @@
 @layer utilities {
   .media-arrow-btn {
     @apply size-9 rounded-full bg-none border-2 border-solid border-dark-400 hover:border-none hover:bg-light-900 p-1 font-bold text-xl text-light-500 hover:text-dark-100;
-  }
-
-  .embla__controls {
-    @apply flex gap-2 items-center justify-between mt-8 w-[90%];
   }
 }
