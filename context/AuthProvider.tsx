@@ -1,9 +1,8 @@
 "use client";
 
 import { userPersonalInfoAction } from "@/actions/auth.action";
-import { verifySession } from "@/lib/session";
+import { checkForToken } from "@/lib/functions/auth.functions";
 import { IContextType, ICurrentUser } from "@/types/auth.types";
-import { jwtDecode } from "jwt-decode";
 import { useRouter } from "next/navigation";
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -37,7 +36,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const checkAuthUser = async () => {
     setIsLoading(true);
-    const token = await verifySession();
+    const token = await checkForToken();
 
     if (!token) {
       setIsLoading(false);
@@ -45,13 +44,12 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     try {
-      const decodedJWTToken = jwtDecode(token);
-      const res = await userPersonalInfoAction(decodedJWTToken?.sub);
+      const res = await userPersonalInfoAction(token);
 
       if (res.status === "7400") {
         if (res?.response?.personalInfo?.firstName) {
           setUser({
-            currentUserId: res?.response?._id,
+            currentUserId: token,
             firstName: res?.response?.personalInfo?.firstName,
             lastName: res?.response?.personalInfo?.lastName,
             username: res?.response?.userName,
@@ -61,7 +59,16 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           });
           setIsAuthenticated(true);
         } else {
-          router.push(`/complete-profile/${decodedJWTToken?.sub}`);
+          setUser({
+            currentUserId: token,
+            firstName: "",
+            lastName: "",
+            username: res?.response?.userName,
+            email: res?.response?.email,
+            imageUrl: null,
+            isTalent: false,
+          });
+          router.push("/complete-profile");
           toast.info("Please complete your profile", {
             duration: 5000,
           });

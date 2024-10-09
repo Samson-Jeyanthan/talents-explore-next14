@@ -7,3 +7,4 @@ export { default as CommentCard } from "./CommentsCard";
 export { default as SavedFolderCard } from "./SavedFolderCard";
 export { default as SavedItemCard } from "./SavedItemCard";
 export { default as SavedListCard } from "./SavedListCard";
+export { default as PostCard } from "./PostCard";

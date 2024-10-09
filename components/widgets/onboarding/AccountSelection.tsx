@@ -3,9 +3,22 @@
 import Image from "next/image";
 import { Spotlight } from "../../ui/Spotlight";
 import { motion as m } from "framer-motion";
+import { useUserContext } from "@/context/AuthProvider";
+import { useRouter } from "next/navigation";
 
 const AccountSelection = () => {
+  const { user } = useUserContext();
+  const router = useRouter();
   const spotlightColor = "rgba(255,255,255,0.3)";
+
+  const handleAccountSelection = (skip: boolean) => {
+    if (skip) {
+      router.push(`/profile/${user.username}/${user.currentUserId}`);
+    } else {
+      router.push("/talent-account-register-form");
+    }
+  };
+
   return (
     <>
       <div className="absolute left-0 top-0 h-full w-1/2 rotate-[10deg]">
@@ -57,7 +70,10 @@ const AccountSelection = () => {
           </div>
         </div>
 
-        <div className="account_selection_button">
+        <div
+          className="account_selection_button"
+          onClick={() => handleAccountSelection(true)}
+        >
           <Image
             src="/assets/images/normal-user-icon.png"
             width={512}

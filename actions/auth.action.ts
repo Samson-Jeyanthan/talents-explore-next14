@@ -51,6 +51,7 @@ export const completeProfileAction = async (
       `/user/personalInfo/${userId}`,
       formData
     );
+    await storeIsAbout(true);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -78,7 +79,8 @@ export const signinAction = async (formData: unknown) => {
         await storeIsAbout(false);
         await createSession(res.response.accessToken);
       }
-      return res;
+
+      return userDetailsRes; // returning user personal data
     } else {
       return false;
     }

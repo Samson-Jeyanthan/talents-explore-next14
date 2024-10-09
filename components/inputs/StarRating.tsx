@@ -11,6 +11,7 @@ type Props = {
   ratingFor: "PROFILE" | "POST" | "SHARE";
   authorId: string;
   postId?: string;
+  revalidatePath: string;
 };
 
 const StarRating = ({
@@ -18,6 +19,7 @@ const StarRating = ({
   ratingFor,
   authorId,
   postId,
+  revalidatePath,
 }: Props) => {
   const { user } = useUserContext();
   const [rating, setRating] = useState(prevRatingValue);
@@ -27,16 +29,15 @@ const StarRating = ({
     setRating(val);
     if (prevRatingValue === val)
       return toast.info("You have already rated", { duration: 4000 });
-    if (ratingFor === "POST") {
-      handleAddRating(
-        user.currentUserId,
-        postId,
-        authorId,
-        ratingFor,
-        val,
-        `/post/${postId}`
-      );
-    }
+
+    handleAddRating(
+      user.currentUserId,
+      postId,
+      authorId,
+      ratingFor,
+      val,
+      revalidatePath
+    );
   };
 
   return (

@@ -5,7 +5,12 @@ export type TCurrentUserData = {
     bio: string;
     ethnic: string;
     featuredPhotos: [string];
-    socialLinks: [string];
+    socialLinks: [
+      {
+        type: string;
+        url: string;
+      },
+    ];
     _id: string;
     ethnicId: string;
   };
@@ -57,6 +62,7 @@ export type TPublicUserData = {
     profileImage: string;
     language: string;
     professional: string;
+    dob: string;
   };
   location: string;
   userName: string;
@@ -79,11 +85,11 @@ export interface ITopPost {
   };
   media: [
     {
-      url: string | null;
-      urlKey: string | null;
+      url: string;
+      urlKey: string;
       mediaType: string;
-      thumbnailUrl: string | null;
-      thumbnailUrlKey: string | null;
+      thumbnailUrl: string;
+      thumbnailUrlKey: string;
     },
   ];
   postRating: number;

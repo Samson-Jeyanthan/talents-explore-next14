@@ -96,6 +96,7 @@ function AllPostCard({ allPostCard, index }: Prop) {
           authorId={allPostCard.author._id}
           postId={allPostCard._id}
           isBestWork={isPinned}
+          className="flex-center !size-10 space-x-1 !px-2"
         />
       </div>
     </MotionDiv>

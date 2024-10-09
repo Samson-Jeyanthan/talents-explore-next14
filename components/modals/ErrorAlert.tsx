@@ -1,3 +1,5 @@
+"use client";
+
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -22,7 +24,7 @@ const ErrorAlert = ({
 }) => {
   return (
     <AlertDialog open={isOpen}>
-      <AlertDialogOverlay className="bg-black/10 backdrop-blur-sm" />
+      <AlertDialogOverlay />
       <AlertDialogContent className="rounded-2xl border-none bg-dark-250 p-6 text-light-900">
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
