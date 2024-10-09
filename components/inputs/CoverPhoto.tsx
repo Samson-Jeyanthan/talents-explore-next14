@@ -14,8 +14,9 @@ const CoverPhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
   const { handleImageInput, media, resetMedia, error, setError, setMedia } =
     useCoverAndProfilePic();
   const [isOpen, setIsOpen] = useState(false);
-  const [finalCropImage, setFinalCropImage] = useState(null);
   const [isActionOpen, setIsActionOpen] = useState(false);
+  const [prevMedia, setPrevMedia] = useState(mediaUrl || null);
+  const [finalCropImage, setFinalCropImage] = useState(null);
 
   // handle image input change
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -26,7 +27,6 @@ const CoverPhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
 
   // image crop compelte function
   const handleCropComplete = (img: any) => {
-    console.log(img, "img");
     setFinalCropImage(img?.croppedPrev);
     fieldChange(img.croppedData);
     setIsOpen(false);
@@ -35,16 +35,17 @@ const CoverPhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
 
   // handle the photo action modal open and input change
   const handleInputBtn = () => {
-    if (finalCropImage === null) {
-      photoRef.current?.click();
-    } else {
+    if (finalCropImage || prevMedia) {
       setIsActionOpen(true);
+    } else {
+      photoRef.current?.click();
     }
   };
 
   // delete the cropped photo
   const handleDelete = () => {
     setFinalCropImage(null);
+    setPrevMedia(null);
     setIsActionOpen(false);
   };
 
@@ -57,7 +58,7 @@ const CoverPhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
 
   return (
     <>
-      <div className="flex-center relative flex h-[22.5rem] max-h-[22.5rem] w-full rounded-xl bg-dark-300">
+      <div className="flex-center relative flex h-[20.5rem] max-h-[20.5rem] w-full rounded-xl bg-dark-300">
         <input
           type="file"
           ref={photoRef}
@@ -66,11 +67,11 @@ const CoverPhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
           accept="image/jpeg,image/jpg,image/png,image/webp"
         />
 
-        {finalCropImage ? (
+        {finalCropImage || prevMedia ? (
           <Image
-            src={finalCropImage}
+            src={finalCropImage || prevMedia || ""}
             alt="cropped-cover-image"
-            width={1024}
+            width={2048}
             height={1024}
             className="size-full rounded-xl object-cover"
           />
@@ -86,14 +87,14 @@ const CoverPhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
           className="shad-button_dark absolute bottom-2 right-2"
           onClick={handleInputBtn}
         >
-          {finalCropImage || mediaUrl ? (
+          {finalCropImage || prevMedia ? (
             <div className="grid place-items-center text-base">
               <MdEdit fill="white" />
             </div>
           ) : (
             <CameraIcon fill="white" width="21px" height="21px" />
           )}
-          {finalCropImage ? "Edit Cover Photo" : "Add Cover Photo"}
+          {finalCropImage || prevMedia ? "Edit Cover Photo" : "Add Cover Photo"}
         </div>
       </div>
 

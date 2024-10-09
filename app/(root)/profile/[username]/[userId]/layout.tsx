@@ -47,7 +47,7 @@ async function layout({
   children: React.ReactNode;
   params: { userId: string; username: string };
 }) {
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  // await new Promise((resolve) => setTimeout(resolve, 1000));
   const userData = await fetchUserDataAction(params.userId, params.username);
   const token = await getSession();
   const isOwnProfile = token === params.userId;
