@@ -10,6 +10,7 @@ import {
   TopPosts,
 } from "@/components/widgets";
 import { getSession } from "@/lib/session";
+import { addLineBreaks } from "@/lib/utils/addLinkBreaks";
 
 async function Overview({ params }: TProfileURLProps) {
   const userData: TCurrentUserData | TPublicUserData =
@@ -40,9 +41,9 @@ async function Overview({ params }: TProfileURLProps) {
           <TopPosts params={params} isOwnProfile={isOwnProfile} />
           <div className="flex flex-col gap-2">
             <h3 className="text-sm">Description</h3>
-            <p className="w-5/6 text-justify text-[13px] text-light-500">
-              {userData?.morePersonalInfo?.bio}
-            </p>
+            <div className="w-5/6 text-justify text-[13px]">
+              {addLineBreaks(userData?.morePersonalInfo?.bio)}
+            </div>
           </div>
           <LanguageEducationDetails params={params} />
           <AwardsAndCertificates params={params} />

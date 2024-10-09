@@ -7,7 +7,7 @@ import React, {
 import { EmblaCarouselType } from "embla-carousel";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { Button } from "@/components/ui/button";
-import "@/styles/embla.css";
+import "@/styles/moreDetailPostCarousel.css";
 
 type UsePrevNextButtonsType = {
   prevBtnDisabled: boolean;

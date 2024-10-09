@@ -19,7 +19,7 @@ const BlurredMedia = ({ postData }: Props) => {
       }
       width={200}
       height={200}
-      className="absolute top-0 z-0 h-[40rem] w-4/5 translate-x-1/4 translate-y-1/3 object-cover opacity-30 lg:w-[40rem]"
+      className="absolute top-0 z-0 h-[30rem] w-4/5 translate-x-1/2 translate-y-1/2 object-cover opacity-30 lg:w-[30rem]"
       alt="blur-media-img"
     />
   );

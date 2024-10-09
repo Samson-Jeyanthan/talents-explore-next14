@@ -13,6 +13,7 @@ export async function middleware(request: NextRequest) {
     "/settings",
     "/community",
     "/create-post",
+    "/profile/edit/[userId]",
   ];
 
   const protectAuthRoutes = ["/sign-in", "/join-us", "/forgot-password"];

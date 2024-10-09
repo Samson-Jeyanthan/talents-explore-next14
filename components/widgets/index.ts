@@ -32,5 +32,7 @@ export { default as RatingDetails } from "./postMoreDetails/RatingDetails";
 export { default as TagsAndOtherInfo } from "./postMoreDetails/TagsAndOtherInfo";
 export { default as Comments } from "./postMoreDetails/Comments";
 // carousel widgets
-export { default as VideoAsImage } from "./mediaCarousal/VideoAsImage";
-export { default as TopPostsCarousel } from "./mediaCarousal/TopPostsCarousel";
+export { default as VideoAsImage } from "./mediaCarousel/VideoAsImage";
+export { default as TopPostsCarousel } from "./mediaCarousel/TopPostsCarousel";
+export { default as MoreDetailPostCarousel } from "./mediaCarousel/MoreDetailPostCarousel";
+export { default as PostFeedCarousel } from "./mediaCarousel/PostFeedCarousel";

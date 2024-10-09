@@ -54,7 +54,7 @@ export const EducationCard = ({ userEducationCard, index, length }: EProp) => {
         <p>-</p>
         <p>{userEducationCard.to}</p>
       </div>
-      <div className="absolute -right-1 top-1">
+      <div className="pro-info-options-wrap">
         <ProInfoEditOptions id={userEducationCard._id} cardName="education" />
       </div>
     </MotionDiv>
@@ -79,7 +79,7 @@ export const LanguageCard = ({ userLangCard, index, length }: LProp) => {
         {userLangCard.languageName}
       </h1>
       <p className="text-xs text-light-500">{userLangCard.level}</p>
-      <div className="absolute -right-1 top-1">
+      <div className="pro-info-options-wrap">
         <ProInfoEditOptions id={userLangCard._id} cardName="language" />
       </div>
     </MotionDiv>
@@ -106,7 +106,7 @@ export const AwardCard = ({ userAwardCard, index, length }: AProp) => {
       </h1>
       <p className="text-xs text-light-500">{userAwardCard.givenBy}</p>
       <p className="text-xs text-light-500">{userAwardCard.year}</p>
-      <div className="absolute -right-1 top-1">
+      <div className="pro-info-options-wrap">
         <ProInfoEditOptions id={userAwardCard._id} cardName="award" />
       </div>
     </MotionDiv>

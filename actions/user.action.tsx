@@ -14,7 +14,7 @@ import {
   AwardCard,
   EducationCard,
   LanguageCard,
-} from "@/components/cards/ProfessionalDetailCards";
+} from "@/components/cards/ProDetailCards";
 import { TopPostCard } from "@/components/cards";
 
 export const userPublicInfoAction = async (
