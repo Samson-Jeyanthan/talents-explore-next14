@@ -35,3 +35,4 @@ export { default as Comments } from "./postMoreDetails/Comments";
 export { default as VideoAsImage } from "./mediaCarousel/VideoAsImage";
 export { default as TopPostsCarousel } from "./mediaCarousel/TopPostsCarousel";
 export { default as MoreDetailPostCarousel } from "./mediaCarousel/MoreDetailPostCarousel";
+export { default as PostFeedCarousel } from "./mediaCarousel/PostFeedCarousel";
