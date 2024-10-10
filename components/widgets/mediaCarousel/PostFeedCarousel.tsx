@@ -1,8 +1,9 @@
-"use client";
+'use client';
 
 import "@/styles/postFeedCarousel.css";
 import useEmblaCarousel from "embla-carousel-react";
 import { EmblaOptionsType } from "embla-carousel";
+import { useEffect, useRef } from "react";
 import { useDotButton } from "./EmblaCarouselDotButton";
 import {
   NextButton,
@@ -17,9 +18,9 @@ type Props = {
   options?: EmblaOptionsType;
   length: number;
 };
+
 const PostFeedCarousel = ({ slides, options, length }: Props) => {
   const [emblaRef, emblaApi] = useEmblaCarousel(options);
-
   const { selectedIndex } = useDotButton(emblaApi);
 
   const {
@@ -28,6 +29,40 @@ const PostFeedCarousel = ({ slides, options, length }: Props) => {
     onPrevButtonClick,
     onNextButtonClick,
   } = usePrevNextButtons(emblaApi);
+
+  // Store references to each video in the carousel
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+
+  useEffect(() => {
+    const handleSelect = () => {
+      if (!emblaApi) return;
+
+      const currentIndex = emblaApi.selectedScrollSnap();
+
+      // Pause all videos
+      videoRefs.current.forEach((video) => {
+        if (video) {
+          video.pause();
+        }
+      });
+
+      // Play the video in the current slide
+      const currentSlideVideo = videoRefs.current[currentIndex];
+      if (currentSlideVideo) {
+        currentSlideVideo.play();
+        currentSlideVideo.muted = true
+      }
+    };
+
+    if (emblaApi) {
+      emblaApi.on('select', handleSelect);
+      handleSelect(); // Ensure the correct video is played on mount
+    }
+
+    return () => {
+      if (emblaApi) emblaApi.off('select', handleSelect);
+    };
+  }, [emblaApi]);
 
   return (
     <section className="pf-embla">
@@ -42,6 +77,7 @@ const PostFeedCarousel = ({ slides, options, length }: Props) => {
                     key={index}
                     videoUrl={item.url}
                     thumbnailUrl={item.thumbnailUrl}
+                    videoRef={(el: HTMLVideoElement | null) => (videoRefs.current[index] = el)}
                   />
                 ) : (
                   <Image

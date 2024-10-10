@@ -5,23 +5,24 @@ import React, { useRef, useEffect } from 'react';
 interface VideoCardProps {
     videoUrl: string;
     thumbnailUrl: string;
+    videoRef?: (instance: HTMLVideoElement | null) => void;
 }
 
-const VideoCard: React.FC<VideoCardProps> = ({ videoUrl, thumbnailUrl }) => {
-    const videoRef = useRef<HTMLVideoElement>(null);
-    
+const VideoCard: React.FC<VideoCardProps> = ({ videoUrl, thumbnailUrl, videoRef }) => {
+    const localVideoRef = useRef<HTMLVideoElement>(null);
+
     useEffect(() => {
         const handlePlay = () => {
             // Pause all other videos when one video starts playing
             const allVideos = document.querySelectorAll('video');
             allVideos.forEach((video) => {
-                if (video !== videoRef.current) {
+                if (video !== localVideoRef.current) {
                     video.pause();
                 }
             });
         };
 
-        const videoElement = videoRef.current;
+        const videoElement = localVideoRef.current;
         if (videoElement) {
             videoElement.addEventListener('play', handlePlay);
         }
@@ -34,9 +35,15 @@ const VideoCard: React.FC<VideoCardProps> = ({ videoUrl, thumbnailUrl }) => {
     }, []);
 
     return (
+        // eslint-disable-next-line tailwindcss/no-custom-classname
         <div className="video-card">
             <video
-                ref={videoRef}
+                ref={el => {
+                    if (localVideoRef) {
+                        (localVideoRef as React.MutableRefObject<HTMLVideoElement | null>).current = el;
+                    }
+                    if (videoRef) videoRef(el); // Use the videoRef passed from parent
+                }}
                 controls
                 width="100%"
                 poster={thumbnailUrl}
