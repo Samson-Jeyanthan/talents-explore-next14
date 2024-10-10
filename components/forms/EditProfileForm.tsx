@@ -5,7 +5,6 @@ import { TCurrentUserData } from "@/types/profile.types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import TransparentLoader from "../ui/transparent-loader";
 import { Form, FormField } from "../ui/form";
 import {
   CheckboxInput,
@@ -20,6 +19,7 @@ import { GENDER_VALUES } from "@/constants";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
 import { useUserContext } from "@/context/AuthProvider";
+import { TransparentLoader } from "../modals";
 
 type Props = {
   langData: any;
@@ -61,7 +61,9 @@ const EditProfileForm = ({ langData, professionData, userData }: Props) => {
 
   return (
     <>
-      {form.formState.isSubmitting && <TransparentLoader />}
+      {form.formState.isSubmitting && (
+        <TransparentLoader text="Updating Profile" />
+      )}
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}

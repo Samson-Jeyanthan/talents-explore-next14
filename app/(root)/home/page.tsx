@@ -6,6 +6,10 @@ async function Home() {
   const token = await getSession();
   const data = await getAllPostsAction(token, 1, 10);
 
+  if (data.status === 400) {
+    return <div>{data.message}</div>;
+  }
+
   return (
     <section className="flex w-full items-start justify-between gap-2">
       <div className="flex-center w-full">

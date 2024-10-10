@@ -4,7 +4,7 @@ import {
   getProfessionsAction,
 } from "@/actions/utils.action";
 import { CompleteProfileForm } from "@/components/forms";
-import { verifySession } from "@/lib/session";
+import { getSession } from "@/lib/session";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 
@@ -16,9 +16,9 @@ export const metadata: Metadata = {
 const CompleteProfile = async () => {
   const langData = await getLanguagesAction();
   const professionData = await getProfessionsAction();
-  const token = await verifySession();
+  const token = await getSession();
 
-  if (token) {
+  if (token !== "") {
     const res = await checkIsAboutAction(token);
     if (res) redirect("/home");
   } else {

@@ -19,7 +19,7 @@ export async function getUserAllPostsAction(
     if (res.status === "7400") {
       const data = res.response;
       return data.map((item: IPost, index: number) => (
-        <AllPostCard key={item._id} allPostCard={item} index={index} />
+        <AllPostCard key={index} allPostCard={item} index={index} />
       ));
     } else {
       const data = {
@@ -101,7 +101,7 @@ export async function getUserCreditPostsAction(
     if (res.status === "7400") {
       const data = res.response;
       return data.map((item: IPost, index: number) => (
-        <AllPostCard key={item._id} allPostCard={item} index={index} />
+        <AllPostCard key={index} allPostCard={item} index={index} />
       ));
     } else {
       const data = {
@@ -148,7 +148,7 @@ export async function getPostCommentsAction(
     if (res.status === "7400") {
       const data = res.response;
       return data.map((item: IComments, index: number) => (
-        <CommentCard key={item._id} commentCard={item} index={index} />
+        <CommentCard key={index} commentCard={item} index={index} />
       ));
     } else {
       const data = {
@@ -203,7 +203,7 @@ export async function getAllPostsAction(
     if (res.status === "7400") {
       const data = res.response;
       return data.map((item: IPost, index: number) => (
-        <PostCard key={item._id} postFeedCard={item} index={index} />
+        <PostCard key={index} postFeedCard={item} index={index} />
       ));
     } else {
       const data = {

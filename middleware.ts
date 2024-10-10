@@ -1,19 +1,23 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { verifyIsAbout, verifySession } from "./lib/session";
+import { verifyIsAbout, getSession } from "./lib/session";
 
 // This function can be marked `async` if using `await` inside
 export async function middleware(request: NextRequest) {
-  const token = await verifySession();
+  const token = await getSession();
   const isAbout = await verifyIsAbout();
 
   const protectedRoutes = [
+    "/complete/profile",
     "/home",
     "/saved-collection",
     "/settings",
     "/community",
     "/create-post",
-    "/profile/edit/[userId]",
+    "/profile/edit",
+    "/settings",
+    "/create-share",
+    "/search",
   ];
 
   const protectAuthRoutes = ["/sign-in", "/join-us", "/forgot-password"];
