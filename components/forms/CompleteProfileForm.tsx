@@ -20,10 +20,10 @@ import { z } from "zod";
 import { completeProfileAction } from "@/actions/auth.action";
 import { convertToISOString } from "@/lib/hooks/useDateSelector";
 import { toast } from "sonner";
-import TransparentLoader from "../ui/transparent-loader";
 import { getFileUpload } from "@/lib/utils/getFileUpload";
 import { useRouter } from "next/navigation";
 import { useUserContext } from "@/context/AuthProvider";
+import { TransparentLoader } from "../modals";
 
 const CompleteProfileForm = ({ langData, professionData }: any) => {
   const { user, setUser } = useUserContext();
@@ -124,7 +124,9 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
 
   return (
     <>
-      {form.formState.isSubmitting && <TransparentLoader />}
+      {form.formState.isSubmitting && (
+        <TransparentLoader text="Submitting Form" />
+      )}
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -168,7 +170,7 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
             <div className="flex w-full flex-col gap-1">
               <label className="shad-auth_form_label">Username</label>
               <div className="shad-auth_form_input flex-start gap-4 rounded-md p-2 px-3 text-sm">
-                {user.username}
+                @{user.username}
               </div>
             </div>
 

@@ -1,7 +1,12 @@
 "use server";
 
 import axiosInstance from "@/lib/config/axiosInstance";
-import { createSession, storeIsAbout } from "@/lib/session";
+import {
+  createSession,
+  deleteSession,
+  getSession,
+  storeIsAbout,
+} from "@/lib/session";
 import { jwtDecode } from "jwt-decode";
 
 export const registerAction = async (formData: unknown) => {
@@ -59,6 +64,21 @@ export const completeProfileAction = async (
   }
 };
 
+// check for token
+export async function checkForToken() {
+  const token = await getSession();
+
+  if (token === "") {
+    return false;
+  } else {
+    return token;
+  }
+}
+
+export async function deleteToken() {
+  await deleteSession();
+}
+
 export const signinAction = async (formData: unknown) => {
   try {
     const response = await axiosInstance.post("/auth/login", formData);
@@ -69,7 +89,6 @@ export const signinAction = async (formData: unknown) => {
       const userDetailsRes = await userPersonalInfoAction(decodedJWTToken?.sub);
       const userPersonalInfo = userDetailsRes?.response?.personalInfo;
       const userFirstName = userPersonalInfo?.firstName;
-      console.log(userFirstName, "userFirstName");
 
       // store isAbout based on user's first name
       if (userFirstName) {
@@ -137,8 +156,7 @@ export const userPersonalInfoAction = async (userId: string | undefined) => {
 };
 
 export const checkIsAboutAction = async (token: any) => {
-  const decodedJWTToken = jwtDecode(token);
-  const userDetailsRes = await userPersonalInfoAction(decodedJWTToken?.sub);
+  const userDetailsRes = await userPersonalInfoAction(token);
   const userPersonalInfo = userDetailsRes?.response?.personalInfo;
   const userFirstName = userPersonalInfo?.firstName;
 

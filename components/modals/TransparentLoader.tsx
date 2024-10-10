@@ -1,9 +1,17 @@
-import React from "react";
-import { Dialog, DialogContent, DialogOverlay, DialogTitle } from "./dialog";
+import CustomLoader from "../ui/custom-loader";
+import {
+  Dialog,
+  DialogContent,
+  DialogOverlay,
+  DialogTitle,
+} from "../ui/dialog";
 import { cn } from "@/lib/utils";
-import CustomLoader from "./custom-loader";
 
-const TransparentLoader = () => {
+type Props = {
+  text?: string;
+};
+
+const TransparentLoader = ({ text }: Props) => {
   return (
     <Dialog open={true}>
       <DialogOverlay className={cn("bg-black/10 backdrop-blur-sm")} />
@@ -13,7 +21,7 @@ const TransparentLoader = () => {
       >
         <DialogTitle className="hidden" />
         <CustomLoader />
-        <p className="text-light-900">Submitting Form</p>
+        <p className="text-light-900">{text}</p>
       </DialogContent>
     </Dialog>
   );

@@ -14,8 +14,9 @@ import {
   DrawerTitle,
 } from "../ui/drawer";
 import { Button } from "../ui/button";
-import { handleLogout } from "@/lib/functions/auth.functions";
-import { useUserContext } from "@/context/AuthProvider";
+import { INITIAL_USER, useUserContext } from "@/context/AuthProvider";
+import { deleteToken } from "@/actions/auth.action";
+import { handleClearStorage } from "@/lib/functions/auth.functions";
 
 const LeftSidebar = () => {
   const { setUser } = useUserContext();
@@ -24,16 +25,9 @@ const LeftSidebar = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const handleLogoutClick = async () => {
-    await handleLogout();
-    setUser({
-      currentUserId: "",
-      email: "",
-      username: "",
-      firstName: "",
-      imageUrl: "",
-      isTalent: false,
-      lastName: "",
-    });
+    await deleteToken();
+    await handleClearStorage();
+    setUser(INITIAL_USER);
     router.push("/sign-in");
   };
 
