@@ -26,7 +26,7 @@ body {
   }
 
   .no-focus {
-    @apply ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 !important;
+    @apply ring-0 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 !important;
   }
 
   .camera-button {
@@ -105,12 +105,16 @@ body {
 
   /* navigation link */
   .leftsidebar-link {
-    @apply flex-start cursor-pointer gap-4 rounded-full fill-light-600 p-3 px-4 text-sm text-light-600 max-lg:rounded-lg hover:bg-dark-250 hover:fill-light-900 hover:text-light-900;
+    @apply flex-start cursor-pointer gap-4 rounded-lg fill-light-600 p-3 px-4 text-[13px] text-light-600 max-lg:rounded-lg hover:bg-dark-250 hover:fill-light-900 hover:text-light-900;
   }
 
   /* options, widgets and more */
   .menubar-options-item {
-    @apply w-full cursor-pointer gap-3 rounded bg-dark-300 fill-light-600 text-base text-light-600 hover:bg-dark-400 hover:fill-light-900 hover:text-light-900;
+    @apply w-full cursor-pointer gap-3 rounded bg-dark-300 fill-light-600 text-base text-light-600 hover:bg-dark-400 hover:fill-light-900 hover:text-light-900 !important;
+  }
+
+  .modal-content-container {
+    @apply flex flex-col w-full max-w-96 border-none gap-3 rounded-2xl bg-dark-250 pt-3 p-4 !important;
   }
 
   /* connection blocks */
@@ -123,7 +127,7 @@ body {
   }
 
   .connection-modal-content {
-    @apply flex max-h-[78vh] min-h-[78vh] max-w-[25rem] flex-col items-center gap-0 rounded-xl border-none bg-dark-250 p-0 pb-2 2xl:max-w-[30rem] 2xl:max-h-[75vh] 2xl:min-h-[75vh] !important;
+    @apply flex h-[85vh] max-w-[25rem] flex-col items-center gap-0 rounded-2xl border-none bg-dark-250 p-0 pb-2 2xl:max-w-[30rem] 2xl:h-[75vh] !important;
   }
 
   .active-connection-tab {
@@ -131,7 +135,7 @@ body {
   }
 
   .default-connection-tab {
-    @apply flex-center w-full py-4 pt-5 cursor-pointer;
+    @apply flex-center w-full py-4 pt-5 text-[15px] cursor-pointer;
   }
 
   .connection-btn {
@@ -144,11 +148,11 @@ body {
   }
 
   .bio-element-wrap {
-    @apply flex items-center gap-3 text-[13px] text-light-850;
+    @apply flex items-center gap-3 text-[13px] text-light-800;
   }
 
   .bio-details-icon {
-    @apply flex-center size-9 min-w-9 rounded-xl border text-xl border-light-500/40 text-light-500/50;
+    @apply flex-center size-9 min-w-9 rounded-xl border text-xl border-light-500/40 fill-light-500/50 text-light-500/50;
   }
 
   .professional-info-card-wrap {
@@ -183,6 +187,15 @@ body {
 
   .scf-bg-blur-image {
     @apply absolute top-0 left-1 h-[136px] w-full max-w-[290px] rounded-3xl bg-dark-100 object-cover;
+  }
+
+  /* Other styles */
+  .container-wrapper {
+    @apply relative flex-center w-full max-w-5xl 2xl:max-w-[1200px] p-4 pt-0 3xl:p-0 2xl:py-8;
+  }
+
+  .pro-info-options-wrap {
+    @apply absolute right-2.5 top-2.5;
   }
 }
 

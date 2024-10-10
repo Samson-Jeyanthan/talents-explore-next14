@@ -11,6 +11,7 @@ export { default as Navbar } from "./Navbar";
 export { default as CurrentUserAvatar } from "./CurrentUserAvatar";
 export { default as Notification } from "./NotificationSheet";
 export { default as Footer } from "./Footer";
+export { default as RightSidebar } from "./RightSidebar";
 // profile widgets
 export { default as ProfileCover } from "./profile/ProfileCover";
 export { default as NormalUserProfileHeader } from "./profile/NormalUserProfileHeader";
@@ -22,6 +23,7 @@ export { default as MyPhotos } from "./profile/MyPhotos";
 export { default as AwardsAndCertificates } from "./profile/AwardsAndCertificates";
 export { default as LanguageEducationDetails } from "./profile/LanguageEducationDetails";
 export { default as ProfDetailsHeader } from "./profile/ProfDetailsHeader";
+export { default as Contact } from "./profile/Contact";
 // post more details widgets
 export { default as BlurredMedia } from "./postMoreDetails/BlurredMedia";
 export { default as PostInfoHeader } from "./postMoreDetails/PostInfoHeader";
@@ -29,5 +31,8 @@ export { default as PostInfo } from "./postMoreDetails/PostInfo";
 export { default as RatingDetails } from "./postMoreDetails/RatingDetails";
 export { default as TagsAndOtherInfo } from "./postMoreDetails/TagsAndOtherInfo";
 export { default as Comments } from "./postMoreDetails/Comments";
-// media widgets
-export { default as VideoAsImage } from "./mediaCarousal/VideoAsImage";
+// carousel widgets
+export { default as VideoAsImage } from "./mediaCarousel/VideoAsImage";
+export { default as TopPostsCarousel } from "./mediaCarousel/TopPostsCarousel";
+export { default as MoreDetailPostCarousel } from "./mediaCarousel/MoreDetailPostCarousel";
+export { default as PostFeedCarousel } from "./mediaCarousel/PostFeedCarousel";

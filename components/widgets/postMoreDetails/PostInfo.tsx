@@ -17,7 +17,7 @@ const PostInfo = ({ postData }: Props) => {
     if (postDescRef.current) {
       const postDescElement = postDescRef.current;
       postDescRef.current.style.height = `${postDescRef.current.scrollHeight}px`;
-      setShowSeeMore(postDescElement.scrollHeight >= 210);
+      setShowSeeMore(postDescElement.scrollHeight >= 300);
     }
   }, [postData.about.description]);
 
@@ -25,12 +25,12 @@ const PostInfo = ({ postData }: Props) => {
     <div className="flex flex-col gap-2 text-sm text-light-500">
       <h2 className="font-medium text-light-900">Description</h2>
       <div
-        ref={postDescRef}
-        className={`${isSeeMore ? "h-auto" : "h-52"} overflow-hidden transition-all duration-300 ease-in-out`}
+        // ref={postDescRef}
+        className={`${isSeeMore ? "h-[300px]" : "h-max"} overflow-hidden transition-all duration-300 ease-in-out`}
       >
-        <p className="text-justify">
+        <div className="text-justify">
           {addLineBreaks(postData.about.description)}
-        </p>
+        </div>
         {postData.about.keywords.map((keyword) => (
           <p key={keyword} className="mt-1 text-xs">
             {keyword}

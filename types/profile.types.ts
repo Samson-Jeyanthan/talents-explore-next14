@@ -5,7 +5,12 @@ export type TCurrentUserData = {
     bio: string;
     ethnic: string;
     featuredPhotos: [string];
-    socialLinks: [string];
+    socialLinks: [
+      {
+        type: string;
+        url: string;
+      },
+    ];
     _id: string;
     ethnicId: string;
   };
@@ -57,6 +62,7 @@ export type TPublicUserData = {
     profileImage: string;
     language: string;
     professional: string;
+    dob: string;
   };
   location: string;
   userName: string;

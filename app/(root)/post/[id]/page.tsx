@@ -9,9 +9,10 @@ import {
   PostInfoHeader,
   RatingDetails,
   TagsAndOtherInfo,
+  MoreDetailPostCarousel,
+  Footer,
 } from "@/components/widgets";
 import { getSession } from "@/lib/session";
-import EmblaCarousel from "@/components/widgets/mediaCarousal/EmblaCarousal";
 import { EmblaOptionsType } from "embla-carousel";
 
 export const revalidate = 1800;
@@ -53,10 +54,10 @@ async function Post({ params }: TPostURLProps) {
   const OPTIONS: EmblaOptionsType = { loop };
 
   return (
-    <section className="mt-4 flex w-full justify-center">
-      <section className="relative flex w-full flex-col items-center gap-3 p-3 2xl:max-w-[1300px]">
-        <EmblaCarousel slides={data?.media} options={OPTIONS} />
-        <div className="relative mt-4 h-auto w-[90%] items-center justify-center lg:w-[85%]">
+    <section className="container-wrapper mt-4 flex-col pb-6">
+      <section className="relative flex w-full flex-col items-center gap-3">
+        <MoreDetailPostCarousel slides={data?.media} options={OPTIONS} />
+        <div className="relative mt-4 h-auto w-[95%] items-center justify-center lg:w-[90%]">
           <BlurredMedia postData={data} />
           <div className="z-10 flex w-full flex-col gap-6 rounded-[28px] border-2 border-solid border-dark-300 bg-dark-200/50 p-5 backdrop-blur-[80px]">
             <PostInfoHeader postData={data} />
@@ -75,6 +76,7 @@ async function Post({ params }: TPostURLProps) {
           </div>
         </div>
       </section>
+      <Footer />
     </section>
   );
 }

@@ -31,7 +31,7 @@ const PhotoAction = ({
               ? "Edit Profile Photo"
               : "Edit Cover Photo"}
           </DialogTitle>
-          <DialogClose className="cursor-pointer rounded-full bg-dark-400 p-1 text-light-900">
+          <DialogClose className="no-focus cursor-pointer rounded-full bg-dark-400 p-1 text-light-900">
             <MdClose className="text-xl" />
           </DialogClose>
         </header>

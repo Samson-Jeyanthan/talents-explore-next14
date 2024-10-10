@@ -1,3 +1,4 @@
+import Link from "next/link";
 import React from "react";
 
 export function addLineBreaks(text: string) {
@@ -11,21 +12,25 @@ export function addLineBreaks(text: string) {
           {line.split(urlRegex).map((part, idx) => {
             if (urlRegex.test(part)) {
               return (
-                <a
+                <Link
                   key={idx}
                   href={part}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="cursor-pointer text-sm font-medium text-blue-600 hover:text-blue-800"
+                  className="cursor-pointer !font-medium !text-custom-lightBlue"
                 >
                   {part}
-                </a>
+                </Link>
               );
             } else {
-              return <React.Fragment key={idx}>{part}</React.Fragment>;
+              return (
+                <p key={idx} className="text-light-500">
+                  {part}
+                </p>
+              );
             }
           })}
-          <br />
+          <div className="my-0.5" />
         </React.Fragment>
       ))}
     </>

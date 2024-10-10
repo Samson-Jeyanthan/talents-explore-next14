@@ -47,6 +47,7 @@ module.exports = {
           250: "rgba(235, 39, 39, 0.06)", // red off
           300: "#16a34a", // green
           350: "rgba(22, 163, 74, 0.1)", // green off
+          lightBlue: "#1e40af",
         },
       },
       animation: {

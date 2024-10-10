@@ -47,7 +47,7 @@ async function layout({
   children: React.ReactNode;
   params: { userId: string; username: string };
 }) {
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  // await new Promise((resolve) => setTimeout(resolve, 1000));
   const userData = await fetchUserDataAction(params.userId, params.username);
   const token = await getSession();
   const isOwnProfile = token === params.userId;
@@ -56,13 +56,17 @@ async function layout({
   }
 
   const isTalent = userData?.isTalent;
+  const isLoggedIn = token === "";
 
   return (
-    <main className="relative flex w-full flex-col items-center justify-center gap-6">
+    <main
+      className={`${isLoggedIn && "pt-6"} container-wrapper flex-col gap-6 pb-6`}
+    >
       <ProfileCover
         coverPhoto={userData?.personalInfo?.coverImage}
         isTalent={isTalent}
         avgRating={userData?.avgRating}
+        isLoggedIn={isLoggedIn}
       />
 
       <section

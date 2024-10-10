@@ -9,15 +9,19 @@ import { Dialog } from "../../ui/dialog";
 import ConnectionListModal from "../../modals/ConnectionListModal";
 import { MessageIcon } from "@/public/assets/svgs";
 import { useUserContext } from "@/context/AuthProvider";
+import { StarRating } from "@/components/inputs";
+import { TCurrentUserData, TPublicUserData } from "@/types/profile.types";
+import { useRouter } from "next/navigation";
 
 const ProfileHeader = ({
   userData,
   isOwnProfile,
 }: {
-  userData: any;
+  userData: TCurrentUserData | TPublicUserData;
   isOwnProfile: boolean;
 }) => {
-  const { isAuthenticated } = useUserContext();
+  const { user } = useUserContext();
+  const router = useRouter();
   const [showDP, setShowDP] = useState(false);
   const [showConnection, setShowConnection] = useState(false);
   const [currentTab, setCurrentTab] = useState(0);
@@ -32,8 +36,8 @@ const ProfileHeader = ({
   };
 
   return (
-    <header className="flex w-full flex-col bg-gradient-to-b from-[rgb(17,19,27,0.45)] to-[rgba(17,19,27)] p-2 backdrop-blur-lg 2xl:-mt-10 2xl:p-0">
-      <section className="flex items-start justify-between p-2 sm:p-3 2xl:p-3">
+    <header className="flex w-full flex-col bg-gradient-to-b from-[rgb(17,19,27,0.45)] to-[rgba(17,19,27)] p-2 pt-1 backdrop-blur-lg 2xl:-mt-10 2xl:p-0">
+      <section className="flex items-start justify-between p-2 2xl:p-3">
         <div className="flex-start gap-5">
           <Image
             src={`${userData?.personalInfo?.profileImage ? userData?.personalInfo?.profileImage : "/assets/images/default_profile_pic_2.png"}`}
@@ -52,10 +56,13 @@ const ProfileHeader = ({
             </p>
           </div>
         </div>
-        {isAuthenticated ? (
-          <div className="flex-start gap-3 pt-3">
+        {user.currentUserId ? (
+          <div className="flex-start gap-3 pt-2 2xl:pt-3">
             {isOwnProfile ? (
-              <Button className="shad-button_secondary w-36 rounded-full">
+              <Button
+                className="shad-button_secondary w-36 rounded-full"
+                onClick={() => router.push(`/profile/edit/${userData?._id}`)}
+              >
                 Edit Profile
               </Button>
             ) : (
@@ -63,8 +70,8 @@ const ProfileHeader = ({
                 <Button className="shad-button_primary w-36 rounded-full">
                   Follow
                 </Button>
-                <Button className="shad-button_secondary w-max rounded-full fill-white">
-                  <MessageIcon />
+                <Button className="shad-button_secondary rounded-full fill-white !px-3">
+                  <MessageIcon width="22px" height="22px" />
                 </Button>
               </>
             )}
@@ -74,12 +81,10 @@ const ProfileHeader = ({
             />
           </div>
         ) : null}
-
-        {/* <div className="text-sm text-light-900">Rate this Profile</div> */}
       </section>
 
       <section className="flex items-start justify-between">
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1 2xl:gap-2">
           <div className="flex-center sm:flex-start">
             <h4
               className="connection-counting"
@@ -112,6 +117,18 @@ const ProfileHeader = ({
             </p>
           )}
         </div>
+
+        {user.currentUserId ? (
+          <div className="flex items-center gap-2 pr-3 text-sm text-light-500">
+            <p>Rate {isOwnProfile ? "your" : "this"} profile</p>
+            <StarRating
+              prevRatingValue={userData.yourRating}
+              ratingFor="PROFILE"
+              authorId={userData._id}
+              revalidatePath={`/profile/${userData.userName}/${userData._id}`}
+            />
+          </div>
+        ) : null}
       </section>
 
       {showDP && (

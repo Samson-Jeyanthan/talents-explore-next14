@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import "@/styles/moreDetailPostCarousel.css";
 import {
   EmblaCarouselType,
   EmblaEventType,
@@ -27,15 +28,14 @@ const TWEEN_FACTOR_BASE = 0.52;
 const numberWithinRange = (number: number, min: number, max: number): number =>
   Math.min(Math.max(number, min), max);
 
-type PropType = {
+type Props = {
   slides: [any];
   options?: EmblaOptionsType;
 };
 
-const EmblaCarousel: React.FC<PropType> = (props) => {
+const MoreDetailPostCarousel = ({ slides, options }: Props) => {
   const [isFullScreen, setIsFullScreen] = useState(false);
   const { setmdSelectedMediaIndex } = useUtils();
-  const { slides, options } = props;
   const [emblaRef, emblaApi] = useEmblaCarousel(options);
   const tweenFactor = useRef(0);
   const tweenNodes = useRef<HTMLElement[]>([]);
@@ -55,7 +55,9 @@ const EmblaCarousel: React.FC<PropType> = (props) => {
 
   const setTweenNodes = useCallback((emblaApi: EmblaCarouselType): void => {
     tweenNodes.current = emblaApi.slideNodes().map((slideNode) => {
-      return slideNode.querySelector(".embla__slide__number") as HTMLElement;
+      return slideNode.querySelector(
+        ".mdp-embla__slide__number"
+      ) as HTMLElement;
     });
   }, []);
 
@@ -165,21 +167,26 @@ const EmblaCarousel: React.FC<PropType> = (props) => {
 
   return (
     <>
-      <div className="embla flex w-[86%] flex-col items-center justify-center">
-        <div className="embla__viewport" ref={emblaRef}>
-          <div className="embla__container">
+      <div className="mdp-embla flex w-[86%] flex-col items-center justify-center">
+        <div className="mdp-embla__viewport" ref={emblaRef}>
+          <div className="mdp-embla__container">
             {slides.map((media, index) => (
               <div
-                className={`${options?.loop ? "embla__slide" : "embla__slide__for__two"}`}
+                className={`${options?.loop ? "mdp-embla__slide" : "mdp-embla__slide__for__two"}`}
                 key={index}
               >
                 <div className="relative h-auto w-max">
+                  {}
                   <Image
-                    src={media.url}
+                    src={
+                      media.mediaType === "image"
+                        ? media.url
+                        : "/assets/images/sample-post-img.jpg"
+                    }
                     width={1024}
                     height={1024}
                     alt="media"
-                    className="embla__slide__number h-[30rem] w-auto rounded-2xl bg-none object-contain"
+                    className="mdp-embla__slide__number h-[30rem] w-auto rounded-2xl bg-none object-contain"
                   />
                   {selectedIndex === index && (
                     <div
@@ -195,11 +202,11 @@ const EmblaCarousel: React.FC<PropType> = (props) => {
           </div>
         </div>
 
-        <div className="embla__controls">
+        <div className="mdp-embla__controls">
           <div className="text-sm text-light-500">
             {selectedIndex + 1} / {slides.length}
           </div>
-          <div className="embla__buttons">
+          <div className="mdp-embla__buttons">
             <PrevButton
               onClick={onPrevButtonClick}
               disabled={prevBtnDisabled}
@@ -222,7 +229,7 @@ const EmblaCarousel: React.FC<PropType> = (props) => {
   );
 };
 
-export default EmblaCarousel;
+export default MoreDetailPostCarousel;
 
 // dot buttons design
 /* <div className="embla__dots">
