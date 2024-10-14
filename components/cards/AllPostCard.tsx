@@ -6,6 +6,7 @@ import { MultiPostIcon, PinIcon, StarIcon } from "@/public/assets/svgs";
 import { GoDotFill } from "react-icons/go";
 import { FaLocationDot } from "react-icons/fa6";
 import { PostOptions } from "../options";
+import { RenderTag } from "../others";
 
 interface Prop {
   allPostCard: IPost;
@@ -83,11 +84,13 @@ function AllPostCard({ allPostCard, index }: Prop) {
           {allPostCard.about.description}
         </p>
         <div className="absolute bottom-3 right-3 flex gap-2">
-          <p className="all-post-card-tags">
-            {allPostCard.numberOfRating} Ratings
-          </p>
-          <p className="all-post-card-tags">{allPostCard.about.mainCategory}</p>
-          <p className="all-post-card-tags">{allPostCard.about.skill}</p>
+          <RenderTag
+            Icon=""
+            name={`${allPostCard.numberOfRating} Ratings`}
+            isNotLink={true}
+          />
+          <RenderTag Icon="" name={allPostCard.about.mainCategory} />
+          <RenderTag Icon="" name={allPostCard.about.skill} />
         </div>
       </div>
 

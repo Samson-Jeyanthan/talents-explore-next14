@@ -1,44 +1,32 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ITab } from "@/types/utils.types";
 
-type Tab = {
-  title: string;
-  value: string;
-  content?: string | React.ReactNode | any;
-  href: string;
-};
-
-type ProfileTabsProps = {
-  tabs: Tab[];
+type TabsProps = {
+  tabs: ITab[];
   containerClassName?: string;
   activeTabClassName?: string;
   tabClassName?: string;
 };
 
-const ProfileTabs = ({
+const Tabs = ({
   tabs: propTabs,
   containerClassName,
   activeTabClassName,
   tabClassName,
-}: ProfileTabsProps) => {
+}: TabsProps) => {
   const pathname = usePathname();
-
-  // const [active, setActive] = useState<Tab>(propTabs[0]);
-  // const [tabs, setTabs] = useState<Tab[]>(propTabs);
 
   const moveSelectedTabToTop = (idx: number) => {
     const newTabs = [...propTabs];
     const selectedTab = newTabs.splice(idx, 1);
     newTabs.unshift(selectedTab[0]);
-    // setTabs(newTabs);
-    // setActive(newTabs[0]);
   };
-
   // const [hovering, setHovering] = useState(false);
 
   return (
@@ -74,14 +62,15 @@ const ProfileTabs = ({
                 layoutId="clickedbutton"
                 transition={{ type: "spring", bounce: 0.3, duration: 0.6 }}
                 className={cn(
-                  "absolute inset-0 bg-dark-300 dark:bg-dark-300 rounded-full",
+                  // bg-dark-300 dark:bg-dark-300 inset-0
+                  "absolute rounded-full",
                   activeTabClassName
                 )}
               />
             )}
             <span
               className={cn(
-                `${isActive ? "text-light-900" : "text-light-600"} relative block text-sm w-max`
+                `${isActive ? "text-light-900" : "text-light-600"} hover:text-light-900 relative block text-sm w-max`
               )}
             >
               {tab.title}
@@ -93,7 +82,7 @@ const ProfileTabs = ({
   );
 };
 
-export default ProfileTabs;
+export default Tabs;
 
 export const FadeInDiv = ({
   className,
@@ -102,13 +91,13 @@ export const FadeInDiv = ({
 }: {
   className?: string;
   key?: string;
-  tabs: Tab[];
-  active: Tab;
+  tabs: ITab[];
+  active: ITab;
   hovering?: boolean;
 }) => {
   const pathname = usePathname();
 
-  const isActive = (tab: Tab) => {
+  const isActive = (tab: ITab) => {
     return tab.href === pathname;
   };
   return (

@@ -36,3 +36,9 @@ export { default as VideoAsImage } from "./mediaCarousel/VideoAsImage";
 export { default as TopPostsCarousel } from "./mediaCarousel/TopPostsCarousel";
 export { default as MoreDetailPostCarousel } from "./mediaCarousel/MoreDetailPostCarousel";
 export { default as PostFeedCarousel } from "./mediaCarousel/PostFeedCarousel";
+// explore widgets
+export { default as ExploreCategories } from "./explore/ExploreCategories";
+export { default as ExploreTopTalents } from "./explore/ExploreTopTalents";
+export { default as ExploreBgCarousel } from "./explore/ExploreBgCarousel";
+export { default as ExploreSearchSection } from "./explore/ExploreSearchSection";
+export { default as ExploreTabs } from "./explore/ExploreTabs";

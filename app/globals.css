@@ -64,7 +64,15 @@ body {
   }
 
   .shad-auth_form_textarea {
-    @apply bg-dark-300 border-none placeholder:text-light-500 focus-visible:ring-1 focus-visible:ring-offset-1 ring-offset-light-500 text-light-900 !important;
+    @apply bg-dark-300 border-none placeholder:text-light-500 focus-visible:ring-0 focus-visible:ring-offset-1 ring-offset-light-500 text-light-900 !important;
+  }
+
+  .shad-nav-search-input {
+    @apply no-focus pl-10 flex h-10 bg-transparent w-full border-dark-400 placeholder:text-light-500/80 outline-none text-light-800 focus:outline-none rounded-[10px] !important;
+  }
+
+  .shad-explore-search-input {
+    @apply ring-offset-light-500 focus-visible:ring-0 focus-visible:ring-offset-1 pl-10 pr-12 flex h-11 bg-dark-250 w-full border-dark-400 placeholder:text-light-500/80 outline-none text-light-800 focus:outline-none rounded-[10px] !important;
   }
 
   /* Button */
