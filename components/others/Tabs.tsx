@@ -12,6 +12,7 @@ type TabsProps = {
   containerClassName?: string;
   activeTabClassName?: string;
   tabClassName?: string;
+  titleClassName?: string;
 };
 
 const Tabs = ({
@@ -19,6 +20,7 @@ const Tabs = ({
   containerClassName,
   activeTabClassName,
   tabClassName,
+  titleClassName,
 }: TabsProps) => {
   const pathname = usePathname();
 
@@ -37,7 +39,7 @@ const Tabs = ({
       )}
     >
       {propTabs.map((tab, idx) => {
-        const isActive = pathname.includes(`/${tab.value}`);
+        const isActive = tab.href === pathname;
 
         return (
           <Link
@@ -70,7 +72,8 @@ const Tabs = ({
             )}
             <span
               className={cn(
-                `${isActive ? "text-light-900" : "text-light-600"} hover:text-light-900 relative block text-sm w-max`
+                `${isActive ? "text-light-900" : "text-light-600"} hover:text-light-900 relative block text-sm w-max`,
+                titleClassName
               )}
             >
               {tab.title}

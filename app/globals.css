@@ -67,6 +67,10 @@ body {
     @apply bg-dark-300 border-none placeholder:text-light-500 focus-visible:ring-0 focus-visible:ring-offset-1 ring-offset-light-500 text-light-900 !important;
   }
 
+  .shad-form-input {
+    @apply h-10 bg-dark-300 text-light-900 w-full placeholder:text-light-500 border-none focus-visible:ring-0 focus-visible:ring-offset-1 ring-offset-light-500  outline-none focus:outline-none !important;
+  }
+
   .shad-nav-search-input {
     @apply no-focus pl-10 flex h-10 bg-transparent w-full border-dark-400 placeholder:text-light-500/80 outline-none text-light-800 focus:outline-none rounded-[10px] !important;
   }
@@ -204,6 +208,13 @@ body {
 
   .pro-info-options-wrap {
     @apply absolute right-2.5 top-2.5;
+  }
+
+  .explore-filter-h3-wrap {
+    @apply flex flex-col gap-2;
+  }
+  .explore-filter-h3 {
+    @apply text-sm text-light-850 font-medium w-full border-b border-dark-400 pb-2.5;
   }
 }
 

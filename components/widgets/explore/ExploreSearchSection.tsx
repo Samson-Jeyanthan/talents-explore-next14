@@ -1,10 +1,10 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
-// import { useState } from "react";
 import { CiSearch } from "react-icons/ci";
+import ExploreFilterSheet from "./ExploreFilterSheet";
 
-const ExploreSearchSection = () => {
+const ExploreSearchSection = ({ langData, professionData }: any) => {
   // const [searchValue, setSearchValue] = useState('')
   return (
     <div className="z-20 flex flex-col items-center gap-2">
@@ -15,11 +15,17 @@ const ExploreSearchSection = () => {
         Find tech posts, shared resources, and talented professionals. Explore,
         connect, and discover insights within the community.
       </p>
-      <div className="relative flex w-full max-md:w-[85%] md:max-w-xl">
-        <CiSearch className="absolute left-2 top-2.5 text-2xl text-light-500/80" />
-        <Input
-          placeholder="Search & Explore"
-          className="shad-explore-search-input"
+      <div className="flex-center w-full gap-5">
+        <div className="relative flex w-full max-md:w-[85%] md:max-w-xl">
+          <CiSearch className="absolute left-2 top-2.5 text-2xl text-light-500/80" />
+          <Input
+            placeholder="Search & Explore"
+            className="shad-explore-search-input"
+          />
+        </div>
+        <ExploreFilterSheet
+          langData={langData}
+          professionData={professionData}
         />
       </div>
     </div>

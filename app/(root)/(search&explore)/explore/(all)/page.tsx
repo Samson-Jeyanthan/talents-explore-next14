@@ -14,14 +14,15 @@ async function page() {
     userId: token,
     viewUserId: token,
     pageNo: 1,
-    pageSize: 5,
+    pageSize: 10,
+    userRating: 4,
   });
 
   return (
-    <>
+    <div className="flex flex-col gap-7">
       <ExploreCategories data={mainCategoriesData.response} />
       <ExploreTopTalents data={topTalentsData.response} />
-    </>
+    </div>
   );
 }
 

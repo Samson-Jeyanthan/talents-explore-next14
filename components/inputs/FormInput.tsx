@@ -15,6 +15,7 @@ type TInputProps = {
   inputType: string;
   placeholder?: string;
   formDescription?: string;
+  isAuthForm?: boolean;
 };
 
 const FormInput = ({
@@ -24,6 +25,7 @@ const FormInput = ({
   inputType,
   placeholder,
   formDescription,
+  isAuthForm,
 }: TInputProps) => {
   return (
     <FormField
@@ -39,7 +41,7 @@ const FormInput = ({
               type={inputType}
               placeholder={placeholder}
               {...field}
-              className="shad-auth_form_input"
+              className={`${!isAuthForm ? "shad-form-input" : "shad-auth_form_input"}`}
             />
           </FormControl>
           <FormMessage className="shad-auth_form_message" />

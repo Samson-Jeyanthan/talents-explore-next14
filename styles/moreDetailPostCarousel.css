@@ -92,7 +92,7 @@
 
 @layer utilities {
   .media-arrow-btn {
-    @apply size-9 rounded-full bg-none border-2 border-solid border-dark-400 hover:border-none hover:bg-light-900 p-1 font-bold text-xl text-light-500 hover:text-dark-100;
+    @apply size-9 rounded-full bg-none border-2 border-solid border-dark-400 hover:border-none hover:bg-light-900 p-1 font-bold text-xl text-light-500 hover:text-dark-100 !important;
   }
 
   .mdp-embla__controls {
