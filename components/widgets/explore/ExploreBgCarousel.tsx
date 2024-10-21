@@ -5,7 +5,7 @@ import { EXPLORE_BG_IMAGES } from "@/constants";
 import Image from "next/image";
 
 function ExploreBgCarousel({ slides }: { slides: string[] }) {
-  const autoSlideInterval = 6000;
+  const autoSlideInterval = 16000;
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const next = () => {
@@ -22,7 +22,7 @@ function ExploreBgCarousel({ slides }: { slides: string[] }) {
   return (
     <div className="absolute left-0 top-0 z-0 flex w-full overflow-hidden">
       <div
-        className="flex w-full transition-transform duration-500 ease-out"
+        className="flex w-full transition-transform duration-1000 ease-in-out"
         style={{ transform: `translateX(-${currentIndex * 100}%)` }}
       >
         {slides.map((img, index) => (
