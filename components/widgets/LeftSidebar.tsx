@@ -31,6 +31,15 @@ const LeftSidebar = () => {
     router.push("/sign-in");
   };
 
+  const handleUploadPageClick = (option: "create-post" | "share") => {
+    if (option === "create-post") {
+      router.push("/create-post");
+    } else if (option === "share") {
+      router.push("/share");
+    }
+    setDrawerOpen(false);
+  };
+
   return (
     <>
       <aside className="sticky left-0 top-0 flex max-h-screen min-h-screen min-w-60 max-w-60 flex-col items-center justify-between bg-dark-100 py-6 max-lg:min-w-20 max-sm:hidden 2xl:py-8">
@@ -90,8 +99,16 @@ const LeftSidebar = () => {
             <DrawerDescription>This action cannot be undone.</DrawerDescription>
           </DrawerHeader>
           <div className="flex w-72 flex-col gap-6">
-            <Button className="shad-button_primary w-full">Create Post</Button>
-            <Button className="shad-button_primary w-full">
+            <Button
+              className="shad-button_primary w-full"
+              onClick={() => handleUploadPageClick("create-post")}
+            >
+              Create Post
+            </Button>
+            <Button
+              className="shad-button_primary w-full"
+              onClick={() => handleUploadPageClick("share")}
+            >
               Share Anything
             </Button>
           </div>
