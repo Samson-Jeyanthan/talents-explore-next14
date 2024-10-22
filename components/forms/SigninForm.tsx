@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { SigninValidation } from "@/lib/validations/authValidation";
+import { SigninValidation } from "@/lib/validations/auth.validation";
 import { signinAction } from "@/actions/auth.action";
 import { useRouter } from "next/navigation";
 import { useUserContext } from "@/context/AuthProvider";

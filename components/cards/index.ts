@@ -8,3 +8,5 @@ export { default as SavedFolderCard } from "./SavedFolderCard";
 export { default as SavedItemCard } from "./SavedItemCard";
 export { default as SavedListCard } from "./SavedListCard";
 export { default as PostCard } from "./PostCard";
+export { default as ExploreTopTalentsCard } from "./ExploreTopTalentsCard";
+export { default as NotificationCard } from "./NotificationCard";

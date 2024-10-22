@@ -87,7 +87,7 @@ async function layout({
               tabs={[
                 {
                   title: "Overview",
-                  value: "overview",
+                  value: "",
                   href: `/profile/${params.username}/${params.userId}/`,
                 },
                 {

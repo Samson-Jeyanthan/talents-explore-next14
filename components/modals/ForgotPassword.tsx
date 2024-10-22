@@ -14,7 +14,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { ForgotPasswordValidation } from "@/lib/validations/authValidation";
+import { ForgotPasswordValidation } from "@/lib/validations/auth.validation";
 import { FormInput } from "../inputs";
 import { OTPModal, ResetPasswordModal } from ".";
 import { useRouter } from "next/navigation";

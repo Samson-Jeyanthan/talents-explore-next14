@@ -13,7 +13,7 @@ import {
 } from "../inputs";
 import { GENDER_VALUES } from "@/constants";
 import { Button } from "../ui/button";
-import { CompleteProfileValidation } from "@/lib/validations/authValidation";
+import { CompleteProfileValidation } from "@/lib/validations/auth.validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";

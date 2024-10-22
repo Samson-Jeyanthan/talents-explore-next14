@@ -1,5 +1,5 @@
 import { userTopPostInfoAction } from "@/actions/user.action";
-import { TopPostsCarousel } from "@/components/widgets/";
+import { TopPostsCarousel } from "@/components/widgets";
 import { PostIcon } from "@/public/assets/svgs";
 import React from "react";
 
@@ -19,7 +19,10 @@ const TopPosts = async ({ params, isOwnProfile }: Props) => {
           <div className="profile-detail-heading w-1/2">
             <PostIcon width="21px" height="21px" /> Top Posts
           </div>
-          <TopPostsCarousel slides={data.response} length={data.response.length} />
+          <TopPostsCarousel
+            slides={data.response}
+            length={data.response.length}
+          />
         </div>
       )}
 

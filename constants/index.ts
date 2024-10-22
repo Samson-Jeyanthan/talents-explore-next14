@@ -11,7 +11,7 @@ import {
   UploadIcon,
   WarningIcon,
 } from "@/public/assets/svgs";
-import { TConvertedSvgJsxProps } from "@/types/utils.types";
+import { ITab, TConvertedSvgJsxProps } from "@/types/utils.types";
 import { IoMdMoon } from "react-icons/io";
 import { TbSunHigh } from "react-icons/tb";
 import { AiOutlineLink } from "react-icons/ai";
@@ -245,7 +245,52 @@ export const FOOTER_LINKS: IFooterLinks[] = [
   },
 ];
 
+export const EXPLORE_TABS: ITab[] = [
+  {
+    title: "All",
+    value: "",
+    href: "/explore",
+  },
+  {
+    title: "Posts",
+    value: "posts",
+    href: "/explore/posts",
+  },
+  {
+    title: "Talents",
+    value: "talents",
+    href: "/explore/talents",
+  },
+  {
+    title: "Shared",
+    value: "shared",
+    href: "/explore/shared",
+  },
+];
 
+export const EXPLORE_BG_IMAGES = [
+  "/assets/images/explore-cover.jpg",
+  "/assets/images/explore-cover-3.jpg",
+  "/assets/images/explore-cover.jpg",
+  "/assets/images/explore-cover-2.jpg",
+  "/assets/images/explore-cover.jpg",
+];
 
-
-
+export const TIME_DURATION_FILTERS = [
+  {
+    id: "one month",
+    name: "This Month",
+  },
+  {
+    id: "six month",
+    name: "Six Months",
+  },
+  {
+    id: "one year",
+    name: "This Year",
+  },
+  {
+    id: "two year",
+    name: "Two Years",
+  },
+];

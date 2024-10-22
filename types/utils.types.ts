@@ -1,4 +1,4 @@
-import { ChangeEvent } from "react";
+import React, { ChangeEvent } from "react";
 
 export type TConvertedSvgJsxProps = {
   height?: string;
@@ -52,3 +52,63 @@ export type TErrorData = {
   status: number;
   message: string;
 };
+
+// types for search and explore
+export type TPeopleTagSearch = {
+  _id: string;
+  personalInfo: {
+    firstName: string;
+    lastName: string;
+    gender: string;
+    dob: string;
+    languageKnown: string;
+    professional: string;
+    profileImage: string | null;
+    coverImage: string | null;
+    shortBio: string;
+  };
+};
+export interface ISearchParams {
+  searchType: "ALL" | "FEED" | "SHARE" | "TALENT" | "CREDITS";
+  userId: string;
+  viewUserId?: string;
+  pageNo: number;
+  pageSize: number;
+  searchText?: string;
+  mainCategoryId?: string;
+  subCategoryId?: string;
+  skillId?: string;
+  level?: string;
+  primaryLanguage?: string;
+  secondaryLanguage?: string;
+  publicRating?: string;
+  privateRating?: string;
+  keywords?: string[]; // Array of strings for keywords
+  description?: string;
+  country?: string;
+  state?: string;
+  creditTitle?: string;
+  creditPeopleTag?: string;
+  resultTime?: string;
+  userRating?: number;
+  userGender?: string;
+  ethnic?: string;
+  userLanguage?: string;
+}
+// userProfession?: string;
+
+export interface ITopTalentsProps {
+  _id: string;
+  userName: string;
+  profileImage: string | null;
+  avgRating: number;
+  numberOfRating: number;
+  professional: string;
+}
+
+export interface ITab {
+  title: string;
+  value: string;
+  content?: string | React.ReactNode | any;
+  href: string;
+}
