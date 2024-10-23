@@ -116,12 +116,38 @@ function PostFilterForm({ langData, professionData }: any) {
 
         <div className="explore-filter-h3-wrap">
           <h3 className="explore-filter-h3">Languages</h3>
-          primary & secondary
+          <Dropdown
+            form={form}
+            value={form.getValues("primaryLanguage")}
+            inputName="primaryLanguage"
+            placeholder="Select primary language"
+            options={LangOptions}
+          />
+          <Dropdown
+            form={form}
+            value={form.getValues("secondaryLanguage")}
+            inputName="secondaryLanguage"
+            placeholder="Select primary language"
+            options={LangOptions}
+          />
         </div>
 
         <div className="explore-filter-h3-wrap">
           <h3 className="explore-filter-h3">Location</h3>
-          country & city
+          <Dropdown
+            form={form}
+            value={form.getValues("primaryLanguage")}
+            inputName="primaryLanguage"
+            placeholder="Select primary language"
+            options={LangOptions}
+          />
+          <Dropdown
+            form={form}
+            value={form.getValues("secondaryLanguage")}
+            inputName="secondaryLanguage"
+            placeholder="Select primary language"
+            options={LangOptions}
+          />
         </div>
 
         <div className="explore-filter-h3-wrap">
