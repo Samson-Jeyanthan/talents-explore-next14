@@ -13,7 +13,7 @@ async function layout({ children }: { children: React.ReactNode }) {
 
   return (
     <main className="flex w-full flex-col items-center justify-center">
-      <header className="sticky top-10 w-full">
+      <header className="sticky top-14 w-full">
         <div className="flex-center relative -mt-10 h-[26rem] w-full flex-col gap-2">
           <ExploreSearchSection
             langData={langData}

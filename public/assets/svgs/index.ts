@@ -30,3 +30,12 @@ export { default as PhoneIcon } from "./PhoneIcon";
 export { default as PhoneBookIcon } from "./PhoneBookIcon";
 export { default as CalendarIcon } from "./CalendarIcon";
 export { default as PostIcon } from "./PostIcon";
+// fill icon
+export { default as HeadPhoneFillIcon } from "./HeadPhoneFillIcon";
+export { default as CameraFillIcon } from "./CameraFillIcon";
+export { default as PaintFillIcon } from "./PaintFillIcon";
+export { default as DanceFillIcon } from "./DanceFillIcon";
+export { default as CommandFillIcon } from "./CommandFillIcon";
+export { default as FilmFillIcon } from "./FilmFillIcon";
+export { default as GraphicsFillIcon } from "./GraphicsFillIcon";
+export { default as AnimationFillIcon } from "./AnimationFillIcon";

@@ -221,6 +221,12 @@ body {
 
 /* custom CSS Styles */
 
+.prevent-select {
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+}
+
 .auth-or {
   color: #e6e6e6;
   overflow: visible;

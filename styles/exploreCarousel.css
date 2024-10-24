@@ -2,17 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
-/* .exc - explore carousel */
+/* .exc - explore categories carousel */
 .exc-embla {
   max-width: 78vw;
   /* margin: auto; */
   --slide-height: 4rem;
   --slide-spacing: 1rem;
   --slide-size: auto;
-}
-
-.exc-embla__viewport {
-  overflow: hidden;
 }
 
 .exc-embla__container {
@@ -69,4 +65,25 @@
   min-width: 0;
   padding-left: var(--slide-spacing);
   height: 26rem;
+}
+
+/* explore top talents carousel */
+.expt-embla {
+  max-width: 78vw;
+  --slide-height: 10rem;
+  --slide-spacing: 1rem;
+  --slide-size: auto;
+}
+.expt-embla__container {
+  display: flex;
+  touch-action: pan-y pinch-zoom;
+  margin-left: calc(var(--slide-spacing) * -1);
+}
+.expt-embla__slide {
+  display: grid;
+  place-items: center;
+  transform: translate3d(50, 50, 50);
+  flex: 0 0 auto;
+  min-width: 0;
+  margin-left: 1.1rem;
 }

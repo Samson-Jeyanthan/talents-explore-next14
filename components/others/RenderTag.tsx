@@ -26,7 +26,7 @@ const RenderTag = ({
   return (
     <>
       {isNotLink ? (
-        <div className="flex items-center justify-between gap-2 fill-light-500">
+        <Badge className="flex w-max items-center gap-2 rounded-lg border-none bg-dark-300 fill-light-500 px-4 py-2 text-xs uppercase text-light-500 hover:bg-dark-400 hover:fill-light-900 hover:text-light-900">
           {showIcon && (
             <>
               {isReactIcon ? (
@@ -36,14 +36,13 @@ const RenderTag = ({
               )}
             </>
           )}
-          <Badge className="w-max rounded-lg border-none bg-dark-300 px-4 py-2 text-xs uppercase text-light-500">
-            {name}
-          </Badge>
-        </div>
+
+          {name}
+        </Badge>
       ) : (
         <Link
           href={`/tags/${_id}`}
-          className="flex items-center justify-between gap-2 fill-light-500"
+          className="flex w-max items-center justify-between gap-4 rounded-lg border-none bg-dark-300 fill-light-500 px-4 py-3 text-xs uppercase text-light-500 hover:bg-dark-400 hover:fill-light-900 hover:text-light-900"
         >
           {showIcon && (
             <>
@@ -54,9 +53,7 @@ const RenderTag = ({
               )}
             </>
           )}
-          <Badge className="w-max rounded-lg border-none bg-dark-300 px-4 py-2 text-xs uppercase text-light-500">
-            {name}
-          </Badge>
+          {name}
         </Link>
       )}
     </>
