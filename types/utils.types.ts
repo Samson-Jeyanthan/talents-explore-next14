@@ -54,6 +54,7 @@ export type TErrorData = {
 };
 
 // types for search and explore
+
 export type TPeopleTagSearch = {
   _id: string;
   personalInfo: {
@@ -97,18 +98,35 @@ export interface ISearchParams {
 }
 // userProfession?: string;
 
-export interface ITopTalentsProps {
-  _id: string;
-  userName: string;
-  profileImage: string | null;
-  avgRating: number;
-  numberOfRating: number;
-  professional: string;
-}
-
 export interface ITab {
   title: string;
   value: string;
   content?: string | React.ReactNode | any;
   href: string;
+}
+
+export interface IMainCategoryProps {
+  _id: string;
+  name: string;
+}
+
+export interface IExploreTalentsProps {
+  _id: string;
+  userName: string;
+  profileImage: string | null;
+  avgRating: number;
+  numberOfRating?: number;
+  professional?: string;
+}
+
+export interface ISearchAllTalentsProps {
+  userId: string;
+  viewUserId?: string;
+  pageNo: number;
+  pageSize: number;
+  searchText?: string;
+  userRating?: number;
+  userGender?: string;
+  ethnic?: string;
+  userLanguage?: string;
 }

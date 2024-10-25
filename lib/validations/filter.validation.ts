@@ -5,7 +5,7 @@ export const postFilterValidation = z.object({
   subCategory: z.string(),
   skill: z.string(),
   level: z.string(),
-  postRating: z.string(),
+  postRating: z.number(),
   postDescription: z.string(),
   primaryLanguage: z.string(),
   secondaryLanguage: z.string(),

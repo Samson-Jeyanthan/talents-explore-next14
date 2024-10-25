@@ -1,4 +1,5 @@
-import { getMainCategoriesAction, searchAction } from "@/actions/utils.action";
+import { searchAction } from "@/actions/search.action";
+import { getMainCategoriesAction } from "@/actions/utils.action";
 import { ExploreCategories, ExploreTopTalents } from "@/components/widgets";
 import { getSession } from "@/lib/session";
 
@@ -14,12 +15,12 @@ async function page() {
     userId: token,
     viewUserId: token,
     pageNo: 1,
-    pageSize: 10,
-    userRating: 4,
+    pageSize: 12,
+    userRating: 4.5,
   });
 
   return (
-    <div className="flex flex-col gap-7">
+    <div className="flex flex-col gap-8">
       <ExploreCategories data={mainCategoriesData.response} />
       <ExploreTopTalents data={topTalentsData.response} />
     </div>

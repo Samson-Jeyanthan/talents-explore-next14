@@ -4,7 +4,7 @@
 
 /* .exc - explore categories carousel */
 .exc-embla {
-  max-width: 78vw;
+  max-width: 80vw;
   /* margin: auto; */
   --slide-height: 4rem;
   --slide-spacing: 1rem;
@@ -69,7 +69,7 @@
 
 /* explore top talents carousel */
 .expt-embla {
-  max-width: 78vw;
+  max-width: 80vw;
   --slide-height: 10rem;
   --slide-spacing: 1rem;
   --slide-size: auto;

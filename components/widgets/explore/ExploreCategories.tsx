@@ -5,19 +5,11 @@ import { RenderTag } from "@/components/others";
 import { EmblaOptionsType } from "embla-carousel";
 import useEmblaCarousel from "embla-carousel-react";
 import { usePrevNextButtons } from "../carousels/EmblaCarouselArrowButtons";
-import {
-  AnimationFillIcon,
-  CameraFillIcon,
-  CommandFillIcon,
-  DanceFillIcon,
-  FilmFillIcon,
-  GraphicsFillIcon,
-  HeadPhoneFillIcon,
-  PaintFillIcon,
-} from "@/public/assets/svgs";
+import { getCategoriesIcon } from "@/lib/utils/ReactElementUtils";
+import { IMainCategoryProps } from "@/types/utils.types";
 
 type Props = {
-  data: any[];
+  data: IMainCategoryProps[];
   options?: EmblaOptionsType;
 };
 
@@ -29,33 +21,6 @@ const ExploreCategories = ({ data, options }: Props) => {
     onPrevButtonClick,
     onNextButtonClick,
   } = usePrevNextButtons(emblaApi);
-
-  const getCategoriesIcon = (name: string) => {
-    switch (name) {
-      case "Sports & Fitness":
-        return HeadPhoneFillIcon;
-      case "Songs & Music":
-        return HeadPhoneFillIcon;
-      case "Dance & Styles":
-        return DanceFillIcon;
-      case "Arts & Crafts":
-        return PaintFillIcon;
-      case "Graphics & Designs":
-        return GraphicsFillIcon;
-      case "Programming & Tech":
-        return CommandFillIcon;
-      case "Video & Animation":
-        return AnimationFillIcon;
-      case "UX, Writing & Translation":
-        return HeadPhoneFillIcon;
-      case "Photography":
-        return CameraFillIcon;
-      case "Film & Entertainment":
-        return FilmFillIcon;
-      default:
-        return HeadPhoneFillIcon;
-    }
-  };
 
   return (
     <div className="flex flex-col justify-start gap-3">

@@ -2,12 +2,12 @@
 
 import { ChangeEvent, useState, FocusEvent } from "react";
 import Link from "next/link";
-import { searchPeopleTag } from "@/actions/utils.action";
 import { Input } from "@/components/ui/input";
 import { useUserContext } from "@/context/AuthProvider";
 import { TPeopleTagSearch } from "@/types/utils.types";
 import UserProfileImg from "../others/UserProfileImg";
 import { CiSearch } from "react-icons/ci";
+import { searchPeopleTag } from "@/actions/search.action";
 
 function NavbarSearch() {
   const { user } = useUserContext();

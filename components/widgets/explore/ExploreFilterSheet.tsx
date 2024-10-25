@@ -24,7 +24,7 @@ const ExploreFilterSheet = ({
         <SlEqualizer className="rotate-90" />
       </SheetTrigger>
       <SheetOverlay />
-      <SheetContent className="flex flex-col gap-3 overflow-y-auto border-none bg-dark-200/10 text-light-900">
+      <SheetContent className="flex flex-col gap-3 overflow-y-auto border-none bg-dark-200 text-light-900">
         <SheetHeader>
           <SheetTitle className="text-xl font-semibold">Filters</SheetTitle>
           <SheetDescription>

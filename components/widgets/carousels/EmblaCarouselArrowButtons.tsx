@@ -62,7 +62,7 @@ export const PrevButton: React.FC<PropType> = (props) => {
 
   return (
     <Button className="media-arrow-btn" type="button" {...restProps}>
-      <IoIosArrowBack className="" />
+      <IoIosArrowBack />
       {children}
     </Button>
   );

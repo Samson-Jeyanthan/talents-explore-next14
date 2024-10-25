@@ -1,29 +1,29 @@
 "use client";
 
-import { useUserContext } from "@/context/AuthProvider";
+// import { useUserContext } from "@/context/AuthProvider";
 import { postFilterValidation } from "@/lib/validations/filter.validation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "../ui/form";
 import { Button } from "../ui/button";
-import { Dropdown, FormInput } from "../inputs";
+import { Dropdown, FormInput, StarRating } from "../inputs";
 import { Checkbox } from "../ui/checkbox";
 import { TIME_DURATION_FILTERS } from "@/constants";
 
 function PostFilterForm({ langData, professionData }: any) {
-  const { user } = useUserContext();
-  const router = useRouter();
+  // const { user } = useUserContext();
+  // const router = useRouter();
   const LangOptions = langData.response.map((item: any) => ({
     _id: item._id,
     name: item.language,
   }));
 
-  const professionOptions = professionData.response.map((item: any) => ({
-    _id: item._id,
-    name: item.professional,
-  }));
+  // const professionOptions = professionData.response.map((item: any) => ({
+  //   _id: item._id,
+  //   name: item.professional,
+  // }));
 
   const form = useForm<z.infer<typeof postFilterValidation>>({
     resolver: zodResolver(postFilterValidation),
@@ -32,7 +32,7 @@ function PostFilterForm({ langData, professionData }: any) {
       subCategory: "",
       skill: "",
       level: "",
-      postRating: "",
+      postRating: 0,
       postDescription: "",
       primaryLanguage: "",
       secondaryLanguage: "",
@@ -72,6 +72,23 @@ function PostFilterForm({ langData, professionData }: any) {
 
         <div className="explore-filter-h3-wrap">
           <h3 className="explore-filter-h3">Ratings</h3>
+          <FormField
+            control={form.control}
+            name="postRating"
+            render={({ field }) => (
+              <FormItem className="!m-0 flex items-center justify-start gap-2 !p-0">
+                <FormControl>
+                  <StarRating
+                    prevRatingValue={form.getValues("postRating")}
+                    ratingFor="FILTER"
+                    authorId=""
+                    revalidatePath=""
+                    onChange={(val) => field.onChange(val)}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
         </div>
 
         <div className="explore-filter-h3-wrap">
