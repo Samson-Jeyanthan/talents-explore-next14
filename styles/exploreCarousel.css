@@ -2,21 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
-/* .exc - explore categories carousel */
-.exc-embla {
-  max-width: 80vw;
-  /* margin: auto; */
-  --slide-height: 4rem;
+/* common explore carousel classes */
+.exp-embla {
+  max-width: 82vw;
+  --slide-height: 10rem;
   --slide-spacing: 1rem;
   --slide-size: auto;
 }
-
-.exc-embla__container {
+.exp-container {
   display: flex;
   touch-action: pan-y pinch-zoom;
   margin-left: calc(var(--slide-spacing) * -1);
 }
-.exc-embla__slide {
+.exp-embla-slide {
   display: grid;
   place-items: center;
   transform: translate3d(50, 50, 50);
@@ -24,17 +22,8 @@
   min-width: 0;
   margin-left: 1.1rem;
 }
-.exc-embla__slide__number {
-  box-shadow: inset 0 0 0 0.2rem var(--detail-medium-contrast);
-  border-radius: 1.8rem;
-  font-size: 4rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: var(--slide-height);
-  user-select: none;
-}
+
+/* .exc - explore categories carousel */
 .exc-embla__controls {
   width: 100%;
   display: flex;
@@ -65,25 +54,4 @@
   min-width: 0;
   padding-left: var(--slide-spacing);
   height: 26rem;
-}
-
-/* explore top talents carousel */
-.expt-embla {
-  max-width: 80vw;
-  --slide-height: 10rem;
-  --slide-spacing: 1rem;
-  --slide-size: auto;
-}
-.expt-embla__container {
-  display: flex;
-  touch-action: pan-y pinch-zoom;
-  margin-left: calc(var(--slide-spacing) * -1);
-}
-.expt-embla__slide {
-  display: grid;
-  place-items: center;
-  transform: translate3d(50, 50, 50);
-  flex: 0 0 auto;
-  min-width: 0;
-  margin-left: 1.1rem;
 }

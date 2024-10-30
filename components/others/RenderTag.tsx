@@ -41,7 +41,7 @@ const RenderTag = ({
         </Badge>
       ) : (
         <Link
-          href={`/tags/${_id}`}
+          href={`/categories/${_id}`}
           className="flex w-max items-center justify-between gap-4 rounded-lg border-none bg-dark-300 fill-light-500 px-4 py-3 text-xs uppercase text-light-500 hover:bg-dark-400 hover:fill-light-900 hover:text-light-900"
         >
           {showIcon && (

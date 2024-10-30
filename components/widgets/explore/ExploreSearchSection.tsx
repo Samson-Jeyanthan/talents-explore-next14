@@ -39,7 +39,7 @@ const ExploreSearchSection = ({ langData, professionData }: Props) => {
 
   return (
     <div className="z-20 flex w-full flex-col items-center gap-2">
-      {pathname.startsWith("/tags") ? null : (
+      {pathname.startsWith("/categories") ? null : (
         <>
           <h1 className="text-center text-3xl font-semibold text-light-900">
             Search For Posts, Shared & Talents

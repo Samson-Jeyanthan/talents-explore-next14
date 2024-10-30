@@ -49,7 +49,7 @@ async function page({ searchParams }: ISearchParamsProps) {
   });
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-10">
       {searchParams && Object.keys(searchParams).length > 0 ? (
         <div className="flex flex-col gap-4">
           {searchParams?.q && (

@@ -4,7 +4,7 @@ import { ExploreTopTalentsCard } from "@/components/cards";
 import { IExploreTalentsProps } from "@/types/utils.types";
 import { EmblaOptionsType } from "embla-carousel";
 import useEmblaCarousel from "embla-carousel-react";
-import { usePrevNextButtons } from "../carousels/EmblaCarouselArrowButtons";
+// import { usePrevNextButtons } from "../carousels/EmblaCarouselArrowButtons";
 import Link from "next/link";
 import { IoIosArrowForward } from "react-icons/io";
 
@@ -14,13 +14,13 @@ type Props = {
 };
 
 const ExploreTopTalents = ({ data, options }: Props) => {
-  const [emblaRef, emblaApi] = useEmblaCarousel(options);
-  const {
-    prevBtnDisabled,
-    nextBtnDisabled,
-    onPrevButtonClick,
-    onNextButtonClick,
-  } = usePrevNextButtons(emblaApi);
+  const [emblaRef] = useEmblaCarousel(options);
+  // const {
+  //   prevBtnDisabled,
+  //   nextBtnDisabled,
+  //   onPrevButtonClick,
+  //   onNextButtonClick,
+  // } = usePrevNextButtons(emblaApi);
 
   return (
     <div className="flex flex-col justify-start gap-3">
@@ -34,11 +34,11 @@ const ExploreTopTalents = ({ data, options }: Props) => {
         </Link>
       </h3>
 
-      <div className="expt-embla prevent-select">
+      <div className="exp-embla prevent-select">
         <div className="embla__viewport" ref={emblaRef}>
-          <div className="expt-embla__container">
+          <div className="exp-container">
             {data.map((item, index) => (
-              <div key={index} className="expt-embla__slide">
+              <div key={index} className="exp-embla-slide">
                 <ExploreTopTalentsCard
                   profileImage={item.profileImage}
                   userName={item.userName}
