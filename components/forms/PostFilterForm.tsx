@@ -1,9 +1,8 @@
 "use client";
 
-// import { useUserContext } from "@/context/AuthProvider";
 import { postFilterValidation } from "@/lib/validations/filter.validation";
 import { zodResolver } from "@hookform/resolvers/zod";
-// import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "../ui/form";
@@ -11,10 +10,17 @@ import { Button } from "../ui/button";
 import { Dropdown, FormInput, StarRating } from "../inputs";
 import { Checkbox } from "../ui/checkbox";
 import { TIME_DURATION_FILTERS } from "@/constants";
+import qs from "query-string";
 
-function PostFilterForm({ langData, professionData }: any) {
-  // const { user } = useUserContext();
-  // const router = useRouter();
+type Props = {
+  langData: any;
+  professionData: any;
+  onClose: () => void;
+};
+
+function PostFilterForm({ langData, professionData, onClose }: Props) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const LangOptions = langData.response.map((item: any) => ({
     _id: item._id,
     name: item.language,
@@ -32,7 +38,7 @@ function PostFilterForm({ langData, professionData }: any) {
       subCategory: "",
       skill: "",
       level: "",
-      postRating: 0,
+      publicRating: 0,
       postDescription: "",
       primaryLanguage: "",
       secondaryLanguage: "",
@@ -43,9 +49,48 @@ function PostFilterForm({ langData, professionData }: any) {
     },
   });
 
-  // results?search_query=vietnamese+war
+  async function onSubmit(values: z.infer<typeof postFilterValidation>) {
+    // Define the keys that need to be part of the URL query string
+    const queryParams: { [key: string]: string | undefined } = {
+      mainCategory: values.mainCategory,
+      subCategory: values.subCategory,
+      skill: values.skill,
+      level: values.level,
+      publicRating: values.publicRating
+        ? String(values.publicRating)
+        : undefined,
+      primaryLanguage: values.primaryLanguage,
+      secondaryLanguage: values.secondaryLanguage,
+      timeDuration: values.timeDuration,
+      country: values.country,
+      state: values.state,
+      creditTitle: values.creditTitle,
+    };
 
-  async function onSubmit(values: z.infer<typeof postFilterValidation>) {}
+    // results?search_query=vietnamese+war
+    // Filter out empty or undefined values
+    const nonEmptyQueryParams = Object.fromEntries(
+      Object.entries(queryParams).filter(
+        ([, value]) => value !== undefined && value !== ""
+      )
+    );
+
+    const newURL = qs.stringifyUrl(
+      {
+        url: window.location.pathname, // Keep the current URL path
+        query: {
+          ...qs.parse(searchParams.toString()), // Keep existing search params
+          ...nonEmptyQueryParams, // Add or update new query params
+        },
+      },
+      { skipNull: true, skipEmptyString: true } // Skip empty/null values
+    );
+
+    router.push(newURL, { scroll: false });
+
+    onClose && onClose();
+  }
+
   return (
     <Form {...form}>
       <form
@@ -74,12 +119,12 @@ function PostFilterForm({ langData, professionData }: any) {
           <h3 className="explore-filter-h3">Ratings</h3>
           <FormField
             control={form.control}
-            name="postRating"
+            name="publicRating"
             render={({ field }) => (
               <FormItem className="!m-0 flex items-center justify-start gap-2 !p-0">
                 <FormControl>
                   <StarRating
-                    prevRatingValue={form.getValues("postRating")}
+                    prevRatingValue={form.getValues("publicRating")}
                     ratingFor="FILTER"
                     authorId=""
                     revalidatePath=""
@@ -182,7 +227,9 @@ function PostFilterForm({ langData, professionData }: any) {
           disabled={form.formState.isSubmitting}
           className="shad-button_primary mt-4 w-full"
         >
-          {form.formState.isSubmitting ? "Applying Filter..." : "Apply Filter"}
+          {form.formState.isSubmitting
+            ? "Filtering Results..."
+            : "Apply Filter"}
         </Button>
       </form>
     </Form>

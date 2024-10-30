@@ -29,7 +29,7 @@ async function layout({ children }: { children: React.ReactNode }) {
           <ExploreBgCarousel slides={EXPLORE_BG_IMAGES} />
         </div>
       </header>
-      <section className="z-30 -mt-4 w-full rounded-t-[30px] bg-dark-200/80 p-8 backdrop-blur-md xl:w-[95%]">
+      <section className="z-30 -mt-4 w-full rounded-t-[30px] bg-dark-200/80 p-8 backdrop-blur-[80px]">
         {children}
       </section>
     </main>

@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  DialogClose,
-  DialogContent,
-  DialogOverlay,
-  DialogTitle,
-} from "../ui/dialog";
+import { DialogClose, DialogContent, DialogTitle } from "../ui/dialog";
 import { z } from "zod";
 import { MdClose } from "react-icons/md";
 import { TProfessionalDetailName } from "@/types/utils.types";
@@ -86,45 +81,42 @@ const ProDetailsModal = ({
   });
 
   return (
-    <>
-      <DialogOverlay />
-      <DialogContent
-        className="modal-content-container"
-        aria-describedby={undefined}
-        onFocus={() => {}}
-      >
-        <DialogTitle className="text-light-900">{getTitle()}</DialogTitle>
+    <DialogContent
+      className="modal-content-container"
+      aria-describedby={undefined}
+      onFocus={() => {}}
+    >
+      <DialogTitle className="text-light-900">{getTitle()}</DialogTitle>
 
-        {detailModalFor === "language" && (
-          <Form {...languageForm}>
-            <form className="flex flex-col gap-2">
-              <Dropdown
-                form={languageForm}
-                value={languageForm.getValues("languageName")}
-                inputName="languageName"
-                placeholder="Select your known language"
-                options={langData.length > 0 ? langData : []}
-                isModal={true}
-              />
-              <Dropdown
-                form={languageForm}
-                value={languageForm.getValues("languageLevel")}
-                inputName="languageLevel"
-                placeholder="Select language level"
-                options={LEVEL_VALUES}
-                isModal={true}
-              />
-            </form>
-          </Form>
-        )}
-        <DialogClose
-          className="absolute -right-8 -top-8 cursor-pointer rounded-full bg-dark-400 p-[6px] text-light-900 focus:outline-none"
-          onClick={onClick}
-        >
-          <MdClose className="text-2xl" />
-        </DialogClose>
-      </DialogContent>
-    </>
+      {detailModalFor === "language" && (
+        <Form {...languageForm}>
+          <form className="flex flex-col gap-2">
+            <Dropdown
+              form={languageForm}
+              value={languageForm.getValues("languageName")}
+              inputName="languageName"
+              placeholder="Select your known language"
+              options={langData.length > 0 ? langData : []}
+              isModal={true}
+            />
+            <Dropdown
+              form={languageForm}
+              value={languageForm.getValues("languageLevel")}
+              inputName="languageLevel"
+              placeholder="Select language level"
+              options={LEVEL_VALUES}
+              isModal={true}
+            />
+          </form>
+        </Form>
+      )}
+      <DialogClose
+        className="absolute -right-8 -top-8 cursor-pointer rounded-full bg-dark-400 p-[6px] text-light-900 focus:outline-none"
+        onClick={onClick}
+      >
+        <MdClose className="text-2xl" />
+      </DialogClose>
+    </DialogContent>
   );
 };
 

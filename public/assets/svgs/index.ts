@@ -30,6 +30,7 @@ export { default as PhoneIcon } from "./PhoneIcon";
 export { default as PhoneBookIcon } from "./PhoneBookIcon";
 export { default as CalendarIcon } from "./CalendarIcon";
 export { default as PostIcon } from "./PostIcon";
+export { default as CategoriesIcon } from "./CategoriesIcon";
 // fill icon
 export { default as HeadPhoneFillIcon } from "./HeadPhoneFillIcon";
 export { default as CameraFillIcon } from "./CameraFillIcon";

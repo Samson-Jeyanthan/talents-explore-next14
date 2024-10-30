@@ -25,14 +25,16 @@ const CheckboxInput = ({
 }: TInputProps) => {
   return (
     <div className="flex flex-col gap-2">
-      <FormLabel className="shad-auth_form_label">{formLabel}</FormLabel>
+      {formLabel && (
+        <FormLabel className="shad-auth_form_label">{formLabel}</FormLabel>
+      )}
       <div className="flex gap-4">
         <FormField
           control={form.control}
           name={inputName}
           render={() => (
             <FormItem className="flex flex-col gap-2">
-              <div className="flex-center gap-6">
+              <div className="flex-start flex-wrap gap-6">
                 {data?.map((item, index) => (
                   <FormField
                     key={index}

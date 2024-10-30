@@ -18,7 +18,7 @@ const ProfileCover = async ({
 
   return (
     <div
-      className={`${isTalent ? `sticky ${isLoggedIn ? "top-8 2xl:top-8" : " top-14 z-0 2xl:top-16"}` : ""} w-full rounded-2xl`}
+      className={`${isTalent ? `sticky ${isLoggedIn ? "top-8 2xl:top-8" : "top-16 z-0 xl:top-16 2xl:top-16"}` : ""} w-full rounded-2xl`}
     >
       <p className="text-light-900">{isLoggedIn}</p>
       {isTalent ? (

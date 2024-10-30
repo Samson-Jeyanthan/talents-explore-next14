@@ -1,7 +1,8 @@
 import { exploreAllTalentsAction } from "@/actions/search.action";
 import { getSession } from "@/lib/session";
+import { ISearchParamsProps } from "@/types/utils.types";
 
-async function TaLents() {
+async function Talents({ searchParams }: ISearchParamsProps) {
   const token = await getSession();
 
   if (!token) {
@@ -12,6 +13,7 @@ async function TaLents() {
     userId: token,
     pageNo: 1,
     pageSize: 14,
+    searchText: searchParams?.q,
   });
 
   if (allTalentsData.status === 400) {
@@ -25,4 +27,4 @@ async function TaLents() {
   );
 }
 
-export default TaLents;
+export default Talents;

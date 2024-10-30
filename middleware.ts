@@ -5,6 +5,7 @@ import { verifyIsAbout, getSession } from "./lib/session";
 export async function middleware(request: NextRequest) {
   const token = await getSession();
   const isAbout = await verifyIsAbout();
+  const pathname = request.nextUrl.pathname;
 
   const protectedRoutes = [
     "/complete/profile",
@@ -15,7 +16,7 @@ export async function middleware(request: NextRequest) {
     "/create-post",
     "/profile/edit",
     "/settings",
-    "/create-share",
+    "/share-something",
     "/explore",
   ];
 
@@ -25,31 +26,21 @@ export async function middleware(request: NextRequest) {
     // user is not loggedin
     console.log("token not found");
 
-    if (
-      protectedRoutes.some((route) =>
-        request.nextUrl.pathname.startsWith(route)
-      )
-    ) {
-      return NextResponse.rewrite(new URL("/sign-in", request.url));
+    if (protectedRoutes.some((route) => pathname.startsWith(route))) {
+      return NextResponse.redirect(new URL("/sign-in", request.url));
     }
   } else {
-    // user is loggedin
-    console.log("logged in");
-
-    // ignore isAbout check on middleware - bcz it will check on the page
-    if (!request.nextUrl.pathname.startsWith("/complete-profile")) {
+    // ignore isAbout check on complete profile page - bcz it will check on that ppage
+    if (!pathname.startsWith("/complete-profile")) {
       // check loggedin user has completed the profile on other routes
-      if (!isAbout)
-        return NextResponse.rewrite(new URL("/complete-profile", request.url));
-    }
-
-    // restrict user to access for auth routes
-    if (
-      protectAuthRoutes.some((route) =>
-        request.nextUrl.pathname.startsWith(route)
-      )
-    ) {
-      return NextResponse.rewrite(new URL("/home", request.url));
+      if (!isAbout) {
+        return NextResponse.redirect(new URL("/complete-profile", request.url));
+      } else if (
+        protectAuthRoutes.some((route) => pathname.startsWith(route))
+      ) {
+        // restrict user to access for authentication pages
+        return NextResponse.redirect(new URL("/home", request.url));
+      }
     }
   }
 }

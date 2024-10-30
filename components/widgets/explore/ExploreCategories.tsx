@@ -5,7 +5,7 @@ import { RenderTag } from "@/components/others";
 import { EmblaOptionsType } from "embla-carousel";
 import useEmblaCarousel from "embla-carousel-react";
 import { usePrevNextButtons } from "../carousels/EmblaCarouselArrowButtons";
-import { getCategoriesIcon } from "@/lib/utils/ReactElementUtils";
+import { getCategoryDetails } from "@/lib/utils/ReactElementUtils";
 import { IMainCategoryProps } from "@/types/utils.types";
 
 type Props = {
@@ -30,16 +30,19 @@ const ExploreCategories = ({ data, options }: Props) => {
       <div className="exc-embla prevent-select">
         <div className="embla__viewport" ref={emblaRef}>
           <div className="exc-embla__container">
-            {data.map((item, index) => (
-              <div className="exc-embla__slide" key={index}>
-                <RenderTag
-                  Icon={getCategoriesIcon(item.name)}
-                  name={item.name}
-                  _id={item._id}
-                  showIcon={true}
-                />
-              </div>
-            ))}
+            {data.map((item, index) => {
+              const detail = getCategoryDetails(item.name);
+              return (
+                <div className="exc-embla__slide" key={index}>
+                  <RenderTag
+                    Icon={detail.icon}
+                    name={item.name}
+                    _id={item._id}
+                    showIcon={true}
+                  />
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

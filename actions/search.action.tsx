@@ -4,8 +4,9 @@ import AllTalentsCard from "@/components/cards/AllTalentsCard";
 import {
   IExploreTalentsProps,
   ISearchAllTalentsProps,
-  ISearchParams,
+  ISearchProps,
 } from "@/types/utils.types";
+import { revalidatePath } from "next/cache";
 
 export async function searchPeopleTag(
   userId: string | undefined,
@@ -50,7 +51,7 @@ export async function searchAction({
   userGender,
   ethnic,
   userLanguage,
-}: ISearchParams) {
+}: ISearchProps) {
   try {
     // Create URLSearchParams instance for building the query string
     const queryParams = new URLSearchParams();
@@ -70,8 +71,10 @@ export async function searchAction({
     if (primaryLanguage) queryParams.append("primaryLanguage", primaryLanguage);
     if (secondaryLanguage)
       queryParams.append("secondaryLanguage", secondaryLanguage);
-    if (publicRating) queryParams.append("publicRating", publicRating);
-    if (privateRating) queryParams.append("privateRating", privateRating);
+    if (publicRating)
+      queryParams.append("publicRating", publicRating.toString());
+    if (privateRating)
+      queryParams.append("privateRating", privateRating.toString());
     if (keywords && keywords.length)
       queryParams.append("keywords", keywords.join(","));
     if (description) queryParams.append("description", description);
@@ -114,6 +117,7 @@ export async function exploreAllTalentsAction({
   userGender,
   ethnic,
   userLanguage,
+  pathForRevalidate,
 }: ISearchAllTalentsProps) {
   try {
     const queryParams = new URLSearchParams();
@@ -145,6 +149,9 @@ export async function exploreAllTalentsAction({
 
     if (res.status === "7400") {
       const data = res.response;
+      if (pathForRevalidate) {
+        revalidatePath(pathForRevalidate);
+      }
       return data.map((item: IExploreTalentsProps, index: number) => (
         <AllTalentsCard key={index} allTalentsCard={item} index={index} />
       ));

@@ -33,6 +33,10 @@ body {
   .camera-button {
     @apply bg-dark-100 absolute bottom-2 right-2 p-2 flex-center rounded-lg cursor-pointer;
   }
+
+  .font-css-poppins {
+    @apply font-poppins;
+  }
 }
 
 @layer components {
