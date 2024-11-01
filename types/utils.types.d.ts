@@ -54,6 +54,7 @@ export type TErrorData = {
 };
 
 // types for search and explore
+
 export type TPeopleTagSearch = {
   _id: string;
   personalInfo: {
@@ -68,7 +69,7 @@ export type TPeopleTagSearch = {
     shortBio: string;
   };
 };
-export interface ISearchParams {
+export interface ISearchProps {
   searchType: "ALL" | "FEED" | "SHARE" | "TALENT" | "CREDITS";
   userId: string;
   viewUserId?: string;
@@ -81,8 +82,8 @@ export interface ISearchParams {
   level?: string;
   primaryLanguage?: string;
   secondaryLanguage?: string;
-  publicRating?: string;
-  privateRating?: string;
+  publicRating?: number;
+  privateRating?: number;
   keywords?: string[]; // Array of strings for keywords
   description?: string;
   country?: string;
@@ -97,18 +98,40 @@ export interface ISearchParams {
 }
 // userProfession?: string;
 
-export interface ITopTalentsProps {
-  _id: string;
-  userName: string;
-  profileImage: string | null;
-  avgRating: number;
-  numberOfRating: number;
-  professional: string;
-}
-
 export interface ITab {
   title: string;
   value: string;
   content?: string | React.ReactNode | any;
   href: string;
+}
+
+export interface IMainCategoryProps {
+  _id: string;
+  name: string;
+}
+
+export interface IExploreTalentsProps {
+  _id: string;
+  userName: string;
+  profileImage: string | null;
+  avgRating: number;
+  numberOfRating?: number;
+  professional?: string;
+}
+
+export interface ISearchAllTalentsProps {
+  userId: string;
+  viewUserId?: string;
+  pageNo: number;
+  pageSize: number;
+  searchText?: string;
+  userRating?: number;
+  userGender?: string;
+  ethnic?: string;
+  userLanguage?: string;
+  pathForRevalidate?: string;
+}
+
+export interface ISearchParamsProps {
+  searchParams: { [key: string]: string | undefined };
 }

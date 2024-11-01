@@ -13,7 +13,7 @@ async function layout({ children }: { children: React.ReactNode }) {
 
   return (
     <main className="flex w-full flex-col items-center justify-center">
-      <header className="sticky top-10 w-full">
+      <header className="sticky top-14 w-full">
         <div className="flex-center relative -mt-10 h-[26rem] w-full flex-col gap-2">
           <ExploreSearchSection
             langData={langData}
@@ -29,7 +29,7 @@ async function layout({ children }: { children: React.ReactNode }) {
           <ExploreBgCarousel slides={EXPLORE_BG_IMAGES} />
         </div>
       </header>
-      <section className="z-30 -mt-4 w-full rounded-t-[30px] bg-dark-200/80 p-8 backdrop-blur-md xl:w-[95%]">
+      <section className="z-30 -mt-4 w-full rounded-t-[30px] bg-dark-200/80 p-8 backdrop-blur-[80px]">
         {children}
       </section>
     </main>

@@ -64,7 +64,7 @@ export async function handleAddRating(
   userId: string | undefined,
   postId: string | undefined,
   authorId: string,
-  ratingFor: "PROFILE" | "POST" | "SHARE",
+  ratingFor: "PROFILE" | "POST" | "SHARE" | "FILTER",
   rating: number,
   revalidatePathURL: string
 ) {

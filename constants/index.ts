@@ -1,6 +1,7 @@
 import React from "react";
 import { IconType } from "react-icons/lib";
 import {
+  CategoriesIcon,
   CommunityIcon,
   ExploreIcon,
   HomeIcon,
@@ -79,6 +80,12 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
     path: "/community",
     name: "Community",
     isLink: true,
+  },
+  {
+    icon: CategoriesIcon,
+    path: "",
+    name: "Categories",
+    isLink: false,
   },
   {
     icon: SettingsIcon,

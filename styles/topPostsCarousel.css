@@ -18,6 +18,7 @@
 }
 .embla__viewport {
   overflow: hidden;
+  cursor: grab;
 }
 .embla__container {
   display: flex;

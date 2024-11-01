@@ -1,12 +1,7 @@
 "use client";
 
 import React, { useRef } from "react";
-import {
-  DialogClose,
-  DialogContent,
-  DialogOverlay,
-  DialogTitle,
-} from "../ui/dialog";
+import { DialogClose, DialogContent, DialogTitle } from "../ui/dialog";
 import { TPhotoActionProps } from "@/types/utils.types";
 import { BiPlus } from "react-icons/bi";
 import { MdClose, MdDelete } from "react-icons/md";
@@ -20,7 +15,6 @@ const PhotoAction = ({
 
   return (
     <>
-      <DialogOverlay />
       <DialogContent
         className="flex max-w-96 flex-col items-center gap-3 rounded-2xl border-none bg-dark-250 p-5"
         aria-describedby={undefined}

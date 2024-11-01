@@ -4,7 +4,6 @@ import {
   Sheet,
   SheetContent,
   SheetHeader,
-  SheetOverlay,
   SheetTitle,
   SheetTrigger,
 } from "../ui/sheet";
@@ -53,7 +52,6 @@ function NotificationSheet({ data }: { data: any[] }) {
       <SheetTrigger className="flex-center z-[110] size-9 cursor-pointer rounded-full bg-dark-300 fill-light-600 hover:bg-dark-400 hover:fill-light-900 focus:outline-none">
         <NotificationIcon height="20px" width="20px" />
       </SheetTrigger>
-      <SheetOverlay />
       <SheetContent
         className="overflow-y-auto border-none bg-dark-200 text-light-900"
         aria-describedby={undefined}

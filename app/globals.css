@@ -33,6 +33,10 @@ body {
   .camera-button {
     @apply bg-dark-100 absolute bottom-2 right-2 p-2 flex-center rounded-lg cursor-pointer;
   }
+
+  .font-css-poppins {
+    @apply font-poppins;
+  }
 }
 
 @layer components {
@@ -220,6 +224,12 @@ body {
 }
 
 /* custom CSS Styles */
+
+.prevent-select {
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+}
 
 .auth-or {
   color: #e6e6e6;
