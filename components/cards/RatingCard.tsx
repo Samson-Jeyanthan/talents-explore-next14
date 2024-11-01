@@ -48,14 +48,14 @@ function RatingCard({ ratingCard, index }: Prop) {
           href={`/profile/${ratingCard.userName}/${ratingCard._id}`}
           className=""
         >
-          <p className="text-sm text-light-900">
+          <p className="text-sm capitalize text-light-900">
             {ratingCard.firstName} {ratingCard.lastName}
           </p>
           <p className="text-xs text-light-600">{ratingCard.professional}</p>
         </Link>
       </div>
-      <div className="flex-center w-12 gap-2 rounded bg-custom-100/10 fill-custom-100 py-[6px]">
-        <StarIcon width="14px" height="14px" />
+      <div className="flex-center w-12 gap-1.5 rounded bg-custom-100/10 fill-custom-100 py-[5px]">
+        <StarIcon width="13px" height="13px" />
         <p className="text-sm text-custom-100">{ratingCard.rating}</p>
       </div>
     </MotionDiv>

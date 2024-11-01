@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { SigninValidation } from "@/lib/validations/authValidation";
+import { SigninValidation } from "@/lib/validations/auth.validation";
 import { signinAction } from "@/actions/auth.action";
 import { useRouter } from "next/navigation";
+import { useUserContext } from "@/context/AuthProvider";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -11,14 +12,12 @@ import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { FormInput } from "../inputs";
-// import { AppDispatch } from "@/redux/store";
-// import { useDispatch } from "react-redux";
-// import { setIsAuthenticated } from "@/redux/slices/authSlice";
-import { jwtDecode } from "jwt-decode";
+import { useState } from "react";
 
 const SigninForm = () => {
+  const { setUser } = useUserContext();
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  // const dispatch = useDispatch<AppDispatch>();
   const form = useForm<z.infer<typeof SigninValidation>>({
     resolver: zodResolver(SigninValidation),
     defaultValues: {
@@ -28,6 +27,7 @@ const SigninForm = () => {
   });
 
   async function onSubmit(values: z.infer<typeof SigninValidation>) {
+    setIsLoading(true);
     const formData = {
       email: values.email,
       password: values.password,
@@ -35,17 +35,33 @@ const SigninForm = () => {
       appVersion: "string",
     };
 
-    const res = await signinAction(formData);
-    console.log(res, "signin res");
-    if (res?.status === "7400") {
-      toast.success("Sign In Successfully", { duration: 4000 });
-      const decodeToken = jwtDecode(res.response.accessToken);
-      router.push(`/complete-profile/${decodeToken.sub}`);
-      console.log(decodeToken, "decodeToken");
-    } else {
-      toast.error("Sign In Failed, Invalid Email or Password.", {
-        duration: 4000,
-      });
+    try {
+      const res = await signinAction(formData);
+      if (res?.status === "7400") {
+        toast.success("Sign In Successfully", { duration: 4000 });
+        setUser({
+          currentUserId: res?.response?._id,
+          firstName: res?.response?.personalInfo?.firstName,
+          lastName: res?.response?.personalInfo?.lastName,
+          username: res?.response?.userName,
+          email: res?.response?.email,
+          imageUrl: res?.response?.personalInfo?.profileImage,
+          isTalent: res?.response?.isTalent,
+        });
+        if (res?.response?.personalInfo?.firstName) {
+          router.push("/home");
+        } else {
+          router.push("/complete-profile");
+        }
+      } else {
+        setIsLoading(false);
+        toast.error("Sign In Failed, Invalid Email or Password.", {
+          duration: 4000,
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      throw error;
     }
   }
 
@@ -80,10 +96,10 @@ const SigninForm = () => {
         </p>
         <Button
           type="submit"
-          disabled={form.formState.isSubmitting}
+          disabled={isLoading}
           className="shad-button_primary mt-4"
         >
-          {form.formState.isSubmitting ? "Signing in..." : "Sign in"}
+          {isLoading ? "Signing in..." : "Sign in"}
         </Button>
         <div className="auth-or" />
         <p className="flex-center body-regular gap-4 text-center text-sm text-light-500">

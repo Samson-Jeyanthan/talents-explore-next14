@@ -9,10 +9,8 @@ import {
 import {
   DialogContent,
   DialogDescription,
-  DialogOverlay,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import useTimer from "@/lib/hooks/useTimer";
 import { useRouter } from "next/navigation";
@@ -86,7 +84,7 @@ const OTP = ({ userId, isSignup, setIsOpen, setVerifiedUserId }: TOTPProps) => {
           };
           const res = await handleVerifyEmailOtp(formData);
           if (res) {
-            router.push(`/complete-profile/${res}`);
+            router.push("/complete-profile/");
           } else {
             setError("Invalid OTP");
             setIsTimerRunning(false);
@@ -100,7 +98,7 @@ const OTP = ({ userId, isSignup, setIsOpen, setVerifiedUserId }: TOTPProps) => {
   const handleOTPStates = () => {
     localStorage.setItem("countdown", "");
     setIsTimerRunning(true);
-    setCountdown(1 * 40); // 10 min 10*60
+    setCountdown(1 * 40); // 10 min 10 * 60
     setError(null);
   };
 
@@ -125,82 +123,76 @@ const OTP = ({ userId, isSignup, setIsOpen, setVerifiedUserId }: TOTPProps) => {
   };
 
   return (
-    <>
-      <DialogOverlay className={cn("bg-black/10 backdrop-blur-sm")} />
-      <DialogContent className="flex max-w-96 flex-col items-center gap-3 rounded-xl border-none bg-dark-250 p-5">
-        <DialogTitle className="h1-bold text-light-900">
-          Verify Your Account
-        </DialogTitle>
-        <DialogDescription className="text-justify text-[12px] text-light-900">
-          Check your inbox we have send an OTP verification code to your email.
-          Please Enter the code to
-          {isSignup ? " continue..." : " reset password"}
-        </DialogDescription>
-        <form
-          onSubmit={handleSubmit}
-          className="flex w-full flex-col items-center gap-2"
+    <DialogContent className="flex max-w-96 flex-col items-center gap-3 rounded-xl border-none bg-dark-250 p-5">
+      <DialogTitle className="h1-bold text-light-900">
+        Verify Your Account
+      </DialogTitle>
+      <DialogDescription className="text-justify text-[12px] text-light-900">
+        Check your inbox we have send an OTP verification code to your email.
+        Please Enter the code to
+        {isSignup ? " continue..." : " reset password"}
+      </DialogDescription>
+      <form
+        onSubmit={handleSubmit}
+        className="flex w-full flex-col items-center gap-2"
+      >
+        <InputOTP
+          maxLength={6}
+          value={value}
+          onChange={(value: any) => setValue(value)}
         >
-          <InputOTP
-            maxLength={6}
-            value={value}
-            onChange={(value: any) => setValue(value)}
-          >
-            <InputOTPGroup className="gap-[11px] text-light-900">
-              <InputOTPSlot index={0} className="shad-input_otp" />
-              <InputOTPSlot index={1} className="shad-input_otp" />
-              <InputOTPSlot index={2} className="shad-input_otp" />
-              <InputOTPSlot index={3} className="shad-input_otp" />
-              <InputOTPSlot index={4} className="shad-input_otp" />
-              <InputOTPSlot index={5} className="shad-input_otp" />
-            </InputOTPGroup>
-          </InputOTP>
+          <InputOTPGroup className="gap-[11px] text-light-900">
+            <InputOTPSlot index={0} className="shad-input_otp" />
+            <InputOTPSlot index={1} className="shad-input_otp" />
+            <InputOTPSlot index={2} className="shad-input_otp" />
+            <InputOTPSlot index={3} className="shad-input_otp" />
+            <InputOTPSlot index={4} className="shad-input_otp" />
+            <InputOTPSlot index={5} className="shad-input_otp" />
+          </InputOTPGroup>
+        </InputOTP>
 
-          {error && (
-            <p className="font-regular my-2 text-custom-100">{error}</p>
-          )}
+        {error && <p className="font-regular my-2 text-custom-100">{error}</p>}
 
-          {!isTimer || isTimerRunning ? (
-            <h4 className="flex-center my-2 w-full gap-2 text-[13px] text-light-700">
-              Verification code expires in
-              <span className="text-primary-500">{formatTime(countdown)}</span>
-            </h4>
-          ) : (
-            <>
-              {!error && (
-                <p className="font-regular my-2 text-custom-100">
-                  Your OTP has expired. Try again!
-                </p>
-              )}
-            </>
-          )}
+        {!isTimer || isTimerRunning ? (
+          <h4 className="flex-center my-2 w-full gap-2 text-[13px] text-light-700">
+            Verification code expires in
+            <span className="text-primary-500">{formatTime(countdown)}</span>
+          </h4>
+        ) : (
+          <>
+            {!error && (
+              <p className="font-regular my-2 text-custom-100">
+                Your OTP has expired. Try again!
+              </p>
+            )}
+          </>
+        )}
 
-          <Button
-            type="submit"
-            className="shad-button_primary w-full"
-            disabled={isSubmitting}
-          >
-            Submit
-          </Button>
+        <Button
+          type="submit"
+          className="shad-button_primary w-full"
+          disabled={isSubmitting}
+        >
+          Submit
+        </Button>
 
-          <div className="flex-center mt-2 w-full gap-2 text-[13px] text-light-700">
-            <h4>Didn&rsquo;t receive the code?</h4>
-            <p
-              onClick={handleResend}
-              className="cursor-pointer text-primary-500"
-            >
-              Resend
-            </p>
-          </div>
+        <div className="flex-center mt-2 w-full gap-2 text-[13px] text-light-700">
+          <h4>Didn&rsquo;t receive the code?</h4>
+          <p onClick={handleResend} className="cursor-pointer text-primary-500">
+            Resend
+          </p>
+        </div>
 
+        {!isSignup && (
           <p
             className="font-regular my-4 mb-1 cursor-pointer text-light-700 hover:text-light-900"
             onClick={handleCancel}
           >
             Cancel
           </p>
-        </form>
-      </DialogContent>
-    </>
+        )}
+      </form>
+    </DialogContent>
   );
 };
 

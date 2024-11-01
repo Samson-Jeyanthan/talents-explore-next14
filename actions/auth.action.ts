@@ -1,7 +1,12 @@
 "use server";
 
 import axiosInstance from "@/lib/config/axiosInstance";
-import { createSession, storeIsAbout } from "@/lib/session";
+import {
+  createSession,
+  deleteSession,
+  getSession,
+  storeIsAbout,
+} from "@/lib/session";
 import { jwtDecode } from "jwt-decode";
 
 export const registerAction = async (formData: unknown) => {
@@ -51,12 +56,28 @@ export const completeProfileAction = async (
       `/user/personalInfo/${userId}`,
       formData
     );
+    await storeIsAbout(true);
     return response.data;
   } catch (error) {
     console.error(error);
     return error;
   }
 };
+
+// check for token
+export async function checkForToken() {
+  const token = await getSession();
+
+  if (token === "") {
+    return false;
+  } else {
+    return token;
+  }
+}
+
+export async function deleteToken() {
+  await deleteSession();
+}
 
 export const signinAction = async (formData: unknown) => {
   try {
@@ -68,7 +89,6 @@ export const signinAction = async (formData: unknown) => {
       const userDetailsRes = await userPersonalInfoAction(decodedJWTToken?.sub);
       const userPersonalInfo = userDetailsRes?.response?.personalInfo;
       const userFirstName = userPersonalInfo?.firstName;
-      console.log(userFirstName, "userFirstName");
 
       // store isAbout based on user's first name
       if (userFirstName) {
@@ -78,7 +98,8 @@ export const signinAction = async (formData: unknown) => {
         await storeIsAbout(false);
         await createSession(res.response.accessToken);
       }
-      return res;
+
+      return userDetailsRes; // returning user personal data
     } else {
       return false;
     }
@@ -135,8 +156,7 @@ export const userPersonalInfoAction = async (userId: string | undefined) => {
 };
 
 export const checkIsAboutAction = async (token: any) => {
-  const decodedJWTToken = jwtDecode(token);
-  const userDetailsRes = await userPersonalInfoAction(decodedJWTToken?.sub);
+  const userDetailsRes = await userPersonalInfoAction(token);
   const userPersonalInfo = userDetailsRes?.response?.personalInfo;
   const userFirstName = userPersonalInfo?.firstName;
 

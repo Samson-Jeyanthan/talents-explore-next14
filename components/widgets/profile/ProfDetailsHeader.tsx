@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ProfDetailsModal } from "../../modals";
+import { ProDetailsModal } from "../../modals";
 import { Dialog } from "../../ui/dialog";
 import { TProfessionalDetailName } from "@/types/utils.types";
 import { IEducation } from "@/types/profile.types";
@@ -43,7 +43,7 @@ const ProfDetailsHeader = ({ detailName, dataArray }: Prop) => {
       </div>
 
       <Dialog open={open}>
-        <ProfDetailsModal
+        <ProDetailsModal
           isEdit={false}
           detailModalFor={detailName}
           onClick={() => setOpen(!open)}

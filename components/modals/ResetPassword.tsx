@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from "../ui/dialog";
 import { cn } from "@/lib/utils";
-import { ResetPasswordValidation } from "@/lib/validations/authValidation";
+import { ResetPasswordValidation } from "@/lib/validations/auth.validation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";

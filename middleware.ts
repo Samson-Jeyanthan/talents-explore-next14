@@ -1,41 +1,53 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { verifyIsAbout, verifySession } from "./lib/session";
-import { jwtDecode } from "jwt-decode";
+import { verifyIsAbout, getSession } from "./lib/session";
 
-// This function can be marked `async` if using `await` inside
 export async function middleware(request: NextRequest) {
-  const token = await verifySession();
+  const token = await getSession();
   const isAbout = await verifyIsAbout();
+  const pathname = request.nextUrl.pathname;
 
-  if (token === "") {
+  const protectedRoutes = [
+    "/complete/profile",
+    "/home",
+    "/saved-collection",
+    "/settings",
+    "/community",
+    "/create-post",
+    "/profile/edit",
+    "/settings",
+    "/share-something",
+    "/explore",
+  ];
+
+  const protectAuthRoutes = ["/sign-in", "/join-us", "/forgot-password"];
+
+  if (!token) {
+    // user is not loggedin
     console.log("token not found");
-    if (request.nextUrl.pathname.startsWith("/home")) {
-      return NextResponse.rewrite(new URL("/sign-in", request.url));
+
+    if (protectedRoutes.some((route) => pathname.startsWith(route))) {
+      return NextResponse.redirect(new URL("/sign-in", request.url));
     }
   } else {
-    const decodedJWTToken = jwtDecode(token);
-    console.log("runnning middleware");
-    if (isAbout === false) {
-      return NextResponse.rewrite(
-        new URL(`/complete-profile/${decodedJWTToken?.sub}`, request.url)
-      );
-    }
-    if (request.nextUrl.pathname.startsWith("/sign-in")) {
-      return NextResponse.rewrite(new URL("/home", request.url));
-    }
-
-    if (request.nextUrl.pathname.startsWith("/join-us")) {
-      return NextResponse.rewrite(new URL("/home", request.url));
-    }
-
-    if (request.nextUrl.pathname.startsWith("/forgot-password")) {
-      return NextResponse.rewrite(new URL("/home", request.url));
+    // ignore isAbout check on complete profile page - bcz it will check on that ppage
+    if (!pathname.startsWith("/complete-profile")) {
+      // check loggedin user has completed the profile on other routes
+      if (!isAbout) {
+        return NextResponse.redirect(new URL("/complete-profile", request.url));
+      } else if (
+        protectAuthRoutes.some((route) => pathname.startsWith(route))
+      ) {
+        // restrict user to access for authentication pages
+        return NextResponse.redirect(new URL("/home", request.url));
+      }
     }
   }
 }
 
-// See "Matching Paths" below to learn more
 export const config = {
-  matcher: ["/home", "/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    "/((?!api|_next/static|_next/image|favicon.ico|_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    "/(api|trpc)(.*)",
+  ],
 };

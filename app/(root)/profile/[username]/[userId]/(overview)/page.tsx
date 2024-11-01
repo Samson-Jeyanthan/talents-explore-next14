@@ -4,30 +4,51 @@ import { fetchUserDataAction } from "@/actions/user.action";
 import {
   AwardsAndCertificates,
   BioDetails,
-  EducationDetails,
-  LanguageDetails,
+  Contact,
+  LanguageEducationDetails,
   MyPhotos,
   TopPosts,
 } from "@/components/widgets";
+import { getSession } from "@/lib/session";
+import { addLineBreaks } from "@/lib/utils/addLinkBreaks";
 
 async function Overview({ params }: TProfileURLProps) {
   const userData: TCurrentUserData | TPublicUserData =
     await fetchUserDataAction(params.userId, params.username);
   if (!userData) return null;
 
+  const token = await getSession();
+  const isOwnProfile = token === params.userId;
+
+  const isTalent = userData?.isTalent;
+
   return (
-    <section className="my-5 flex w-full flex-col gap-3 text-light-900">
-      <TopPosts params={params} />
-      <div className="flex flex-col gap-3 bg-dark-250 p-2">
-        <BioDetails userData={userData} />
-        <MyPhotos myPhotos={userData?.morePersonalInfo?.featuredPhotos} />
+    <section className="flex w-full max-w-screen-xl gap-3 overflow-x-hidden text-light-850">
+      <div
+        className={`${isTalent ? "w-72 min-w-72 border-2 border-dark-300 bg-dark-250 p-4 2xl:w-[21rem] 2xl:min-w-[21rem]" : "w-[21rem] min-w-[21rem] p-2"} flex flex-col gap-10 rounded-3xl `}
+      >
+        <BioDetails userData={userData} isOwnProfile={isOwnProfile} />
+        {isTalent && (
+          <>
+            <Contact userData={userData} />
+            <MyPhotos myPhotos={userData?.morePersonalInfo?.featuredPhotos} />
+          </>
+        )}
       </div>
 
-      <div className="flex gap-3 rounded-3xl border-2 border-dark-300 bg-dark-300/20 p-3">
-        <EducationDetails params={params} />
-        <LanguageDetails params={params} />
-        <AwardsAndCertificates params={params} />
-      </div>
+      {isTalent && (
+        <div className="flex w-full max-w-[852px] flex-col items-start gap-10 rounded-3xl border-2 border-dark-300 bg-dark-250 p-4">
+          <TopPosts params={params} isOwnProfile={isOwnProfile} />
+          <div className="flex flex-col gap-2">
+            <h3 className="text-sm">Description</h3>
+            <div className="w-5/6 text-justify text-[13px]">
+              {addLineBreaks(userData?.morePersonalInfo?.bio)}
+            </div>
+          </div>
+          <LanguageEducationDetails params={params} />
+          <AwardsAndCertificates params={params} />
+        </div>
+      )}
     </section>
   );
 }

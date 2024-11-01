@@ -10,6 +10,8 @@ export { default as LeftSidebar } from "./LeftSidebar";
 export { default as Navbar } from "./Navbar";
 export { default as CurrentUserAvatar } from "./CurrentUserAvatar";
 export { default as Notification } from "./NotificationSheet";
+export { default as Footer } from "./Footer";
+export { default as RightSidebar } from "./RightSidebar";
 // profile widgets
 export { default as ProfileCover } from "./profile/ProfileCover";
 export { default as NormalUserProfileHeader } from "./profile/NormalUserProfileHeader";
@@ -19,9 +21,9 @@ export { default as TopPosts } from "./profile/TopPosts";
 export { default as BioDetails } from "./profile/BioDetails";
 export { default as MyPhotos } from "./profile/MyPhotos";
 export { default as AwardsAndCertificates } from "./profile/AwardsAndCertificates";
-export { default as EducationDetails } from "./profile/EducationDetails";
-export { default as LanguageDetails } from "./profile/LanguageDetails";
+export { default as LanguageEducationDetails } from "./profile/LanguageEducationDetails";
 export { default as ProfDetailsHeader } from "./profile/ProfDetailsHeader";
+export { default as Contact } from "./profile/Contact";
 // post more details widgets
 export { default as BlurredMedia } from "./postMoreDetails/BlurredMedia";
 export { default as PostInfoHeader } from "./postMoreDetails/PostInfoHeader";
@@ -29,5 +31,15 @@ export { default as PostInfo } from "./postMoreDetails/PostInfo";
 export { default as RatingDetails } from "./postMoreDetails/RatingDetails";
 export { default as TagsAndOtherInfo } from "./postMoreDetails/TagsAndOtherInfo";
 export { default as Comments } from "./postMoreDetails/Comments";
-// media widgets
-export { default as VideoAsImage } from "./mediaCarousal/VideoAsImage";
+// carousel widgets
+export { default as VideoAsImage } from "./carousels/VideoAsImage";
+export { default as TopPostsCarousel } from "./carousels/TopPostsCarousel";
+export { default as MoreDetailPostCarousel } from "./carousels/MoreDetailPostCarousel";
+export { default as PostFeedCarousel } from "./carousels/PostFeedCarousel";
+// explore widgets
+export { default as ExploreBgCarousel } from "./explore/ExploreBgCarousel";
+export { default as ExploreSearchSection } from "./explore/ExploreSearchSection";
+export { default as ExploreFilterSheet } from "./explore/ExploreFilterSheet";
+export { default as ExploreCategories } from "./explore/ExploreCategories";
+export { default as ExploreTopTalents } from "./explore/ExploreTopTalents";
+export { default as ExploreTopPosts } from "./explore/ExploreTopPosts";

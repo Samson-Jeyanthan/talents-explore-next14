@@ -6,9 +6,11 @@ import { SaveIcon, ShareIcon } from "@/public/assets/svgs";
 type Props = {
   buttonFor: "SHARE" | "COMMENT" | "SAVE";
   className?: string;
+  size?: string;
+  isSaveText?: boolean;
 };
 
-const PostUtilsButton = ({ buttonFor, className }: Props) => {
+const PostUtilsButton = ({ buttonFor, className, size, isSaveText }: Props) => {
   return (
     <div
       className={cn(
@@ -17,12 +19,16 @@ const PostUtilsButton = ({ buttonFor, className }: Props) => {
     >
       {buttonFor === "SAVE" ? (
         <div className="flex items-center gap-2">
-          <SaveIcon width="17px" height="18px" />
-          <p>Save</p>
+          <SaveIcon width={size || "17px"} height={size || "18px"} />
+          {isSaveText && <p>Save</p>}
         </div>
       ) : null}
-      {buttonFor === "COMMENT" ? <p>Comment</p> : null}
-      {buttonFor === "SHARE" ? <ShareIcon width="18px" height="18px" /> : null}
+      {buttonFor === "COMMENT" ? (
+        <ShareIcon width={size || "18px"} height={size || "18px"} />
+      ) : null}
+      {buttonFor === "SHARE" ? (
+        <ShareIcon width={size || "18px"} height={size || "18px"} />
+      ) : null}
     </div>
   );
 };

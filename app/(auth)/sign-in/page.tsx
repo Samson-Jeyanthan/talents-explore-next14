@@ -1,8 +1,6 @@
 import { Metadata } from "next";
 import Image from "next/image";
 import { SigninForm } from "@/components/forms";
-// import { verifySession } from "@/lib/session";
-// import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Sign-in | Talents Explore",

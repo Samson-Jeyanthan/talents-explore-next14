@@ -6,6 +6,7 @@ import { MultiPostIcon, PinIcon, StarIcon } from "@/public/assets/svgs";
 import { GoDotFill } from "react-icons/go";
 import { FaLocationDot } from "react-icons/fa6";
 import { PostOptions } from "../options";
+import { RenderTag } from "../others";
 
 interface Prop {
   allPostCard: IPost;
@@ -30,14 +31,14 @@ function AllPostCard({ allPostCard, index }: Prop) {
       initial="hidden"
       animate="visible"
       transition={{
-        delay: index * 0.15,
+        delay: index * 0.12,
         ease: "easeInOut",
-        duration: 0.3,
+        duration: 0.2,
       }}
       viewport={{ amount: 0 }}
-      className="relative flex gap-3 rounded-[28px] border-2 border-dark-300 bg-dark-250 p-2"
+      className="relative flex w-full gap-3 rounded-[28px] border-2 border-dark-300 bg-dark-250 p-2"
     >
-      <Link href={postLink} className="relative h-52 w-80 rounded-lg">
+      <Link href={postLink} className="relative h-60 w-[22rem] rounded-lg">
         <span className="absolute left-3 top-3 flex gap-2 fill-white">
           {isPinned && <PinIcon height="18px" width="18px" />}
 
@@ -55,7 +56,7 @@ function AllPostCard({ allPostCard, index }: Prop) {
           alt={allPostCard.about.title}
           width={1024}
           height={512}
-          className="size-full min-w-80 rounded-2xl bg-dark-400 object-cover"
+          className="size-full min-w-[22rem] rounded-2xl bg-dark-400 object-cover"
         />
 
         <div className="flex-center absolute bottom-2 right-2 gap-2 rounded-full bg-dark-200 fill-custom-100 p-3 py-2 text-sm text-light-900">
@@ -79,15 +80,15 @@ function AllPostCard({ allPostCard, index }: Prop) {
           <GoDotFill className="text-[8px]" />
           {allPostCard.timeAgo}
         </p>
+        <p className="py-1 text-xs text-light-500">
+          {allPostCard.numberOfRating} Ratings
+        </p>
         <p className="line-clamp-3 text-ellipsis text-justify text-xs text-light-500 first-letter:capitalize 2xl:text-sm">
           {allPostCard.about.description}
         </p>
         <div className="absolute bottom-3 right-3 flex gap-2">
-          <p className="all-post-card-tags">
-            {allPostCard.numberOfRating} Ratings
-          </p>
-          <p className="all-post-card-tags">{allPostCard.about.mainCategory}</p>
-          <p className="all-post-card-tags">{allPostCard.about.skill}</p>
+          <RenderTag Icon="" name={allPostCard.about.mainCategory} />
+          <RenderTag Icon="" name={allPostCard.about.skill} />
         </div>
       </div>
 
@@ -96,6 +97,7 @@ function AllPostCard({ allPostCard, index }: Prop) {
           authorId={allPostCard.author._id}
           postId={allPostCard._id}
           isBestWork={isPinned}
+          className="flex-center !size-10 space-x-1 !px-2"
         />
       </div>
     </MotionDiv>

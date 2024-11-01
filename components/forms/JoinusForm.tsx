@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { SignupValidation } from "@/lib/validations/authValidation";
+import { SignupValidation } from "@/lib/validations/auth.validation";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import Link from "next/link";
@@ -13,8 +13,10 @@ import { Dialog } from "../ui/dialog";
 import { FormInput } from "../inputs";
 import { registerAction } from "@/actions/auth.action";
 import { toast } from "sonner";
+import { useUserContext } from "@/context/AuthProvider";
 
 const JoinusForm = () => {
+  const { setUser } = useUserContext();
   const [isOTPOpen, setIsOTPOpen] = useState(false);
   const [decodedUserId, setDecodedUserId] = useState<any>("");
 
@@ -36,6 +38,15 @@ const JoinusForm = () => {
     const res = await registerAction(formData);
 
     if (res?.status === "7400") {
+      setUser({
+        currentUserId: res.response,
+        firstName: "",
+        lastName: "",
+        username: formData.userName,
+        email: formData.email,
+        imageUrl: null,
+        isTalent: false,
+      });
       localStorage.setItem("registerUserId", res.response);
       setDecodedUserId(res.response);
       toast.success("You Have Registered Successfully", { duration: 3000 });

@@ -1,9 +1,7 @@
 "use client";
 
-import { userPersonalInfoAction } from "@/actions/auth.action";
-import { verifySession } from "@/lib/session";
+import { checkForToken, userPersonalInfoAction } from "@/actions/auth.action";
 import { IContextType, ICurrentUser } from "@/types/auth.types";
-import { jwtDecode } from "jwt-decode";
 import { useRouter } from "next/navigation";
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -21,9 +19,7 @@ export const INITIAL_USER = {
 const INITIAL_STATE = {
   user: INITIAL_USER,
   isLoading: false,
-  isAuthenticated: false,
   setUser: () => {},
-  setIsAuthenticated: () => {},
   checkAuthUser: async () => {},
 };
 
@@ -32,12 +28,11 @@ const AuthContext = createContext<IContextType>(INITIAL_STATE);
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<ICurrentUser>(INITIAL_USER);
   const [isLoading, setIsLoading] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
 
-  const checkAuthUser = async () => {
+  async function checkAuthUser() {
     setIsLoading(true);
-    const token = await verifySession();
+    const token = await checkForToken();
 
     if (!token) {
       setIsLoading(false);
@@ -45,13 +40,12 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     try {
-      const decodedJWTToken = jwtDecode(token);
-      const res = await userPersonalInfoAction(decodedJWTToken?.sub);
+      const res = await userPersonalInfoAction(token);
 
       if (res.status === "7400") {
         if (res?.response?.personalInfo?.firstName) {
           setUser({
-            currentUserId: res?.response?._id,
+            currentUserId: token,
             firstName: res?.response?.personalInfo?.firstName,
             lastName: res?.response?.personalInfo?.lastName,
             username: res?.response?.userName,
@@ -59,14 +53,23 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             imageUrl: res?.response?.personalInfo?.profileImage,
             isTalent: res?.response?.isTalent,
           });
-          setIsAuthenticated(true);
         } else {
-          router.push(`/complete-profile/${decodedJWTToken?.sub}`);
+          setUser({
+            currentUserId: token,
+            firstName: "",
+            lastName: "",
+            username: res?.response?.userName,
+            email: res?.response?.email,
+            imageUrl: null,
+            isTalent: false,
+          });
+          // router.push("/complete-profile");
           toast.info("Please complete your profile", {
             duration: 5000,
           });
         }
       } else {
+        router.push("/sign-in");
         toast.error("Couldn't fetch user details", {
           duration: 5000,
         });
@@ -76,10 +79,11 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       toast.error("Error checking auth user", {
         duration: 5000,
       });
+      throw error;
     } finally {
       setIsLoading(false);
     }
-  };
+  }
 
   useEffect(() => {
     checkAuthUser();
@@ -91,8 +95,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     user,
     setUser,
     isLoading,
-    isAuthenticated,
-    setIsAuthenticated,
     checkAuthUser,
   };
 
