@@ -11,3 +11,4 @@ export { default as PostCard } from "./PostCard";
 export { default as ExploreTopTalentsCard } from "./ExploreTopTalentsCard";
 export { default as NotificationCard } from "./NotificationCard";
 export { default as ExplorePostCard } from "./ExplorePostCard";
+export { default as CategoryCard } from "./CategoryCard";

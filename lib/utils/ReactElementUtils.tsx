@@ -18,6 +18,7 @@ export const getCategoryDetails = (name: string) => {
         name,
         description:
           "Stay active and healthy with content focused on sports, exercise routines, and fitness tips.",
+        bgImg: "/assets/images/sports.jpg",
       };
     case "Songs & Music":
       return {
@@ -25,6 +26,7 @@ export const getCategoryDetails = (name: string) => {
         name,
         description:
           "Discover a world of music, from compositions and tutorials to the latest trends in audio creation.",
+        bgImg: "/assets/images/music.jpg",
       };
     case "Dance & Styles":
       return {
@@ -32,6 +34,7 @@ export const getCategoryDetails = (name: string) => {
         name,
         description:
           "Explore various dance styles and learn new moves from experienced dancers.",
+        bgImg: "/assets/images/dance-styles.jpg",
       };
     case "Arts & Crafts":
       return {
@@ -39,6 +42,7 @@ export const getCategoryDetails = (name: string) => {
         name,
         description:
           "Unleash your creativity with projects, techniques, and inspiration in arts and crafts.",
+        bgImg: "/assets/images/arts-crafts.jpg",
       };
     case "Graphics & Designs":
       return {
@@ -46,6 +50,7 @@ export const getCategoryDetails = (name: string) => {
         name,
         description:
           "From digital art to branding, find resources and inspiration for graphic design.",
+        bgImg: "/assets/images/graphics.jpg",
       };
     case "Programming & Tech":
       return {
@@ -53,6 +58,7 @@ export const getCategoryDetails = (name: string) => {
         name,
         description:
           "Stay ahead in the tech world with programming tutorials, tech trends, and development insights.",
+        bgImg: "/assets/images/code.jpg",
       };
     case "Video & Animation":
       return {
@@ -60,6 +66,7 @@ export const getCategoryDetails = (name: string) => {
         name,
         description:
           "Learn the art of video production and animation with industry tips and tutorials.",
+        bgImg: "/assets/images/video.jpg",
       };
     case "UX, Writing & Translation":
       return {
@@ -67,6 +74,7 @@ export const getCategoryDetails = (name: string) => {
         name,
         description:
           "Dive into UX design, writing skills, and translation techniques for effective communication.",
+        bgImg: "/assets/images/ux.jpg",
       };
     case "Photography":
       return {
@@ -74,6 +82,7 @@ export const getCategoryDetails = (name: string) => {
         name,
         description:
           "Capture moments like a pro with photography tips, gear guides, and editing advice.",
+        bgImg: "/assets/images/photography.jpg",
       };
     case "Film & Entertainment":
       return {
@@ -81,6 +90,7 @@ export const getCategoryDetails = (name: string) => {
         name,
         description:
           "Get insights into the film industry, entertainment news, and content creation.",
+        bgImg: "/assets/images/film.jpg",
       };
     default:
       return {
