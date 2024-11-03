@@ -37,7 +37,7 @@ const ProInfoEditOptions = ({ id, cardName, data }: Props) => {
       {isOwnProfile && (
         <Menubar className="relative m-0 size-min border-none p-0">
           <MenubarMenu>
-            <MenubarTrigger className="cursor-pointer text-sm text-light-500 hover:text-light-900">
+            <MenubarTrigger className="cursor-pointer bg-transparent bg-none text-sm text-light-500 hover:text-light-900">
               <HiOutlinePencil />
             </MenubarTrigger>
             <MenubarContent className="absolute -right-5 min-w-36 gap-10 rounded-lg border border-solid border-dark-400 bg-dark-300 p-2 shadow-xl shadow-dark-100/25">

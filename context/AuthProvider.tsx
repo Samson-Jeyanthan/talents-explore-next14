@@ -1,7 +1,6 @@
 "use client";
 
-import { userPersonalInfoAction } from "@/actions/auth.action";
-import { checkForToken } from "@/lib/functions/auth.functions";
+import { checkForToken, userPersonalInfoAction } from "@/actions/auth.action";
 import { IContextType, ICurrentUser } from "@/types/auth.types";
 import { useRouter } from "next/navigation";
 import React, { createContext, useContext, useState, useEffect } from "react";
@@ -20,9 +19,7 @@ export const INITIAL_USER = {
 const INITIAL_STATE = {
   user: INITIAL_USER,
   isLoading: false,
-  isAuthenticated: false,
   setUser: () => {},
-  setIsAuthenticated: () => {},
   checkAuthUser: async () => {},
 };
 
@@ -31,10 +28,9 @@ const AuthContext = createContext<IContextType>(INITIAL_STATE);
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<ICurrentUser>(INITIAL_USER);
   const [isLoading, setIsLoading] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
 
-  const checkAuthUser = async () => {
+  async function checkAuthUser() {
     setIsLoading(true);
     const token = await checkForToken();
 
@@ -57,7 +53,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             imageUrl: res?.response?.personalInfo?.profileImage,
             isTalent: res?.response?.isTalent,
           });
-          setIsAuthenticated(true);
         } else {
           setUser({
             currentUserId: token,
@@ -68,12 +63,13 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             imageUrl: null,
             isTalent: false,
           });
-          router.push("/complete-profile");
+          // router.push("/complete-profile");
           toast.info("Please complete your profile", {
             duration: 5000,
           });
         }
       } else {
+        router.push("/sign-in");
         toast.error("Couldn't fetch user details", {
           duration: 5000,
         });
@@ -83,10 +79,11 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       toast.error("Error checking auth user", {
         duration: 5000,
       });
+      throw error;
     } finally {
       setIsLoading(false);
     }
-  };
+  }
 
   useEffect(() => {
     checkAuthUser();
@@ -98,8 +95,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     user,
     setUser,
     isLoading,
-    isAuthenticated,
-    setIsAuthenticated,
     checkAuthUser,
   };
 

@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import "@/styles/topPostsCarousel.css";
 import useEmblaCarousel from "embla-carousel-react";
 import { EmblaOptionsType } from "embla-carousel";

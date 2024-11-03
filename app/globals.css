@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -32,6 +33,10 @@ body {
   .camera-button {
     @apply bg-dark-100 absolute bottom-2 right-2 p-2 flex-center rounded-lg cursor-pointer;
   }
+
+  .font-css-poppins {
+    @apply font-poppins;
+  }
 }
 
 @layer components {
@@ -64,7 +69,19 @@ body {
   }
 
   .shad-auth_form_textarea {
-    @apply bg-dark-300 border-none placeholder:text-light-500 focus-visible:ring-1 focus-visible:ring-offset-1 ring-offset-light-500 text-light-900 !important;
+    @apply bg-dark-300 border-none placeholder:text-light-500 focus-visible:ring-0 focus-visible:ring-offset-1 ring-offset-light-500 text-light-900 !important;
+  }
+
+  .shad-form-input {
+    @apply h-10 bg-dark-300 text-light-900 w-full placeholder:text-light-500 border-none focus-visible:ring-0 focus-visible:ring-offset-1 ring-offset-light-500  outline-none focus:outline-none !important;
+  }
+
+  .shad-nav-search-input {
+    @apply no-focus pl-10 flex h-10 bg-transparent w-full border-dark-400 placeholder:text-light-500/80 outline-none text-light-800 focus:outline-none rounded-[10px] !important;
+  }
+
+  .shad-explore-search-input {
+    @apply ring-offset-light-500 focus-visible:ring-0 focus-visible:ring-offset-1 pl-10 pr-12 flex h-11 bg-dark-250 w-full border-dark-400 placeholder:text-light-500/80 outline-none text-light-800 focus:outline-none rounded-[10px] !important;
   }
 
   /* Button */
@@ -197,9 +214,22 @@ body {
   .pro-info-options-wrap {
     @apply absolute right-2.5 top-2.5;
   }
+
+  .explore-filter-h3-wrap {
+    @apply flex flex-col gap-2;
+  }
+  .explore-filter-h3 {
+    @apply text-sm text-light-850 font-medium w-full border-b border-dark-400 pb-2.5;
+  }
 }
 
 /* custom CSS Styles */
+
+.prevent-select {
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+}
 
 .auth-or {
   color: #e6e6e6;

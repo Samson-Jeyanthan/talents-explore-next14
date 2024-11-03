@@ -7,3 +7,4 @@ export { default as CheckboxInput } from "./CheckboxInput";
 export { default as DateInpt } from "./DateInput";
 export { default as StarRating } from "./StarRating";
 export { default as CommentInput } from "./CommentInput";
+export { default as NavbarSearch } from "./NavbarSearch";

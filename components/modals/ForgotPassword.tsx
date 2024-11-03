@@ -1,9 +1,7 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import {
   DialogContent,
-  DialogOverlay,
   Dialog,
   DialogTitle,
   DialogDescription,
@@ -14,7 +12,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { ForgotPasswordValidation } from "@/lib/validations/authValidation";
+import { ForgotPasswordValidation } from "@/lib/validations/auth.validation";
 import { FormInput } from "../inputs";
 import { OTPModal, ResetPasswordModal } from ".";
 import { useRouter } from "next/navigation";
@@ -84,7 +82,6 @@ const ForgotPassword = () => {
     <>
       {isOpen.isFP && (
         <Dialog open={isOpen.isFP}>
-          <DialogOverlay className={cn("bg-black/10 backdrop-blur-sm")} />
           <DialogContent className="flex max-w-96 flex-col items-center gap-3 rounded-xl border-none bg-dark-250 p-5">
             <DialogTitle className="h1-bold text-light-900">
               Forgot Password?
