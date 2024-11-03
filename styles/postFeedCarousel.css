@@ -3,7 +3,8 @@
 @tailwind utilities;
 
 .pf-embla {
-  max-width: 48rem;
+  width: 100%;
+  max-width: 36rem;
   margin: auto;
   --slide-height: 19rem;
   --slide-spacing: 1rem;
@@ -73,9 +74,5 @@
 @layer utilities {
   .media-arrow-btn {
     @apply size-9 rounded-full bg-none border-2 border-solid border-dark-400 hover:border-none hover:bg-light-900 p-1 font-bold text-xl text-light-500 hover:text-dark-100;
-  }
-
-  .pf-embla__controls {
-    @apply flex gap-2 items-center justify-between mt-8 w-[95%];
   }
 }

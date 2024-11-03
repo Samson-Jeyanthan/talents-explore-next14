@@ -50,7 +50,7 @@ const PostFeedCarousel = ({ slides, options, length }: Props) => {
                     width={500}
                     height={500}
                     alt="post"
-                    className="max-h-[30rem] w-full rounded-xl bg-dark-200 object-contain"
+                    className="max-h-[34rem] w-full rounded-xl bg-dark-200 object-contain"
                   />
                 )}
               </div>
@@ -59,23 +59,25 @@ const PostFeedCarousel = ({ slides, options, length }: Props) => {
         </div>
       </div>
 
-      <footer className="flex-center w-full">
-        <div className="pf-embla__controls">
-          <div className="text-sm text-light-500">
-            {selectedIndex + 1} / {slides.length}
+      {length > 1 && (
+        <footer className="flex-center w-full">
+          <div className="mt-2 flex w-[98%] items-center justify-between gap-2">
+            <div className="text-sm text-light-500">
+              {selectedIndex + 1} / {slides.length}
+            </div>
+            <div className="pf-embla__buttons">
+              <PrevButton
+                onClick={onPrevButtonClick}
+                disabled={prevBtnDisabled}
+              />
+              <NextButton
+                onClick={onNextButtonClick}
+                disabled={nextBtnDisabled}
+              />
+            </div>
           </div>
-          <div className="pf-embla__buttons">
-            <PrevButton
-              onClick={onPrevButtonClick}
-              disabled={prevBtnDisabled}
-            />
-            <NextButton
-              onClick={onNextButtonClick}
-              disabled={nextBtnDisabled}
-            />
-          </div>
-        </div>
-      </footer>
+        </footer>
+      )}
     </section>
   );
 };

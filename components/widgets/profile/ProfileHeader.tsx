@@ -11,7 +11,7 @@ import { MessageIcon } from "@/public/assets/svgs";
 import { useUserContext } from "@/context/AuthProvider";
 import { StarRating } from "@/components/inputs";
 import { TCurrentUserData, TPublicUserData } from "@/types/profile.types";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 const ProfileHeader = ({
   userData,
@@ -22,6 +22,7 @@ const ProfileHeader = ({
 }) => {
   const { user } = useUserContext();
   const router = useRouter();
+  const pathname = usePathname();
   const [showDP, setShowDP] = useState(false);
   const [showConnection, setShowConnection] = useState(false);
   const [currentTab, setCurrentTab] = useState(0);
@@ -125,7 +126,7 @@ const ProfileHeader = ({
               prevRatingValue={userData.yourRating}
               ratingFor="PROFILE"
               authorId={userData._id}
-              revalidatePath={`/profile/${userData.userName}/${userData._id}`}
+              revalidatePath={pathname}
             />
           </div>
         ) : null}

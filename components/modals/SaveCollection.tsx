@@ -20,7 +20,13 @@ import { Button } from "../ui/button";
 import { toast } from "sonner";
 import { getAllSavedFoldersAction } from "@/actions/save.action";
 
-const SaveCollection = ({ postId }: { postId: string }) => {
+const SaveCollection = ({
+  postId,
+  buttonClassName,
+}: {
+  postId: string;
+  buttonClassName?: string;
+}) => {
   const { user } = useUserContext();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -74,13 +80,13 @@ const SaveCollection = ({ postId }: { postId: string }) => {
   return (
     <Dialog open={isOpen}>
       <DialogTrigger onClick={() => setIsOpen(true)}>
-        <PostUtilsButton buttonFor="SAVE" className="p-3" />
+        <PostUtilsButton buttonFor="SAVE" className={buttonClassName} />
       </DialogTrigger>
       <DialogContent
         className="connection-modal-content !rounded-2xl"
         aria-describedby={undefined}
       >
-        <DialogTitle className="sticky top-0 w-full rounded-t-2xl border-b border-solid border-light-500 bg-dark-250 p-2 pt-3 text-center text-xl font-medium text-light-850">
+        <DialogTitle className="sticky top-0 w-full rounded-t-2xl border-b border-solid border-light-500/40 bg-dark-250 p-2 py-3 text-center text-xl font-medium text-light-850">
           Save To Collection
         </DialogTitle>
         <div className="flex w-full flex-col gap-3 overflow-y-scroll p-3 pb-16">
