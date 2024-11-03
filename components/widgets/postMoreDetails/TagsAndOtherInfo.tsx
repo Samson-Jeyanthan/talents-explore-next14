@@ -11,35 +11,35 @@ type Props = {
 const TagsAndOtherInfo = ({ postData }: Props) => {
   return (
     <section className="flex min-w-[320px] max-w-[320px] flex-col gap-8 text-sm text-light-500">
-      {postData.about.productionName || postData.about.productionDate ? (
+      {postData?.about?.productionName || postData?.about?.productionDate ? (
         <div className="flex flex-col gap-2">
           <h2 className="font-medium text-light-900">Production Details</h2>
-          {postData.about.productionName && (
+          {postData?.about?.productionName && (
             <p className="flex gap-3 text-[13px] first-letter:capitalize">
               <GiFilmStrip className="text-xl" />
-              {postData.about.productionName}
+              {postData?.about?.productionName}
             </p>
           )}{" "}
-          {postData.about.productionDate && (
+          {postData?.about?.productionDate && (
             <p className="flex gap-3 text-[13px]">
               <IoCalendar className="text-xl" />
-              Production Date {getFormattedDate(postData.about.productionDate)}
+              Production Date {getFormattedDate(postData?.about.productionDate)}
             </p>
           )}
         </div>
       ) : null}
 
-      {postData.about.peopleTag.length > 0 && (
+      {postData?.about?.peopleTag.length > 0 && (
         <div className="flex flex-col gap-2">
           <h2 className="font-medium text-light-900">Tagged People</h2>
           <div className="flex flex-wrap gap-2 text-[13px] lowercase">
-            {postData.about.peopleTag.map((tag, index) => (
+            {postData?.about?.peopleTag.map((tag, index) => (
               <Link
                 key={index}
-                href={`/profile/${tag.userName}/${tag._id}`}
+                href={`/profile/${tag?.userName}/${tag?._id}`}
                 className="hover:text-light-900"
               >
-                @{tag.userName}
+                @{tag?.userName}
               </Link>
             ))}
           </div>
