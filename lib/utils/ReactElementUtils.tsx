@@ -1,3 +1,4 @@
+import { getAllSavedFoldersAction } from "@/actions/save.action";
 import { getMainCategoriesAction } from "@/actions/utils.action";
 import {
   AnimationFillIcon,
@@ -113,5 +114,22 @@ export async function getNameOfCategory(categoryId: string) {
     return {
       ...categoryDetails,
     };
+  }
+}
+
+export async function getSaveCollectionFolderName(
+  folderId: string,
+  userId: string | undefined
+) {
+  const res = await getAllSavedFoldersAction({
+    userId,
+    postId: 0,
+    returnAsCard: false,
+  });
+
+  if (res.status === 200) {
+    const data = res.response;
+    const itemName = data.find((item: any) => item._id === folderId);
+    return itemName?.collectionName;
   }
 }

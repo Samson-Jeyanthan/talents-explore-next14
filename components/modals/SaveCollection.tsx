@@ -12,14 +12,13 @@ import { PostUtilsButton } from "../buttons";
 import { MdClose } from "react-icons/md";
 import { useUserContext } from "@/context/AuthProvider";
 import { ISavedFolder } from "@/types/post.types";
-import {
-  getSaveCollection,
-  handleCreateSaveCollection,
-} from "@/lib/functions/post.functions";
+import { handleCreateSaveCollection } from "@/lib/functions/post.functions";
 import { SavedListCard } from "../cards";
 import { Input } from "../ui/input";
 import { SendIcon } from "@/public/assets/svgs";
 import { Button } from "../ui/button";
+import { toast } from "sonner";
+import { getAllSavedFoldersAction } from "@/actions/save.action";
 
 const SaveCollection = ({ postId }: { postId: string }) => {
   const { user } = useUserContext();
@@ -31,9 +30,16 @@ const SaveCollection = ({ postId }: { postId: string }) => {
 
   async function fetchData() {
     try {
-      const res = await getSaveCollection(user.currentUserId, postId);
-      if (res) {
-        setData(res);
+      const res = await getAllSavedFoldersAction({
+        userId: user.currentUserId,
+        postId,
+        returnAsCard: false,
+      });
+      if (res.status === 200) {
+        setData(res.response);
+      } else {
+        toast.error("Couldn't fetch saved collections", { duration: 4000 });
+        return false;
       }
     } catch (error) {
       console.error("Error fetching saved collections:", error);
