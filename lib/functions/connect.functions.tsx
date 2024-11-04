@@ -79,6 +79,7 @@ export async function handleAddRating(
       revalidatePathURL
     );
   }
+  console.log(res);
   if (res.status === "7400") {
     toast.success(
       `You have given ${rating} ⭐ to this ${
