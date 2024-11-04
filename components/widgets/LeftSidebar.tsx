@@ -17,18 +17,28 @@ import { Button } from "../ui/button";
 import { INITIAL_USER, useUserContext } from "@/context/AuthProvider";
 import { deleteToken } from "@/actions/auth.action";
 import { handleClearStorage } from "@/lib/functions/auth.functions";
+import { CategoriesSelectionModal } from "../modals";
 
 const LeftSidebar = () => {
   const { setUser } = useUserContext();
   const pathname = usePathname();
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
 
   const handleLogoutClick = async () => {
     await deleteToken();
     await handleClearStorage();
     setUser(INITIAL_USER);
     router.push("/sign-in");
+  };
+
+  const handleNonLinkClick = (name: string) => {
+    if (name === "Upload") {
+      setDrawerOpen(true);
+    } else if (name === "Categories") {
+      setCategoriesOpen(true);
+    }
   };
 
   const handleUploadPageClick = (option: "create-post" | "share") => {
@@ -69,7 +79,7 @@ const LeftSidebar = () => {
                   ) : (
                     <div
                       className={`${isActive ? "bg-dark-250 fill-light-900 text-light-900" : ""} leftsidebar-link w-full `}
-                      onClick={() => setDrawerOpen(true)}
+                      onClick={() => handleNonLinkClick(item.name)}
                     >
                       <item.icon width="19px" height="19px" />
                       <p className="max-lg:hidden">{item.name}</p>
@@ -114,6 +124,11 @@ const LeftSidebar = () => {
           </div>
         </DrawerContent>
       </Drawer>
+
+      <CategoriesSelectionModal
+        isOpen={categoriesOpen}
+        onClose={() => setCategoriesOpen(false)}
+      />
     </>
   );
 };

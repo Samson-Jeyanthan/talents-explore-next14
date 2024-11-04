@@ -4,16 +4,17 @@ import Image from "next/image";
 const UserProfileImg = ({
   src,
   userName,
+  userId,
   className,
 }: {
   src?: string | null;
   userName: string;
+  userId?: string;
   className?: string;
 }) => {
   return (
     <>
       <Image
-        // eslint-disable-next-line no-unneeded-ternary
         src={src || "/assets/images/default_profile_pic_2.png"}
         alt={userName}
         width={512}

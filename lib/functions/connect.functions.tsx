@@ -64,7 +64,7 @@ export async function handleAddRating(
   userId: string | undefined,
   postId: string | undefined,
   authorId: string,
-  ratingFor: "PROFILE" | "POST" | "SHARE",
+  ratingFor: "PROFILE" | "POST" | "SHARE" | "FILTER",
   rating: number,
   revalidatePathURL: string
 ) {
@@ -79,6 +79,7 @@ export async function handleAddRating(
       revalidatePathURL
     );
   }
+  console.log(res);
   if (res.status === "7400") {
     toast.success(
       `You have given ${rating} ⭐ to this ${

@@ -1,13 +1,13 @@
 "use client";
 
-import { ChangeEvent, useState, FocusEvent } from "react";
+import { useState, FocusEvent, useEffect } from "react";
 import Link from "next/link";
-import { searchPeopleTag } from "@/actions/utils.action";
 import { Input } from "@/components/ui/input";
 import { useUserContext } from "@/context/AuthProvider";
 import { TPeopleTagSearch } from "@/types/utils.types";
 import UserProfileImg from "../others/UserProfileImg";
 import { CiSearch } from "react-icons/ci";
+import { searchPeopleTag } from "@/actions/search.action";
 
 function NavbarSearch() {
   const { user } = useUserContext();
@@ -15,8 +15,7 @@ function NavbarSearch() {
   const [resultsList, setResultsList] = useState<TPeopleTagSearch[]>([]);
   const [isFocused, setIsFocused] = useState(false);
 
-  async function handleSearch(e: ChangeEvent<HTMLInputElement>) {
-    const filter = e.target.value;
+  async function handleSearch(filter: string) {
     setTypingVal(filter);
     if (!user) return null;
     const response = await searchPeopleTag(user.currentUserId, filter, 1, 5);
@@ -24,6 +23,17 @@ function NavbarSearch() {
       setResultsList(response.response);
     }
   }
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (typingVal) {
+        handleSearch(typingVal);
+      }
+    }, 1000);
+
+    return () => clearTimeout(delayDebounceFn);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [typingVal]);
 
   function handleFocus(e: FocusEvent<HTMLInputElement>) {
     setIsFocused(true);
@@ -41,8 +51,8 @@ function NavbarSearch() {
       <CiSearch className="absolute left-2 top-2 text-2xl text-light-500/80" />
       <Input
         value={typingVal}
-        onChange={(e) => handleSearch(e)}
-        placeholder="Search for people"
+        onChange={(e) => setTypingVal(e.target.value)}
+        placeholder="Search for users"
         className="shad-nav-search-input"
         onFocus={(e) => handleFocus(e)}
         onBlur={(e) => handleBlur(e)}

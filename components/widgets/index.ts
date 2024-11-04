@@ -37,8 +37,9 @@ export { default as TopPostsCarousel } from "./carousels/TopPostsCarousel";
 export { default as MoreDetailPostCarousel } from "./carousels/MoreDetailPostCarousel";
 export { default as PostFeedCarousel } from "./carousels/PostFeedCarousel";
 // explore widgets
-export { default as ExploreCategories } from "./explore/ExploreCategories";
-export { default as ExploreTopTalents } from "./explore/ExploreTopTalents";
 export { default as ExploreBgCarousel } from "./explore/ExploreBgCarousel";
 export { default as ExploreSearchSection } from "./explore/ExploreSearchSection";
 export { default as ExploreFilterSheet } from "./explore/ExploreFilterSheet";
+export { default as ExploreCategories } from "./explore/ExploreCategories";
+export { default as ExploreTopTalents } from "./explore/ExploreTopTalents";
+export { default as ExploreTopPosts } from "./explore/ExploreTopPosts";

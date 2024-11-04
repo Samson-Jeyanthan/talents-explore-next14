@@ -8,7 +8,6 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogOverlay,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Input } from "../ui/input";
@@ -56,7 +55,6 @@ const CRUDSaveFolder = ({
 
   return (
     <AlertDialog open={isOpen}>
-      <AlertDialogOverlay />
       <AlertDialogContent className="max-w-[26rem] rounded-2xl border-none bg-dark-250 p-4 text-light-900">
         <AlertDialogHeader className="flex flex-col gap-2">
           <AlertDialogTitle className="capitalize">
