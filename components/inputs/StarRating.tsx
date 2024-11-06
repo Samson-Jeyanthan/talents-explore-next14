@@ -8,7 +8,7 @@ import { toast } from "sonner";
 
 type Props = {
   prevRatingValue: number;
-  ratingFor: "PROFILE" | "POST" | "SHARE" | "FILTER";
+  ratingFor: "PROFILE" | "POST" | "SHARE" | "FILTER" | "UPLOAD";
   authorId: string;
   postId?: string;
   revalidatePath: string;
@@ -28,7 +28,7 @@ const StarRating = ({
   const [hover, setHover] = useState(0); // Store the hovered rating
 
   const handleStarSubmit = (val: number) => {
-    if (ratingFor === "FILTER") {
+    if (ratingFor === "FILTER" || ratingFor === "UPLOAD") {
       setRating(val);
       onChange && onChange(val);
     } else {

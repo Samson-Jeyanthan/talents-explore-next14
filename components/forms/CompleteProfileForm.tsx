@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { Form, FormField } from "../ui/form";
 import {
   CheckboxInput,

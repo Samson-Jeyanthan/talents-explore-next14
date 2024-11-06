@@ -40,7 +40,7 @@ const Dropdown = ({
       control={form.control}
       name={inputName}
       render={({ field }) => (
-        <FormItem>
+        <FormItem className="w-full">
           <FormLabel className="shad-auth_form_label">{formLabel}</FormLabel>
           <FormControl>
             <Select onValueChange={(_id: string) => field.onChange(_id)}>

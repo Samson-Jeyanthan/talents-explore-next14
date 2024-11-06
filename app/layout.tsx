@@ -28,7 +28,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning={true}
-      className={`${poppins.variable} font-sans`}
+      className={`${poppins.variable} top-0 bg-dark-200 font-sans`}
     >
       <body>
         <AuthProvider>
