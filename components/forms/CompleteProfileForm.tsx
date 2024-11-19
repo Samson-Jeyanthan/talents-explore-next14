@@ -190,6 +190,9 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
             <DateInpt
               form={form}
               formLabel="Date of Birth"
+              yearName="year"
+              monthName="month"
+              dayName="day"
               yearValue={form.getValues("year")}
               monthValue={form.getValues("month")}
               dayValue={form.getValues("day")}

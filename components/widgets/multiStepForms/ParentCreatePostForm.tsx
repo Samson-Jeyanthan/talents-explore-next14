@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PostAboutValidation } from "@/lib/validations/post.validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -9,19 +9,20 @@ import { CreatePostAboutForm, CreatePostCreditForm } from "@/components/forms";
 import { TransparentLoader } from "@/components/modals";
 import { Button } from "@/components/ui/button";
 import Footer from "../Footer";
+import { Form } from "@/components/ui/form";
 
 interface Props {
   langData: any;
   mainCategoryData: any;
   subCategoryData?: any;
   skillData?: any;
+  countryData: any;
 }
 
 const ParentCreatePostForm = ({
   langData,
   mainCategoryData,
-  subCategoryData,
-  skillData,
+  countryData,
 }: Props) => {
   const LangOptions = langData.response.map((item: any) => ({
     _id: item._id,
@@ -31,6 +32,11 @@ const ParentCreatePostForm = ({
   const mainCategoryOptions = mainCategoryData.response.map((item: any) => ({
     _id: item._id,
     name: item.name,
+  }));
+
+  const countryOptions = countryData.response.map((item: any) => ({
+    _id: item._id,
+    name: item.country,
   }));
 
   const [page, setPage] = useState(0);
@@ -49,10 +55,14 @@ const ParentCreatePostForm = ({
       secondaryLanguage: "",
       country: "",
       state: "",
-      tagPeople: "",
+      tagPeople: [""],
       hashtag: "",
     },
   });
+
+  useEffect(() => {
+    console.log(form.getValues("mainCategory"));
+  }, [mainCategoryOptions, form]);
 
   async function onSubmit(values: z.infer<typeof PostAboutValidation>) {
     console.log(values);
@@ -73,6 +83,7 @@ const ParentCreatePostForm = ({
           form={form}
           langData={LangOptions}
           mainCategoryOptions={mainCategoryOptions}
+          countryOptions={countryOptions}
         />
       ),
     },
@@ -100,8 +111,8 @@ const ParentCreatePostForm = ({
               </span>
             </div>
           </header>
-          <>{postForm[page].form}</>
-          <footer className="flex w-full flex-col gap-5">
+          <Form {...form}>{postForm[page].form}</Form>
+          <footer className="mt-5 flex w-full flex-col gap-5">
             {postForm.length - 1 === page ? (
               <Button
                 onClick={form.handleSubmit(onSubmit)}

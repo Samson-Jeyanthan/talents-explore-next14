@@ -43,6 +43,11 @@ export const GENDER_VALUES = [
   },
 ];
 
+export const CREDIT_WORK_OPTIONS = [
+  { id: "true", name: "Credit Work" },
+  { id: "false", name: "Full Ownership" },
+];
+
 interface SidebarItem {
   icon: IconType | React.ComponentType<TConvertedSvgJsxProps>;
   path: string;
