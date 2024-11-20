@@ -24,13 +24,13 @@ type Props = {
   options: { _id: string; name: string }[];
   value: string | boolean | undefined;
   formDescription?: string;
+  isModal?: boolean;
   dependentFieldPlaceholder?: string;
-  dependentFieldValue?: boolean;
-  onValueChange?: (_id: string) => {};
-  resetFiled?: () => void;
+
+  onValueChange: (_id: string) => {};
 };
 
-const Dropdown = ({
+const SkillDropdown = ({
   form,
   formLabel,
   inputName,
@@ -38,18 +38,14 @@ const Dropdown = ({
   options,
   value,
   formDescription,
+  isModal,
   dependentFieldPlaceholder,
-  dependentFieldValue,
+
   onValueChange,
-  resetFiled,
 }: Props) => {
   const handleOnChange = (_id: string, field: any) => {
     field.onChange(_id);
-    onValueChange && onValueChange(_id);
-
-    if (resetFiled) {
-      field.onChange();
-    }
+    onValueChange(_id);
   };
 
   return (
@@ -69,17 +65,19 @@ const Dropdown = ({
                   </p>
                 )}
               </SelectTrigger>
-              <SelectContent className="shad-auth_form_select_option">
-                {dependentFieldPlaceholder && !dependentFieldValue && (
-                  <div className="shad-auth_form_select_item flex items-center pl-2 text-sm">
-                    --{dependentFieldPlaceholder}--
+              <SelectContent
+                className={`${isModal ? "z-[125]" : ""} shad-auth_form_select_option`}
+              >
+                {options?.length === 0 && (
+                  <div className="shad-auth_form_select_item">
+                    {dependentFieldPlaceholder}
                   </div>
                 )}
                 {options?.length > 0 &&
                   options?.map((option, index) => (
                     <SelectItem
                       key={index}
-                      value={option?._id && option?._id}
+                      value={option?._id}
                       className="shad-auth_form_select_item"
                     >
                       {option?.name}
@@ -100,4 +98,4 @@ const Dropdown = ({
   );
 };
 
-export default Dropdown;
+export default SkillDropdown;

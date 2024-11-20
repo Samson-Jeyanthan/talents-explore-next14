@@ -20,6 +20,9 @@ import { useState } from "react";
 type TDropdownProps = {
   form: any;
   formLabel?: string;
+  yearName: string;
+  monthName: string;
+  dayName: string;
   yearValue: any;
   monthValue: any;
   dayValue: any;
@@ -29,6 +32,9 @@ type TDropdownProps = {
 const DateInput = ({
   form,
   formLabel,
+  yearName,
+  monthName,
+  dayName,
   yearValue,
   monthValue,
   dayValue,
@@ -50,7 +56,7 @@ const DateInput = ({
       <div className="flex-center w-full gap-4">
         <FormField
           control={form.control}
-          name="year"
+          name={yearName}
           render={({ field }) => (
             <FormItem className="w-full">
               <FormControl>
@@ -89,7 +95,7 @@ const DateInput = ({
         />
         <FormField
           control={form.control}
-          name="month"
+          name={monthName}
           render={({ field }) => (
             <FormItem className="w-full">
               <FormControl>
@@ -128,7 +134,7 @@ const DateInput = ({
         />
         <FormField
           control={form.control}
-          name="day"
+          name={dayName}
           render={({ field }) => (
             <FormItem className="w-full">
               <FormControl>
