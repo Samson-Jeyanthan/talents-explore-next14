@@ -17,7 +17,7 @@ import {
 } from "../ui/select";
 import { useState } from "react";
 
-type TDropdownProps = {
+type Props = {
   form: any;
   formLabel?: string;
   yearName: string;
@@ -38,7 +38,7 @@ const DateInput = ({
   yearValue,
   monthValue,
   dayValue,
-}: TDropdownProps) => {
+}: Props) => {
   const [dates, setDates] = useState({
     selectedYear: "",
     selectedMonth: "",

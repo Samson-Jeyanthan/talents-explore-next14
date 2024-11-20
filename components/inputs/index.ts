@@ -4,7 +4,7 @@ export { default as CoverPhoto } from "./CoverPhoto";
 export { default as ProfilePhoto } from "./ProfilePhoto";
 export { default as TextArea } from "./TextArea";
 export { default as CheckboxInput } from "./CheckboxInput";
-export { default as DateInpt } from "./DateInput";
+export { default as DateInput } from "./DateInput";
 export { default as StarRating } from "./StarRating";
 export { default as CommentInput } from "./CommentInput";
 export { default as UserTagAndSearch } from "./UserTagAndSearch";

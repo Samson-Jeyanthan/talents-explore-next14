@@ -4,7 +4,7 @@ import { Form, FormField } from "../ui/form";
 import {
   CheckboxInput,
   CoverPhoto,
-  DateInpt,
+  DateInput,
   Dropdown,
   FormInput,
   ProfilePhoto,
@@ -187,7 +187,7 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
               data={GENDER_VALUES}
             />
 
-            <DateInpt
+            <DateInput
               form={form}
               formLabel="Date of Birth"
               yearName="year"

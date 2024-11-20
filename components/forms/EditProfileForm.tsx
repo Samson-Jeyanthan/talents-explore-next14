@@ -9,11 +9,11 @@ import { Form, FormField } from "../ui/form";
 import {
   CheckboxInput,
   CoverPhoto,
-  DateInpt,
   Dropdown,
   FormInput,
   ProfilePhoto,
   TextArea,
+  DateInput,
 } from "../inputs";
 import { GENDER_VALUES } from "@/constants";
 import { Button } from "../ui/button";
@@ -46,7 +46,7 @@ const EditProfileForm = ({ langData, professionData, userData }: Props) => {
       firstName: userData?.personalInfo.firstName || "",
       lastName: userData?.personalInfo.lastName || "",
       knownLanguage: userData?.personalInfo.languageKnown || "",
-      profession: userData?.personalInfo.professional || "",
+      profession: userData?.personalInfo.professionalId || "",
       year: "",
       month: "",
       day: "",
@@ -57,7 +57,9 @@ const EditProfileForm = ({ langData, professionData, userData }: Props) => {
     },
   });
 
-  async function onSubmit(data: z.infer<typeof EditProfileValidation>) {}
+  async function onSubmit(values: z.infer<typeof EditProfileValidation>) {
+    console.log(values);
+  }
 
   return (
     <>
@@ -116,9 +118,12 @@ const EditProfileForm = ({ langData, professionData, userData }: Props) => {
               data={GENDER_VALUES}
             />
 
-            <DateInpt
+            <DateInput
               form={form}
               formLabel="Date of Birth"
+              yearName="year"
+              monthName="month"
+              dayName="day"
               yearValue={form.getValues("year")}
               monthValue={form.getValues("month")}
               dayValue={form.getValues("day")}
