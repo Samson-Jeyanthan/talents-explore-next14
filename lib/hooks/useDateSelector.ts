@@ -80,7 +80,7 @@ const useDateSelector = ({
   // setting the days in array regarding of selected month & year
   const [days, setDays] = useState<TDays[]>([]);
   useEffect(() => {
-    console.log(yearValue, monthValue, "from hook");
+    // console.log(yearValue, monthValue, "from hook");
     const daysInMonth = getDaysInMonth(parseInt(yearValue), monthValue);
     const calDays: TDays[] = [];
     for (let i = 1; i <= daysInMonth; i++) {
@@ -120,7 +120,7 @@ export function convertToISOString(
 }
 
 // function to extract the year, month, and day from the date
-export const formatDateOfBirth = (dob: string | undefined) => {
+export const formatISOStringDate = (dob: string | undefined) => {
   if (!dob) {
     return { year: "", month: "", day: "" };
   }

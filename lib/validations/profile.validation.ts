@@ -1,4 +1,5 @@
 import * as z from "zod";
+import { formatISOStringDate } from "../hooks/useDateSelector";
 
 export const languageValidation = z.object({
   languageId: z.string(),
@@ -16,13 +17,14 @@ export const EditProfileValidation = z
     quotes: z.string().trim(),
     coverPhoto: z.union([z.custom<File[]>(), z.string()]).optional(),
     profilePhoto: z.union([z.custom<File[]>(), z.string()]).optional(),
-    year: z.string(),
-    month: z.string(),
-    day: z.string(),
     dob: z.string().min(1, { message: "Date of Birth is required" }),
     // professional info for talents
     bio: z.string().min(1, { message: "Bio is required" }).trim(),
-    ethnic: z.string().min(1, { message: "Ethnic is required" }).trim(),
+    ethnic: z
+      .string()
+      .min(1, { message: "Ethnic is required" })
+      .trim()
+      .optional(),
     featuredPhotos: z
       .array(
         z.custom<File>((file) => file instanceof File, {
@@ -30,32 +32,28 @@ export const EditProfileValidation = z
         })
       )
       .optional(),
-    socialLinks: z.array(
-      z.object({
-        type: z.string(),
-        url: z.string(),
-        show: z.boolean(),
-      })
-    ),
+    socialLinks: z
+      .array(
+        z.object({
+          type: z.string(),
+          url: z.string(),
+          show: z.boolean(),
+        })
+      )
+      .optional(),
   })
   .refine(
     (data) => {
-      const { year, month, day } = data;
-      return !!year && !!month && !!day;
-    },
-    {
-      message: "Date of Birth is required",
-      path: ["year"],
-    }
-  )
-  .refine(
-    (data) => {
-      const { year, month, day } = data;
-      const dob = new Date(Number(year), Number(month) - 1, Number(day));
+      const { dob } = data;
+
+      const { year, month, day } = formatISOStringDate(dob);
+      const refinedDob = new Date(Number(year), Number(month) - 1, Number(day));
       const today = new Date();
-      const age = today.getFullYear() - dob.getFullYear();
-      const isMonthPast = today.getMonth() - dob.getMonth();
-      const isDayPast = today.getDate() - dob.getDate();
+      const age = today.getFullYear() - refinedDob.getFullYear();
+      const isMonthPast = today.getMonth() - refinedDob.getMonth();
+      const isDayPast = today.getDate() - refinedDob.getDate();
+
+      console.log(dob, refinedDob, age);
 
       // Calculate the exact age considering month and day
       const exactAge =
@@ -67,6 +65,6 @@ export const EditProfileValidation = z
     },
     {
       message: "You must be at least 13 years old",
-      path: ["year"],
+      path: ["dob"],
     }
   );

@@ -1,5 +1,6 @@
+"use client";
+
 import { GENDER_VALUES } from "@/constants";
-import React from "react";
 import {
   CheckboxInput,
   CoverPhoto,
@@ -9,7 +10,7 @@ import {
   ProfilePhoto,
   TextArea,
 } from "../inputs";
-import { FormField } from "../ui/form";
+import { FormField, FormMessage } from "../ui/form";
 
 const EditPersonalInfoForm = ({
   form,
@@ -66,13 +67,19 @@ const EditPersonalInfoForm = ({
           data={GENDER_VALUES}
         />
 
-        <DateInput
-          form={form}
-          formLabel="Date of Birth"
-          yearName="year"
-          monthName="month"
-          dayName="day"
-          isoDate={userData?.personalInfo?.dob}
+        <FormField
+          control={form.control}
+          name="dob"
+          render={({ field }) => (
+            <>
+              <DateInput
+                formLabel="Date of Birth"
+                fieldChange={field.onChange}
+                isoDate={form.getValues("dob")}
+              />
+              <FormMessage className="shad-auth_form_message -mt-4" />
+            </>
+          )}
         />
 
         <Dropdown

@@ -1,4 +1,5 @@
 import * as z from "zod";
+import { formatISOStringDate } from "../hooks/useDateSelector";
 
 export const SignupValidation = z.object({
   username: z
@@ -66,31 +67,22 @@ export const CompleteProfileValidation = z
     knownLanguage: z.string().min(1, { message: "Known Language is required" }),
     profession: z.string().min(1, { message: "Profession is required" }),
     quotes: z.string().trim(),
-    // dob: z.string().min(1, { message: "Date of Birth is required" }).date(),
+    dob: z.string().min(1, { message: "Date of Birth is required" }),
     coverPhoto: z.custom<File[]>().optional(),
     profilePhoto: z.custom<File[]>().optional(),
-    year: z.string(),
-    month: z.string(),
-    day: z.string(),
   })
   .refine(
     (data) => {
-      const { year, month, day } = data;
-      return !!year && !!month && !!day;
-    },
-    {
-      message: "Date of Birth is required",
-      path: ["year"],
-    }
-  )
-  .refine(
-    (data) => {
-      const { year, month, day } = data;
-      const dob = new Date(Number(year), Number(month) - 1, Number(day));
+      const { dob } = data;
+
+      const { year, month, day } = formatISOStringDate(dob);
+      const refinedDob = new Date(Number(year), Number(month) - 1, Number(day));
       const today = new Date();
-      const age = today.getFullYear() - dob.getFullYear();
-      const isMonthPast = today.getMonth() - dob.getMonth();
-      const isDayPast = today.getDate() - dob.getDate();
+      const age = today.getFullYear() - refinedDob.getFullYear();
+      const isMonthPast = today.getMonth() - refinedDob.getMonth();
+      const isDayPast = today.getDate() - refinedDob.getDate();
+
+      console.log(dob, refinedDob, age);
 
       // Calculate the exact age considering month and day
       const exactAge =
@@ -102,6 +94,6 @@ export const CompleteProfileValidation = z
     },
     {
       message: "You must be at least 13 years old",
-      path: ["year"],
+      path: ["dob"],
     }
   );

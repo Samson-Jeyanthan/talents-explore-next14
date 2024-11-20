@@ -9,6 +9,7 @@ import { EditProfileValidation } from "@/lib/validations/profile.validation";
 import { TCurrentUserData } from "@/types/profile.types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -25,18 +26,21 @@ const ParentEditProfileForm = ({
 }: Props) => {
   const router = useRouter();
   const { user } = useUserContext();
-  const LangOptions = langData.response.map((item: any) => ({
+  const [prevURLs, setPrevURLs] = useState<string[]>(
+    userData?.morePersonalInfo?.featuredPhotos || []
+  );
+  const LangOptions = langData?.response?.map((item: any) => ({
     _id: item._id,
     name: item.language,
   }));
 
-  const professionOptions = professionData.response.map((item: any) => ({
+  const professionOptions = professionData?.response?.map((item: any) => ({
     _id: item._id,
     name: item.professional,
   }));
 
   async function onSubmit(values: z.infer<typeof EditProfileValidation>) {
-    console.log(values);
+    console.log(values.dob, "values");
   }
 
   const form = useForm<z.infer<typeof EditProfileValidation>>({
@@ -46,9 +50,7 @@ const ParentEditProfileForm = ({
       lastName: userData?.personalInfo.lastName || "",
       knownLanguage: userData?.personalInfo.languageKnown || "",
       profession: userData?.personalInfo.professionalId || "",
-      year: "",
-      month: "",
-      day: "",
+      dob: userData?.personalInfo?.dob,
       gender: userData?.personalInfo.gender || "",
       quotes: userData?.personalInfo.shortBio || "",
       coverPhoto: userData?.personalInfo.coverImage || undefined,
@@ -56,7 +58,7 @@ const ParentEditProfileForm = ({
       // professional info
       bio: userData?.morePersonalInfo.bio || "",
       ethnic: userData?.morePersonalInfo.ethnic || "",
-      featuredPhotos: userData?.morePersonalInfo.featuredPhotos || [],
+      featuredPhotos: [],
       socialLinks: userData?.morePersonalInfo.socialLinks || [],
     },
   });
@@ -70,10 +72,15 @@ const ParentEditProfileForm = ({
         <EditPersonalInfoForm
           form={form}
           userData={userData}
-          langData={LangOptions}
-          professionData={professionOptions}
+          LangOptions={LangOptions}
+          professionOptions={professionOptions}
         />
-        <EditProInfoForm form={form} userData={userData} />
+        <EditProInfoForm
+          form={form}
+          userData={userData}
+          prevURLs={prevURLs}
+          setPrevURLs={setPrevURLs}
+        />
       </Form>
 
       <div className="my-3 mb-5 flex w-full justify-end gap-3">
