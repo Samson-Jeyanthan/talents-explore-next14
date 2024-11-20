@@ -7,6 +7,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "../ui/textarea";
+import { cn } from "@/lib/utils";
 
 type TInputProps = {
   form: any;
@@ -15,6 +16,7 @@ type TInputProps = {
   placeholder?: string;
   maxLength?: number | undefined;
   formDescription?: string;
+  className?: string;
 };
 
 const TextArea = ({
@@ -24,6 +26,7 @@ const TextArea = ({
   placeholder,
   maxLength,
   formDescription,
+  className,
 }: TInputProps) => {
   return (
     <FormField
@@ -35,7 +38,7 @@ const TextArea = ({
           <FormControl>
             <Textarea
               placeholder={placeholder}
-              className="shad-auth_form_textarea resize-none"
+              className={cn(className, `shad-auth_form_textarea resize-none`)}
               maxLength={maxLength}
               {...field}
             />
