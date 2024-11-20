@@ -1,6 +1,8 @@
 "use client";
 
-import useDateSelector from "@/lib/hooks/useDateSelector";
+import useDateSelector, {
+  formatDateOfBirth,
+} from "@/lib/hooks/useDateSelector";
 import {
   FormControl,
   FormField,
@@ -20,13 +22,12 @@ import { useState } from "react";
 type Props = {
   form: any;
   formLabel?: string;
+  // input names for dat. bcz in a single form there can be multiple date inputs
   yearName: string;
   monthName: string;
   dayName: string;
-  yearValue: any;
-  monthValue: any;
-  dayValue: any;
   formDescription?: string;
+  isoDate?: string;
 };
 
 const DateInput = ({
@@ -35,13 +36,14 @@ const DateInput = ({
   yearName,
   monthName,
   dayName,
-  yearValue,
-  monthValue,
-  dayValue,
+  isoDate,
 }: Props) => {
+  const { year, month, day } = formatDateOfBirth(isoDate);
+
   const [dates, setDates] = useState({
-    selectedYear: "",
-    selectedMonth: "",
+    selectedYear: year || "",
+    selectedMonth: month || "",
+    selectedDay: day || "",
   });
   const { years, months, days } = useDateSelector({
     yearValue: dates.selectedYear,
@@ -70,8 +72,9 @@ const DateInput = ({
                   }}
                 >
                   <SelectTrigger className="flex-between shad-auth_form_input">
-                    <SelectValue />
-                    {!yearValue && (
+                    {years?.find((year) => year.id === dates.selectedYear)
+                      ?.label || <SelectValue />}
+                    {!dates.selectedYear && (
                       <p className="flex w-full items-start text-light-500">
                         Year
                       </p>
@@ -109,8 +112,10 @@ const DateInput = ({
                   }}
                 >
                   <SelectTrigger className="flex-between shad-auth_form_input">
-                    <SelectValue />
-                    {!monthValue && (
+                    {months?.find(
+                      (year) => year.id === String(dates.selectedMonth)
+                    )?.label || <SelectValue />}
+                    {!dates.selectedMonth && (
                       <p className="flex w-full items-start text-light-500">
                         Month
                       </p>
@@ -138,14 +143,27 @@ const DateInput = ({
           render={({ field }) => (
             <FormItem className="w-full">
               <FormControl>
-                <Select onValueChange={(id: any) => field.onChange(id)}>
+                <Select
+                  onValueChange={(id: any) => {
+                    field.onChange(id);
+                    setDates({
+                      ...dates,
+                      selectedDay: id,
+                    });
+                  }}
+                >
                   <SelectTrigger className="flex-between shad-auth_form_input">
-                    <SelectValue />
-                    {!dayValue && (
-                      <p className="flex w-full items-start text-light-500">
-                        Day
-                      </p>
-                    )}
+                    {days?.find(
+                      (day) => day.label === String(dates.selectedDay)
+                    )?.label || <SelectValue />}
+                    {!dates.selectedDay ||
+                      (!days?.some(
+                        (day) => day.label === String(dates.selectedDay)
+                      ) && (
+                        <p className="flex w-full items-start text-light-500">
+                          Day
+                        </p>
+                      ))}
                   </SelectTrigger>
                   {days.length > 0 && (
                     <SelectContent className="shad-auth_form_select_option">

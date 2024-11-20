@@ -118,3 +118,16 @@ export function convertToISOString(
   // Return the ISO string representation of the date
   return date.toISOString();
 }
+
+// function to extract the year, month, and day from the date
+export const formatDateOfBirth = (dob: string | undefined) => {
+  if (!dob) {
+    return { year: "", month: "", day: "" };
+  }
+  const date = new Date(dob);
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1; // Months are 0-based, so add 1
+  const day = date.getDate();
+
+  return { year, month, day };
+};

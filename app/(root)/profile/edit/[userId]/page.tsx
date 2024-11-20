@@ -3,8 +3,8 @@ import {
   getLanguagesAction,
   getProfessionsAction,
 } from "@/actions/utils.action";
-import { EditProfileForm } from "@/components/forms";
 import { Footer } from "@/components/widgets";
+import { ParentEditProfileForm } from "@/components/widgets/multiStepForms";
 import { getSession } from "@/lib/session";
 import { Metadata, ResolvingMetadata } from "next";
 import { redirect } from "next/navigation";
@@ -55,7 +55,7 @@ const EditProfile = async ({ params }: ParamsProps) => {
   return (
     <div className="container-wrapper flex-col pb-6">
       <h1 className="h1-bold flex-start w-full text-light-900">Edit Profile</h1>
-      <EditProfileForm
+      <ParentEditProfileForm
         langData={langData}
         professionData={professionData}
         userData={userData}
