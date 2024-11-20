@@ -6,18 +6,11 @@ import { SIDEBAR_ITEMS } from "@/constants";
 import Image from "next/image";
 import Link from "next/link";
 import { AiOutlineLogout } from "react-icons/ai";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-} from "../ui/drawer";
 import { Button } from "../ui/button";
 import { INITIAL_USER, useUserContext } from "@/context/AuthProvider";
 import { deleteToken } from "@/actions/auth.action";
 import { handleClearStorage } from "@/lib/functions/auth.functions";
-import { CategoriesSelectionModal } from "../modals";
+import { CategoriesSelectionModal, UploadDrawer } from "../modals";
 
 const LeftSidebar = () => {
   const { setUser } = useUserContext();
@@ -39,15 +32,6 @@ const LeftSidebar = () => {
     } else if (name === "Categories") {
       setCategoriesOpen(true);
     }
-  };
-
-  const handleUploadPageClick = (option: "create-post" | "share") => {
-    if (option === "create-post") {
-      router.push("/create-post");
-    } else if (option === "share") {
-      router.push("/share");
-    }
-    setDrawerOpen(false);
   };
 
   return (
@@ -104,33 +88,12 @@ const LeftSidebar = () => {
         </div>
       </aside>
 
-      <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-        <DrawerContent className="flex-start h-2/5 gap-6 border-none bg-dark-200">
-          <DrawerHeader>
-            <DrawerTitle>Are you absolutely sure?</DrawerTitle>
-            <DrawerDescription>This action cannot be undone.</DrawerDescription>
-          </DrawerHeader>
-          <div className="flex w-72 flex-col gap-6">
-            <Button
-              className="shad-button_primary w-full"
-              onClick={() => handleUploadPageClick("create-post")}
-            >
-              Create Post
-            </Button>
-            <Button
-              className="shad-button_primary w-full"
-              onClick={() => handleUploadPageClick("share")}
-            >
-              Share Anything
-            </Button>
-          </div>
-        </DrawerContent>
-      </Drawer>
-
       <CategoriesSelectionModal
         isOpen={categoriesOpen}
         onClose={() => setCategoriesOpen(false)}
       />
+
+      <UploadDrawer open={drawerOpen} setOpen={setDrawerOpen} />
     </>
   );
 };
