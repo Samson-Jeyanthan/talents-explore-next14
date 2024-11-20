@@ -19,10 +19,17 @@ export const EditProfileValidation = z
     year: z.string(),
     month: z.string(),
     day: z.string(),
+    dob: z.string().min(1, { message: "Date of Birth is required" }),
     // professional info for talents
     bio: z.string().min(1, { message: "Bio is required" }).trim(),
     ethnic: z.string().min(1, { message: "Ethnic is required" }).trim(),
-    featuredPhotos: z.array(z.string()).optional(),
+    featuredPhotos: z
+      .array(
+        z.custom<File>((file) => file instanceof File, {
+          message: "Expected a file",
+        })
+      )
+      .optional(),
     socialLinks: z.array(
       z.object({
         type: z.string(),

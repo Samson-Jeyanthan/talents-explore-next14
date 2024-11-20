@@ -9,7 +9,7 @@ export const defaultMediaState: Media = {
   mediaType: "",
 };
 
-export function useCoverAndProfilePic() {
+export function useImageSelection() {
   const [error, setError] = useState("");
   const [media, setMedia] = useState<Media>(defaultMediaState);
 

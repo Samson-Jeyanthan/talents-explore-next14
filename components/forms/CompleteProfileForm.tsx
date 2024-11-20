@@ -193,9 +193,6 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
               yearName="year"
               monthName="month"
               dayName="day"
-              yearValue={form.getValues("year")}
-              monthValue={form.getValues("month")}
-              dayValue={form.getValues("day")}
             />
 
             <Dropdown
