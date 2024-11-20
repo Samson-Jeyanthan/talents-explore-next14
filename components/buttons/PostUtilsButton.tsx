@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { SaveIcon, ShareIcon } from "@/public/assets/svgs";
+import { CommentIcon, SaveIcon, ShareIcon } from "@/public/assets/svgs";
 
 type Props = {
   buttonFor: "SHARE" | "COMMENT" | "SAVE";
@@ -24,7 +24,7 @@ const PostUtilsButton = ({ buttonFor, className, size, isSaveText }: Props) => {
         </div>
       ) : null}
       {buttonFor === "COMMENT" ? (
-        <ShareIcon width={size || "18px"} height={size || "18px"} />
+        <CommentIcon width={size || "18px"} height={size || "18px"} />
       ) : null}
       {buttonFor === "SHARE" ? (
         <ShareIcon width={size || "18px"} height={size || "18px"} />

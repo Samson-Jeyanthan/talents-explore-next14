@@ -10,7 +10,6 @@ import {
   createSaveCollectionFolderAction,
   deleteSaveCollectionFolderAction,
   editSaveCollectionFolderAction,
-  getAllSavedFoldersAction,
   removeFromSaveCollectionAction,
 } from "@/actions/save.action";
 import { toast } from "sonner";
@@ -72,23 +71,13 @@ export async function handleCreateSaveCollection(
     collectionName,
     revalidatePathURL
   );
+  console.log(res);
   if (res.status === "7400") {
     toast.success("Folder created successfully", { duration: 4000 });
+  } else if (res.status === "7407") {
+    toast.info("Folder name already exist", { duration: 4000 });
   } else {
     toast.error("Something went wrong", { duration: 4000 });
-  }
-}
-
-export async function getSaveCollection(
-  userId: string | undefined,
-  postId: string | number | undefined
-) {
-  const res = await getAllSavedFoldersAction(userId, postId, false);
-  if (res.status === 200) {
-    return res.response;
-  } else {
-    toast.error("Couldn't fetch saved collections", { duration: 4000 });
-    return false;
   }
 }
 

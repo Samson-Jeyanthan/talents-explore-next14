@@ -8,10 +8,11 @@ import { toast } from "sonner";
 
 type Props = {
   prevRatingValue: number;
-  ratingFor: "PROFILE" | "POST" | "SHARE";
+  ratingFor: "PROFILE" | "POST" | "SHARE" | "FILTER" | "UPLOAD";
   authorId: string;
   postId?: string;
   revalidatePath: string;
+  onChange?: (val: number) => void;
 };
 
 const StarRating = ({
@@ -20,24 +21,30 @@ const StarRating = ({
   authorId,
   postId,
   revalidatePath,
+  onChange,
 }: Props) => {
   const { user } = useUserContext();
   const [rating, setRating] = useState(prevRatingValue);
   const [hover, setHover] = useState(0); // Store the hovered rating
 
   const handleStarSubmit = (val: number) => {
-    setRating(val);
-    if (prevRatingValue === val)
-      return toast.info("You have already rated", { duration: 4000 });
+    if (ratingFor === "FILTER" || ratingFor === "UPLOAD") {
+      setRating(val);
+      onChange && onChange(val);
+    } else {
+      setRating(val);
+      if (prevRatingValue === val)
+        return toast.info("You have already rated", { duration: 4000 });
 
-    handleAddRating(
-      user.currentUserId,
-      postId,
-      authorId,
-      ratingFor,
-      val,
-      revalidatePath
-    );
+      handleAddRating(
+        user.currentUserId,
+        postId,
+        authorId,
+        ratingFor,
+        val,
+        revalidatePath
+      );
+    }
   };
 
   return (

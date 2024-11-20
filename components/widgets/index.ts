@@ -32,6 +32,14 @@ export { default as RatingDetails } from "./postMoreDetails/RatingDetails";
 export { default as TagsAndOtherInfo } from "./postMoreDetails/TagsAndOtherInfo";
 export { default as Comments } from "./postMoreDetails/Comments";
 // carousel widgets
-export { default as VideoAsImage } from "./mediaCarousel/VideoAsImage";
-export { default as TopPostsCarousel } from "./mediaCarousel/TopPostsCarousel";
-export { default as MoreDetailPostCarousel } from "./mediaCarousel/MoreDetailPostCarousel";
+export { default as VideoAsImage } from "./carousels/VideoAsImage";
+export { default as TopPostsCarousel } from "./carousels/TopPostsCarousel";
+export { default as MoreDetailPostCarousel } from "./carousels/MoreDetailPostCarousel";
+export { default as PostFeedCarousel } from "./carousels/PostFeedCarousel";
+// explore widgets
+export { default as ExploreBgCarousel } from "./explore/ExploreBgCarousel";
+export { default as ExploreSearchSection } from "./explore/ExploreSearchSection";
+export { default as ExploreFilterSheet } from "./explore/ExploreFilterSheet";
+export { default as ExploreCategories } from "./explore/ExploreCategories";
+export { default as ExploreTopTalents } from "./explore/ExploreTopTalents";
+export { default as ExploreTopPosts } from "./explore/ExploreTopPosts";

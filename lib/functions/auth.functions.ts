@@ -13,7 +13,6 @@ import {
 } from "@/types/auth.types";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "sonner";
-import { deleteSession, verifySession } from "../session";
 
 // signup otp function
 export async function handleVerifyEmailOtp(formData: TVerifyOTPProps) {
@@ -126,21 +125,4 @@ export async function handleClearStorage() {
   localStorage.removeItem("isOTP");
   localStorage.removeItem("verifiedEmail");
   localStorage.removeItem("registerUserId");
-}
-
-// logout function
-export async function handleLogout() {
-  await deleteSession();
-  localStorage.clear();
-}
-
-// check for token
-export async function checkForToken() {
-  const token = await verifySession();
-  if (token === "") {
-    return false;
-  } else {
-    const decodedJWTToken = jwtDecode(token);
-    return decodedJWTToken?.sub;
-  }
 }

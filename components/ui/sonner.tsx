@@ -15,10 +15,10 @@ const Toaster = ({ ...props }: ToasterProps) => {
           // toast:
           //   "group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg",
           success:
-            "bg-light-900 dark:bg-dark-100 text-green-400 border-2 border-[#fafafa] dark:border-[#161616] font-poppins font-regular",
+            "bg-light-900 dark:bg-dark-100 text-green-400 border-2 border-[#fafafa] dark:border-[#161616] font-css-poppins font-regular",
           error:
-            "bg-light-900 dark:bg-dark-100 text-red-400 border-2 border-[#fafafa] dark:border-[#161616] font-poppins font-regular",
-          info: "bg-light-900 dark:bg-dark-100 text-amber-400 border-2 border-[#fafafa] dark:border-[#161616] font-poppins font-regular",
+            "bg-light-900 dark:bg-dark-100 text-red-400 border-2 border-[#fafafa] dark:border-[#161616] font-css-poppins font-regular",
+          info: "bg-light-900 dark:bg-dark-100 text-amber-400 border-2 border-[#fafafa] dark:border-[#161616] font-css-poppins font-regular",
           description: "group-[.toast]:text-muted-foreground",
           actionButton:
             "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground",

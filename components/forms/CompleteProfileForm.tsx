@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { Form, FormField } from "../ui/form";
 import {
   CheckboxInput,
@@ -13,17 +12,17 @@ import {
 } from "../inputs";
 import { GENDER_VALUES } from "@/constants";
 import { Button } from "../ui/button";
-import { CompleteProfileValidation } from "@/lib/validations/authValidation";
+import { CompleteProfileValidation } from "@/lib/validations/auth.validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { completeProfileAction } from "@/actions/auth.action";
 import { convertToISOString } from "@/lib/hooks/useDateSelector";
 import { toast } from "sonner";
-import TransparentLoader from "../ui/transparent-loader";
 import { getFileUpload } from "@/lib/utils/getFileUpload";
 import { useRouter } from "next/navigation";
 import { useUserContext } from "@/context/AuthProvider";
+import { TransparentLoader } from "../modals";
 
 const CompleteProfileForm = ({ langData, professionData }: any) => {
   const { user, setUser } = useUserContext();
@@ -124,7 +123,9 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
 
   return (
     <>
-      {form.formState.isSubmitting && <TransparentLoader />}
+      {form.formState.isSubmitting && (
+        <TransparentLoader text="Submitting Form" />
+      )}
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -168,7 +169,7 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
             <div className="flex w-full flex-col gap-1">
               <label className="shad-auth_form_label">Username</label>
               <div className="shad-auth_form_input flex-start gap-4 rounded-md p-2 px-3 text-sm">
-                {user.username}
+                @{user.username}
               </div>
             </div>
 
@@ -189,6 +190,9 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
             <DateInpt
               form={form}
               formLabel="Date of Birth"
+              yearName="year"
+              monthName="month"
+              dayName="day"
               yearValue={form.getValues("year")}
               monthValue={form.getValues("month")}
               dayValue={form.getValues("day")}

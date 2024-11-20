@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* common explore carousel classes */
+.exp-embla {
+  max-width: 82vw;
+  --slide-height: 10rem;
+  --slide-spacing: 1rem;
+  --slide-size: auto;
+}
+.exp-container {
+  display: flex;
+  touch-action: pan-y pinch-zoom;
+  margin-left: calc(var(--slide-spacing) * -1);
+}
+.exp-embla-slide {
+  display: grid;
+  place-items: center;
+  transform: translate3d(50, 50, 50);
+  flex: 0 0 auto;
+  min-width: 0;
+  margin-left: 1.1rem;
+}
+
+/* .exc - explore categories carousel */
+.exc-embla__controls {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1.2rem;
+  margin-top: 1rem;
+}
+
+/* explore background carousel */
+.exbg-embla {
+  max-width: 90vw;
+  margin: auto;
+  --slide-height: 26rem;
+  --slide-spacing: 1rem;
+  --slide-size: 70%;
+}
+.exbg-embla__viewport {
+  overflow: hidden;
+}
+.exbg-embla__container {
+  display: flex;
+  touch-action: pan-y pinch-zoom;
+  margin-left: calc(var(--slide-spacing) * -1);
+}
+.exbg-embla__slide {
+  transform: translate3d(50, 50, 50);
+  flex: 0 0 70%;
+  min-width: 0;
+  padding-left: var(--slide-spacing);
+  height: 26rem;
+}

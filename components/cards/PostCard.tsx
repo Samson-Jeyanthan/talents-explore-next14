@@ -5,8 +5,10 @@ import Link from "next/link";
 import { StarIcon } from "@/public/assets/svgs";
 import { getFormattedDecimal } from "@/lib/utils";
 import { PostOptions } from "../options";
-import Image from "next/image";
 import { PostUtilsButton } from "../buttons";
+import { PostFeedCarousel } from "../widgets";
+import { StarRating } from "../inputs";
+import { SaveCollectionModal } from "../modals";
 
 interface Props {
   postFeedCard: IPost;
@@ -32,7 +34,7 @@ const PostCard = ({ postFeedCard, index }: Props) => {
         duration: 0.3,
       }}
       viewport={{ amount: 0 }}
-      className="relative flex flex-col gap-3 rounded-[28px] border-2 border-dark-300 bg-dark-250 p-2 text-light-900"
+      className="relative flex flex-col gap-3 rounded-[28px] border-2 border-dark-300 bg-dark-250 p-3 text-light-900"
     >
       <div className="flex w-full items-start justify-between">
         <div className="flex items-start gap-2">
@@ -76,32 +78,33 @@ const PostCard = ({ postFeedCard, index }: Props) => {
 
       <Link
         href={postLink}
-        className="w-max text-base font-medium first-letter:capitalize"
+        className="my-1 w-max text-lg font-medium first-letter:capitalize"
       >
         {postFeedCard.about.title}
       </Link>
 
-      <div className="flex gap-1">
-        {postFeedCard.media.map((item, index) => (
-          <Image
-            src={
-              item.mediaType === "image"
-                ? item.url
-                : "/assets/images/sample-post-img.jpg"
-            }
-            key={index}
-            width={500}
-            height={500}
-            alt="post"
-            className="max-h-[30rem] w-full rounded-xl bg-dark-200 object-contain"
-          />
-        ))}
-      </div>
+      <PostFeedCarousel
+        slides={postFeedCard.media}
+        length={postFeedCard.media.length}
+      />
 
-      <div className="flex gap-2">
-        <PostUtilsButton buttonFor="COMMENT" size="19px" />
-        <PostUtilsButton buttonFor="SHARE" size="19px" />
-        <PostUtilsButton buttonFor="SAVE" />
+      <div className="flex items-center justify-between">
+        <div className="flex gap-2">
+          <PostUtilsButton buttonFor="COMMENT" size="19px" />
+          <PostUtilsButton buttonFor="SHARE" size="19px" />
+          <SaveCollectionModal
+            postId={postFeedCard._id}
+            buttonClassName="!bg-transparent p-0"
+          />
+        </div>
+
+        <StarRating
+          postId={postFeedCard._id}
+          prevRatingValue={postFeedCard.yourRating}
+          ratingFor="POST"
+          authorId={postFeedCard.author._id}
+          revalidatePath={"/home"}
+        />
       </div>
 
       <p className="text-xs text-light-500">
@@ -117,7 +120,6 @@ const PostCard = ({ postFeedCard, index }: Props) => {
       <p className="line-clamp-3 text-justify text-[13px] text-light-700">
         {postFeedCard.about.description}
       </p>
-      {postFeedCard.yourRating}
     </MotionDiv>
   );
 };

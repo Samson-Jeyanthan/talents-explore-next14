@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, ChangeEvent, useState } from "react";
+import { useRef, ChangeEvent, useState } from "react";
 import { Dialog } from "../ui/dialog";
 import { CropImgModal, PhotoActionModal, ErrorAlert } from "../modals";
 import { CameraIcon } from "@/public/assets/svgs";

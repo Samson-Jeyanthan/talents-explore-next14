@@ -10,3 +10,6 @@ export { default as ProDetailsModal } from "./ProDetailsModal";
 export { default as FullScreenModal } from "./FullScreenModal";
 export { default as CRUDSaveFolderModal } from "./CRUDSaveFolder";
 export { default as SaveCollectionModal } from "./SaveCollection";
+export { default as TransparentLoader } from "./TransparentLoader";
+export { default as CategoriesSelectionModal } from "./CategoriesSelection";
+export { default as UploadDrawer } from "./UploadDrawer";
