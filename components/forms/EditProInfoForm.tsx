@@ -1,6 +1,6 @@
 "use client";
 
-import { MyPhotosInput, TextArea } from "../inputs";
+import { MyPhotosInput, SocialMediaInput, TextArea } from "../inputs";
 import { FormField } from "../ui/form";
 
 const EditProInfoForm = ({ form, userData, prevURLs, setPrevURLs }: any) => {
@@ -28,6 +28,17 @@ const EditProInfoForm = ({ form, userData, prevURLs, setPrevURLs }: any) => {
               setPrevURLs={setPrevURLs}
               values={form.getValues("featuredPhotos")}
               fieldChange={field.onChange}
+            />
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="featuredVideos"
+          render={({ field }) => (
+            <SocialMediaInput
+              fieldChange={field.onChange}
+              values={form.getValues("socialLinks")}
             />
           )}
         />

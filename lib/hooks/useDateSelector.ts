@@ -6,6 +6,7 @@ type TDateSelectorProps = {
   isPresent?: boolean;
   yearValue: any;
   monthValue: any;
+  dayValue: any;
 };
 
 type TDays = {
@@ -17,6 +18,7 @@ const useDateSelector = ({
   isPresent,
   yearValue,
   monthValue,
+  dayValue,
 }: TDateSelectorProps) => {
   const currentYear = new Date().getFullYear();
 
@@ -56,22 +58,22 @@ const useDateSelector = ({
   }, []);
 
   // find out leap years' and normal years' days
-  const getDaysInMonth = (year: number, month: string): number => {
+  const getDaysInMonth = (year: number, month: number): number => {
     const isLeapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
 
     const daysInMonth: { [key: string]: number } = {
-      "01": 31,
-      "02": isLeapYear ? 29 : 28,
-      "03": 31,
-      "04": 30,
-      "05": 31,
-      "06": 30,
-      "07": 31,
-      "08": 31,
-      "09": 30,
-      "10": 31,
-      "11": 30,
-      "12": 31,
+      1: 31,
+      2: isLeapYear ? 29 : 28,
+      3: 31,
+      4: 30,
+      5: 31,
+      6: 30,
+      7: 31,
+      8: 31,
+      9: 30,
+      10: 31,
+      11: 30,
+      12: 31,
     };
 
     return daysInMonth[month];
@@ -81,7 +83,10 @@ const useDateSelector = ({
   const [days, setDays] = useState<TDays[]>([]);
   useEffect(() => {
     // console.log(yearValue, monthValue, "from hook");
-    const daysInMonth = getDaysInMonth(parseInt(yearValue), monthValue);
+    const daysInMonth = getDaysInMonth(
+      parseInt(yearValue),
+      parseInt(monthValue)
+    );
     const calDays: TDays[] = [];
     for (let i = 1; i <= daysInMonth; i++) {
       calDays.push({
@@ -91,7 +96,7 @@ const useDateSelector = ({
     }
 
     setDays(calDays);
-  }, [yearValue, monthValue]);
+  }, [yearValue, monthValue, dayValue]);
 
   return {
     years,

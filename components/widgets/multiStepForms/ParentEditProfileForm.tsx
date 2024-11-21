@@ -40,7 +40,7 @@ const ParentEditProfileForm = ({
   }));
 
   async function onSubmit(values: z.infer<typeof EditProfileValidation>) {
-    console.log(values.dob, "values");
+    console.log(values, "values");
   }
 
   const form = useForm<z.infer<typeof EditProfileValidation>>({

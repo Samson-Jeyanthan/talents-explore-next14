@@ -35,7 +35,8 @@ const DateInput = ({
   });
   const { years, months, days } = useDateSelector({
     yearValue: dates.selectedYear,
-    monthValue: dates.selectedMonth,
+    monthValue: Number(dates.selectedMonth),
+    dayValue: dates.selectedDay,
   });
 
   const handleDropdownChange = () => {
@@ -71,8 +72,9 @@ const DateInput = ({
           }}
         >
           <SelectTrigger className="flex-between shad-auth_form_input">
-            {years?.find((year) => String(year.id) === dates.selectedYear)
-              ?.label || <SelectValue />}
+            {years?.find(
+              (year) => Number(year.id) === Number(dates.selectedYear)
+            )?.label || <SelectValue />}
             {!dates.selectedYear && (
               <p className="flex w-full items-start text-light-500">Year</p>
             )}
@@ -99,9 +101,9 @@ const DateInput = ({
           }}
         >
           <SelectTrigger className="flex-between shad-auth_form_input">
-            {months?.find((year) => year.id === dates.selectedMonth)?.label || (
-              <SelectValue />
-            )}
+            {months?.find(
+              (month) => Number(month.id) === Number(dates.selectedMonth)
+            )?.label || <SelectValue />}
             {!dates.selectedMonth && (
               <p className="flex w-full items-start text-light-500">Month</p>
             )}
@@ -128,11 +130,11 @@ const DateInput = ({
           }}
         >
           <SelectTrigger className="flex-between shad-auth_form_input">
-            {days?.find((day) => day.label === dates.selectedDay)?.label || (
+            {days?.find((day) => day.id === dates.selectedDay)?.label || (
               <SelectValue />
             )}
             {!dates.selectedDay ||
-              (!days?.some((day) => day.label === dates.selectedDay) && (
+              (!days?.some((day) => day.id === dates.selectedDay) && (
                 <p className="flex w-full items-start text-light-500">Day</p>
               ))}
           </SelectTrigger>

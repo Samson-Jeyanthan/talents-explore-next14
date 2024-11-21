@@ -10,3 +10,4 @@ export { default as CommentInput } from "./CommentInput";
 export { default as UserTagAndSearch } from "./UserTagAndSearch";
 export { default as SkillDropdown } from "./SkillDropdown";
 export { default as MyPhotosInput } from "./MyPhotosInput";
+export { default as SocialMediaInput } from "./SocialMediaInput";

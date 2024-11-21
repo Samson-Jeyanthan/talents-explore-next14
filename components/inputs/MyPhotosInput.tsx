@@ -1,13 +1,30 @@
 "use client";
 
-import { useImageSelection } from "@/lib/hooks/useMedia";
-import Image from "next/image";
 import React, { useRef, ChangeEvent } from "react";
+import Image from "next/image";
+import { useImageSelection } from "@/lib/hooks/useMedia";
 import { BiPlus } from "react-icons/bi";
+import { MdDelete } from "react-icons/md";
 
-// type Props = {
-//   values: string[];
-// };
+export const MyPhotosImgCard = ({ onClick, src, alt }: any) => {
+  return (
+    <div className="relative size-28 rounded-md">
+      <div
+        onClick={onClick}
+        className="flex-center hover:myphotos-gradient absolute left-0 top-0 size-full cursor-pointer rounded-md text-white opacity-0 transition-opacity duration-500 hover:z-10 hover:opacity-100"
+      >
+        <MdDelete className="text-2xl" />
+      </div>
+      <Image
+        src={src}
+        alt={alt}
+        width={512}
+        height={512}
+        className="size-28 rounded-md object-cover"
+      />
+    </div>
+  );
+};
 
 const MyPhotosInput = ({ prevURLs, setPrevURLs, values, fieldChange }: any) => {
   const myPhotoRefs = useRef<(HTMLInputElement | null)[]>([]); // Store refs as an array
@@ -56,28 +73,22 @@ const MyPhotosInput = ({ prevURLs, setPrevURLs, values, fieldChange }: any) => {
     <div className="flex gap-4">
       {/* displaying singed url values */}
       {prevURLs?.map((url: string, index: number) => (
-        <div key={index} onClick={() => handleInputDelete(index, "url")}>
-          <Image
-            src={url}
-            alt={`Image ${index}`}
-            width={512}
-            height={512}
-            className="size-28 object-cover"
-          />
-        </div>
+        <MyPhotosImgCard
+          key={index}
+          src={url}
+          alt={`Image ${index}`}
+          onClick={() => handleInputDelete(index, "url")}
+        />
       ))}
 
       {/* displaying selected image files */}
       {values.map((img: any, index: number) => (
-        <div key={index} onClick={() => handleInputDelete(index, "file")}>
-          <Image
-            src={URL.createObjectURL(img)}
-            alt={`Image ${index}`}
-            width={512}
-            height={512}
-            className="size-28 object-cover"
-          />
-        </div>
+        <MyPhotosImgCard
+          key={index}
+          src={URL.createObjectURL(img)}
+          alt={`Image ${index}`}
+          onClick={() => handleInputDelete(index, "file")}
+        />
       ))}
 
       {/* input fields based on the number of empty slots */}

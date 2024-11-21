@@ -20,11 +20,7 @@ export const EditProfileValidation = z
     dob: z.string().min(1, { message: "Date of Birth is required" }),
     // professional info for talents
     bio: z.string().min(1, { message: "Bio is required" }).trim(),
-    ethnic: z
-      .string()
-      .min(1, { message: "Ethnic is required" })
-      .trim()
-      .optional(),
+    ethnic: z.string().min(1, { message: "Ethnic is required" }),
     featuredPhotos: z
       .array(
         z.custom<File>((file) => file instanceof File, {
@@ -37,7 +33,6 @@ export const EditProfileValidation = z
         z.object({
           type: z.string(),
           url: z.string(),
-          show: z.boolean(),
         })
       )
       .optional(),
@@ -52,8 +47,6 @@ export const EditProfileValidation = z
       const age = today.getFullYear() - refinedDob.getFullYear();
       const isMonthPast = today.getMonth() - refinedDob.getMonth();
       const isDayPast = today.getDate() - refinedDob.getDate();
-
-      console.log(dob, refinedDob, age);
 
       // Calculate the exact age considering month and day
       const exactAge =
