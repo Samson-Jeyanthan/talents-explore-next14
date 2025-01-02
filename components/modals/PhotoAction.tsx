@@ -1,13 +1,7 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import React, { useRef } from "react";
-import {
-  DialogClose,
-  DialogContent,
-  DialogOverlay,
-  DialogTitle,
-} from "../ui/dialog";
+import { DialogClose, DialogContent, DialogTitle } from "../ui/dialog";
 import { TPhotoActionProps } from "@/types/utils.types";
 import { BiPlus } from "react-icons/bi";
 import { MdClose, MdDelete } from "react-icons/md";
@@ -21,7 +15,6 @@ const PhotoAction = ({
 
   return (
     <>
-      <DialogOverlay className={cn("bg-black/10 backdrop-blur-sm")} />
       <DialogContent
         className="flex max-w-96 flex-col items-center gap-3 rounded-2xl border-none bg-dark-250 p-5"
         aria-describedby={undefined}
@@ -32,7 +25,7 @@ const PhotoAction = ({
               ? "Edit Profile Photo"
               : "Edit Cover Photo"}
           </DialogTitle>
-          <DialogClose className="cursor-pointer rounded-full bg-dark-400 p-1 text-light-900">
+          <DialogClose className="no-focus cursor-pointer rounded-full bg-dark-400 p-1 text-light-900">
             <MdClose className="text-xl" />
           </DialogClose>
         </header>

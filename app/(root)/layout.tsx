@@ -2,17 +2,18 @@ import React from "react";
 import { LeftSidebar, Navbar } from "@/components/widgets";
 import { getSession } from "@/lib/session";
 
-const layout = async ({ children }: { children: React.ReactNode }) => {
+type Props = {
+  children: React.ReactNode;
+};
+const layout = async ({ children }: Props) => {
   const session = await getSession();
 
   return (
-    <main className="flex min-h-screen w-full bg-dark-200">
+    <main className="relative flex min-h-screen w-full bg-dark-200 pt-0">
       {session ? <LeftSidebar /> : null}
       <section className="relative flex w-full flex-col items-center bg-dark-200">
-        {session ? <Navbar /> : null}
-        <div className="flex w-full max-w-screen-xl items-start justify-center px-4 pb-8 3xl:p-0">
-          {children}
-        </div>
+        {session ? <Navbar userId={session} /> : null}
+        <div className="flex-center w-full">{children}</div>
       </section>
     </main>
   );

@@ -11,35 +11,35 @@ type Props = {
 const TagsAndOtherInfo = ({ postData }: Props) => {
   return (
     <section className="flex min-w-[320px] max-w-[320px] flex-col gap-8 text-sm text-light-500">
-      {postData.about.productionName || postData.about.productionDate ? (
+      {postData?.about?.productionName || postData?.about?.productionDate ? (
         <div className="flex flex-col gap-2">
           <h2 className="font-medium text-light-900">Production Details</h2>
-          {postData.about.productionName && (
+          {postData?.about?.productionName && (
             <p className="flex gap-3 text-[13px] first-letter:capitalize">
               <GiFilmStrip className="text-xl" />
-              {postData.about.productionName}
+              {postData?.about?.productionName}
             </p>
           )}{" "}
-          {postData.about.productionDate && (
+          {postData?.about?.productionDate && (
             <p className="flex gap-3 text-[13px]">
               <IoCalendar className="text-xl" />
-              Production Date {getFormattedDate(postData.about.productionDate)}
+              Production Date {getFormattedDate(postData?.about.productionDate)}
             </p>
           )}
         </div>
       ) : null}
 
-      {postData.about.peopleTag.length > 0 && (
+      {postData?.about?.peopleTag.length > 0 && (
         <div className="flex flex-col gap-2">
           <h2 className="font-medium text-light-900">Tagged People</h2>
           <div className="flex flex-wrap gap-2 text-[13px] lowercase">
-            {postData.about.peopleTag.map((tag) => (
+            {postData?.about?.peopleTag.map((tag, index) => (
               <Link
-                key={tag._id}
-                href={`/profile/${tag.userName}/${tag._id}`}
+                key={index}
+                href={`/profile/${tag?.userName}/${tag?._id}`}
                 className="hover:text-light-900"
               >
-                @{tag.userName}
+                @{tag?.userName}
               </Link>
             ))}
           </div>
@@ -58,16 +58,16 @@ const TagsAndOtherInfo = ({ postData }: Props) => {
                   className={`flex flex-col gap-1 text-[13px] ${isLast ? "pt-3" : "border-b border-solid border-dark-300 py-3"} ${index === 0 && "pt-0"}`}
                 >
                   <p className="text-light-700 first-letter:capitalize">
-                    {credit.creditTitle}
+                    {credit?.creditTitle}
                   </p>
                   <div className="flex flex-wrap gap-2 lowercase">
-                    {credit.peopleTag.map((tag) => (
+                    {credit?.peopleTag.map((tag, index) => (
                       <Link
-                        key={tag._id}
-                        href={`/profile/${tag.userName}/${tag._id}`}
+                        key={index}
+                        href={`/profile/${tag?.userName}/${tag?._id}`}
                         className="hover:text-light-900"
                       >
-                        @{tag.userName}
+                        @{tag?.userName}
                       </Link>
                     ))}
                   </div>
@@ -87,7 +87,7 @@ const TagsAndOtherInfo = ({ postData }: Props) => {
               return (
                 <p
                   key={index}
-                  className={`text-[13px] capitalize text-light-500 ${isLast ? "pt-3" : "border-b border-solid border-dark-300 py-3"} ${index === 0 && "pt-0"}`}
+                  className={`text-[13px] capitalize text-light-500 ${isLast ? `${index === 0 ? "pt-0" : "pt-3"}` : "border-b border-solid border-dark-300 py-3"} `}
                 >
                   {tool.toolName} - {tool.level}
                 </p>
@@ -101,3 +101,10 @@ const TagsAndOtherInfo = ({ postData }: Props) => {
 };
 
 export default TagsAndOtherInfo;
+
+// <FaTags style={{ fontSize: "1.6rem", marginBottom: "5px" }} />
+// No Credits or Tags provided
+// <BsTools
+// style={{ fontSize: "1.6rem", marginBottom: "5px" }}
+// />
+// No tools provided

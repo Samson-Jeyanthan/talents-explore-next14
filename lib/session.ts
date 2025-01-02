@@ -14,21 +14,11 @@ export async function createSession(accessToken: string) {
   cookies().set("accessToken", session, {
     expires,
     httpOnly: true,
+    sameSite: "strict",
   });
-  // console.log(cookies().get("accessToken"));
+
   const res = cookies().get("accessToken");
   return res;
-}
-
-// verfiy session
-export async function verifySession() {
-  const session = cookies().get("accessToken")?.value;
-
-  if (!session) {
-    return "";
-  } else {
-    return session;
-  }
 }
 
 //  get session
@@ -46,7 +36,6 @@ export async function getSession() {
 export async function deleteSession() {
   cookies().delete("accessToken");
   cookies().delete("isAbout");
-  return true;
 }
 
 // store isAbout in cookies
@@ -55,14 +44,14 @@ export async function storeIsAbout(isOk: boolean) {
     cookies().set("isAbout", "true", {
       expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
       httpOnly: true,
+      sameSite: "strict",
     });
-    return 200;
   } else {
     cookies().set("isAbout", "false", {
-      expires: new Date(Date.now() + 10 * 60 * 1000),
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
       httpOnly: true,
+      sameSite: "strict",
     });
-    return 400;
   }
 }
 

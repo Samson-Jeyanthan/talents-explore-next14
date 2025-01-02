@@ -5,10 +5,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogOverlay,
   DialogClose,
 } from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
 import { TCropImgModalProps } from "@/types/utils.types";
 import Cropper from "react-easy-crop";
 import { IoMdClose } from "react-icons/io";
@@ -70,88 +68,86 @@ const CropImg = ({
   );
 
   return (
-    <>
-      <DialogOverlay className={cn("bg-black/10 backdrop-blur-sm")} />
-      <DialogContent
-        className="gap-0 rounded-2xl border-none bg-dark-250 p-0"
-        aria-describedby={undefined}
-      >
-        <DialogHeader className="flex w-full flex-row items-center justify-between p-2 px-4">
-          <DialogTitle className="font-medium text-light-900">
-            {modalFor === "cover" && "Set Cover Photo"}
-            {modalFor === "profile" && "Set Profile Photo"}
-            {modalFor === "post" && "Adjust & Crop Photo for Post"}
-          </DialogTitle>
-          <div className="flex-center relative pb-2">
-            <DialogClose className="flex-center text-[1.5rem] text-light-900">
-              <IoMdClose />
-            </DialogClose>
-          </div>
-        </DialogHeader>
+    <DialogContent
+      className="gap-0 rounded-2xl border-none bg-dark-250 p-0"
+      aria-describedby={undefined}
+    >
+      <DialogHeader className="flex w-full flex-row items-center justify-between p-2 px-4">
+        <DialogTitle className="font-medium text-light-900">
+          {modalFor === "cover" && "Set Cover Photo"}
+          {modalFor === "profile" && "Set Profile Photo"}
+          {modalFor === "post" && "Adjust & Crop Photo for Post"}
+        </DialogTitle>
+        <div className="flex-center relative pb-2">
+          <DialogClose className="flex-center text-[1.5rem] text-light-900">
+            <IoMdClose />
+          </DialogClose>
+        </div>
+      </DialogHeader>
 
-        <div className="flex-center relative m-4 mt-0 h-[350px] w-[94%] border-none 2xl:h-[400px]">
-          {modalFor === "cover" && (
-            <Cropper
-              image={media.preview}
-              crop={crop}
-              zoom={zoom}
-              aspect={5.8 / 2}
-              onCropChange={setCrop}
-              onZoomChange={setZoom}
-              onCropComplete={onCropComplete}
-              onMediaLoaded={(res: any) => {
-                console.log(res);
-              }}
-            />
-          )}
-          {modalFor === "profile" && (
-            <Cropper
-              image={media.preview}
-              crop={crop}
-              zoom={zoom}
-              aspect={3 / 4}
-              onCropChange={setCrop}
-              onZoomChange={setZoom}
-              onCropComplete={onCropComplete}
-              onMediaLoaded={(res: any) => {
-                console.log(res);
-              }}
-            />
-          )}
-        </div>
-        <div className="flex-center w-full gap-2 p-4 pt-2">
-          <div
-            className="cursor-pointer rounded-[1px] bg-dark-300 p-[3px] text-base text-light-900 hover:bg-dark-400"
-            onClick={zoomOut}
-          >
-            <FaMinus />
-          </div>
-          <Slider
-            defaultValue={[2]}
-            min={1}
-            max={10}
-            step={0.1}
-            value={[zoom]}
-            onValueChange={(e: any) => setZoom(e)}
-            className="h-1 bg-dark-400"
+      <div className="flex-center relative m-4 mt-0 h-[350px] w-[94%] border-none 2xl:h-[400px]">
+        {modalFor === "cover" && (
+          <Cropper
+            image={media.preview}
+            crop={crop}
+            zoom={zoom}
+            aspect={6.8 / 2}
+            onCropChange={setCrop}
+            onZoomChange={setZoom}
+            onCropComplete={onCropComplete}
+            onMediaLoaded={(res: any) => {
+              console.log(res);
+            }}
           />
-          <div
-            className="cursor-pointer rounded-[1px] bg-dark-300 p-[3px] text-base text-light-900 hover:bg-dark-400"
-            onClick={zoomIn}
-          >
-            <FaPlus />
-          </div>
+        )}
+        {modalFor === "profile" && (
+          <Cropper
+            image={media.preview}
+            crop={crop}
+            zoom={zoom}
+            cropShape="round"
+            aspect={1}
+            onCropChange={setCrop}
+            onZoomChange={setZoom}
+            onCropComplete={onCropComplete}
+            onMediaLoaded={(res: any) => {
+              console.log(res);
+            }}
+          />
+        )}
+      </div>
+      <div className="flex-center w-full gap-2 p-4 pt-2">
+        <div
+          className="cursor-pointer rounded-[1px] bg-dark-300 p-[3px] text-base text-light-900 hover:bg-dark-400"
+          onClick={zoomOut}
+        >
+          <FaMinus />
         </div>
-        <footer className="flex w-full justify-end p-4">
-          <Button
-            onClick={() => getCroppedImage("show")}
-            className="shad-btn_primary-200"
-          >
-            Done
-          </Button>
-        </footer>
-      </DialogContent>
-    </>
+        <Slider
+          defaultValue={[2]}
+          min={1}
+          max={10}
+          step={0.1}
+          value={[zoom]}
+          onValueChange={(e: any) => setZoom(e)}
+          className="h-1 bg-dark-400"
+        />
+        <div
+          className="cursor-pointer rounded-[1px] bg-dark-300 p-[3px] text-base text-light-900 hover:bg-dark-400"
+          onClick={zoomIn}
+        >
+          <FaPlus />
+        </div>
+      </div>
+      <footer className="flex w-full justify-end p-4">
+        <Button
+          onClick={() => getCroppedImage("show")}
+          className="shad-btn_primary-200"
+        >
+          Done
+        </Button>
+      </footer>
+    </DialogContent>
   );
 };
 

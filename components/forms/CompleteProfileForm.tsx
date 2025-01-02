@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { Form, FormField } from "../ui/form";
 import {
   CheckboxInput,
@@ -13,17 +12,17 @@ import {
 } from "../inputs";
 import { GENDER_VALUES } from "@/constants";
 import { Button } from "../ui/button";
-import { CompleteProfileValidation } from "@/lib/validations/authValidation";
+import { CompleteProfileValidation } from "@/lib/validations/auth.validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { completeProfileAction } from "@/actions/auth.action";
 import { convertToISOString } from "@/lib/hooks/useDateSelector";
 import { toast } from "sonner";
-import TransparentLoader from "../ui/transparent-loader";
 import { getFileUpload } from "@/lib/utils/getFileUpload";
 import { useRouter } from "next/navigation";
 import { useUserContext } from "@/context/AuthProvider";
+import { TransparentLoader } from "../modals";
 
 const CompleteProfileForm = ({ langData, professionData }: any) => {
   const { user, setUser } = useUserContext();
@@ -106,7 +105,6 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
     const res = await completeProfileAction(user.currentUserId, formData);
 
     if (res.status === "7400") {
-      toast.success("Profile Updated Successfully", { duration: 5000 });
       setUser({
         currentUserId: user.currentUserId,
         firstName: formData.firstName,
@@ -116,6 +114,7 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
         imageUrl: formData.profileImage,
         isTalent: false,
       });
+      toast.success("Profile Updated Successfully", { duration: 5000 });
       router.push("/onboarding");
     } else {
       toast.error("Profile Update Failed", { duration: 4000 });
@@ -124,13 +123,15 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
 
   return (
     <>
-      {form.formState.isSubmitting && <TransparentLoader />}
+      {form.formState.isSubmitting && (
+        <TransparentLoader text="Submitting Form" />
+      )}
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="mt-4 flex w-full flex-col gap-5"
         >
-          <div className="relative flex w-full">
+          <div className="flex w-full flex-col gap-6">
             <FormField
               control={form.control}
               name="coverPhoto"
@@ -147,7 +148,7 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
             />
           </div>
 
-          <div className="mt-20 flex w-full max-w-screen-md flex-col gap-6">
+          <div className="mt-4 flex w-full max-w-screen-md flex-col gap-6">
             <div className="flex w-full gap-4">
               <FormInput
                 form={form}
@@ -165,6 +166,20 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
               />
             </div>
 
+            <div className="flex w-full flex-col gap-1">
+              <label className="shad-auth_form_label">Username</label>
+              <div className="shad-auth_form_input flex-start gap-4 rounded-md p-2 px-3 text-sm">
+                @{user.username}
+              </div>
+            </div>
+
+            <div className="flex w-full flex-col gap-1">
+              <label className="shad-auth_form_label">Email</label>
+              <div className="shad-auth_form_input flex-start gap-4 rounded-md p-2 px-3 text-sm">
+                {user.email}
+              </div>
+            </div>
+
             <CheckboxInput
               form={form}
               inputName="gender"
@@ -175,6 +190,9 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
             <DateInpt
               form={form}
               formLabel="Date of Birth"
+              yearName="year"
+              monthName="month"
+              dayName="day"
               yearValue={form.getValues("year")}
               monthValue={form.getValues("month")}
               dayValue={form.getValues("day")}
@@ -183,7 +201,7 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
             <Dropdown
               form={form}
               value={form.getValues("knownLanguage")}
-              formLabel="Known Language"
+              formLabel="Native Language"
               inputName="knownLanguage"
               placeholder="Select your native language"
               formDescription="Let us know the language you speak so we can connect you with people who share your interests and culture."

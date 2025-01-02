@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import AllPostCard from "@/components/cards/AllPostCard";
 import { IComments, IPost } from "@/types/post.types";
-import { CommentCard } from "@/components/cards";
+import { CommentCard, PostCard } from "@/components/cards";
 
 export async function getUserAllPostsAction(
   userId: string | undefined,
@@ -19,7 +19,7 @@ export async function getUserAllPostsAction(
     if (res.status === "7400") {
       const data = res.response;
       return data.map((item: IPost, index: number) => (
-        <AllPostCard key={item._id} allPostCard={item} index={index} />
+        <AllPostCard key={index} allPostCard={item} index={index} />
       ));
     } else {
       const data = {
@@ -101,7 +101,7 @@ export async function getUserCreditPostsAction(
     if (res.status === "7400") {
       const data = res.response;
       return data.map((item: IPost, index: number) => (
-        <AllPostCard key={item._id} allPostCard={item} index={index} />
+        <AllPostCard key={index} allPostCard={item} index={index} />
       ));
     } else {
       const data = {
@@ -137,17 +137,18 @@ export async function getPostByIdAction(
 
 export async function getPostCommentsAction(
   postId: string | undefined,
-  userId: string | undefined
+  userId: string | undefined,
+  pageNo: number
 ) {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/comments?userId=${userId}&postId=${postId}&pageNo=${1}&pageSize=${10}`
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/comments?userId=${userId}&postId=${postId}&pageNo=${pageNo}&pageSize=${20}`
     );
     const res = await response.json();
     if (res.status === "7400") {
       const data = res.response;
       return data.map((item: IComments, index: number) => (
-        <CommentCard key={item._id} commentCard={item} index={index} />
+        <CommentCard key={index} commentCard={item} index={index} />
       ));
     } else {
       const data = {
@@ -186,5 +187,30 @@ export async function addPostCommentAction(
       revalidatePath(revalidatePathURL);
     }
     return res;
+  } catch {}
+}
+
+export async function getAllPostsAction(
+  userId: string | undefined,
+  pageNo: number,
+  pageSize: number
+) {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/home?userId=${userId}&viewUserId=${userId}&pageNo=${pageNo}&pageSize=${pageSize}`
+    );
+    const res = await response.json();
+    if (res.status === "7400") {
+      const data = res.response;
+      return data.map((item: IPost, index: number) => (
+        <PostCard key={index} postFeedCard={item} index={index} />
+      ));
+    } else {
+      const data = {
+        status: 400,
+        message: "Could not fetch all posts data",
+      };
+      return data;
+    }
   } catch {}
 }

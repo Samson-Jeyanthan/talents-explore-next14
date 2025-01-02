@@ -4,11 +4,17 @@ import { SavedItemCard, SavedFolderCard } from "@/components/cards";
 import { ISavedFolder, ISavedItem } from "@/types/post.types";
 import { revalidatePath } from "next/cache";
 
-export async function getAllSavedFoldersAction(
-  userId: string | undefined,
-  postId: string | number | undefined,
-  returnAsCard: boolean
-) {
+type Props = {
+  userId: string | undefined;
+  postId: string | number | undefined;
+  returnAsCard: boolean;
+};
+
+export async function getAllSavedFoldersAction({
+  userId,
+  postId,
+  returnAsCard,
+}: Props) {
   try {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/collection/${userId}/${postId}`

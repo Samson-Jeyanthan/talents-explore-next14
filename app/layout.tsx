@@ -9,9 +9,9 @@ import { UtilsProvider } from "@/context/UtilsProvider";
 
 const poppins = Poppins({
   subsets: ["latin"],
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
   variable: "--font-poppins",
-  preload: false,
+  display: "swap",
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
 
 export const metadata: Metadata = {
@@ -25,8 +25,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning={true}>
-      <body className={`${poppins.variable}`}>
+    <html
+      lang="en"
+      suppressHydrationWarning={true}
+      className={`${poppins.variable} top-0 bg-dark-200 font-sans`}
+    >
+      <body>
         <AuthProvider>
           <UtilsProvider>
             <ThemeProvider>{children}</ThemeProvider>

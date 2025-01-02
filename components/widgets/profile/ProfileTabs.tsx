@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -13,22 +13,22 @@ type Tab = {
   href: string;
 };
 
+type ProfileTabsProps = {
+  tabs: Tab[];
+  containerClassName?: string;
+  activeTabClassName?: string;
+  tabClassName?: string;
+};
+
 const ProfileTabs = ({
   tabs: propTabs,
   containerClassName,
   activeTabClassName,
   tabClassName,
-  contentClassName,
-}: {
-  tabs: Tab[];
-  containerClassName?: string;
-  activeTabClassName?: string;
-  tabClassName?: string;
-  contentClassName?: string;
-}) => {
+}: ProfileTabsProps) => {
   const pathname = usePathname();
 
-  const [active, setActive] = useState<Tab>(propTabs[0]);
+  // const [active, setActive] = useState<Tab>(propTabs[0]);
   // const [tabs, setTabs] = useState<Tab[]>(propTabs);
 
   const moveSelectedTabToTop = (idx: number) => {
@@ -36,7 +36,7 @@ const ProfileTabs = ({
     const selectedTab = newTabs.splice(idx, 1);
     newTabs.unshift(selectedTab[0]);
     // setTabs(newTabs);
-    setActive(newTabs[0]);
+    // setActive(newTabs[0]);
   };
 
   // const [hovering, setHovering] = useState(false);
@@ -44,12 +44,12 @@ const ProfileTabs = ({
   return (
     <div
       className={cn(
-        "flex flex-row items-center gap-4 justify-center [perspective:1000px] relative overflow-auto sm:overflow-visible no-visible-scrollbar max-w-max w-full",
+        "flex flex-row items-center gap-2 sm:gap-4 justify-center [perspective:1000px] relative overflow-auto sm:overflow-visible no-visible-scrollbar w-full",
         containerClassName
       )}
     >
       {propTabs.map((tab, idx) => {
-        const isActive = tab.href === pathname || active.value === tab.value;
+        const isActive = pathname.includes(`/${tab.value}`);
 
         return (
           <Link
@@ -60,7 +60,10 @@ const ProfileTabs = ({
             }}
             // onMouseEnter={() => setHovering(true)}
             // onMouseLeave={() => setHovering(false)}
-            className={cn("relative px-4 py-2 rounded-full", tabClassName)}
+            className={cn(
+              "relative px-3 sm:px-4 py-2 rounded-full",
+              tabClassName
+            )}
             style={{
               transformStyle: "preserve-3d",
             }}
@@ -78,7 +81,7 @@ const ProfileTabs = ({
             )}
             <span
               className={cn(
-                `${isActive ? "text-light-900" : "text-light-600"} relative block text-sm`
+                `${isActive ? "text-light-900" : "text-light-600"} relative block text-sm w-max`
               )}
             >
               {tab.title}
@@ -103,8 +106,10 @@ export const FadeInDiv = ({
   active: Tab;
   hovering?: boolean;
 }) => {
+  const pathname = usePathname();
+
   const isActive = (tab: Tab) => {
-    return tab.value === tabs[0].value;
+    return tab.href === pathname;
   };
   return (
     <div className="relative size-full">

@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -26,11 +27,15 @@ body {
   }
 
   .no-focus {
-    @apply ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 !important;
+    @apply ring-0 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 !important;
   }
 
   .camera-button {
     @apply bg-dark-100 absolute bottom-2 right-2 p-2 flex-center rounded-lg cursor-pointer;
+  }
+
+  .font-css-poppins {
+    @apply font-poppins;
   }
 }
 
@@ -64,7 +69,19 @@ body {
   }
 
   .shad-auth_form_textarea {
-    @apply bg-dark-300 border-none placeholder:text-light-500 focus-visible:ring-1 focus-visible:ring-offset-1 ring-offset-light-500 text-light-900 !important;
+    @apply bg-dark-300 border-none placeholder:text-light-500 focus-visible:ring-0 focus-visible:ring-offset-1 ring-offset-light-500 text-light-900 !important;
+  }
+
+  .shad-form-input {
+    @apply h-10 bg-dark-300 text-light-900 w-full placeholder:text-light-500 border-none focus-visible:ring-0 focus-visible:ring-offset-1 ring-offset-light-500  outline-none focus:outline-none !important;
+  }
+
+  .shad-nav-search-input {
+    @apply no-focus pl-10 flex h-10 bg-transparent w-full border-dark-400 placeholder:text-light-500/80 outline-none text-light-800 focus:outline-none rounded-[10px] !important;
+  }
+
+  .shad-explore-search-input {
+    @apply ring-offset-light-500 focus-visible:ring-0 focus-visible:ring-offset-1 pl-10 pr-12 flex h-11 bg-dark-250 w-full border-dark-400 placeholder:text-light-500/80 outline-none text-light-800 focus:outline-none rounded-[10px] !important;
   }
 
   /* Button */
@@ -105,11 +122,19 @@ body {
 
   /* navigation link */
   .leftsidebar-link {
-    @apply flex-start cursor-pointer gap-4 rounded-full fill-light-600 p-3 px-4 text-sm text-light-600 max-lg:rounded-lg hover:bg-dark-250 hover:fill-light-900 hover:text-light-900;
+    @apply flex-start cursor-pointer gap-4 rounded-lg fill-light-600 p-3 px-4 text-[13px] text-light-600 max-lg:rounded-lg hover:bg-dark-250 hover:fill-light-900 hover:text-light-900;
+  }
+
+  /* options, widgets and more */
+  .menubar-options-item {
+    @apply w-full cursor-pointer gap-3 rounded bg-dark-300 fill-light-600 text-base text-light-600 hover:bg-dark-400 hover:fill-light-900 hover:text-light-900 !important;
+  }
+
+  .modal-content-container {
+    @apply flex flex-col w-full max-w-96 border-none gap-3 rounded-2xl bg-dark-250 pt-3 p-4 !important;
   }
 
   /* connection blocks */
-
   .connection-counting {
     @apply flex-center gap-[6px] text-light-900 bg-none px-3 py-1 cursor-pointer rounded-full hover:bg-dark-300 text-base font-medium;
   }
@@ -119,7 +144,7 @@ body {
   }
 
   .connection-modal-content {
-    @apply flex max-h-[78vh] min-h-[78vh] max-w-[25rem] flex-col items-center gap-0 rounded-xl border-none bg-dark-250 p-0 pb-2 2xl:max-w-[30rem] 2xl:max-h-[75vh] 2xl:min-h-[75vh] !important;
+    @apply flex h-[85vh] max-w-[25rem] flex-col items-center gap-0 rounded-2xl border-none bg-dark-250 p-0 pb-2 2xl:max-w-[30rem] 2xl:h-[75vh] !important;
   }
 
   .active-connection-tab {
@@ -127,31 +152,40 @@ body {
   }
 
   .default-connection-tab {
-    @apply flex-center w-full py-4 pt-5 cursor-pointer;
+    @apply flex-center w-full py-4 pt-5 text-[15px] cursor-pointer;
   }
 
   .connection-btn {
     @apply h-8 w-24 hover:bg-primary-500 hover:text-light-900 text-sm font-medium flex gap-2 !important;
   }
 
-  /* professional Info styles */
+  /*profile details styles */
+  .profile-detail-heading {
+    @apply flex w-full items-center gap-3 pb-2.5 text-[14px] text-light-850 fill-light-850 border-b-2 border-solid border-dark-400;
+  }
+
+  .bio-element-wrap {
+    @apply flex items-center gap-3 text-[13px] text-light-800;
+  }
+
+  .bio-details-icon {
+    @apply flex-center size-9 min-w-9 rounded-xl border text-xl border-light-500/40 fill-light-500/50 text-light-500/50;
+  }
 
   .professional-info-card-wrap {
     @apply flex w-96 flex-col items-end gap-2;
   }
 
   .professional-info-card {
-    @apply flex w-[90%] relative flex-col gap-2 border-b-2 border-dark-300 p-2 pb-4 mr-2;
+    @apply flex w-full relative flex-col gap-2 px-2 py-2.5;
   }
 
   /* posts related styles */
-
   .all-post-card-tags {
     @apply py-2 px-4 rounded-lg bg-dark-300 text-light-500 text-xs w-max;
   }
 
   /* Saved collection styles */
-
   .scf-general-image {
     @apply max-h-[6.5rem] min-h-[6.5rem] min-w-[5.5rem] max-w-[5.5rem] rounded-2xl bg-dark-100 object-cover;
   }
@@ -171,9 +205,31 @@ body {
   .scf-bg-blur-image {
     @apply absolute top-0 left-1 h-[136px] w-full max-w-[290px] rounded-3xl bg-dark-100 object-cover;
   }
+
+  /* Other styles */
+  .container-wrapper {
+    @apply relative flex-center w-full max-w-5xl 2xl:max-w-[1200px] p-4 pt-0 3xl:p-0 2xl:py-8;
+  }
+
+  .pro-info-options-wrap {
+    @apply absolute right-2.5 top-2.5;
+  }
+
+  .explore-filter-h3-wrap {
+    @apply flex flex-col gap-2;
+  }
+  .explore-filter-h3 {
+    @apply text-sm text-light-850 font-medium w-full border-b border-dark-400 pb-2.5;
+  }
 }
 
 /* custom CSS Styles */
+
+.prevent-select {
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+}
 
 .auth-or {
   color: #e6e6e6;
