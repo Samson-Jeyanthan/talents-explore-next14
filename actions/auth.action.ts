@@ -7,7 +7,8 @@ import {
   getSession,
   storeIsAbout,
 } from "@/lib/session";
-import { jwtDecode } from "jwt-decode";
+import axios from "axios";
+// import { jwtDecode } from "jwt-decode";
 
 export const registerAction = async (formData: unknown) => {
   try {
@@ -26,7 +27,7 @@ export const otpVerificationAction = async (formData: unknown) => {
     if (res?.status === "7400") {
       await storeIsAbout(false);
       const result = await createSession(res.response.accessToken);
-      console.log(result, "result-access-token-isAbout-fsldr");
+      console.log(result, "result-access-token-isAbout");
       return res;
     } else {
       return false;
@@ -56,6 +57,8 @@ export const completeProfileAction = async (
       `/user/personalInfo/${userId}`,
       formData
     );
+
+    console.log(response, "complete profile response");
     await storeIsAbout(true);
     return response.data;
   } catch (error) {
@@ -83,10 +86,13 @@ export const signinAction = async (formData: unknown) => {
   try {
     const response = await axiosInstance.post("/auth/login", formData);
     const res = response.data;
+
+    console.log(res, "signin response");
+
     if (res?.status === "7400") {
       //  check the user has complete the about section
-      const decodedJWTToken = jwtDecode(res.response.accessToken);
-      const userDetailsRes = await userPersonalInfoAction(decodedJWTToken?.sub);
+      const accessToken = res.response.accessToken;
+      const userDetailsRes = await userPersonalInfoAction(accessToken);
       const userPersonalInfo = userDetailsRes?.response?.personalInfo;
       const userFirstName = userPersonalInfo?.firstName;
 
@@ -145,13 +151,28 @@ export const resetPasswordAction = async (formData: unknown) => {
 
 export const userPersonalInfoAction = async (userId: string | undefined) => {
   try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/${userId}`
+    console.log(userId, "auth.action-token");
+
+    if (!userId) {
+      throw new Error("No access token found");
+    }
+
+    const response = await axios.get(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user`,
+      {
+        headers: {
+          Authorization: `Bearer ${userId}`,
+        },
+      }
     );
-    return await response.json();
-  } catch (error) {
-    console.error(error);
-    return error;
+
+    return response.data;
+  } catch (error: any) {
+    console.error(
+      "userPersonalInfoAction:",
+      error.response?.data || error.message
+    );
+    throw error;
   }
 };
 

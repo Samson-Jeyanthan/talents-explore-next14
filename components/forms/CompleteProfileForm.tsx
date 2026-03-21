@@ -96,6 +96,8 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
 
     const res = await completeProfileAction(user.currentUserId, formData);
 
+    console.log(res, "res");
+
     if (res.status === "7400") {
       setUser({
         currentUserId: user.currentUserId,
