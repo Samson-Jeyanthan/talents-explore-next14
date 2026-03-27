@@ -1,7 +1,6 @@
 // import "server-only";
 "use server";
 
-import { jwtDecode } from "jwt-decode";
 import { cookies } from "next/headers";
 
 // create session
@@ -27,8 +26,9 @@ export async function getSession() {
   if (!session) {
     return "";
   } else {
-    const decodedJWTToken = jwtDecode(session);
-    return decodedJWTToken.sub;
+    // const decodedJWTToken = jwtDecode(session);
+    // return decodedJWTToken.sub;
+    return session;
   }
 }
 

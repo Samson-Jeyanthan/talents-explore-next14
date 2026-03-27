@@ -114,6 +114,10 @@ body {
     @apply flex h-16 w-full cursor-pointer items-center justify-start gap-9 rounded-2xl border-2 border-dark-300 bg-dark-250 px-3 py-11 text-xl font-medium text-light-600 hover:bg-dark-300 hover:text-light-900 !important;
   }
 
+  .myphotos-gradient {
+    @apply bg-gradient-to-b from-[rgb(17,19,27,0.0)] to-[#000000];
+  }
+
   /* Input OTP */
 
   .shad-input_otp {
@@ -170,6 +174,10 @@ body {
 
   .bio-details-icon {
     @apply flex-center size-9 min-w-9 rounded-xl border text-xl border-light-500/40 fill-light-500/50 text-light-500/50;
+  }
+
+  .social-link-icon {
+    @apply flex-center size-10 min-w-10 rounded-xl border text-xl border-light-500/40 fill-light-500/50 text-light-500/50;
   }
 
   .professional-info-card-wrap {

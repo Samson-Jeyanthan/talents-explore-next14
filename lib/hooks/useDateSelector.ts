@@ -6,6 +6,7 @@ type TDateSelectorProps = {
   isPresent?: boolean;
   yearValue: any;
   monthValue: any;
+  dayValue: any;
 };
 
 type TDays = {
@@ -17,6 +18,7 @@ const useDateSelector = ({
   isPresent,
   yearValue,
   monthValue,
+  dayValue,
 }: TDateSelectorProps) => {
   const currentYear = new Date().getFullYear();
 
@@ -56,22 +58,22 @@ const useDateSelector = ({
   }, []);
 
   // find out leap years' and normal years' days
-  const getDaysInMonth = (year: number, month: string): number => {
+  const getDaysInMonth = (year: number, month: number): number => {
     const isLeapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
 
     const daysInMonth: { [key: string]: number } = {
-      "01": 31,
-      "02": isLeapYear ? 29 : 28,
-      "03": 31,
-      "04": 30,
-      "05": 31,
-      "06": 30,
-      "07": 31,
-      "08": 31,
-      "09": 30,
-      "10": 31,
-      "11": 30,
-      "12": 31,
+      1: 31,
+      2: isLeapYear ? 29 : 28,
+      3: 31,
+      4: 30,
+      5: 31,
+      6: 30,
+      7: 31,
+      8: 31,
+      9: 30,
+      10: 31,
+      11: 30,
+      12: 31,
     };
 
     return daysInMonth[month];
@@ -80,8 +82,11 @@ const useDateSelector = ({
   // setting the days in array regarding of selected month & year
   const [days, setDays] = useState<TDays[]>([]);
   useEffect(() => {
-    console.log(yearValue, monthValue, "from hook");
-    const daysInMonth = getDaysInMonth(parseInt(yearValue), monthValue);
+    // console.log(yearValue, monthValue, "from hook");
+    const daysInMonth = getDaysInMonth(
+      parseInt(yearValue),
+      parseInt(monthValue)
+    );
     const calDays: TDays[] = [];
     for (let i = 1; i <= daysInMonth; i++) {
       calDays.push({
@@ -91,7 +96,7 @@ const useDateSelector = ({
     }
 
     setDays(calDays);
-  }, [yearValue, monthValue]);
+  }, [yearValue, monthValue, dayValue]);
 
   return {
     years,
@@ -118,3 +123,16 @@ export function convertToISOString(
   // Return the ISO string representation of the date
   return date.toISOString();
 }
+
+// function to extract the year, month, and day from the date
+export const formatISOStringDate = (dob: string | undefined) => {
+  if (!dob) {
+    return { year: "", month: "", day: "" };
+  }
+  const date = new Date(dob);
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1; // Months are 0-based, so add 1
+  const day = date.getDate();
+
+  return { year, month, day };
+};

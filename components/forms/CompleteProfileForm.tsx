@@ -1,10 +1,10 @@
 "use client";
 
-import { Form, FormField } from "../ui/form";
+import { Form, FormField, FormMessage } from "../ui/form";
 import {
   CheckboxInput,
   CoverPhoto,
-  DateInpt,
+  DateInput,
   Dropdown,
   FormInput,
   ProfilePhoto,
@@ -17,7 +17,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { completeProfileAction } from "@/actions/auth.action";
-import { convertToISOString } from "@/lib/hooks/useDateSelector";
 import { toast } from "sonner";
 import { getFileUpload } from "@/lib/utils/getFileUpload";
 import { useRouter } from "next/navigation";
@@ -44,9 +43,7 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
       lastName: "",
       knownLanguage: "",
       profession: "",
-      year: "",
-      month: "",
-      day: "",
+      dob: "",
       gender: "",
       quotes: "",
       coverPhoto: undefined,
@@ -55,11 +52,6 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
   });
 
   async function onSubmit(values: z.infer<typeof CompleteProfileValidation>) {
-    const convertedDate = convertToISOString(
-      values.year,
-      values.month,
-      values.day
-    );
     console.log(values.profilePhoto, "values.profilePhoto");
     console.log(values.coverPhoto, "values.coverPhoto");
 
@@ -89,7 +81,7 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
     const formData = {
       firstName: values.firstName,
       lastName: values.lastName,
-      dob: convertedDate,
+      dob: values.dob,
       gender: values.gender,
       languageKnown: values.knownLanguage,
       profileImage: profileImageKey && profileImageKey,
@@ -103,6 +95,8 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
     console.log(formData, "formData");
 
     const res = await completeProfileAction(user.currentUserId, formData);
+
+    console.log(res, "res");
 
     if (res.status === "7400") {
       setUser({
@@ -187,15 +181,19 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
               data={GENDER_VALUES}
             />
 
-            <DateInpt
-              form={form}
-              formLabel="Date of Birth"
-              yearName="year"
-              monthName="month"
-              dayName="day"
-              yearValue={form.getValues("year")}
-              monthValue={form.getValues("month")}
-              dayValue={form.getValues("day")}
+            <FormField
+              control={form.control}
+              name="dob"
+              render={({ field }) => (
+                <>
+                  <DateInput
+                    formLabel="Date of Birth"
+                    fieldChange={field.onChange}
+                    isoDate={form.getValues("dob")}
+                  />
+                  <FormMessage className="shad-auth_form_message -mt-4" />
+                </>
+              )}
             />
 
             <Dropdown

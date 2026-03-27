@@ -4,13 +4,21 @@ import {
   CategoriesIcon,
   CommunityIcon,
   ExploreIcon,
+  FacebookIcon,
   HomeIcon,
+  InstagramIcon,
+  LinkedInIcon,
+  LinkIcon,
   PinIcon,
   SaveIcon,
   SettingsIcon,
+  SnapchatIcon,
   SystemIcon,
+  TikTokIcon,
+  TwitterIcon,
   UploadIcon,
   WarningIcon,
+  YoutubeIcon,
 } from "@/public/assets/svgs";
 import { ITab, TConvertedSvgJsxProps } from "@/types/utils.types";
 import { IoMdMoon } from "react-icons/io";
@@ -304,5 +312,54 @@ export const TIME_DURATION_FILTERS = [
   {
     id: "two year",
     name: "Two Years",
+  },
+];
+
+interface ISocialMediaProps {
+  type: string;
+  icon: IconType | React.ComponentType<TConvertedSvgJsxProps>;
+  default: boolean;
+}
+
+export const SOCIAL_MEDIA_OPTIONS: ISocialMediaProps[] = [
+  {
+    type: "linkedin",
+    icon: LinkedInIcon,
+    default: true,
+  },
+  {
+    type: "facebook",
+    icon: FacebookIcon,
+    default: true,
+  },
+  {
+    type: "tiktok",
+    icon: TikTokIcon,
+    default: false,
+  },
+  {
+    type: "twitter",
+    icon: TwitterIcon,
+    default: false,
+  },
+  {
+    type: "instagram",
+    icon: InstagramIcon,
+    default: true,
+  },
+  {
+    type: "youtube",
+    icon: YoutubeIcon,
+    default: false,
+  },
+  {
+    type: "snapchat",
+    icon: SnapchatIcon,
+    default: false,
+  },
+  {
+    type: "portfolio",
+    icon: LinkIcon,
+    default: false,
   },
 ];

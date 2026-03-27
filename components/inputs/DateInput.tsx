@@ -1,13 +1,9 @@
 "use client";
 
-import useDateSelector from "@/lib/hooks/useDateSelector";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "../ui/form";
+import useDateSelector, {
+  convertToISOString,
+  formatISOStringDate,
+} from "@/lib/hooks/useDateSelector";
 import {
   Select,
   SelectContent,
@@ -15,164 +11,148 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-type TDropdownProps = {
-  form: any;
+type Props = {
   formLabel?: string;
-  yearName: string;
-  monthName: string;
-  dayName: string;
-  yearValue: any;
-  monthValue: any;
-  dayValue: any;
   formDescription?: string;
+  isoDate?: string;
+  fieldChange: (value: string) => void;
 };
 
 const DateInput = ({
-  form,
   formLabel,
-  yearName,
-  monthName,
-  dayName,
-  yearValue,
-  monthValue,
-  dayValue,
-}: TDropdownProps) => {
+  formDescription,
+  fieldChange,
+  isoDate,
+}: Props) => {
+  const { year, month, day } = formatISOStringDate(isoDate);
+
   const [dates, setDates] = useState({
-    selectedYear: "",
-    selectedMonth: "",
+    selectedYear: String(year) || "",
+    selectedMonth: String(month) || "",
+    selectedDay: String(day) || "",
   });
   const { years, months, days } = useDateSelector({
     yearValue: dates.selectedYear,
-    monthValue: dates.selectedMonth,
+    monthValue: Number(dates.selectedMonth),
+    dayValue: dates.selectedDay,
   });
 
+  const handleDropdownChange = () => {
+    const convertedDate = convertToISOString(
+      dates.selectedYear,
+      dates.selectedMonth,
+      dates.selectedDay
+    );
+    fieldChange(convertedDate);
+  };
+
+  useEffect(() => {
+    if (
+      dates.selectedYear !== "" &&
+      dates.selectedMonth !== "" &&
+      dates.selectedDay !== ""
+    ) {
+      handleDropdownChange();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dates]);
+
   return (
-    <div>
-      {formLabel && (
-        <FormLabel className="shad-auth_form_label">{formLabel}</FormLabel>
-      )}
+    <div className="flex w-full flex-col gap-2">
+      {formLabel && <p className="shad-auth_form_label">{formLabel}</p>}
       <div className="flex-center w-full gap-4">
-        <FormField
-          control={form.control}
-          name={yearName}
-          render={({ field }) => (
-            <FormItem className="w-full">
-              <FormControl>
-                <Select
-                  onValueChange={(id: string) => {
-                    field.onChange(id);
-                    setDates({
-                      ...dates,
-                      selectedYear: id,
-                    });
-                  }}
+        <Select
+          onValueChange={(id: string) => {
+            setDates({
+              ...dates,
+              selectedYear: id,
+            });
+          }}
+        >
+          <SelectTrigger className="flex-between shad-auth_form_input">
+            {years?.find(
+              (year) => Number(year.id) === Number(dates.selectedYear)
+            )?.label || <SelectValue />}
+            {!dates.selectedYear && (
+              <p className="flex w-full items-start text-light-500">Year</p>
+            )}
+          </SelectTrigger>
+          <SelectContent className="shad-auth_form_select_option">
+            {years.map((option, index) => (
+              <SelectItem
+                key={index}
+                value={String(option.id)}
+                className="shad-auth_form_select_item"
+              >
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select
+          onValueChange={(id: string) => {
+            setDates({
+              ...dates,
+              selectedMonth: id,
+            });
+          }}
+        >
+          <SelectTrigger className="flex-between shad-auth_form_input">
+            {months?.find(
+              (month) => Number(month.id) === Number(dates.selectedMonth)
+            )?.label || <SelectValue />}
+            {!dates.selectedMonth && (
+              <p className="flex w-full items-start text-light-500">Month</p>
+            )}
+          </SelectTrigger>
+          <SelectContent className="shad-auth_form_select_option">
+            {months.map((option, index) => (
+              <SelectItem
+                key={index}
+                value={String(option.id)}
+                className="shad-auth_form_select_item"
+              >
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select
+          onValueChange={(id: any) => {
+            setDates({
+              ...dates,
+              selectedDay: id,
+            });
+          }}
+        >
+          <SelectTrigger className="flex-between shad-auth_form_input">
+            {days?.find((day) => day.id === dates.selectedDay)?.label || (
+              <SelectValue />
+            )}
+            {!dates.selectedDay ||
+              (!days?.some((day) => day.id === dates.selectedDay) && (
+                <p className="flex w-full items-start text-light-500">Day</p>
+              ))}
+          </SelectTrigger>
+          {days.length > 0 && (
+            <SelectContent className="shad-auth_form_select_option">
+              {days.map((option, index) => (
+                <SelectItem
+                  key={index}
+                  value={option.id}
+                  className="shad-auth_form_select_item"
                 >
-                  <SelectTrigger className="flex-between shad-auth_form_input">
-                    <SelectValue />
-                    {!yearValue && (
-                      <p className="flex w-full items-start text-light-500">
-                        Year
-                      </p>
-                    )}
-                  </SelectTrigger>
-                  <SelectContent className="shad-auth_form_select_option">
-                    {years.map((option, index) => (
-                      <SelectItem
-                        key={index}
-                        value={String(option.id)}
-                        className="shad-auth_form_select_item"
-                      >
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-            </FormItem>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
           )}
-        />
-        <FormField
-          control={form.control}
-          name={monthName}
-          render={({ field }) => (
-            <FormItem className="w-full">
-              <FormControl>
-                <Select
-                  onValueChange={(id: string) => {
-                    field.onChange(id);
-                    setDates({
-                      ...dates,
-                      selectedMonth: id,
-                    });
-                  }}
-                >
-                  <SelectTrigger className="flex-between shad-auth_form_input">
-                    <SelectValue />
-                    {!monthValue && (
-                      <p className="flex w-full items-start text-light-500">
-                        Month
-                      </p>
-                    )}
-                  </SelectTrigger>
-                  <SelectContent className="shad-auth_form_select_option">
-                    {months.map((option, index) => (
-                      <SelectItem
-                        key={index}
-                        value={String(option.id)}
-                        className="shad-auth_form_select_item"
-                      >
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name={dayName}
-          render={({ field }) => (
-            <FormItem className="w-full">
-              <FormControl>
-                <Select onValueChange={(id: any) => field.onChange(id)}>
-                  <SelectTrigger className="flex-between shad-auth_form_input">
-                    <SelectValue />
-                    {!dayValue && (
-                      <p className="flex w-full items-start text-light-500">
-                        Day
-                      </p>
-                    )}
-                  </SelectTrigger>
-                  {days.length > 0 && (
-                    <SelectContent className="shad-auth_form_select_option">
-                      {days.map((option, index) => (
-                        <SelectItem
-                          key={index}
-                          value={option.id}
-                          className="shad-auth_form_select_item"
-                        >
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  )}
-                </Select>
-              </FormControl>
-            </FormItem>
-          )}
-        />
+        </Select>
       </div>
-      <FormField
-        control={form.control}
-        name="year"
-        render={({ field }) => (
-          <FormMessage className="shad-auth_form_message mt-2" />
-        )}
-      />
     </div>
   );
 };

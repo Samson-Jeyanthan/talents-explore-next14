@@ -30,7 +30,7 @@ function NotificationSheet({ data }: { data: any[] }) {
     older: [],
   };
 
-  data.forEach((item) => {
+  data?.forEach((item) => {
     const createdOn = new Date(item.createdOn);
 
     if (isToday(createdOn)) {

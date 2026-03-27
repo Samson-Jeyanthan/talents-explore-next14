@@ -32,6 +32,15 @@ export { default as CalendarIcon } from "./CalendarIcon";
 export { default as PostIcon } from "./PostIcon";
 export { default as CategoriesIcon } from "./CategoriesIcon";
 export { default as CommentIcon } from "./CommentIcon";
+export { default as LinkIcon } from "./LinkIcon";
+// social media icon
+export { default as InstagramIcon } from "./InstagramIcon";
+export { default as FacebookIcon } from "./FaceBookIcon";
+export { default as LinkedInIcon } from "./LinkedinIcon";
+export { default as TikTokIcon } from "./TikTokIcon";
+export { default as YoutubeIcon } from "./YoutubeIcon";
+export { default as TwitterIcon } from "./TwitterIcon";
+export { default as SnapchatIcon } from "./SnapchatIcon";
 // fill icon
 export { default as HeadPhoneFillIcon } from "./HeadPhoneFillIcon";
 export { default as CameraFillIcon } from "./CameraFillIcon";

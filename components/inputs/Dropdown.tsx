@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useState } from "react";
 
 type Props = {
   form: any;
@@ -24,6 +25,7 @@ type Props = {
   options: { _id: string; name: string }[];
   value: string | boolean | undefined;
   formDescription?: string;
+  // it is usefull for skils and countries related onChanges, bcz it is dependent on another field
   dependentFieldPlaceholder?: string;
   dependentFieldValue?: boolean;
   onValueChange?: (_id: string) => {};
@@ -43,13 +45,12 @@ const Dropdown = ({
   onValueChange,
   resetFiled,
 }: Props) => {
+  const [selectedValue, setSelectedValue] = useState(value || "");
+
   const handleOnChange = (_id: string, field: any) => {
     field.onChange(_id);
+    setSelectedValue(_id);
     onValueChange && onValueChange(_id);
-
-    if (resetFiled) {
-      field.onChange();
-    }
   };
 
   return (
@@ -62,8 +63,10 @@ const Dropdown = ({
           <FormControl>
             <Select onValueChange={(_id: string) => handleOnChange(_id, field)}>
               <SelectTrigger className="flex-between shad-auth_form_input">
-                <SelectValue />
-                {!value && (
+                {options?.find((option) => option._id === selectedValue)
+                  ?.name || <SelectValue />}
+
+                {!selectedValue && (
                   <p className="flex w-full items-start text-light-500">
                     {placeholder}
                   </p>
