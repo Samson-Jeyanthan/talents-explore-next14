@@ -9,16 +9,16 @@ import {
   MyPhotos,
   TopPosts,
 } from "@/components/widgets";
-import { getSession } from "@/lib/session";
 import { addLineBreaks } from "@/lib/utils/addLinkBreaks";
+import { getCurrentChatUserAction } from "@/actions/chat.action";
 
 async function Overview({ params }: TProfileURLProps) {
   const userData: TCurrentUserData | TPublicUserData =
     await fetchUserDataAction(params.userId, params.username);
   if (!userData) return null;
 
-  const token = await getSession();
-  const isOwnProfile = token === params.userId;
+  const currentUser = await getCurrentChatUserAction();
+  const isOwnProfile = currentUser?._id === params.userId;
 
   const isTalent = userData?.isTalent;
 

@@ -7,11 +7,11 @@ import { useState } from "react";
 import { PhotoViewModal } from "../../modals";
 import { Dialog } from "../../ui/dialog";
 import ConnectionListModal from "../../modals/ConnectionListModal";
-import { MessageIcon } from "@/public/assets/svgs";
 import { useUserContext } from "@/context/AuthProvider";
 import { StarRating } from "@/components/inputs";
 import { TCurrentUserData, TPublicUserData } from "@/types/profile.types";
 import { usePathname, useRouter } from "next/navigation";
+import ChatLauncher from "../ChatLauncher";
 
 const ProfileHeader = ({
   userData,
@@ -71,9 +71,11 @@ const ProfileHeader = ({
                 <Button className="shad-button_primary w-36 rounded-full">
                   Follow
                 </Button>
-                <Button className="shad-button_secondary rounded-full fill-white !px-3">
-                  <MessageIcon width="22px" height="22px" />
-                </Button>
+                <ChatLauncher
+                  userId={userData?._id}
+                  iconOnly
+                  className="shad-button_secondary rounded-full fill-white !px-3"
+                />
               </>
             )}
             <ProfileOptions

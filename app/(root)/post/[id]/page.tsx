@@ -21,7 +21,11 @@ export async function generateMetadata(
   { params }: TPostURLProps,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const postData: TPostProps = await getPostByIdAction(params.id, "userId");
+  const session = await getSession();
+  const postData: TPostProps = await getPostByIdAction(
+    params.id,
+    session || "no_user"
+  );
 
   // optionally access and extend (rather than replace) parent metadata
   // const previousImages = (await parent).openGraph?.images || [];

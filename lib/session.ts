@@ -14,6 +14,7 @@ export async function createSession(accessToken: string) {
     expires,
     httpOnly: true,
     sameSite: "strict",
+    path: "/",
   });
 
   const res = cookies().get("accessToken");
@@ -34,8 +35,14 @@ export async function getSession() {
 
 // delete session
 export async function deleteSession() {
-  cookies().delete("accessToken");
-  cookies().delete("isAbout");
+  cookies().delete({
+    name: "accessToken",
+    path: "/",
+  });
+  cookies().delete({
+    name: "isAbout",
+    path: "/",
+  });
 }
 
 // store isAbout in cookies
@@ -45,12 +52,14 @@ export async function storeIsAbout(isOk: boolean) {
       expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
       httpOnly: true,
       sameSite: "strict",
+      path: "/",
     });
   } else {
     cookies().set("isAbout", "false", {
       expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
       httpOnly: true,
       sameSite: "strict",
+      path: "/",
     });
   }
 }

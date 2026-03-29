@@ -10,13 +10,15 @@ type Props = {
 
 const BlurredMedia = ({ postData }: Props) => {
   const { mdSelectedMediaIndex } = useUtils();
+  const mediaUrl = postData?.media?.[mdSelectedMediaIndex]?.url;
+
+  if (!mediaUrl) {
+    return null;
+  }
+
   return (
     <Image
-      src={
-        postData.media[mdSelectedMediaIndex]?.url
-          ? postData?.media[mdSelectedMediaIndex]?.url
-          : ""
-      }
+      src={mediaUrl}
       width={200}
       height={200}
       className="absolute top-0 z-0 h-[30rem] w-4/5 translate-x-1/2 translate-y-1/2 object-cover opacity-30 lg:w-[30rem]"

@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type Props = {
   form: any;
@@ -47,6 +47,10 @@ const Dropdown = ({
 }: Props) => {
   const [selectedValue, setSelectedValue] = useState(value || "");
 
+  useEffect(() => {
+    setSelectedValue(value || "");
+  }, [value]);
+
   const handleOnChange = (_id: string, field: any) => {
     field.onChange(_id);
     setSelectedValue(_id);
@@ -61,7 +65,10 @@ const Dropdown = ({
         <FormItem className="w-full">
           <FormLabel className="shad-auth_form_label">{formLabel}</FormLabel>
           <FormControl>
-            <Select onValueChange={(_id: string) => handleOnChange(_id, field)}>
+            <Select
+              value={selectedValue as string}
+              onValueChange={(_id: string) => handleOnChange(_id, field)}
+            >
               <SelectTrigger className="flex-between shad-auth_form_input">
                 {options?.find((option) => option._id === selectedValue)
                   ?.name || <SelectValue />}

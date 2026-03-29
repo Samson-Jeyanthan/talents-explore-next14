@@ -16,50 +16,77 @@ type Props = {
 };
 
 const PostInfoHeader = ({ postData }: Props) => {
-  const profileLink = `/profile/${postData?.author?.userName}/${postData?.author?._id}`;
+  const author = postData?.author || {};
+  const profileLink = author?._id
+    ? `/profile/${author?.userName}/${author?._id}`
+    : "#";
+  const about = postData?.about || {};
+  const locationLabel = [about?.country, about?.state].filter(Boolean).join(" - ");
+
   return (
     <section className="flex flex-col text-light-900">
       <div className="flex-between gap-2 border-b-2 border-solid border-dark-300 pb-6 pt-1">
         <h1 className="text-left text-3xl font-semibold capitalize">
-          {postData.about.title}
+          {about?.title || "Untitled post"}
         </h1>
         <div className="flex gap-3">
           <SaveCollectionModal postId={postData._id} />
           <PostUtilsButton buttonFor="SHARE" className="p-3" />
-          <PostOptions
-            authorId={postData.author._id}
-            postId={postData._id}
-            isBestWork={postData.isBestWork}
-            className="flex-center !size-[42px] space-x-1 !px-2"
-          />
+          {author?._id ? (
+            <PostOptions
+              authorId={author._id}
+              postId={postData._id}
+              isBestWork={postData.isBestWork}
+              className="flex-center !size-[42px] space-x-1 !px-2"
+            />
+          ) : null}
         </div>
       </div>
 
       <div className="flex items-start justify-between pt-6">
         <div className="flex flex-col gap-3">
           <div className="flex items-start gap-3">
-            <Link href={profileLink}>
+            {author?._id ? (
+              <Link href={profileLink}>
+                <UserProfileImg
+                  src={author?.profileImage}
+                  userName={author?.userName}
+                  className="size-20 rounded-2xl"
+                />
+              </Link>
+            ) : (
               <UserProfileImg
-                src={postData?.author?.profileImage}
-                userName={postData?.author?.userName}
+                src={author?.profileImage}
+                userName={author?.userName || "Unknown user"}
                 className="size-20 rounded-2xl"
               />
-            </Link>
+            )}
             <div className="flex flex-col gap-1">
-              <Link href={profileLink} className="text-xl font-medium">
-                {postData?.author?.firstName} {postData?.author?.lastName}
-              </Link>
-              <Link href={profileLink} className="text-sm">
-                @{postData?.author?.userName}
-              </Link>
+              {author?._id ? (
+                <>
+                  <Link href={profileLink} className="text-xl font-medium">
+                    {author?.firstName} {author?.lastName}
+                  </Link>
+                  <Link href={profileLink} className="text-sm">
+                    @{author?.userName}
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <p className="text-xl font-medium">Unknown user</p>
+                  <p className="text-sm text-light-500">Profile unavailable</p>
+                </>
+              )}
             </div>
           </div>
 
           <div className="flex gap-2 text-xs text-light-500">
-            <p className="flex items-center gap-1">
-              <FaLocationDot />
-              {postData?.about.country} - {postData?.about.state}
-            </p>
+            {locationLabel ? (
+              <p className="flex items-center gap-1">
+                <FaLocationDot />
+                {locationLabel}
+              </p>
+            ) : null}
             <p className="flex items-center gap-1">
               <IoCalendar />
               {getFormattedDate(postData?.publishedAt)}
@@ -67,13 +94,15 @@ const PostInfoHeader = ({ postData }: Props) => {
           </div>
 
           <div className="flex gap-2">
-            <span className="all-post-card-tags">
-              {postData?.about.mainCategory}
-            </span>
-            <span className="all-post-card-tags">
-              {postData?.about.subCategory}
-            </span>
-            <span className="all-post-card-tags">{postData?.about.skill}</span>
+            {about?.mainCategory ? (
+              <span className="all-post-card-tags">{about.mainCategory}</span>
+            ) : null}
+            {about?.subCategory ? (
+              <span className="all-post-card-tags">{about.subCategory}</span>
+            ) : null}
+            {about?.skill ? (
+              <span className="all-post-card-tags">{about.skill}</span>
+            ) : null}
             <span className="all-post-card-tags flex items-center gap-2 fill-custom-100">
               <StarIcon width="14px" height="14px" />
               {getFormattedDecimal(postData?.postRating)}
@@ -87,7 +116,7 @@ const PostInfoHeader = ({ postData }: Props) => {
             prevRatingValue={postData?.yourRating}
             ratingFor="POST"
             postId={postData?._id}
-            authorId={postData?.author._id}
+            authorId={author?._id}
             revalidatePath={`/post/${postData?._id}`}
           />
         </div>

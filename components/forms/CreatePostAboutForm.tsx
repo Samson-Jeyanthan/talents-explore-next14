@@ -12,6 +12,7 @@ import { UploadFormTooltip } from "../tooltips";
 import { LEVEL_VALUES } from "@/constants";
 import {
   getSkillsAction,
+  getStatesAction,
   getSubCategoriesAction,
 } from "@/actions/utils.action";
 import { useState } from "react";
@@ -24,15 +25,18 @@ const CreatePostAboutForm = ({
 }: any) => {
   const [subCategoryOptions, setSubCategoryOptions] = useState([]);
   const [skillOptions, setSkillOptions] = useState([]);
+  const [stateOptions, setStateOptions] = useState([]);
 
   async function fetchSubcategories(mainCategory: string) {
-    await form.resetField("subCategory", "skills");
+    form.resetField("subCategory");
+    form.resetField("skills");
+    form.resetField("skillLevel");
     setSubCategoryOptions([]);
     setSkillOptions([]);
     try {
       const res = await getSubCategoriesAction(mainCategory);
       setSubCategoryOptions(
-        res.response.map((item: any) => ({
+        (res?.response || []).map((item: any) => ({
           _id: item._id,
           name: item.name,
         }))
@@ -44,15 +48,32 @@ const CreatePostAboutForm = ({
   }
 
   async function fetchSkills(subCategory: string) {
-    await form.resetField("skills");
+    form.resetField("skills");
+    form.resetField("skillLevel");
     setSkillOptions([]);
     try {
       const res = await getSkillsAction(subCategory);
-      console.log(res);
       setSkillOptions(
-        res.response.map((item: any) => ({
+        (res?.response || []).map((item: any) => ({
           _id: item._id,
           name: item.name,
+        }))
+      );
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
+
+  async function fetchStates(country: string) {
+    form.resetField("state");
+    setStateOptions([]);
+    try {
+      const res = await getStatesAction(country);
+      setStateOptions(
+        (res?.response || []).map((item: any) => ({
+          _id: item.state || item.name || item,
+          name: item.state || item.name || item,
         }))
       );
     } catch (error) {
@@ -129,24 +150,26 @@ const CreatePostAboutForm = ({
           dependentFieldValue={form.getValues("mainCategory") !== ""}
         />
 
-        <div className="flex w-full gap-4">
-          <Dropdown
-            form={form}
-            inputName="skills"
-            placeholder="Select Skill Name"
-            options={skillOptions}
-            value={form.getValues("skills")}
-            dependentFieldPlaceholder={"Please select sub category"}
-            dependentFieldValue={form.getValues("subCategory") !== ""}
-          />
-          <Dropdown
-            form={form}
-            value={form.getValues("skillLevel")}
-            inputName="skillLevel"
-            placeholder="Level"
-            options={LEVEL_VALUES}
-          />
-        </div>
+        {skillOptions.length > 0 ? (
+          <div className="flex w-full gap-4">
+            <Dropdown
+              form={form}
+              inputName="skills"
+              placeholder="Select Skill Name"
+              options={skillOptions}
+              value={form.getValues("skills")}
+              dependentFieldPlaceholder={"Please select sub category"}
+              dependentFieldValue={form.getValues("subCategory") !== ""}
+            />
+            <Dropdown
+              form={form}
+              value={form.getValues("skillLevel")}
+              inputName="skillLevel"
+              placeholder="Level"
+              options={LEVEL_VALUES}
+            />
+          </div>
+        ) : null}
       </div>
 
       <div className="flex flex-col gap-2">
@@ -181,13 +204,16 @@ const CreatePostAboutForm = ({
           inputName="country"
           placeholder="Country"
           options={countryOptions}
+          onValueChange={(country: string) => fetchStates(country)}
         />
         <Dropdown
           form={form}
           value={form.getValues("state")}
           inputName="state"
           placeholder="State"
-          options={langData}
+          options={stateOptions}
+          dependentFieldPlaceholder="Please select country"
+          dependentFieldValue={form.getValues("country") !== ""}
         />
       </div>
 
@@ -196,12 +222,11 @@ const CreatePostAboutForm = ({
           Tags
         </p>
         <UserTagAndSearch isTag={true} />
-        <Dropdown
+        <FormInput
           form={form}
-          value={form.getValues("mainCategory")}
-          inputName="mainCategory"
-          placeholder="Select your profession"
-          options={langData}
+          inputName="hashtag"
+          inputType="text"
+          placeholder="Add hashtags"
         />
       </div>
     </form>

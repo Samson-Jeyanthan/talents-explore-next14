@@ -45,7 +45,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (res.status === "7400") {
         if (res?.response?.personalInfo?.firstName) {
           setUser({
-            currentUserId: token,
+            currentUserId: res?.response?._id || "",
             firstName: res?.response?.personalInfo?.firstName,
             lastName: res?.response?.personalInfo?.lastName,
             username: res?.response?.userName,
@@ -55,7 +55,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           });
         } else {
           setUser({
-            currentUserId: token,
+            currentUserId: res?.response?._id || "",
             firstName: "",
             lastName: "",
             username: res?.response?.userName,

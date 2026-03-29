@@ -24,18 +24,20 @@ const ParentCreatePostForm = ({
   mainCategoryData,
   countryData,
 }: Props) => {
-  const LangOptions = langData.response.map((item: any) => ({
+  const LangOptions = (langData?.response || []).map((item: any) => ({
     _id: item._id,
     name: item.language,
   }));
 
-  const mainCategoryOptions = mainCategoryData.response.map((item: any) => ({
-    _id: item._id,
-    name: item.name,
-  }));
+  const mainCategoryOptions = (mainCategoryData?.response || []).map(
+    (item: any) => ({
+      _id: item._id,
+      name: item.name,
+    })
+  );
 
-  const countryOptions = countryData.response.map((item: any) => ({
-    _id: item._id,
+  const countryOptions = (countryData?.response || []).map((item: any) => ({
+    _id: item.country,
     name: item.country,
   }));
 

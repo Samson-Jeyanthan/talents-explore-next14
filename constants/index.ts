@@ -9,6 +9,7 @@ import {
   InstagramIcon,
   LinkedInIcon,
   LinkIcon,
+  MessageIcon,
   PinIcon,
   SaveIcon,
   SettingsIcon,
@@ -21,8 +22,6 @@ import {
   YoutubeIcon,
 } from "@/public/assets/svgs";
 import { ITab, TConvertedSvgJsxProps } from "@/types/utils.types";
-import { IoMdMoon } from "react-icons/io";
-import { TbSunHigh } from "react-icons/tb";
 import { AiOutlineLink } from "react-icons/ai";
 import { MdDelete, MdModeEdit } from "react-icons/md";
 
@@ -83,6 +82,12 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
     isLink: false,
   },
   {
+    icon: MessageIcon,
+    path: "/chat",
+    name: "Chat",
+    isLink: true,
+  },
+  {
     icon: SaveIcon,
     path: "/saved-collection",
     name: "Saved Collection",
@@ -111,14 +116,14 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
 interface ThemeItems {
   name: string;
   value: string;
-  icon: IconType | React.ComponentType<TConvertedSvgJsxProps>;
+  icon: "light" | "dark" | "system";
   height: string | undefined;
 }
 
 export const THEME_OPTIONS: ThemeItems[] = [
-  { name: "Light", value: "light", icon: TbSunHigh, height: undefined },
-  { name: "Dark", value: "dark", icon: IoMdMoon, height: undefined },
-  { name: "System", value: "system", icon: SystemIcon, height: "16px" },
+  { name: "Light", value: "light", icon: "light", height: undefined },
+  { name: "Dark", value: "dark", icon: "dark", height: undefined },
+  { name: "System", value: "system", icon: "system", height: "16px" },
 ];
 
 interface IPostOptions {

@@ -8,9 +8,9 @@ import {
 } from "@/components/widgets";
 import type { Metadata, ResolvingMetadata } from "next";
 import { fetchUserDataAction } from "@/actions/user.action";
-import { getSession } from "@/lib/session";
 import NotFound from "../../not-found";
 import { TProfileURLProps } from "@/types/utils.types";
+import { getCurrentChatUserAction } from "@/actions/chat.action";
 
 export async function generateMetadata(
   { params }: TProfileURLProps,
@@ -49,14 +49,14 @@ async function layout({
 }) {
   // await new Promise((resolve) => setTimeout(resolve, 1000));
   const userData = await fetchUserDataAction(params.userId, params.username);
-  const token = await getSession();
-  const isOwnProfile = token === params.userId;
+  const currentUser = await getCurrentChatUserAction();
+  const isOwnProfile = currentUser?._id === params.userId;
   if (!userData) {
     return <NotFound />;
   }
 
   const isTalent = userData?.isTalent;
-  const isLoggedIn = token === "";
+  const isLoggedIn = !currentUser?._id;
 
   return (
     <main

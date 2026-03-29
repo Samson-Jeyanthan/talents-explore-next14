@@ -5,9 +5,9 @@ import {
 } from "@/actions/utils.action";
 import { Footer } from "@/components/widgets";
 import { ParentEditProfileForm } from "@/components/widgets/multiStepForms";
-import { getSession } from "@/lib/session";
 import { Metadata, ResolvingMetadata } from "next";
 import { redirect } from "next/navigation";
+import { getCurrentChatUserAction } from "@/actions/chat.action";
 
 type ParamsProps = {
   params: { userId: string };
@@ -42,8 +42,8 @@ export async function generateMetadata(
 }
 
 const EditProfile = async ({ params }: ParamsProps) => {
-  const token = await getSession();
-  const isOwnProfile = token === params.userId;
+  const currentUser = await getCurrentChatUserAction();
+  const isOwnProfile = currentUser?._id === params.userId;
   const langData = await getLanguagesAction();
   const professionData = await getProfessionsAction();
   const userData = await fetchUserDataAction(params.userId, params.userId);

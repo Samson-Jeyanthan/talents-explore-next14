@@ -1,12 +1,23 @@
 "use server";
 
 import AllTalentsCard from "@/components/cards/AllTalentsCard";
+import { getSession } from "@/lib/session";
 import {
   IExploreTalentsProps,
   ISearchAllTalentsProps,
   ISearchProps,
 } from "@/types/utils.types";
 import { revalidatePath } from "next/cache";
+
+async function getAuthHeaders() {
+  const token = await getSession();
+
+  return token
+    ? {
+        Authorization: `Bearer ${token}`,
+      }
+    : undefined;
+}
 
 export async function searchPeopleTag(
   userId: string | undefined,
@@ -15,8 +26,13 @@ export async function searchPeopleTag(
   pageSize: number
 ) {
   try {
+    const headers = await getAuthHeaders();
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/tagging/search?userId=${userId}&pageNo=${pageNo}&pageSize=${20}&filter=${filter}`
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/tagging/search?userId=${userId}&pageNo=${pageNo}&pageSize=${20}&filter=${filter}`,
+      {
+        cache: "no-store",
+        headers,
+      }
     );
     return await response.json();
   } catch (error) {
@@ -53,6 +69,7 @@ export async function searchAction({
   userLanguage,
 }: ISearchProps) {
   try {
+    const headers = await getAuthHeaders();
     // Create URLSearchParams instance for building the query string
     const queryParams = new URLSearchParams();
 
@@ -91,7 +108,11 @@ export async function searchAction({
 
     // Make the API request
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/search/?${queryParams.toString()}`
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/search/?${queryParams.toString()}`,
+      {
+        cache: "no-store",
+        headers,
+      }
     );
 
     // Check if the response is okay
@@ -120,6 +141,7 @@ export async function exploreAllTalentsAction({
   pathForRevalidate,
 }: ISearchAllTalentsProps) {
   try {
+    const headers = await getAuthHeaders();
     const queryParams = new URLSearchParams();
 
     queryParams.append("searchType", "TALENT");
@@ -137,7 +159,11 @@ export async function exploreAllTalentsAction({
 
     // Make the API request
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/search/?${queryParams.toString()}`
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/search/?${queryParams.toString()}`,
+      {
+        cache: "no-store",
+        headers,
+      }
     );
 
     // Check if the response is okay

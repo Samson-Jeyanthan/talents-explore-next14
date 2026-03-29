@@ -29,11 +29,12 @@ const numberWithinRange = (number: number, min: number, max: number): number =>
   Math.min(Math.max(number, min), max);
 
 type Props = {
-  slides: [any];
+  slides?: any[];
   options?: EmblaOptionsType;
 };
 
 const MoreDetailPostCarousel = ({ slides, options }: Props) => {
+  const safeSlides = Array.isArray(slides) ? slides : [];
   const [isFullScreen, setIsFullScreen] = useState(false);
   const { setmdSelectedMediaIndex } = useUtils();
   const [emblaRef, emblaApi] = useEmblaCarousel(options);
@@ -170,7 +171,7 @@ const MoreDetailPostCarousel = ({ slides, options }: Props) => {
       <div className="mdp-embla flex w-[86%] flex-col items-center justify-center">
         <div className="mdp-embla__viewport" ref={emblaRef}>
           <div className="mdp-embla__container">
-            {slides.map((media, index) => (
+            {safeSlides.map((media, index) => (
               <div
                 className={`${options?.loop ? "mdp-embla__slide" : "mdp-embla__slide__for__two"}`}
                 key={index}
@@ -204,7 +205,7 @@ const MoreDetailPostCarousel = ({ slides, options }: Props) => {
 
         <div className="mdp-embla__controls">
           <div className="text-sm text-light-500">
-            {selectedIndex + 1} / {slides.length}
+            {safeSlides.length > 0 ? selectedIndex + 1 : 0} / {safeSlides.length}
           </div>
           <div className="mdp-embla__buttons">
             <PrevButton
@@ -221,7 +222,7 @@ const MoreDetailPostCarousel = ({ slides, options }: Props) => {
       <Dialog open={isFullScreen}>
         <FullScreenModal
           mediaType="image"
-          mediaUrl={slides[selectedIndex]?.url}
+          mediaUrl={safeSlides[selectedIndex]?.url}
           onClose={handleMinScreen}
         />
       </Dialog>

@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { SigninValidation } from "@/lib/validations/auth.validation";
 import { signinAction } from "@/actions/auth.action";
-import { useRouter } from "next/navigation";
 import { useUserContext } from "@/context/AuthProvider";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -17,7 +16,6 @@ import { useState } from "react";
 const SigninForm = () => {
   const { setUser } = useUserContext();
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
   const form = useForm<z.infer<typeof SigninValidation>>({
     resolver: zodResolver(SigninValidation),
     defaultValues: {
@@ -48,11 +46,13 @@ const SigninForm = () => {
           imageUrl: res?.response?.personalInfo?.profileImage,
           isTalent: res?.response?.isTalent,
         });
-        if (res?.response?.personalInfo?.firstName) {
-          router.push("/home");
-        } else {
-          router.push("/complete-profile");
-        }
+        const redirectPath = res?.response?.personalInfo?.firstName
+          ? "/home"
+          : "/complete-profile";
+
+        // Use a full document navigation so the new auth cookie is guaranteed
+        // to be visible to middleware and server components immediately.
+        window.location.assign(redirectPath);
       } else {
         setIsLoading(false);
         toast.error("Sign In Failed, Invalid Email or Password.", {

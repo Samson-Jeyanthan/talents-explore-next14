@@ -6,8 +6,8 @@ import { ProfileOptions } from "../../options";
 import { useState } from "react";
 import { Dialog } from "../../ui/dialog";
 import { PhotoViewModal } from "../../modals";
-import { MessageIcon } from "@/public/assets/svgs";
 import ConnectionListModal from "../../modals/ConnectionListModal";
+import ChatLauncher from "../ChatLauncher";
 
 const NormalUserProfileHeader = ({
   userData,
@@ -80,9 +80,11 @@ const NormalUserProfileHeader = ({
             <Button className="h-11 w-max rounded-full border border-solid border-primary-500 bg-none text-primary-500 hover:bg-primary-500 hover:text-light-900">
               Remove from Follower
             </Button>
-            <Button className="shad-button_secondary w-max rounded-full fill-white">
-              <MessageIcon width="22px" height="22px" />
-            </Button>
+            <ChatLauncher
+              userId={userData?._id}
+              iconOnly
+              className="shad-button_secondary w-max rounded-full fill-white"
+            />
           </>
         )}
         <ProfileOptions

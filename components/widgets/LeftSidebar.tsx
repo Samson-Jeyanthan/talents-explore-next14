@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { SIDEBAR_ITEMS } from "@/constants";
 import Image from "next/image";
 import Link from "next/link";
@@ -15,7 +15,6 @@ import { CategoriesSelectionModal, UploadDrawer } from "../modals";
 const LeftSidebar = () => {
   const { setUser } = useUserContext();
   const pathname = usePathname();
-  const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
 
@@ -23,7 +22,7 @@ const LeftSidebar = () => {
     await deleteToken();
     await handleClearStorage();
     setUser(INITIAL_USER);
-    router.push("/sign-in");
+    window.location.assign("/sign-in");
   };
 
   const handleNonLinkClick = (name: string) => {

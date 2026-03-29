@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { verifyIsAbout, getSession } from "./lib/session";
 
 export async function middleware(request: NextRequest) {
-  const token = await getSession();
-  const isAbout = await verifyIsAbout();
+  const token = request.cookies.get("accessToken")?.value;
+  const isAbout = request.cookies.get("isAbout")?.value === "true";
   const pathname = request.nextUrl.pathname;
 
   const protectedRoutes = [

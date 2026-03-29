@@ -17,13 +17,58 @@ import {
 } from "@/components/cards/ProDetailCards";
 import { TopPostCard } from "@/components/cards";
 
+async function getAuthHeaders() {
+  const token = await getSession();
+
+  return token
+    ? {
+        Authorization: `Bearer ${token}`,
+      }
+    : undefined;
+}
+
+async function resolveRouteUserId(userOrToken: string | undefined) {
+  const sessionToken = await getSession();
+
+  if (userOrToken && sessionToken && userOrToken === sessionToken) {
+    try {
+      const userRes = await userPersonalInfoAction(sessionToken);
+      return userRes?.response?._id || userOrToken;
+    } catch {
+      return userOrToken;
+    }
+  }
+
+  return userOrToken || "";
+}
+
+async function resolveViewerIdFromSession() {
+  const sessionToken = await getSession();
+
+  if (!sessionToken) {
+    return "";
+  }
+
+  try {
+    const userRes = await userPersonalInfoAction(sessionToken);
+    return userRes?.response?._id || "";
+  } catch {
+    return "";
+  }
+}
+
 export const userPublicInfoAction = async (
   userId: string | undefined,
-  viewerId: string | undefined
+  _viewerId: string | undefined
 ) => {
   try {
+    const headers = await getAuthHeaders();
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/public/${userId}/${viewerId}`
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/public/${userId}`,
+      {
+        cache: "no-store",
+        headers,
+      }
     );
     return await response.json();
   } catch (error) {
@@ -34,14 +79,15 @@ export const userPublicInfoAction = async (
 
 export async function fetchUserDataAction(userId: string, viewerId: string) {
   const token = await getSession();
+  const resolvedViewerId = token ? await resolveViewerIdFromSession() : viewerId;
 
   let res;
 
   if (token) {
-    if (token === userId) {
-      res = await userPersonalInfoAction(userId);
+    if (resolvedViewerId === userId) {
+      res = await userPersonalInfoAction(token);
     } else {
-      res = await userPublicInfoAction(userId, token);
+      res = await userPublicInfoAction(userId, resolvedViewerId);
     }
   } else {
     res = await userPublicInfoAction(userId, viewerId);
@@ -59,8 +105,13 @@ export async function userTopPostInfoAction(
   returnAsCard: boolean
 ) {
   try {
+    const headers = await getAuthHeaders();
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/profile/best-work?userId=${userId}&viewUserId=${""}&pageNo=${1}&pageSize=${3}`
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/profile/best-work?userId=${userId}&viewUserId=${""}&pageNo=${1}&pageSize=${3}`,
+      {
+        cache: "no-store",
+        headers,
+      }
     );
     const res = await response.json();
     if (res.status === "7400") {
@@ -88,8 +139,14 @@ export async function userTopPostInfoAction(
 
 export async function userSkillsInfoAction(userId: string | undefined) {
   try {
+    const headers = await getAuthHeaders();
+    const resolvedUserId = await resolveRouteUserId(userId);
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/skills/${userId}`
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/skills/${resolvedUserId}`,
+      {
+        cache: "no-store",
+        headers,
+      }
     );
     const res = await response.json();
     if (res.status === "7400") {
@@ -109,8 +166,14 @@ export async function userSkillsInfoAction(userId: string | undefined) {
 
 export async function userAwardInfoAction(userId: string | undefined) {
   try {
+    const headers = await getAuthHeaders();
+    const resolvedUserId = await resolveRouteUserId(userId);
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/awardsOrCertificate/${userId}`
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/awardsOrCertificate/${resolvedUserId}`,
+      {
+        cache: "no-store",
+        headers,
+      }
     );
     const res = await response.json();
     if (res.status === "7400") {
@@ -135,8 +198,14 @@ export async function userAwardInfoAction(userId: string | undefined) {
 
 export async function userEducationInfoAction(userId: string | undefined) {
   try {
+    const headers = await getAuthHeaders();
+    const resolvedUserId = await resolveRouteUserId(userId);
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/educations/${userId}`
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/educations/${resolvedUserId}`,
+      {
+        cache: "no-store",
+        headers,
+      }
     );
     const res = await response.json();
     if (res.status === "7400") {
@@ -161,8 +230,14 @@ export async function userEducationInfoAction(userId: string | undefined) {
 
 export async function userLanguageInfoAction(userId: string | undefined) {
   try {
+    const headers = await getAuthHeaders();
+    const resolvedUserId = await resolveRouteUserId(userId);
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/languages/${userId}`
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/languages/${resolvedUserId}`,
+      {
+        cache: "no-store",
+        headers,
+      }
     );
     const res = await response.json();
     if (res.status === "7400") {

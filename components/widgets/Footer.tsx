@@ -1,5 +1,31 @@
-import { FOOTER_LINKS } from "@/constants";
 import Link from "next/link";
+
+const FOOTER_LINKS = [
+  {
+    name: "Terms & Conditions",
+    path: "https://talentsexplore.com/terms-and-conditions",
+  },
+  {
+    name: "Privacy Policy",
+    path: "https://talentsexplore.com/privacy-policy",
+  },
+  {
+    name: "Branded Policy",
+    path: "https://talentsexplore.com/branded-policy",
+  },
+  {
+    name: "Cookies",
+    path: "https://talentsexplore.com/cookies-policy",
+  },
+  {
+    name: "Community",
+    path: "https://talentsexplore.com/community-guidelines",
+  },
+  {
+    name: "Intellectual Property",
+    path: "https://talentsexplore.com/intellectual-property-policy",
+  },
+];
 
 const Footer = () => {
   return (

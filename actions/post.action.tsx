@@ -4,6 +4,51 @@ import { revalidatePath } from "next/cache";
 import AllPostCard from "@/components/cards/AllPostCard";
 import { IComments, IPost } from "@/types/post.types";
 import { CommentCard, PostCard } from "@/components/cards";
+import { userPersonalInfoAction } from "./auth.action";
+import { getSession } from "@/lib/session";
+
+type TPostActionError = {
+  status: number;
+  message: string;
+};
+
+async function resolveViewerId(accessToken: string | undefined) {
+  if (!accessToken) {
+    return "";
+  }
+
+  try {
+    const userRes = await userPersonalInfoAction(accessToken);
+    return userRes?.response?._id ?? "";
+  } catch (error) {
+    console.error("resolveViewerId failed:", error);
+    return "";
+  }
+}
+
+async function getAuthHeaders() {
+  const accessToken = await getSession();
+
+  return accessToken
+    ? {
+        Authorization: `Bearer ${accessToken}`,
+      }
+    : undefined;
+}
+
+async function resolveRouteUserId(userOrToken: string | undefined) {
+  const sessionToken = await getSession();
+
+  if ((userOrToken === "userId" || userOrToken === "no_user") && sessionToken) {
+    return (await resolveViewerId(sessionToken)) || "";
+  }
+
+  if (userOrToken && sessionToken && userOrToken === sessionToken) {
+    return (await resolveViewerId(sessionToken)) || userOrToken;
+  }
+
+  return userOrToken || "";
+}
 
 export async function getUserAllPostsAction(
   userId: string | undefined,
@@ -12,8 +57,14 @@ export async function getUserAllPostsAction(
   pageSize: number
 ) {
   try {
+    const resolvedViewerId = await resolveRouteUserId(viewerId);
+    const headers = await getAuthHeaders();
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/profile/all?userId=${userId}&viewUserId=${viewerId}&pageNo=${pageNo}&pageSize=${pageSize}`
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/profile/all?userId=${userId}&viewUserId=${resolvedViewerId}&pageNo=${pageNo}&pageSize=${pageSize}`,
+      {
+        cache: "no-store",
+        headers,
+      }
     );
     const res = await response.json();
     if (res.status === "7400") {
@@ -41,12 +92,14 @@ export async function addPostToBestWorkAction(
     postId,
   };
   try {
+    const headers = await getAuthHeaders();
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/te-post/addToBestWork`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...headers,
         },
         body: JSON.stringify(formData),
       }
@@ -68,12 +121,14 @@ export async function removeFromBestWorkAction(
     postId,
   };
   try {
+    const headers = await getAuthHeaders();
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/te-post/removeFromBestWork`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...headers,
         },
         body: JSON.stringify(formData),
       }
@@ -94,8 +149,14 @@ export async function getUserCreditPostsAction(
   pageSize: number
 ) {
   try {
+    const resolvedViewerId = await resolveRouteUserId(viewerId);
+    const headers = await getAuthHeaders();
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/profile/credit?userId=${userId}&viewUserId=${viewerId}&pageNo=${pageNo}&pageSize=${pageSize}`
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/profile/credit?userId=${userId}&viewUserId=${resolvedViewerId}&pageNo=${pageNo}&pageSize=${pageSize}`,
+      {
+        cache: "no-store",
+        headers,
+      }
     );
     const res = await response.json();
     if (res.status === "7400") {
@@ -118,9 +179,23 @@ export async function getPostByIdAction(
   userId: string | undefined
 ) {
   try {
+    const resolvedUserId = (await resolveRouteUserId(userId)) || "no_user";
+    const headers = await getAuthHeaders();
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/${postId}/${userId}`
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/${postId}/${resolvedUserId}`,
+      {
+        cache: "no-store",
+        headers,
+      }
     );
+
+    if (!response.ok) {
+      return {
+        status: response.status,
+        message: "Could not find post data",
+      };
+    }
+
     const res = await response.json();
     if (res.status === "7400") {
       const data = res.response;
@@ -132,17 +207,28 @@ export async function getPostByIdAction(
       };
       return data;
     }
-  } catch {}
+  } catch (error) {
+    console.error("getPostByIdAction failed:", error);
+    return {
+      status: 500,
+      message: "Could not find post data",
+    };
+  }
 }
 
 export async function getPostCommentsAction(
   postId: string | undefined,
-  userId: string | undefined,
+  _userId: string | undefined,
   pageNo: number
 ) {
   try {
+    const headers = await getAuthHeaders();
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/comments?userId=${userId}&postId=${postId}&pageNo=${pageNo}&pageSize=${20}`
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/comments?postId=${postId}&pageNo=${pageNo}&pageSize=${20}`,
+      {
+        cache: "no-store",
+        headers,
+      }
     );
     const res = await response.json();
     if (res.status === "7400") {
@@ -172,12 +258,14 @@ export async function addPostCommentAction(
     comment,
   };
   try {
+    const headers = await getAuthHeaders();
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/comments`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...headers,
         },
         body: JSON.stringify(formData),
       }
@@ -191,26 +279,54 @@ export async function addPostCommentAction(
 }
 
 export async function getAllPostsAction(
-  userId: string | undefined,
+  accessToken: string | undefined,
   pageNo: number,
   pageSize: number
-) {
+): Promise<JSX.Element[] | TPostActionError> {
   try {
+    const viewerId = await resolveViewerId(accessToken);
+
+    if (!viewerId) {
+      return {
+        status: 401,
+        message: "Could not identify the logged-in user for the home feed.",
+      };
+    }
+
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/home?userId=${userId}&viewUserId=${userId}&pageNo=${pageNo}&pageSize=${pageSize}`
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/home?userId=${viewerId}&viewUserId=${viewerId}&pageNo=${pageNo}&pageSize=${pageSize}`,
+      {
+        cache: "no-store",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
     );
+
+    if (!response.ok) {
+      return {
+        status: response.status,
+        message: "Could not fetch home feed posts.",
+      };
+    }
+
     const res = await response.json();
     if (res.status === "7400") {
-      const data = res.response;
+      const data = Array.isArray(res.response) ? res.response : [];
       return data.map((item: IPost, index: number) => (
         <PostCard key={index} postFeedCard={item} index={index} />
       ));
     } else {
-      const data = {
+      return {
         status: 400,
-        message: "Could not fetch all posts data",
+        message: res?.message || "Could not fetch all posts data",
       };
-      return data;
     }
-  } catch {}
+  } catch (error) {
+    console.error("getAllPostsAction failed:", error);
+    return {
+      status: 500,
+      message: "Something went wrong while loading the home feed.",
+    };
+  }
 }

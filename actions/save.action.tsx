@@ -3,6 +3,8 @@
 import { SavedItemCard, SavedFolderCard } from "@/components/cards";
 import { ISavedFolder, ISavedItem } from "@/types/post.types";
 import { revalidatePath } from "next/cache";
+import { getSession } from "@/lib/session";
+import { userPersonalInfoAction } from "./auth.action";
 
 type Props = {
   userId: string | undefined;
@@ -10,14 +12,45 @@ type Props = {
   returnAsCard: boolean;
 };
 
+async function resolveRouteUserId(userOrToken: string | undefined) {
+  const sessionToken = await getSession();
+
+  if (userOrToken && sessionToken && userOrToken === sessionToken) {
+    try {
+      const userRes = await userPersonalInfoAction(sessionToken);
+      return userRes?.response?._id || userOrToken;
+    } catch {
+      return userOrToken;
+    }
+  }
+
+  return userOrToken || "";
+}
+
+async function getAuthHeaders() {
+  const accessToken = await getSession();
+
+  return accessToken
+    ? {
+        Authorization: `Bearer ${accessToken}`,
+      }
+    : undefined;
+}
+
 export async function getAllSavedFoldersAction({
   userId,
   postId,
   returnAsCard,
 }: Props) {
   try {
+    const resolvedUserId = await resolveRouteUserId(userId);
+    const headers = await getAuthHeaders();
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/collection/${userId}/${postId}`
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/collection/${resolvedUserId}/${postId}`,
+      {
+        cache: "no-store",
+        headers,
+      }
     );
     const res = await response.json();
     if (res.status === "7400") {
@@ -25,13 +58,13 @@ export async function getAllSavedFoldersAction({
       if (returnAsCard) {
         const reversedList = data?.slice().reverse();
         return reversedList.map((item: ISavedFolder, index: number) => (
-          <SavedFolderCard
-            key={item._id}
-            folderCard={item}
-            userId={userId}
-            index={index}
-          />
-        ));
+            <SavedFolderCard
+              key={item._id}
+              folderCard={item}
+              userId={resolvedUserId}
+              index={index}
+            />
+          ));
       } else {
         const result = {
           status: 200,
@@ -57,8 +90,14 @@ export async function getSavedItemsByFolderIdAction(
   returnAsCard: boolean
 ) {
   try {
+    const resolvedUserId = await resolveRouteUserId(userId);
+    const headers = await getAuthHeaders();
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/collection/${collectionId}?userId=${userId}&viewUserId=${userId}&pageNo=${pageNo}&pageSize=${pageSize}`
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/collection/${collectionId}?userId=${resolvedUserId}&viewUserId=${resolvedUserId}&pageNo=${pageNo}&pageSize=${pageSize}`,
+      {
+        cache: "no-store",
+        headers,
+      }
     );
     const res = await response.json();
     if (res.status === "7400") {
@@ -89,12 +128,14 @@ export async function createSaveCollectionFolderAction(
     collectionName,
   };
   try {
+    const headers = await getAuthHeaders();
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/collection`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...headers,
         },
         body: JSON.stringify(formData),
       }
@@ -111,12 +152,14 @@ export async function editSaveCollectionFolderAction(
   revalidatePathURL: string
 ) {
   try {
+    const headers = await getAuthHeaders();
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/collection/${collectionId}/${collectionName}`,
       {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          ...headers,
         },
         body: JSON.stringify({ name: collectionName }),
       }
@@ -132,12 +175,14 @@ export async function deleteSaveCollectionFolderAction(
   revalidatePathURL: string
 ) {
   try {
+    const headers = await getAuthHeaders();
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/collection/${collectionId}`,
       {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
+          ...headers,
         },
       }
     );
@@ -152,12 +197,14 @@ export async function addPostToSaveCollectionAction(
   postId: string
 ) {
   try {
+    const headers = await getAuthHeaders();
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/collection/post/${collectionId}/${postId}`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...headers,
         },
       }
     );
@@ -171,12 +218,14 @@ export async function removeFromSaveCollectionAction(
   postId: string
 ) {
   try {
+    const headers = await getAuthHeaders();
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/collection/post/${collectionId}/${postId}`,
       {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
+          ...headers,
         },
       }
     );
