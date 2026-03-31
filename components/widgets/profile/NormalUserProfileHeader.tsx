@@ -8,6 +8,7 @@ import { Dialog } from "../../ui/dialog";
 import { PhotoViewModal } from "../../modals";
 import ConnectionListModal from "../../modals/ConnectionListModal";
 import ChatLauncher from "../ChatLauncher";
+import { getProfileVisibilityState } from "@/lib/utils/profilePrivacy";
 
 const NormalUserProfileHeader = ({
   userData,
@@ -18,13 +19,16 @@ const NormalUserProfileHeader = ({
 }) => {
   const [showDP, setShowDP] = useState(false);
   const [showConnection, setShowConnection] = useState(false);
+  const visibility = getProfileVisibilityState(userData, isOwnProfile);
 
   const handleShowDP = () => {
     if (userData?.personalInfo?.profileImage) setShowDP(!showDP);
   };
 
   const handleConnectionModalOpen = () => {
-    if (userData?.following !== 0) setShowConnection(!showConnection);
+    if (visibility.canViewFollowings && userData?.following !== 0) {
+      setShowConnection(!showConnection);
+    }
   };
 
   return (
@@ -60,13 +64,15 @@ const NormalUserProfileHeader = ({
               {userData?.personalInfo?.shortBio}
             </p>
           )}
-          <h4
-            className="connection-counting mt-2 w-max bg-dark-300"
-            onClick={handleConnectionModalOpen}
-          >
-            {userData?.following}
-            <span className="connection-counting-text">Followings</span>
-          </h4>
+          {visibility.canViewFollowings ? (
+            <h4
+              className="connection-counting mt-2 w-max bg-dark-300"
+              onClick={handleConnectionModalOpen}
+            >
+              {userData?.following}
+              <span className="connection-counting-text">Followings</span>
+            </h4>
+          ) : null}
         </div>
       </section>
 
@@ -80,11 +86,13 @@ const NormalUserProfileHeader = ({
             <Button className="h-11 w-max rounded-full border border-solid border-primary-500 bg-none text-primary-500 hover:bg-primary-500 hover:text-light-900">
               Remove from Follower
             </Button>
-            <ChatLauncher
-              userId={userData?._id}
-              iconOnly
-              className="shad-button_secondary w-max rounded-full fill-white"
-            />
+            {visibility.canReceiveMessages ? (
+              <ChatLauncher
+                userId={userData?._id}
+                iconOnly
+                className="shad-button_secondary w-max rounded-full fill-white"
+              />
+            ) : null}
           </>
         )}
         <ProfileOptions
@@ -98,6 +106,7 @@ const NormalUserProfileHeader = ({
             isTalent={false}
             onClick={() => setShowConnection(!showConnection)}
             currentTab={2}
+            canViewFollowings={visibility.canViewFollowings}
           />
         </Dialog>
       )}

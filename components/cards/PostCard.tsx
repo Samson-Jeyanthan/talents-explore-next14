@@ -9,6 +9,7 @@ import { PostUtilsButton } from "../buttons";
 import { PostFeedCarousel } from "../widgets";
 import { StarRating } from "../inputs";
 import { SaveCollectionModal } from "../modals";
+import { getProfileVisibilityState } from "@/lib/utils/profilePrivacy";
 
 interface Props {
   postFeedCard: IPost;
@@ -23,6 +24,7 @@ const variants = {
 const PostCard = ({ postFeedCard, index }: Props) => {
   const postLink = `/post/${postFeedCard._id}`;
   const userProfile = `/profile/${postFeedCard.author.userName}/${postFeedCard.author._id}`;
+  const visibility = getProfileVisibilityState(postFeedCard.author, false);
   return (
     <MotionDiv
       variants={variants}
@@ -98,13 +100,17 @@ const PostCard = ({ postFeedCard, index }: Props) => {
           />
         </div>
 
-        <StarRating
-          postId={postFeedCard._id}
-          prevRatingValue={postFeedCard.yourRating}
-          ratingFor="POST"
-          authorId={postFeedCard.author._id}
-          revalidatePath={"/home"}
-        />
+        {visibility.canRatePosts ? (
+          <StarRating
+            postId={postFeedCard._id}
+            prevRatingValue={postFeedCard.yourRating}
+            ratingFor="POST"
+            authorId={postFeedCard.author._id}
+            revalidatePath={"/home"}
+          />
+        ) : (
+          <p className="text-xs text-light-500">Ratings private</p>
+        )}
       </div>
 
       <p className="text-xs text-light-500">

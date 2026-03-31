@@ -1,6 +1,8 @@
 export type TCurrentUserData = {
   _id: string;
   isTalent: boolean;
+  privacy?: Record<string, any>;
+  privacySettings?: Record<string, any>;
   morePersonalInfo: {
     bio: string;
     ethnic: string;
@@ -9,6 +11,7 @@ export type TCurrentUserData = {
       {
         type: string;
         url: string;
+        show?: boolean;
       },
     ];
     _id: string;
@@ -42,6 +45,8 @@ export type TCurrentUserData = {
 export type TPublicUserData = {
   _id: string;
   isTalent: boolean;
+  privacy?: Record<string, any>;
+  privacySettings?: Record<string, any>;
   morePersonalInfo: {
     bio: string;
     ethnic: string;
@@ -50,6 +55,7 @@ export type TPublicUserData = {
       {
         type: string;
         url: string;
+        show?: boolean;
       },
     ];
     _id: string;

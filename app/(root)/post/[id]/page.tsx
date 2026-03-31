@@ -14,6 +14,8 @@ import {
 } from "@/components/widgets";
 import { getSession } from "@/lib/session";
 import { EmblaOptionsType } from "embla-carousel";
+import { getCurrentChatUserAction } from "@/actions/chat.action";
+import { getProfileVisibilityState } from "@/lib/utils/profilePrivacy";
 
 export const revalidate = 1800;
 
@@ -48,10 +50,14 @@ async function Post({ params }: TPostURLProps) {
   const session = await getSession();
   const userId = session || "no_user";
   const data: TPostProps = await getPostByIdAction(params.id, userId);
+  const currentUser = await getCurrentChatUserAction();
 
   if (data?.status === 400) {
     return <NotFound />;
   }
+
+  const isOwnProfile = currentUser?._id === data?.author?._id;
+  const visibility = getProfileVisibilityState(data?.author || data, isOwnProfile);
 
   let loop = false;
   data?.media?.length / 2 > 1 ? (loop = true) : (loop = false);
@@ -73,6 +79,7 @@ async function Post({ params }: TPostURLProps) {
                 <Comments
                   numberOfComments={data?.numberOfComments}
                   params={params}
+                  canComment={visibility.canCommentOnPosts}
                 />
               </div>
               <TagsAndOtherInfo postData={data} />

@@ -11,6 +11,7 @@ import { fetchUserDataAction } from "@/actions/user.action";
 import NotFound from "../../not-found";
 import { TProfileURLProps } from "@/types/utils.types";
 import { getCurrentChatUserAction } from "@/actions/chat.action";
+import { getProfileVisibilityState } from "@/lib/utils/profilePrivacy";
 
 export async function generateMetadata(
   { params }: TProfileURLProps,
@@ -57,6 +58,7 @@ async function layout({
 
   const isTalent = userData?.isTalent;
   const isLoggedIn = !currentUser?._id;
+  const visibility = getProfileVisibilityState(userData, isOwnProfile);
 
   return (
     <main
@@ -90,21 +92,33 @@ async function layout({
                   value: "",
                   href: `/profile/${params.username}/${params.userId}/`,
                 },
-                {
-                  title: "All Posts",
-                  value: "all-posts",
-                  href: `/profile/${params.username}/${params.userId}/all-posts`,
-                },
-                {
-                  title: "Credits",
-                  value: "credits",
-                  href: `/profile/${params.username}/${params.userId}/credits`,
-                },
-                {
-                  title: "Skills",
-                  value: "skills",
-                  href: `/profile/${params.username}/${params.userId}/skills`,
-                },
+                ...(visibility.canViewPosts
+                  ? [
+                      {
+                        title: "All Posts",
+                        value: "all-posts",
+                        href: `/profile/${params.username}/${params.userId}/all-posts`,
+                      },
+                    ]
+                  : []),
+                ...(visibility.canViewSharedPosts
+                  ? [
+                      {
+                        title: "Credits",
+                        value: "credits",
+                        href: `/profile/${params.username}/${params.userId}/credits`,
+                      },
+                    ]
+                  : []),
+                ...(visibility.canViewProfile
+                  ? [
+                      {
+                        title: "Skills",
+                        value: "skills",
+                        href: `/profile/${params.username}/${params.userId}/skills`,
+                      },
+                    ]
+                  : []),
               ]}
             />
           ) : null}

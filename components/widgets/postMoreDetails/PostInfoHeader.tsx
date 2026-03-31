@@ -10,6 +10,7 @@ import Link from "next/link";
 import React from "react";
 import { FaLocationDot } from "react-icons/fa6";
 import { IoCalendar } from "react-icons/io5";
+import { getProfileVisibilityState } from "@/lib/utils/profilePrivacy";
 
 type Props = {
   postData: TPostProps;
@@ -17,6 +18,7 @@ type Props = {
 
 const PostInfoHeader = ({ postData }: Props) => {
   const author = postData?.author || {};
+  const visibility = getProfileVisibilityState(author, false);
   const profileLink = author?._id
     ? `/profile/${author?.userName}/${author?._id}`
     : "#";
@@ -110,16 +112,22 @@ const PostInfoHeader = ({ postData }: Props) => {
           </div>
         </div>
 
-        <div className="flex items-center gap-3 text-sm text-light-500">
-          <p>Rate this post</p>
-          <StarRating
-            prevRatingValue={postData?.yourRating}
-            ratingFor="POST"
-            postId={postData?._id}
-            authorId={author?._id}
-            revalidatePath={`/post/${postData?._id}`}
-          />
-        </div>
+        {visibility.canRatePosts ? (
+          <div className="flex items-center gap-3 text-sm text-light-500">
+            <p>Rate this post</p>
+            <StarRating
+              prevRatingValue={postData?.yourRating}
+              ratingFor="POST"
+              postId={postData?._id}
+              authorId={author?._id}
+              revalidatePath={`/post/${postData?._id}`}
+            />
+          </div>
+        ) : (
+          <div className="text-sm text-light-500">
+            Post ratings are private for your current visibility level.
+          </div>
+        )}
       </div>
     </section>
   );

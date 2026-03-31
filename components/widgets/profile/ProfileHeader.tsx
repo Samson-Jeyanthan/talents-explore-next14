@@ -12,6 +12,7 @@ import { StarRating } from "@/components/inputs";
 import { TCurrentUserData, TPublicUserData } from "@/types/profile.types";
 import { usePathname, useRouter } from "next/navigation";
 import ChatLauncher from "../ChatLauncher";
+import { getProfileVisibilityState } from "@/lib/utils/profilePrivacy";
 
 const ProfileHeader = ({
   userData,
@@ -26,12 +27,22 @@ const ProfileHeader = ({
   const [showDP, setShowDP] = useState(false);
   const [showConnection, setShowConnection] = useState(false);
   const [currentTab, setCurrentTab] = useState(0);
+  const visibility = getProfileVisibilityState(userData, isOwnProfile);
 
   const handleShowDP = () => {
     if (userData?.personalInfo?.profileImage) setShowDP(!showDP);
   };
 
   const handleConnectionModalOpen = async (currentTab: number) => {
+    const canOpen =
+      (currentTab === 0 && visibility.canViewProfileRatings) ||
+      (currentTab === 1 && visibility.canViewFollowers) ||
+      currentTab === 2;
+
+    if (!canOpen) {
+      return;
+    }
+
     setShowConnection(!showConnection);
     setCurrentTab(currentTab);
   };
@@ -71,11 +82,13 @@ const ProfileHeader = ({
                 <Button className="shad-button_primary w-36 rounded-full">
                   Follow
                 </Button>
-                <ChatLauncher
-                  userId={userData?._id}
-                  iconOnly
-                  className="shad-button_secondary rounded-full fill-white !px-3"
-                />
+                {visibility.canReceiveMessages ? (
+                  <ChatLauncher
+                    userId={userData?._id}
+                    iconOnly
+                    className="shad-button_secondary rounded-full fill-white !px-3"
+                  />
+                ) : null}
               </>
             )}
             <ProfileOptions
@@ -89,29 +102,35 @@ const ProfileHeader = ({
       <section className="flex items-start justify-between">
         <div className="flex flex-col gap-1 2xl:gap-2">
           <div className="flex-center sm:flex-start">
-            <h4
-              className="connection-counting"
-              onClick={() => handleConnectionModalOpen(0)}
-            >
-              {userData?.numberOfRating || 0}
-              <span className="connection-counting-text">Ratings</span>
-            </h4>
+            {visibility.canViewProfileRatings ? (
+              <h4
+                className="connection-counting"
+                onClick={() => handleConnectionModalOpen(0)}
+              >
+                {userData?.numberOfRating || 0}
+                <span className="connection-counting-text">Ratings</span>
+              </h4>
+            ) : null}
 
-            <h4
-              className="connection-counting"
-              onClick={() => handleConnectionModalOpen(1)}
-            >
-              {userData?.followers}
-              <span className="connection-counting-text">Followers</span>
-            </h4>
+            {visibility.canViewFollowers ? (
+              <h4
+                className="connection-counting"
+                onClick={() => handleConnectionModalOpen(1)}
+              >
+                {userData?.followers}
+                <span className="connection-counting-text">Followers</span>
+              </h4>
+            ) : null}
 
-            <h4
-              className="connection-counting"
-              onClick={() => handleConnectionModalOpen(2)}
-            >
-              {userData?.following}
-              <span className="connection-counting-text">Followings</span>
-            </h4>
+            {visibility.canViewFollowings ? (
+              <h4
+                className="connection-counting"
+                onClick={() => handleConnectionModalOpen(2)}
+              >
+                {userData?.following}
+                <span className="connection-counting-text">Followings</span>
+              </h4>
+            ) : null}
           </div>
 
           {userData?.personalInfo?.shortBio && (
@@ -121,7 +140,7 @@ const ProfileHeader = ({
           )}
         </div>
 
-        {user.currentUserId ? (
+        {user.currentUserId && visibility.canViewProfileRatings ? (
           <div className="flex items-center gap-2 pr-3 text-sm text-light-500">
             <p>Rate {isOwnProfile ? "your" : "this"} profile</p>
             <StarRating
@@ -150,6 +169,9 @@ const ProfileHeader = ({
             currentTab={currentTab}
             onClick={() => setShowConnection(!showConnection)}
             setCuurentTab={(currentTab: number) => setCurrentTab(currentTab)}
+            canViewRatings={visibility.canViewProfileRatings}
+            canViewFollowers={visibility.canViewFollowers}
+            canViewFollowings={visibility.canViewFollowings}
           />
         </Dialog>
       )}
