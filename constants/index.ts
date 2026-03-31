@@ -24,6 +24,7 @@ import {
 import { ITab, TConvertedSvgJsxProps } from "@/types/utils.types";
 import { AiOutlineLink } from "react-icons/ai";
 import { MdDelete, MdModeEdit } from "react-icons/md";
+import { RiUserSharedLine } from "react-icons/ri";
 
 export const LEVEL_VALUES = [
   { _id: "beginner", name: "Beginner" },
@@ -85,6 +86,12 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
     icon: MessageIcon,
     path: "/chat",
     name: "Chat",
+    isLink: true,
+  },
+  {
+    icon: RiUserSharedLine,
+    path: "/collaboration",
+    name: "Collaboration",
     isLink: true,
   },
   {

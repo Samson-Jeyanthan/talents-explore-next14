@@ -23,7 +23,7 @@ type Props = {
   inputName: string;
   placeholder?: string;
   options: { _id: string; name: string }[];
-  value: string | boolean | undefined;
+  value: string | boolean | null | undefined;
   formDescription?: string;
   // it is usefull for skils and countries related onChanges, bcz it is dependent on another field
   dependentFieldPlaceholder?: string;
@@ -45,10 +45,10 @@ const Dropdown = ({
   onValueChange,
   resetFiled,
 }: Props) => {
-  const [selectedValue, setSelectedValue] = useState(value || "");
+  const [selectedValue, setSelectedValue] = useState(value ?? "");
 
   useEffect(() => {
-    setSelectedValue(value || "");
+    setSelectedValue(value ?? "");
   }, [value]);
 
   const handleOnChange = (_id: string, field: any) => {

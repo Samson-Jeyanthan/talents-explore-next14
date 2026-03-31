@@ -29,8 +29,8 @@ const CreatePostAboutForm = ({
 
   async function fetchSubcategories(mainCategory: string) {
     form.resetField("subCategory");
-    form.resetField("skills");
-    form.resetField("skillLevel");
+    form.setValue("skills", null);
+    form.setValue("skillLevel", null);
     setSubCategoryOptions([]);
     setSkillOptions([]);
     try {
@@ -48,17 +48,20 @@ const CreatePostAboutForm = ({
   }
 
   async function fetchSkills(subCategory: string) {
-    form.resetField("skills");
-    form.resetField("skillLevel");
+    form.setValue("skills", null);
+    form.setValue("skillLevel", null);
     setSkillOptions([]);
     try {
       const res = await getSkillsAction(subCategory);
-      setSkillOptions(
-        (res?.response || []).map((item: any) => ({
+      const nextSkillOptions = (res?.response || []).map((item: any) => ({
           _id: item._id,
           name: item.name,
-        }))
-      );
+        }));
+      setSkillOptions(nextSkillOptions);
+      if (nextSkillOptions.length === 0) {
+        form.setValue("skills", null);
+        form.setValue("skillLevel", null);
+      }
     } catch (error) {
       console.error(error);
       throw error;
