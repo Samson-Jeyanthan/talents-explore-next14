@@ -340,8 +340,18 @@ export const SOCIAL_MEDIA_OPTIONS: ISocialMediaProps[] = [
     default: true,
   },
   {
+    type: "youtube",
+    icon: YoutubeIcon,
+    default: true,
+  },
+  {
     type: "facebook",
     icon: FacebookIcon,
+    default: true,
+  },
+  {
+    type: "instagram",
+    icon: InstagramIcon,
     default: true,
   },
   {
@@ -352,16 +362,6 @@ export const SOCIAL_MEDIA_OPTIONS: ISocialMediaProps[] = [
   {
     type: "twitter",
     icon: TwitterIcon,
-    default: false,
-  },
-  {
-    type: "instagram",
-    icon: InstagramIcon,
-    default: true,
-  },
-  {
-    type: "youtube",
-    icon: YoutubeIcon,
     default: false,
   },
   {
