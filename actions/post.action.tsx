@@ -4,8 +4,12 @@ import { revalidatePath } from "next/cache";
 import AllPostCard from "@/components/cards/AllPostCard";
 import { IComments, IPost } from "@/types/post.types";
 import { CommentCard, PostCard } from "@/components/cards";
-import { userPersonalInfoAction } from "./auth.action";
+import { getUserPersonalInfoAction } from "./auth.action";
 import { getSession } from "@/lib/session";
+import {
+  getAuthHeaders,
+  resolveViewerIdAction,
+} from "./tokenAndHeaders.action";
 
 type TPostActionError = {
   status: number;
@@ -18,22 +22,13 @@ async function resolveViewerId(accessToken: string | undefined) {
   }
 
   try {
-    const userRes = await userPersonalInfoAction(accessToken);
-    return userRes?.response?._id ?? "";
+    const userRes = await getUserPersonalInfoAction("");
+
+    return userRes?.response?._id || "";
   } catch (error) {
     console.error("resolveViewerId failed:", error);
     return "";
   }
-}
-
-async function getAuthHeaders() {
-  const accessToken = await getSession();
-
-  return accessToken
-    ? {
-        Authorization: `Bearer ${accessToken}`,
-      }
-    : undefined;
 }
 
 async function resolveRouteUserId(userOrToken: string | undefined) {
@@ -97,10 +92,7 @@ export async function addPostToBestWorkAction(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/te-post/addToBestWork`,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...headers,
-        },
+        headers,
         body: JSON.stringify(formData),
       }
     );
@@ -126,10 +118,7 @@ export async function removeFromBestWorkAction(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/te-post/removeFromBestWork`,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...headers,
-        },
+        headers,
         body: JSON.stringify(formData),
       }
     );
@@ -263,10 +252,7 @@ export async function addPostCommentAction(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/comments`,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...headers,
-        },
+        headers,
         body: JSON.stringify(formData),
       }
     );
@@ -279,12 +265,13 @@ export async function addPostCommentAction(
 }
 
 export async function getAllPostsAction(
-  accessToken: string | undefined,
   pageNo: number,
   pageSize: number
+  // eslint-disable-next-line no-undef
 ): Promise<JSX.Element[] | TPostActionError> {
   try {
-    const viewerId = await resolveViewerId(accessToken);
+    const viewerId = await resolveViewerIdAction();
+    const accessToken = await getSession();
 
     if (!viewerId) {
       return {
@@ -294,7 +281,7 @@ export async function getAllPostsAction(
     }
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/home?userId=${viewerId}&viewUserId=${viewerId}&pageNo=${pageNo}&pageSize=${pageSize}`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/home?&viewUserId=${viewerId}&userId=${viewerId}&pageNo=${pageNo}&pageSize=${pageSize}`,
       {
         cache: "no-store",
         headers: {
@@ -311,8 +298,10 @@ export async function getAllPostsAction(
     }
 
     const res = await response.json();
+
     if (res.status === "7400") {
       const data = Array.isArray(res.response) ? res.response : [];
+      console.log("// [getAllPostsAction] res: //", data[0]);
       return data.map((item: IPost, index: number) => (
         <PostCard key={index} postFeedCard={item} index={index} />
       ));

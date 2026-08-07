@@ -9,37 +9,53 @@ import {
   IProfileSkills,
   ITopPost,
 } from "@/types/profile.types";
-import { userPersonalInfoAction } from "./auth.action";
+import { getUserPersonalInfoAction } from "./auth.action";
 import {
   AwardCard,
   EducationCard,
   LanguageCard,
 } from "@/components/cards/ProDetailCards";
 import { TopPostCard } from "@/components/cards";
+import { getAuthHeaders } from "./tokenAndHeaders.action";
 
-async function getAuthHeaders() {
-  const token = await getSession();
+// async function resolveRouteUserId(userOrToken: string | undefined) {
+//   const sessionToken = await getSession();
 
-  return token
-    ? {
-        Authorization: `Bearer ${token}`,
-      }
-    : undefined;
-}
+//   if (userOrToken && sessionToken && userOrToken === sessionToken) {
+//     try {
+//       const userRes = await getUserPersonalInfoAction(sessionToken);
+//       return userRes?.response?._id || userOrToken;
+//     } catch {
+//       return userOrToken;
+//     }
+//   }
 
-async function resolveRouteUserId(userOrToken: string | undefined) {
+//   return userOrToken || "";
+// }
+
+// Resolves the userId from the route params corrected version
+
+export async function resolveRouteUserId(
+  userIdOrToken?: string
+): Promise<string | null> {
+  if (!userIdOrToken) return null;
+
   const sessionToken = await getSession();
 
-  if (userOrToken && sessionToken && userOrToken === sessionToken) {
+  // If route param is actually session token
+  if (sessionToken && userIdOrToken === sessionToken) {
     try {
-      const userRes = await userPersonalInfoAction(sessionToken);
-      return userRes?.response?._id || userOrToken;
-    } catch {
-      return userOrToken;
+      const userRes = await getUserPersonalInfoAction(sessionToken);
+
+      return userRes?.response?._id ?? null;
+    } catch (error) {
+      console.error("Failed to resolve user ID:", error);
+      return null;
     }
   }
 
-  return userOrToken || "";
+  // Already a real userId
+  return userIdOrToken;
 }
 
 async function resolveViewerIdFromSession() {
@@ -50,7 +66,7 @@ async function resolveViewerIdFromSession() {
   }
 
   try {
-    const userRes = await userPersonalInfoAction(sessionToken);
+    const userRes = await getUserPersonalInfoAction(sessionToken);
     return userRes?.response?._id || "";
   } catch {
     return "";
@@ -79,13 +95,15 @@ export const userPublicInfoAction = async (
 
 export async function fetchUserDataAction(userId: string, viewerId: string) {
   const token = await getSession();
-  const resolvedViewerId = token ? await resolveViewerIdFromSession() : viewerId;
+  const resolvedViewerId = token
+    ? await resolveViewerIdFromSession()
+    : viewerId;
 
   let res;
 
   if (token) {
     if (resolvedViewerId === userId) {
-      res = await userPersonalInfoAction(token);
+      res = await getUserPersonalInfoAction(token);
     } else {
       res = await userPublicInfoAction(userId, resolvedViewerId);
     }
@@ -107,33 +125,36 @@ export async function userTopPostInfoAction(
   try {
     const headers = await getAuthHeaders();
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/profile/best-work?userId=${userId}&viewUserId=${""}&pageNo=${1}&pageSize=${3}`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/profile/best-work?viewUserId=${""}&userId=${userId}&pageNo=${1}&pageSize=${3}`,
       {
         cache: "no-store",
         headers,
       }
     );
+
     const res = await response.json();
-    if (res.status === "7400") {
-      const data = res.response;
-      if (returnAsCard) {
-        return data.map((item: ITopPost, index: number) => (
-          <TopPostCard key={item._id} userTopPostCard={item} index={index} />
-        ));
-      } else {
-        const result = {
-          status: 200,
-          response: data,
-        };
-        return result;
-      }
-    } else {
-      const data = {
-        status: 400,
-        message: "Could not fetch top post data",
-      };
-      return data;
-    }
+
+    console.log(res, "// top-post - 136 //");
+    // if (res.status === "7400") {
+    //   const data = res.response;
+    //   if (returnAsCard) {
+    //     return data.map((item: ITopPost, index: number) => (
+    //       <TopPostCard key={item._id} userTopPostCard={item} index={index} />
+    //     ));
+    //   } else {
+    //     const result = {
+    //       status: 200,
+    //       response: data,
+    //     };
+    //     return result;
+    //   }
+    // } else {
+    //   const data = {
+    //     status: 400,
+    //     message: "Could not fetch top post data",
+    //   };
+    //   return data;
+    // }
   } catch {}
 }
 
@@ -228,7 +249,11 @@ export async function userEducationInfoAction(userId: string | undefined) {
   } catch {}
 }
 
-export async function userLanguageInfoAction(userId: string | undefined) {
+export async function userLanguageInfoAction({
+  userId,
+}: {
+  userId: string | undefined;
+}) {
   try {
     const headers = await getAuthHeaders();
     const resolvedUserId = await resolveRouteUserId(userId);
@@ -242,14 +267,7 @@ export async function userLanguageInfoAction(userId: string | undefined) {
     const res = await response.json();
     if (res.status === "7400") {
       const data = res.response;
-      return data.map((item: ILanguage, index: number) => (
-        <LanguageCard
-          key={item._id}
-          userLangCard={item}
-          index={index}
-          length={data.length}
-        />
-      ));
+      return data;
     } else {
       const data = {
         status: 400,
@@ -257,7 +275,45 @@ export async function userLanguageInfoAction(userId: string | undefined) {
       };
       return data;
     }
-  } catch {}
+  } catch (error) {
+    console.error("userLanguageInfoAction error:", error);
+
+    return {
+      status: 500,
+      message: "Internal server error",
+    };
+  }
 }
 
-export async function userLanguageInfoUpdateAction() {}
+export async function userPersonalInfoEditAction(formData: unknown) {
+  try {
+    const headers = await getAuthHeaders();
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/editPersonalInfo`,
+      {
+        method: "PUT",
+        cache: "no-store",
+        headers: {
+          ...headers,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      }
+    );
+
+    const res = await response.json();
+    console.log("// user-personal-info-edit //", res);
+
+    if (res.status === "7400") {
+      return res.response;
+    } else {
+      return undefined;
+    }
+  } catch (error) {
+    console.error("user-personal-edit error:", error);
+    return {
+      status: 500,
+      message: "Internal server error",
+    };
+  }
+}

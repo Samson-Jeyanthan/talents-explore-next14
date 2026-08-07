@@ -1,5 +1,6 @@
 "use client";
 
+import { userPersonalInfoEditAction } from "@/actions/user.action";
 import { EditPersonalInfoForm, EditProInfoForm } from "@/components/forms";
 import { TransparentLoader } from "@/components/modals";
 import { Button } from "@/components/ui/button";
@@ -19,11 +20,7 @@ type Props = {
   userData: TCurrentUserData;
 };
 
-const ParentEditProfileForm = ({
-  langData,
-  professionData,
-  userData,
-}: Props) => {
+const EditProfileForm = ({ langData, professionData, userData }: Props) => {
   const router = useRouter();
   const { user } = useUserContext();
   const [prevURLs, setPrevURLs] = useState<string[]>(
@@ -40,7 +37,29 @@ const ParentEditProfileForm = ({
   }));
 
   async function onSubmit(values: z.infer<typeof EditProfileValidation>) {
-    console.log(values, "values");
+    console.log(values);
+    // personal information form data
+    const personalInfo = {
+      firstName: values.firstName,
+      lastName: values.lastName,
+      dob: values.dob,
+      gender: values.gender,
+      languageKnown: values.knownLanguage,
+      profileImage: values.profilePhoto,
+      coverImage: values.coverPhoto,
+      shortBio: values.quotes,
+      professional: values.profession,
+      moreInfo: {},
+    };
+    // professional information form data
+    const professionalInfo = {
+      bio: values.bio,
+      ethnic: values.ethnic,
+      featuredPhotos: prevURLs,
+      socialLinks: values.socialLinks,
+    };
+    const res = await userPersonalInfoEditAction(personalInfo);
+    console.log(res, "// res of personal info edit // ");
   }
 
   const form = useForm<z.infer<typeof EditProfileValidation>>({
@@ -75,14 +94,15 @@ const ParentEditProfileForm = ({
           LangOptions={LangOptions}
           professionOptions={professionOptions}
         />
-        <EditProInfoForm
-          form={form}
-          userData={userData}
-          prevURLs={prevURLs}
-          setPrevURLs={setPrevURLs}
-        />
+        {userData?.isTalent && (
+          <EditProInfoForm
+            form={form}
+            userData={userData}
+            prevURLs={prevURLs}
+            setPrevURLs={setPrevURLs}
+          />
+        )}
       </Form>
-
       <div className="my-3 mb-5 flex w-full justify-end gap-3">
         <Button
           className="shad-button_secondary w-40"
@@ -106,4 +126,4 @@ const ParentEditProfileForm = ({
   );
 };
 
-export default ParentEditProfileForm;
+export default EditProfileForm;

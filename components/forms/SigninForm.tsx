@@ -35,6 +35,9 @@ const SigninForm = () => {
 
     try {
       const res = await signinAction(formData);
+
+      console.log(res, "// signin-form-res - 39 //");
+
       if (res?.status === "7400") {
         toast.success("Sign In Successfully", { duration: 4000 });
         setUser({
@@ -46,6 +49,7 @@ const SigninForm = () => {
           imageUrl: res?.response?.personalInfo?.profileImage,
           isTalent: res?.response?.isTalent,
         });
+
         const redirectPath = res?.response?.personalInfo?.firstName
           ? "/home"
           : "/complete-profile";

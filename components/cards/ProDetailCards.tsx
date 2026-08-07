@@ -80,7 +80,7 @@ export const LanguageCard = ({ userLangCard, index, length }: LProp) => {
       </h1>
       <p className="text-xs text-light-500">{userLangCard.level}</p>
       <div className="pro-info-options-wrap">
-        <ProInfoEditOptions id={userLangCard._id} cardName="language" />
+        <ProInfoEditOptions cardName="language" data={userLangCard} />
       </div>
     </MotionDiv>
   );

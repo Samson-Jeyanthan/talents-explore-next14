@@ -1,22 +1,12 @@
 "use server";
 
-import { getSession } from "@/lib/session";
+import { getAuthHeaders } from "./tokenAndHeaders.action";
 
 const EMPTY_RESPONSE = {
   status: "400",
   message: "Failed to fetch data",
   response: [],
 };
-
-async function getAuthHeaders() {
-  const token = await getSession();
-
-  return token
-    ? {
-        Authorization: `Bearer ${token}`,
-      }
-    : undefined;
-}
 
 export async function getLanguagesAction() {
   try {

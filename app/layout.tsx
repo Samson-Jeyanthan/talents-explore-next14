@@ -1,4 +1,3 @@
-import "./globals.css";
 import React from "react";
 import { Poppins } from "next/font/google";
 import type { Metadata } from "next";
@@ -6,6 +5,7 @@ import { ThemeProvider } from "@/context/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
 import AuthProvider from "@/context/AuthProvider";
 import { UtilsProvider } from "@/context/UtilsProvider";
+import "./globals.css";
 
 const poppins = Poppins({
   subsets: ["latin"],

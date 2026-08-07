@@ -1,6 +1,7 @@
 "use client";
 
-import { checkForToken, userPersonalInfoAction } from "@/actions/auth.action";
+import { getUserPersonalInfoAction } from "@/actions/auth.action";
+import { getSession } from "@/lib/session";
 import { IContextType, ICurrentUser } from "@/types/auth.types";
 import { useRouter } from "next/navigation";
 import React, { createContext, useContext, useState, useEffect } from "react";
@@ -32,7 +33,9 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   async function checkAuthUser() {
     setIsLoading(true);
-    const token = await checkForToken();
+    const token = await getSession();
+
+    console.log(token, "// auth-provider-token - 38 //");
 
     if (!token) {
       setIsLoading(false);
@@ -40,7 +43,9 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     try {
-      const res = await userPersonalInfoAction(token);
+      const res = await getUserPersonalInfoAction(token);
+
+      console.log(res, "// auth-provider-response //");
 
       if (res.status === "7400") {
         if (res?.response?.personalInfo?.firstName) {
@@ -69,7 +74,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           });
         }
       } else {
-        router.push("/sign-in");
+        // router.push("/sign-in");
         toast.error("Couldn't fetch user details", {
           duration: 5000,
         });

@@ -57,7 +57,10 @@ async function Post({ params }: TPostURLProps) {
   }
 
   const isOwnProfile = currentUser?._id === data?.author?._id;
-  const visibility = getProfileVisibilityState(data?.author || data, isOwnProfile);
+  const visibility = getProfileVisibilityState(
+    data?.author || data,
+    isOwnProfile
+  );
 
   let loop = false;
   data?.media?.length / 2 > 1 ? (loop = true) : (loop = false);
@@ -77,7 +80,7 @@ async function Post({ params }: TPostURLProps) {
                 <PostInfo postData={data} />
                 <RatingDetails postData={data} />
                 <Comments
-                  numberOfComments={data?.numberOfComments}
+                  numberOfComments={data?.totalComments}
                   params={params}
                   canComment={visibility.canCommentOnPosts}
                 />

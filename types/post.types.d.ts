@@ -3,7 +3,7 @@ export interface IPost {
   isBestWork: false;
   timeAgo: string;
   publishedAt: string;
-  numberOfComments: number;
+  totalComments: number;
   yourRating: number;
   numberOfRating: number;
   postRating: number;
@@ -76,6 +76,7 @@ export type TPostProps = {
       updatedAt: string;
     },
   ];
+  totalComments: number;
   author: {
     _id: string;
     firstName: string;

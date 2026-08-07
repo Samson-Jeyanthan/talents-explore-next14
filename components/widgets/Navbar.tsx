@@ -17,8 +17,8 @@ const Navbar = async ({ userId }: { userId: string }) => {
       <UserTagAndSearch isTag={false} />
       <ul className="flex-center gap-2">
         <Theme />
-        <ChatNavButton unreadCount={chatUnreadCount.oneToOne} />
-        <NotificationSheet data={notificationRes} />
+        {/* <ChatNavButton unreadCount={chatUnreadCount.oneToOne} /> */}
+        {/* <NotificationSheet data={notificationRes} /> */}
         <CurrentUserAvatar />
       </ul>
     </nav>

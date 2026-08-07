@@ -114,8 +114,8 @@ const PostCard = ({ postFeedCard, index }: Props) => {
       </div>
 
       <p className="text-xs text-light-500">
-        {postFeedCard.numberOfComments} comments and{" "}
-        {postFeedCard.numberOfRating} ratings
+        {postFeedCard.totalComments} comments and {postFeedCard.numberOfRating}{" "}
+        ratings
       </p>
 
       <div className="flex gap-2">

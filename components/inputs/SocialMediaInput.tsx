@@ -28,14 +28,17 @@ type SocialMediaLink = {
 
 // function to add default links when its seen first
 export const processLinks = (links: SocialMediaLink[]): TLink[] => {
-  const seen: Set<string> = new Set();
+  const alreadyEntered: Set<string> = new Set();
   return links.map((link) => {
     const isDefault =
-      (link.type === "facebook" || link.type === "instagram") &&
-      !seen.has(link.type);
+      (link.type === "facebook" ||
+        link.type === "instagram" ||
+        link.type === "linkedin" ||
+        link.type === "youtube") &&
+      !alreadyEntered.has(link.type);
 
     if (isDefault) {
-      seen.add(link.type); // Mark as seen
+      alreadyEntered.add(link.type); // already entered
     }
 
     return { ...link, default: isDefault };
@@ -43,6 +46,7 @@ export const processLinks = (links: SocialMediaLink[]): TLink[] => {
 };
 
 const SocialMediaInput = ({ values, fieldChange }: any) => {
+  console.log(values, "social-links");
   const processedLinks = processLinks(values);
 
   const [addedLinks, setAddedLinks] = useState<TLink[]>(
@@ -63,6 +67,15 @@ const SocialMediaInput = ({ values, fieldChange }: any) => {
   });
   const [error, setError] = useState("");
 
+  // handler for updating default link URLs
+  const handleDefaultLinkChange = (type: string, url: string) => {
+    const updated = addedLinks.map((link) =>
+      link.type === type && link.default ? { ...link, url } : link
+    );
+    setAddedLinks(updated);
+    fieldChange(updated);
+  };
+
   const handleOkClick = () => {
     if (additionalLink.type === "" || additionalLink.url === "") {
       setError("Please fill all the fields");
@@ -77,29 +90,30 @@ const SocialMediaInput = ({ values, fieldChange }: any) => {
     <div className="flex w-[70%] flex-col gap-3">
       {/* display default links */}
       {SOCIAL_MEDIA_OPTIONS.map((option, index) => {
-        const isDefaultLink = addedLinks.find(
+        const matched = addedLinks.find(
           (link) => link.type === option.type && link.default
         );
         return (
           <React.Fragment key={index}>
-            {option.default ? (
+            {option.default && (
               <div className="flex w-full items-center justify-start gap-4">
                 <span className="social-link-icon">
-                  <option.icon height={"20px"} width={"20px"} />
+                  <option.icon height="20px" width="20px" />
                 </span>
                 <Input
-                  value={isDefaultLink?.url}
-                  onChange={(e) => {}}
+                  value={matched ? matched.url : ""}
+                  onChange={(e) =>
+                    handleDefaultLinkChange(option.type, e.target.value)
+                  }
                   className="shad-auth_form_input"
                   placeholder={`Add ${option.type.toLowerCase()} URL`}
                 />
               </div>
-            ) : null}
+            )}
           </React.Fragment>
         );
       })}
-
-      {/* display added links */}
+      {/* display added links
       {addedLinks.map((link, index) => {
         const Icon =
           SOCIAL_MEDIA_OPTIONS.find((option) => option.type === link.type)
@@ -184,7 +198,8 @@ const SocialMediaInput = ({ values, fieldChange }: any) => {
             OK
           </div>
         </footer>
-      </div>
+      </div>{" "}
+      */
     </div>
   );
 };

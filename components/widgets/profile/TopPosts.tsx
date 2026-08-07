@@ -10,11 +10,13 @@ type Props = {
 
 const TopPosts = async ({ params, isOwnProfile }: Props) => {
   const data = await userTopPostInfoAction(params.userId, false);
-  if (data?.status === 400) return null;
+
+  console.log(data, "// data-top-post-gadget //");
+  // if (data?.status === 400) return null;
 
   return (
     <React.Fragment>
-      {data.response.length > 0 && (
+      {/* {data.response.length > 0 && (
         <div className="flex max-w-[95%] flex-col gap-3">
           <div className="profile-detail-heading w-1/2">
             <PostIcon width="21px" height="21px" /> Top Posts
@@ -34,7 +36,7 @@ const TopPosts = async ({ params, isOwnProfile }: Props) => {
 
           <p className="text-center">No posts yet</p>
         </div>
-      ) : null}
+      ) : null} */}
     </React.Fragment>
   );
 };

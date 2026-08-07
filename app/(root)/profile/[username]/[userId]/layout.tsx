@@ -10,8 +10,8 @@ import type { Metadata, ResolvingMetadata } from "next";
 import { fetchUserDataAction } from "@/actions/user.action";
 import NotFound from "../../not-found";
 import { TProfileURLProps } from "@/types/utils.types";
-import { getCurrentChatUserAction } from "@/actions/chat.action";
 import { getProfileVisibilityState } from "@/lib/utils/profilePrivacy";
+import { getUserPersonalInfoAction } from "@/actions/auth.action";
 
 export async function generateMetadata(
   { params }: TProfileURLProps,
@@ -50,8 +50,13 @@ async function layout({
 }) {
   // await new Promise((resolve) => setTimeout(resolve, 1000));
   const userData = await fetchUserDataAction(params.userId, params.username);
-  const currentUser = await getCurrentChatUserAction();
+
+  const res = await getUserPersonalInfoAction("");
+  const currentUser = res?.response;
+  console.log(currentUser, " // current-user //");
+
   const isOwnProfile = currentUser?._id === params.userId;
+
   if (!userData) {
     return <NotFound />;
   }

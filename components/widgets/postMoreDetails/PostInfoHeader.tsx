@@ -23,7 +23,9 @@ const PostInfoHeader = ({ postData }: Props) => {
     ? `/profile/${author?.userName}/${author?._id}`
     : "#";
   const about = postData?.about || {};
-  const locationLabel = [about?.country, about?.state].filter(Boolean).join(" - ");
+  const locationLabel = [about?.country, about?.state]
+    .filter(Boolean)
+    .join(" - ");
 
   return (
     <section className="flex flex-col text-light-900">

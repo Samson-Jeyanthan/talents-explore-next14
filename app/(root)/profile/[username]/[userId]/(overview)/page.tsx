@@ -10,15 +10,16 @@ import {
   TopPosts,
 } from "@/components/widgets";
 import { addLineBreaks } from "@/lib/utils/addLinkBreaks";
-import { getCurrentChatUserAction } from "@/actions/chat.action";
 import { getProfileVisibilityState } from "@/lib/utils/profilePrivacy";
+import { getUserPersonalInfoAction } from "@/actions/auth.action";
 
 async function Overview({ params }: TProfileURLProps) {
   const userData: TCurrentUserData | TPublicUserData =
     await fetchUserDataAction(params.userId, params.username);
   if (!userData) return null;
 
-  const currentUser = await getCurrentChatUserAction();
+  const res = await getUserPersonalInfoAction("");
+  const currentUser = res?.response;
   const isOwnProfile = currentUser?._id === params.userId;
   const visibility = getProfileVisibilityState(userData, isOwnProfile);
 

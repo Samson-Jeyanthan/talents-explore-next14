@@ -7,11 +7,15 @@ type Props = {
   canComment?: boolean;
 };
 
-const Comments = async ({ params, numberOfComments, canComment = true }: Props) => {
+const Comments = async ({
+  params,
+  numberOfComments,
+  canComment = true,
+}: Props) => {
   const data = await getPostCommentsAction(params.id, "_", 1);
   if (data?.status === 400) return <p>Could not fetch comment data</p>;
   return (
-    <section className="flex flex-col gap-2">
+    <section className="flex w-full flex-col gap-2">
       <h2 className="text-sm font-medium text-light-900">
         {numberOfComments} Comments
       </h2>

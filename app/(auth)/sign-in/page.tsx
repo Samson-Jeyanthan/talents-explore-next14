@@ -1,8 +1,8 @@
 import { Metadata } from "next";
 import Image from "next/image";
 import { SigninForm } from "@/components/forms";
-import { getSession, verifyIsAbout } from "@/lib/session";
-import { redirect } from "next/navigation";
+// import { getSession, verifyIsAbout } from "@/lib/session";
+// import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Sign-in | Talents Explore",
@@ -10,12 +10,12 @@ export const metadata: Metadata = {
 };
 
 const Signin = async () => {
-  const session = await getSession();
+  // const session = await getSession();
 
-  if (session) {
-    const isAbout = await verifyIsAbout();
-    redirect(isAbout ? "/home" : "/complete-profile");
-  }
+  // if (session) {
+  //   const isAbout = await verifyIsAbout();
+  //   redirect(isAbout ? "/home" : "/complete-profile");
+  // }
 
   return (
     <div className="flex-between w-full">

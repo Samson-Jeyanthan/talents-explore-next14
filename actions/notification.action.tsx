@@ -2,7 +2,7 @@
 
 import axios from "axios";
 import { getSession } from "@/lib/session";
-import { userPersonalInfoAction } from "./auth.action";
+import { getUserPersonalInfoAction } from "./auth.action";
 
 async function getAccessToken() {
   return await getSession();
@@ -16,7 +16,7 @@ async function resolveCurrentUserId() {
   }
 
   try {
-    const userRes = await userPersonalInfoAction(token);
+    const userRes = await getUserPersonalInfoAction(token);
     return userRes?.response?._id || "";
   } catch (error) {
     console.error("resolveCurrentUserId failed:", error);
@@ -57,7 +57,7 @@ export async function getAllNotificationsAction(
 
     return [];
   } catch (error) {
-    console.error("getAllNotificationsAction failed:", error);
+    // console.error("getAllNotificationsAction failed:", error);
     return [];
   }
 }

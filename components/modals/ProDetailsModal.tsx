@@ -65,6 +65,7 @@ const ProDetailsModal = ({
   async function fetchLangData() {
     const data = await getLanguagesAction();
     setLangData(data);
+    console.log(data, "Lang data");
   }
 
   useEffect(() => {

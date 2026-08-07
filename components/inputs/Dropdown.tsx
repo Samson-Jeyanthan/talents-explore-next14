@@ -30,6 +30,7 @@ type Props = {
   dependentFieldValue?: boolean;
   onValueChange?: (_id: string) => {};
   resetFiled?: () => void;
+  isModal?: boolean;
 };
 
 const Dropdown = ({
@@ -44,6 +45,7 @@ const Dropdown = ({
   dependentFieldValue,
   onValueChange,
   resetFiled,
+  isModal,
 }: Props) => {
   const [selectedValue, setSelectedValue] = useState(value ?? "");
 
@@ -79,7 +81,9 @@ const Dropdown = ({
                   </p>
                 )}
               </SelectTrigger>
-              <SelectContent className="shad-auth_form_select_option">
+              <SelectContent
+                className={`${isModal ? "!z-[150]" : ""} shad-auth_form_select_option`}
+              >
                 {dependentFieldPlaceholder && !dependentFieldValue && (
                   <div className="shad-auth_form_select_item flex items-center pl-2 text-sm">
                     --{dependentFieldPlaceholder}--

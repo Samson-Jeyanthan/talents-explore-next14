@@ -14,19 +14,20 @@ const PostInfo = ({ postData }: Props) => {
   const [showSeeMore, setShowSeeMore] = useState(false);
 
   useEffect(() => {
+    console.log(showSeeMore, isSeeMore, "see-more");
     if (postDescRef.current) {
       const postDescElement = postDescRef.current;
       postDescRef.current.style.height = `${postDescRef.current.scrollHeight}px`;
       setShowSeeMore(postDescElement.scrollHeight >= 300);
     }
-  }, [postData.about.description]);
+  }, [isSeeMore, postData.about.description, showSeeMore]);
 
   return (
-    <div className="flex flex-col gap-2 text-sm text-light-500">
+    <div className="flex w-full flex-col gap-2 text-sm text-light-500">
       <h2 className="font-medium text-light-900">Description</h2>
       <div
-        // ref={postDescRef}
-        className={`${isSeeMore ? "h-[300px]" : "h-max"} overflow-hidden transition-all duration-300 ease-in-out`}
+        ref={postDescRef}
+        className={`${isSeeMore ? "[h-300px]" : "h-max"} w-full overflow-hidden border border-solid border-custom-200 transition-all duration-300 ease-in-out`}
       >
         <div className="text-justify">
           {addLineBreaks(postData.about.description)}
@@ -42,7 +43,7 @@ const PostInfo = ({ postData }: Props) => {
           className="-mt-2 w-max cursor-pointer text-[13px] font-medium text-light-700"
           onClick={() => setIsSeeMore(!isSeeMore)}
         >
-          {isSeeMore ? "show ess" : "see more..."}
+          {isSeeMore ? "show less" : "see more..."}
         </p>
       ) : null}
     </div>

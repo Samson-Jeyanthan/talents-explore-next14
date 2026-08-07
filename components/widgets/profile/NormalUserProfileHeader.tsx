@@ -9,6 +9,7 @@ import { PhotoViewModal } from "../../modals";
 import ConnectionListModal from "../../modals/ConnectionListModal";
 import ChatLauncher from "../ChatLauncher";
 import { getProfileVisibilityState } from "@/lib/utils/profilePrivacy";
+import { useRouter } from "next/navigation";
 
 const NormalUserProfileHeader = ({
   userData,
@@ -20,6 +21,7 @@ const NormalUserProfileHeader = ({
   const [showDP, setShowDP] = useState(false);
   const [showConnection, setShowConnection] = useState(false);
   const visibility = getProfileVisibilityState(userData, isOwnProfile);
+  const router = useRouter();
 
   const handleShowDP = () => {
     if (userData?.personalInfo?.profileImage) setShowDP(!showDP);
@@ -78,7 +80,10 @@ const NormalUserProfileHeader = ({
 
       <section className="flex items-start justify-between gap-3">
         {isOwnProfile ? (
-          <Button className="shad-button_secondary w-36 rounded-full">
+          <Button
+            className="shad-button_secondary w-36 rounded-full"
+            onClick={() => router.push(`/profile/edit/${userData?._id}`)}
+          >
             Edit Profile
           </Button>
         ) : (

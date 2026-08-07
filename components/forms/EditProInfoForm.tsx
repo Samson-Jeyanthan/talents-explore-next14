@@ -34,7 +34,7 @@ const EditProInfoForm = ({ form, userData, prevURLs, setPrevURLs }: any) => {
 
         <FormField
           control={form.control}
-          name="featuredVideos"
+          name="socialLinks"
           render={({ field }) => (
             <SocialMediaInput
               fieldChange={field.onChange}

@@ -18,6 +18,10 @@ const CompleteProfile = async () => {
   const professionData = await getProfessionsAction();
   const token = await getSession();
 
+  console.log(langData, "LangData");
+  console.log(professionData, "ProfessionData");
+  console.log(token, "token");
+
   if (token !== "") {
     const res = await checkIsAboutAction(token);
     if (res) redirect("/home");

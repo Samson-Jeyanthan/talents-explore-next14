@@ -2,13 +2,12 @@
 
 import axiosInstance from "@/lib/config/axiosInstance";
 import {
+  clearSession,
   createSession,
-  deleteSession,
   getSession,
   storeIsAbout,
 } from "@/lib/session";
-import axios from "axios";
-// import { jwtDecode } from "jwt-decode";
+import { getAuthHeaders } from "./tokenAndHeaders.action";
 
 export const registerAction = async (formData: unknown) => {
   try {
@@ -26,7 +25,10 @@ export const otpVerificationAction = async (formData: unknown) => {
     const res = response.data;
     if (res?.status === "7400") {
       await storeIsAbout(false);
-      const result = await createSession(res.response.accessToken);
+      const result = await createSession(
+        res.response.accessToken,
+        res.response.refreshToken
+      );
       console.log(result, "result-access-token-isAbout");
       return res;
     } else {
@@ -49,15 +51,26 @@ export const resendOtpAction = async (userId: string) => {
 };
 
 export const completeProfileAction = async (
-  _userId: string,
+  userId: string,
   formData: unknown
 ) => {
   try {
-    const response = await axiosInstance.put(`/user/personalInfo`, formData);
+    const headers = await getAuthHeaders();
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/personalInfo/`,
+      {
+        method: "PUT",
+        cache: "no-store",
+        headers: {
+          ...headers,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      }
+    );
 
-    console.log(response, "complete profile response");
-    await storeIsAbout(true);
-    return response.data;
+    const data = await response.json();
+    return data;
   } catch (error) {
     console.error(error);
     return error;
@@ -76,33 +89,48 @@ export async function checkForToken() {
 }
 
 export async function deleteToken() {
-  await deleteSession();
+  await clearSession();
 }
 
-export const signinAction = async (formData: unknown) => {
+export async function signinAction(formData: unknown) {
   try {
-    const response = await axiosInstance.post("/auth/login", formData);
-    const res = response.data;
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      }
+    );
 
-    console.log(res, "signin response");
+    const res = await response.json();
 
     if (res?.status === "7400") {
       //  check the user has complete the about section
       const accessToken = res.response.accessToken;
-      const userDetailsRes = await userPersonalInfoAction(accessToken);
+      const userDetailsRes = await getUserPersonalInfoAction(accessToken);
+
       const userPersonalInfo = userDetailsRes?.response?.personalInfo;
       const userFirstName = userPersonalInfo?.firstName;
 
       // store isAbout based on user's first name
       if (userFirstName) {
         await storeIsAbout(true);
-        await createSession(res.response.accessToken);
+        await createSession(
+          res.response.accessToken,
+          res.response.refreshToken
+        );
       } else {
         await storeIsAbout(false);
-        await createSession(res.response.accessToken);
+        await createSession(
+          res.response.accessToken,
+          res.response.refreshToken
+        );
       }
 
-      return userDetailsRes; // returning user personal data
+      return userDetailsRes;
     } else {
       return false;
     }
@@ -110,7 +138,7 @@ export const signinAction = async (formData: unknown) => {
     console.error(error);
     return error;
   }
-};
+}
 
 export const forgotPasswordAction = async (email: string) => {
   try {
@@ -146,27 +174,32 @@ export const resetPasswordAction = async (formData: unknown) => {
   }
 };
 
-export const userPersonalInfoAction = async (userId: string | undefined) => {
+export const getUserPersonalInfoAction = async (token: string | undefined) => {
+  let headers = {};
+  if (token === undefined || token === "") {
+    headers = await getAuthHeaders();
+    console.log(headers, "auth.action-headers");
+  }
   try {
-    console.log(userId, "auth.action-token");
-
-    if (!userId) {
-      throw new Error("No access token found");
-    }
-
-    const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user`,
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/`,
       {
-        headers: {
-          Authorization: `Bearer ${userId}`,
-        },
+        cache: "no-store",
+        headers:
+          token === undefined || token === ""
+            ? headers
+            : {
+                Authorization: `Bearer ${token}`,
+              },
       }
     );
+    const res = await response.json();
 
-    return response.data;
+    console.log(res, "// getUserPersonalInfoAction //");
+    return res;
   } catch (error: any) {
     console.error(
-      "userPersonalInfoAction:",
+      "getUserPersonalInfoAction: //",
       error.response?.data || error.message
     );
     throw error;
@@ -174,7 +207,7 @@ export const userPersonalInfoAction = async (userId: string | undefined) => {
 };
 
 export const checkIsAboutAction = async (token: any) => {
-  const userDetailsRes = await userPersonalInfoAction(token);
+  const userDetailsRes = await getUserPersonalInfoAction(token);
   const userPersonalInfo = userDetailsRes?.response?.personalInfo;
   const userFirstName = userPersonalInfo?.firstName;
 

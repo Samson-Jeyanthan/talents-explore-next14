@@ -1,4 +1,4 @@
-import { getSession, verifyIsAbout } from "@/lib/session";
+import { getSession, checkIsAbout } from "@/lib/session";
 import { redirect } from "next/navigation";
 
 export default async function Home() {
@@ -8,7 +8,7 @@ export default async function Home() {
     redirect("/sign-in");
   }
 
-  const isAbout = await verifyIsAbout();
+  const isAbout = await checkIsAbout();
 
   if (!isAbout) {
     redirect("/complete-profile");
