@@ -1,6 +1,6 @@
 "use server";
 
-import { getAuthHeaders } from "./tokenAndHeaders.action";
+import { getAuthHeaders } from "@/lib/session";
 
 const EMPTY_RESPONSE = {
   status: "400",

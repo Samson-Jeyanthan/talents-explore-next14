@@ -1,22 +1,22 @@
 "use server";
 
 import SkillCard from "@/components/cards/SkillCard";
-import { getSession } from "@/lib/session";
+import { getAuthHeaders, getSession } from "@/lib/session";
 import {
   IAwardsOrCertificate,
   IEducation,
-  ILanguage,
+  // ILanguage,
   IProfileSkills,
-  ITopPost,
+  // ITopPost,
 } from "@/types/profile.types";
 import { getUserPersonalInfoAction } from "./auth.action";
 import {
   AwardCard,
   EducationCard,
-  LanguageCard,
+  // LanguageCard,
 } from "@/components/cards/ProDetailCards";
-import { TopPostCard } from "@/components/cards";
-import { getAuthHeaders } from "./tokenAndHeaders.action";
+import { resolveViewerIdAction } from "./tokenAndHeaders.action";
+// import { TopPostCard } from "@/components/cards";
 
 // async function resolveRouteUserId(userOrToken: string | undefined) {
 //   const sessionToken = await getSession();
@@ -58,21 +58,6 @@ export async function resolveRouteUserId(
   return userIdOrToken;
 }
 
-async function resolveViewerIdFromSession() {
-  const sessionToken = await getSession();
-
-  if (!sessionToken) {
-    return "";
-  }
-
-  try {
-    const userRes = await getUserPersonalInfoAction(sessionToken);
-    return userRes?.response?._id || "";
-  } catch {
-    return "";
-  }
-}
-
 export const userPublicInfoAction = async (
   userId: string | undefined,
   _viewerId: string | undefined
@@ -95,9 +80,7 @@ export const userPublicInfoAction = async (
 
 export async function fetchUserDataAction(userId: string, viewerId: string) {
   const token = await getSession();
-  const resolvedViewerId = token
-    ? await resolveViewerIdFromSession()
-    : viewerId;
+  const resolvedViewerId = token ? await resolveViewerIdAction() : viewerId;
 
   let res;
 

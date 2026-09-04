@@ -5,11 +5,8 @@ import AllPostCard from "@/components/cards/AllPostCard";
 import { IComments, IPost } from "@/types/post.types";
 import { CommentCard, PostCard } from "@/components/cards";
 import { getUserPersonalInfoAction } from "./auth.action";
-import { getSession } from "@/lib/session";
-import {
-  getAuthHeaders,
-  resolveViewerIdAction,
-} from "./tokenAndHeaders.action";
+import { getAuthHeaders, getSession } from "@/lib/session";
+import { resolveViewerIdAction } from "./tokenAndHeaders.action";
 
 type TPostActionError = {
   status: number;

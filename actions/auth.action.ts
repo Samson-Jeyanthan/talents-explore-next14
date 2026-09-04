@@ -4,12 +4,12 @@ import axiosInstance from "@/lib/config/axiosInstance";
 import {
   clearSession,
   createSession,
+  getAuthHeaders,
   getSession,
   storeIsAbout,
 } from "@/lib/session";
-import { getAuthHeaders } from "./tokenAndHeaders.action";
 
-export const registerAction = async (formData: unknown) => {
+export async function registerAction(formData: unknown) {
   try {
     const response = await axiosInstance.post("/auth/register", formData);
     return response.data;
@@ -17,9 +17,9 @@ export const registerAction = async (formData: unknown) => {
     console.error(error);
     return error;
   }
-};
+}
 
-export const otpVerificationAction = async (formData: unknown) => {
+export async function otpVerificationAction(formData: unknown) {
   try {
     const response = await axiosInstance.post("/auth/verifyEmailOtp", formData);
     const res = response.data;
@@ -38,9 +38,9 @@ export const otpVerificationAction = async (formData: unknown) => {
     console.error(error);
     return error;
   }
-};
+}
 
-export const resendOtpAction = async (userId: string) => {
+export async function resendOtpAction(userId: string) {
   try {
     const response = await axiosInstance.post(`/auth/resendOtp/${userId}`);
     return response.data;
@@ -48,12 +48,9 @@ export const resendOtpAction = async (userId: string) => {
     console.error(error);
     return error;
   }
-};
+}
 
-export const completeProfileAction = async (
-  userId: string,
-  formData: unknown
-) => {
+export async function completeProfileAction(userId: string, formData: unknown) {
   try {
     const headers = await getAuthHeaders();
     const response = await fetch(
@@ -61,10 +58,7 @@ export const completeProfileAction = async (
       {
         method: "PUT",
         cache: "no-store",
-        headers: {
-          ...headers,
-          "Content-Type": "application/json",
-        },
+        headers,
         body: JSON.stringify(formData),
       }
     );
@@ -75,7 +69,7 @@ export const completeProfileAction = async (
     console.error(error);
     return error;
   }
-};
+}
 
 // check for token
 export async function checkForToken() {
@@ -140,7 +134,7 @@ export async function signinAction(formData: unknown) {
   }
 }
 
-export const forgotPasswordAction = async (email: string) => {
+export async function forgotPasswordAction(email: string) {
   try {
     console.log(email, "email");
     const response = await axiosInstance.post(`/auth/forgotPassword/${email}`);
@@ -149,9 +143,9 @@ export const forgotPasswordAction = async (email: string) => {
     console.error(error);
     return error;
   }
-};
+}
 
-export const verifyForgotPasswordAction = async (formData: unknown) => {
+export async function verifyForgotPasswordAction(formData: unknown) {
   try {
     const response = await axiosInstance.post(
       "/auth/verifyForgotPassword",
@@ -162,9 +156,9 @@ export const verifyForgotPasswordAction = async (formData: unknown) => {
     console.error(error);
     return error;
   }
-};
+}
 
-export const resetPasswordAction = async (formData: unknown) => {
+export async function resetPasswordAction(formData: unknown) {
   try {
     const response = await axiosInstance.post("/auth/resetPassword", formData);
     return response.data;
@@ -172,9 +166,9 @@ export const resetPasswordAction = async (formData: unknown) => {
     console.error(error);
     return error;
   }
-};
+}
 
-export const getUserPersonalInfoAction = async (token: string | undefined) => {
+export async function getUserPersonalInfoAction(token: string | undefined) {
   let headers = {};
   if (token === undefined || token === "") {
     headers = await getAuthHeaders();
@@ -184,7 +178,7 @@ export const getUserPersonalInfoAction = async (token: string | undefined) => {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/`,
       {
-        cache: "no-store",
+        // cache: "no-store",
         headers:
           token === undefined || token === ""
             ? headers
@@ -204,9 +198,9 @@ export const getUserPersonalInfoAction = async (token: string | undefined) => {
     );
     throw error;
   }
-};
+}
 
-export const checkIsAboutAction = async (token: any) => {
+export async function checkIsAboutAction(token: any) {
   const userDetailsRes = await getUserPersonalInfoAction(token);
   const userPersonalInfo = userDetailsRes?.response?.personalInfo;
   const userFirstName = userPersonalInfo?.firstName;
@@ -216,9 +210,9 @@ export const checkIsAboutAction = async (token: any) => {
   } else {
     return false;
   }
-};
+}
 
-export const logoutAction = async (userId: string) => {
+export async function logoutAction(userId: string) {
   const refreshToken = "";
   try {
     const response = await axiosInstance.post(
@@ -226,4 +220,4 @@ export const logoutAction = async (userId: string) => {
     );
     console.log(response, "logout res");
   } catch {}
-};
+}

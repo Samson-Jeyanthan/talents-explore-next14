@@ -20,7 +20,6 @@ const CompleteProfile = async () => {
 
   console.log(langData, "LangData");
   console.log(professionData, "ProfessionData");
-  console.log(token, "token");
 
   if (token !== "") {
     const res = await checkIsAboutAction(token);
