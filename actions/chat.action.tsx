@@ -2,7 +2,7 @@
 
 import axios from "axios";
 import { getSession } from "@/lib/session";
-import { userPersonalInfoAction } from "./auth.action";
+import { getUserPersonalInfoAction } from "./auth.action";
 
 const SUCCESS_STATUS = "7400";
 
@@ -105,6 +105,38 @@ function normalizeChatRoomResponse(responseData: any) {
   return findNestedRoomArray(responseData);
 }
 
+function normalizeChatMessagesResponse(responseData: any): any[] {
+  const looksLikeMessage = (item: any) =>
+    item &&
+    typeof item === "object" &&
+    (typeof item._id === "string" ||
+      typeof item.chatId === "string" ||
+      typeof item.content === "string" ||
+      typeof item.createdAt === "string");
+
+  const findMessages = (value: any): any[] => {
+    if (!value) return [];
+    if (Array.isArray(value)) {
+      if (value.some(looksLikeMessage)) return value;
+      for (const item of value) {
+        const nested = findMessages(item);
+        if (nested.length) return nested;
+      }
+      return [];
+    }
+
+    if (typeof value === "object") {
+      for (const key of ["messages", "list", "data", "response"]) {
+        const nested = findMessages(value[key]);
+        if (nested.length) return nested;
+      }
+    }
+    return [];
+  };
+
+  return findMessages(responseData?.response ?? responseData);
+}
+
 async function getCurrentUserResponse() {
   const token = await getAccessToken();
 
@@ -113,7 +145,7 @@ async function getCurrentUserResponse() {
   }
 
   try {
-    const response = await userPersonalInfoAction(token);
+    const response = await getUserPersonalInfoAction(token);
     return {
       token,
       user: response?.response || null,
@@ -370,14 +402,15 @@ export async function getChatMessagesAction({
       }
     );
 
-    if (response.data?.status === SUCCESS_STATUS) {
-      return Array.isArray(response.data?.response) ? response.data.response : [];
+    const messages = normalizeChatMessagesResponse(response.data);
+    if (response.data?.status === SUCCESS_STATUS || messages.length > 0) {
+      return messages;
     }
 
     return [];
   } catch (error) {
     console.error("getChatMessagesAction failed:", error);
-    return [];
+    return normalizeChatMessagesResponse((error as any)?.response?.data);
   }
 }
 

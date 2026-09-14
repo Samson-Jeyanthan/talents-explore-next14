@@ -1,11 +1,8 @@
 "use server";
 
-import { refreshAccessTokenAction } from "@/actions/tokenAndHeaders.action";
 import { jwtDecode } from "jwt-decode";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-
-// ─── Constants ────────────────────────────────────────────────────────────────
 
 const COOKIE_NAMES = {
   accessToken: "access_token",
@@ -13,142 +10,167 @@ const COOKIE_NAMES = {
   isAbout: "is_about",
 } as const;
 
-const baseCookieOptions = {
+const TOKEN_COOKIE_MAX_AGE = 7 * 24 * 60 * 60;
+const EXPIRY_BUFFER_MS = 60 * 1000;
+
+type TokenPair = {
+  accessToken: string;
+  refreshToken: string;
+};
+
+type AccessTokenPayload = {
+  exp?: number;
+};
+
+const refreshInFlight = new Map<string, Promise<TokenPair | null>>();
+
+const cookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
   sameSite: "strict" as const,
   path: "/",
+  maxAge: TOKEN_COOKIE_MAX_AGE,
 };
 
-const TOKEN_EXPIRY = 7 * 24 * 60 * 60 * 1000; // 7 days (ms)
+function getTokenPair(payload: unknown): TokenPair | null {
+  const data = payload as {
+    accessToken?: unknown;
+    refreshToken?: unknown;
+    response?: { accessToken?: unknown; refreshToken?: unknown };
+  };
+  const candidate = data?.response ?? data;
 
-interface AccessTokenPayload {
-  sub: string;
-  iat: number;
-  exp: number;
-  jti: string;
+  if (
+    typeof candidate?.accessToken !== "string" ||
+    typeof candidate?.refreshToken !== "string" ||
+    !candidate.accessToken ||
+    !candidate.refreshToken
+  ) {
+    return null;
+  }
+
+  return {
+    accessToken: candidate.accessToken,
+    refreshToken: candidate.refreshToken,
+  };
 }
 
-// ─── Create Session ───────────────────────────────────────────────────────────
 export async function createSession(
   accessToken: string,
-  refreshToken: string
+  refreshToken: string,
 ): Promise<{ success: boolean }> {
   try {
     const cookieStore = await cookies();
-
-    const accessTokenExpiry = new Date(Date.now() + TOKEN_EXPIRY);
-    const refreshTokenExpiry = new Date(Date.now() + TOKEN_EXPIRY);
-
-    // Save access token
-    cookieStore.set(COOKIE_NAMES.accessToken, accessToken, {
-      ...baseCookieOptions,
-      expires: accessTokenExpiry,
-    });
-
-    // Save refresh token — scoped to refresh endpoint only, longer expiry
-    cookieStore.set(COOKIE_NAMES.refreshToken, refreshToken, {
-      ...baseCookieOptions,
-      path: "/", // adjust to your actual refresh route
-      expires: refreshTokenExpiry,
-    });
-
+    cookieStore.set(COOKIE_NAMES.accessToken, accessToken, cookieOptions);
+    cookieStore.set(COOKIE_NAMES.refreshToken, refreshToken, cookieOptions);
     return { success: true };
   } catch (error) {
-    console.error("[createSession] Failed:", error);
+    console.error("[session] Unable to store tokens", error);
     return { success: false };
   }
 }
 
-// ─── Get Access Token ─────────────────────────────────────────────────────────
+async function getStoredAccessToken(): Promise<string> {
+  const cookieStore = await cookies();
+  return cookieStore.get(COOKIE_NAMES.accessToken)?.value ?? "";
+}
+
 export async function getSession(): Promise<string> {
+  return (await getActiveAccessToken()) ?? "";
+}
+
+export async function getRefreshToken(): Promise<string | null> {
+  const cookieStore = await cookies();
+  return cookieStore.get(COOKIE_NAMES.refreshToken)?.value ?? null;
+}
+
+export async function isAccessTokenExpired(): Promise<boolean> {
+  const token = await getStoredAccessToken();
+  if (!token) return true;
+
   try {
-    const accessToken = cookies().get(COOKIE_NAMES.accessToken)?.value;
-    if (!accessToken) return "";
-    return accessToken;
-  } catch (error) {
-    console.error("[getSession] Failed:", error);
-    return "";
+    const { exp } = jwtDecode<AccessTokenPayload>(token);
+    return !exp || Date.now() >= exp * 1000 - EXPIRY_BUFFER_MS;
+  } catch {
+    return true;
   }
 }
 
-// ─── Get Refresh Token ────────────────────────────────────────────────────────
-export async function getRefreshToken(): Promise<string | null> {
+export async function clearSession(): Promise<{ success: boolean }> {
   try {
-    const refreshToken = await cookies().get(COOKIE_NAMES.refreshToken)?.value;
-    if (!refreshToken) return null;
-    return refreshToken;
+    const cookieStore = await cookies();
+    cookieStore.delete(COOKIE_NAMES.accessToken);
+    cookieStore.delete(COOKIE_NAMES.refreshToken);
+    return { success: true };
   } catch (error) {
-    console.error("[getRefreshToken] Failed:", error);
+    console.error("[session] Unable to clear tokens", error);
+    return { success: false };
+  }
+}
+
+async function requestRefreshToken(
+  refreshToken: string,
+  accessToken: string,
+): Promise<TokenPair | null> {
+  const endpoint = process.env.NEXT_PUBLIC_BACKEND_URL;
+  if (!endpoint) {
+    console.error("[session] NEXT_PUBLIC_BACKEND_URL is not configured");
+    return null;
+  }
+
+  const params = new URLSearchParams({
+    grant_type: "refresh_token",
+    refresh_token: refreshToken,
+    device_id: "webApp",
+  });
+
+  try {
+    const response = await fetch(`${endpoint}/auth/access_token?${params}`, {
+      method: "GET",
+      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+      cache: "no-store",
+    });
+
+    if (!response.ok) return null;
+    return getTokenPair(await response.json());
+  } catch (error) {
+    console.error("[session] Token refresh request failed", error);
     return null;
   }
 }
 
-// ─── Check if Access Token is Expired ────────────────────────────────────────
-export async function isAccessTokenExpired(): Promise<boolean> {
-  try {
-    const token = (await cookies()).get(COOKIE_NAMES.accessToken)?.value;
-    if (!token) return true;
+export async function refreshSession(): Promise<TokenPair | null> {
+  const refreshToken = await getRefreshToken();
+  const accessToken = await getStoredAccessToken();
+  if (!refreshToken) return null;
 
-    const decoded = jwtDecode<AccessTokenPayload>(token);
-    if (!decoded?.exp || typeof decoded.exp !== "number") return true;
+  const pending = refreshInFlight.get(refreshToken);
+  if (pending) return pending;
 
-    const expiryMs = decoded.exp * 1000; // exp is in seconds → convert to ms
-    const bufferMs = 60 * 1000; // treat as expired 60s early, to allow time for refresh
+  const refreshPromise = requestRefreshToken(refreshToken, accessToken).finally(() => {
+    refreshInFlight.delete(refreshToken);
+  });
+  refreshInFlight.set(refreshToken, refreshPromise);
 
-    return Date.now() >= expiryMs - bufferMs;
-  } catch (error) {
-    console.error("[isAccessTokenExpired] Failed:", error);
-    return true; // fail safe → treat as expired
-  }
+  const tokens = await refreshPromise;
+  if (tokens) await createSession(tokens.accessToken, tokens.refreshToken);
+  return tokens;
 }
 
-// ─── Clear Session ────────────────────────────────────────────────────────────
-export async function clearSession(): Promise<{ success: boolean }> {
-  try {
-    const cookieStore = await cookies();
-
-    cookieStore.delete(COOKIE_NAMES.accessToken);
-    cookieStore.delete({
-      name: COOKIE_NAMES.refreshToken,
-      // path: "/api/auth/refresh",
-    });
-
-    return { success: true };
-  } catch (error) {
-    console.error("[clearSession] Failed:", error);
-    return { success: false };
+export async function getActiveAccessToken(): Promise<string | null> {
+  if (await isAccessTokenExpired()) {
+    return (await refreshSession())?.accessToken ?? null;
   }
+
+  return (await getStoredAccessToken()) || null;
 }
 
-// ─── Get Auth Headers ────────────────────────────────────────────────────────
-export async function getAuthHeaders() {
-  const expired = await isAccessTokenExpired();
-  const existingAccessToken = await getSession();
-
-  if (expired) {
-    console.log("[getAuthHeaders] Token expired, refreshing...");
-
-    const newTokens = await refreshAccessTokenAction(existingAccessToken);
-
-    if (newTokens === null) {
-      await clearSession(); // clear session if refresh fails
-      redirect("/sign-in"); // redirect to login page if refresh fails
-    }
-
-    await createSession(newTokens.accessToken, newTokens.refreshToken);
-
-    return {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${newTokens.accessToken}`,
-    };
-  }
-
-  const accessToken = await getSession();
+export async function getAuthHeaders(): Promise<Record<string, string>> {
+  const accessToken = await getActiveAccessToken();
 
   if (!accessToken) {
     await clearSession();
-    redirect("/sign-in"); // redirect to login page if no access token
+    redirect("/sign-in");
   }
 
   return {
@@ -157,37 +179,12 @@ export async function getAuthHeaders() {
   };
 }
 
-// store isAbout in cookies
-export async function storeIsAbout(isOk: boolean) {
-  if (isOk) {
-    cookies().set("is_about", "true", {
-      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      httpOnly: true,
-      sameSite: "strict",
-      path: "/",
-    });
-  } else {
-    cookies().set("is_about", "false", {
-      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      httpOnly: true,
-      sameSite: "strict",
-      path: "/",
-    });
-  }
+export async function storeIsAbout(isAbout: boolean) {
+  const cookieStore = await cookies();
+  cookieStore.set(COOKIE_NAMES.isAbout, String(isAbout), cookieOptions);
 }
 
-// check isAbout
 export async function checkIsAbout() {
-  const isAbout = cookies().get("is_about")?.value;
-  if (isAbout === "true") {
-    return true;
-  } else {
-    return false;
-  }
+  const cookieStore = await cookies();
+  return cookieStore.get(COOKIE_NAMES.isAbout)?.value === "true";
 }
-
-// clear and modify the cookies for token
-// export async function clearAndModifyCookies(data: any) {
-//   await clearSession();
-//   createSession(data.accessToken, data.refreshToken);
-// }

@@ -1,5 +1,5 @@
 import { getSession } from "@/lib/session";
-import { userPersonalInfoAction } from "@/actions/auth.action";
+import { getUserPersonalInfoAction } from "@/actions/auth.action";
 import axios from "axios";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -84,7 +84,7 @@ async function getCurrentUserResponse() {
   }
 
   try {
-    const response = await userPersonalInfoAction(token);
+    const response = await getUserPersonalInfoAction(token);
     return {
       token,
       user: response?.response || null,

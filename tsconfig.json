@@ -29,5 +29,5 @@
     ".next/types/**/*.ts",
     "lib/utils/getCroppedImg.js"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "actions/sample.ts"]
 }

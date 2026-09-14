@@ -1,14 +1,7 @@
 "use server";
 
-import axiosInstance from "@/lib/config/axiosInstance";
 import { revalidatePath } from "next/cache";
-import { getSession } from "@/lib/session";
-
-async function getAuthHeaders() {
-  const token = await getSession();
-
-  return token ? { Authorization: `Bearer ${token}` } : undefined;
-}
+import { getAuthHeaders } from "@/lib/session";
 
 export async function getFollowerList(
   userId: string | undefined,
@@ -59,11 +52,19 @@ export async function followUserAction(
     followingId,
   };
   try {
-    const response = await axiosInstance.post("/connect-user/follow", formData);
-    console.log("response follow");
-    console.log(response.data);
-    return response.data;
-  } catch {}
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/connect-user/follow`,
+      {
+        method: "POST",
+        cache: "no-store",
+        headers: await getAuthHeaders(),
+        body: JSON.stringify(formData),
+      }
+    );
+    return await response.json();
+  } catch (error) {
+    console.error("Unable to follow user", error);
+  }
 }
 
 export async function unFollowUserAction(
@@ -75,14 +76,19 @@ export async function unFollowUserAction(
     followingId,
   };
   try {
-    const response = await axiosInstance.post(
-      "/connect-user/unfollow",
-      formData
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/connect-user/unfollow`,
+      {
+        method: "POST",
+        cache: "no-store",
+        headers: await getAuthHeaders(),
+        body: JSON.stringify(formData),
+      }
     );
-    console.log("response unfollow");
-    console.log(response.data);
-    return response.data;
-  } catch {}
+    return await response.json();
+  } catch (error) {
+    console.error("Unable to unfollow user", error);
+  }
 }
 
 export async function getProfileRatingList(
@@ -130,15 +136,11 @@ export async function addPostRating(
   };
 
   try {
-    const token = await getSession();
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/te-post/rating`,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
+        headers: await getAuthHeaders(),
         body: JSON.stringify(formData),
       }
     );

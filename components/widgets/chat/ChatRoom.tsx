@@ -155,6 +155,12 @@ function ChatRoom({
         : sender?.professional || chatInfo?.type || "";
 
   useEffect(() => {
+    setMessages(initialMessages || []);
+    setMembers(initialMembers || []);
+    setChatInfo(initialChatInfo || null);
+  }, [roomId, initialMessages, initialMembers, initialChatInfo]);
+
+  useEffect(() => {
     if (!roomId) {
       return;
     }
@@ -201,7 +207,7 @@ function ChatRoom({
     if (container) {
       container.scrollTop = container.scrollHeight;
     }
-  }, []);
+  }, [messages]);
 
   useEffect(() => {
     if (!activeUserId || !roomId) {

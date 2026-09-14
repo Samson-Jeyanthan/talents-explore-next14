@@ -7,7 +7,6 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { LocationPickerDialog, NativePickerField } from "@/components/widgets/collaboration/CollaborationFieldPickers";
-import axiosInstance from "@/lib/config/axiosInstance";
 import { GENDER_VALUES, LEVEL_VALUES } from "@/constants";
 import { ArrowLeft, ArrowRight, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
@@ -86,15 +85,25 @@ function mapLookup(items: any[], valueKeys: string[], labelKeys: string[]) {
     .filter(Boolean) as { value: string; label: string }[];
 }
 
-function uploadFile(file: File, prefix: string, userName: string) {
+async function uploadFile(file: File, prefix: string, userName: string) {
   const ext = file.name.split(".").pop();
   const fileName = `${prefix}-${userName || "user"}-${Date.now()}.${ext}`;
-  return axiosInstance.post("/s3/signedUrl", { fileName, contentType: file.type }).then(async (res) => {
-    const signedUrl = res?.data?.url;
-    const key = res?.data?.key;
-    await fetch(signedUrl, { method: "PUT", body: file });
-    return { url: String(signedUrl).split("?")[0], key };
+  const response = await fetch("/api/s3/signedUrl", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ fileName, contentType: file.type }),
   });
+  if (!response.ok) throw new Error("Unable to prepare the file upload.");
+
+  const result = await response.json();
+  const signedUrl = result?.url;
+  const key = result?.key;
+  if (!signedUrl || !key) throw new Error("The upload service returned an invalid response.");
+
+  const uploadResponse = await fetch(signedUrl, { method: "PUT", body: file });
+  if (!uploadResponse.ok) throw new Error("Unable to upload the file.");
+
+  return { url: String(signedUrl).split("?")[0], key };
 }
 
 function emptyRole() {
