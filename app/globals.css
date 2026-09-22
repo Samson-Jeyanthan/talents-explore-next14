@@ -5,6 +5,13 @@
 
 @import url("../styles/theme.css");
 
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
 body {
   font-family: "Poppins", sans-serif;
 }

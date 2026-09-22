@@ -46,6 +46,24 @@ export type PaidPromotionRequestPayload = {
   contactInfo: string;
 };
 
+export type HelpSupportPayload = {
+  name: string;
+  email: string;
+  accountType: string;
+  priority: "Low" | "Medium" | "High";
+  summary: string;
+  description: string;
+  attachmentUrl: string;
+};
+
+export type FeedbackPayload = {
+  fullName: string;
+  email: string;
+  workingWell: string;
+  improvements: string;
+  attachmentUrl: string;
+};
+
 async function getAccessToken() {
   return await getSession();
 }
@@ -128,6 +146,14 @@ export async function getPaidPromotionRequestsAction() {
 
 export async function submitPaidPromotionRequestAction(payload: PaidPromotionRequestPayload) {
   return submitRequest("promo-request", payload);
+}
+
+export async function submitHelpSupportAction(payload: HelpSupportPayload) {
+  return submitRequest("help-support", payload);
+}
+
+export async function submitFeedbackAction(payload: FeedbackPayload) {
+  return submitRequest("feedback", payload);
 }
 
 export async function getPrivacySettingsAction(accessToken?: string) {

@@ -10,7 +10,7 @@ type Props = {
 
 const TagsAndOtherInfo = ({ postData }: Props) => {
   return (
-    <section className="flex min-w-[320px] max-w-[320px] flex-col gap-8 text-sm text-light-500">
+    <section className="flex w-full min-w-0 max-w-[320px] flex-col gap-8 text-sm text-light-500">
       {postData?.about?.productionName || postData?.about?.productionDate ? (
         <div className="flex flex-col gap-2">
           <h2 className="font-medium text-light-900">Production Details</h2>

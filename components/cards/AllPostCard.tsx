@@ -36,9 +36,9 @@ function AllPostCard({ allPostCard, index }: Prop) {
         duration: 0.2,
       }}
       viewport={{ amount: 0 }}
-      className="relative flex w-full gap-3 rounded-[28px] border-2 border-dark-300 bg-dark-250 p-2"
+      className="relative flex w-full min-w-0 flex-col gap-3 rounded-[28px] border-2 border-dark-300 bg-dark-250 p-2 sm:flex-row"
     >
-      <Link href={postLink} className="relative h-60 w-[22rem] rounded-lg">
+      <Link href={postLink} className="relative h-60 w-full shrink-0 rounded-lg sm:w-[18rem] lg:w-[22rem]">
         <span className="absolute left-3 top-3 flex gap-2 fill-white">
           {isPinned && <PinIcon height="18px" width="18px" />}
 
@@ -56,7 +56,7 @@ function AllPostCard({ allPostCard, index }: Prop) {
           alt={allPostCard.about.title}
           width={1024}
           height={512}
-          className="size-full min-w-[22rem] rounded-2xl bg-dark-400 object-cover"
+          className="size-full rounded-2xl bg-dark-400 object-cover"
         />
 
         <div className="flex-center absolute bottom-2 right-2 gap-2 rounded-full bg-dark-200 fill-custom-100 p-3 py-2 text-sm text-light-900">
@@ -67,10 +67,10 @@ function AllPostCard({ allPostCard, index }: Prop) {
         </div>
       </Link>
 
-      <div className="flex w-3/5 flex-col gap-2 2xl:w-4/6 2xl:gap-1">
+      <div className="flex min-w-0 w-full flex-col gap-2 pb-10 sm:w-3/5 sm:pb-0 2xl:w-4/6 2xl:gap-1">
         <Link
           href={postLink}
-          className="w-max cursor-pointer text-xl font-semibold capitalize text-light-900"
+          className="truncate cursor-pointer text-xl font-semibold capitalize text-light-900"
         >
           {allPostCard.about.title}
         </Link>
@@ -86,7 +86,7 @@ function AllPostCard({ allPostCard, index }: Prop) {
         <p className="line-clamp-3 text-ellipsis text-justify text-xs text-light-500 first-letter:capitalize 2xl:text-sm">
           {allPostCard.about.description}
         </p>
-        <div className="absolute bottom-3 right-3 flex gap-2">
+        <div className="absolute bottom-3 right-3 flex max-w-[calc(100%-1.5rem)] flex-wrap justify-end gap-2">
           <RenderTag Icon="" name={allPostCard.about.mainCategory} />
           <RenderTag Icon="" name={allPostCard.about.skill} />
         </div>

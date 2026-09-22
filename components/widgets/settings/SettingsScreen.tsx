@@ -29,6 +29,7 @@ import { deleteToken } from "@/actions/auth.action";
 import { handleClearStorage } from "@/lib/functions/auth.functions";
 import { INITIAL_USER, useUserContext } from "@/context/AuthProvider";
 import PromotionRequests from "./PromotionRequests";
+import SupportFeedback from "./SupportFeedback";
 
 type Props = {
   slugPath: string;
@@ -66,6 +67,8 @@ const SETTINGS_LINKS = [
   { href: "/settings/activity", label: "Your Activity" },
   { href: "/settings/advertisement", label: "Advertisement Request" },
   { href: "/settings/paid-promotions", label: "Paid Promotions" },
+  { href: "/settings/help-support", label: "Help / Support" },
+  { href: "/settings/feedback", label: "Feedback" },
 ];
 
 const PRIVACY_LINKS = [
@@ -811,6 +814,16 @@ function SettingsScreen({ slugPath, currentUser, initialPrivacy, initialNotifica
               title: "Paid Promotions",
               description: "Apply for paid promotion opportunities and track your requests.",
             },
+            {
+              href: "/settings/help-support",
+              title: "Help / Support",
+              description: "Tell our team what you need help with.",
+            },
+            {
+              href: "/settings/feedback",
+              title: "Feedback",
+              description: "Share what is working well or what we can improve.",
+            },
           ]}
         />
 
@@ -1392,6 +1405,10 @@ function SettingsScreen({ slugPath, currentUser, initialPrivacy, initialNotifica
     content = <PromotionRequests feature="paid-promotions" view="list" />;
   } else if (slugPath === "paid-promotions/request") {
     content = <PromotionRequests feature="paid-promotions" view="form" />;
+  } else if (slugPath === "help-support") {
+    content = <SupportFeedback feature="help-support" currentUser={currentUser} />;
+  } else if (slugPath === "feedback") {
+    content = <SupportFeedback feature="feedback" currentUser={currentUser} />;
   }
 
   return (
