@@ -23,9 +23,10 @@ export default async function SettingsPage({ params }: Props) {
   }
 
   const slugPath = params?.slug?.join("/") || "";
-  const currentUser = await getCurrentSettingsUserAction();
+  const isRequestRoute = slugPath === "advertisement" || slugPath.startsWith("advertisement/") || slugPath === "paid-promotions" || slugPath.startsWith("paid-promotions/");
+  const currentUser = isRequestRoute ? null : await getCurrentSettingsUserAction();
 
-  if (!currentUser?._id) {
+  if (!isRequestRoute && !currentUser?._id) {
     redirect("/sign-in");
   }
 
@@ -33,9 +34,9 @@ export default async function SettingsPage({ params }: Props) {
   const shouldLoadNotification = slugPath === "" || slugPath === "notifications";
 
   const [initialPrivacy, initialNotification] = await Promise.all([
-    shouldLoadPrivacy ? getPrivacySettingsAction() : Promise.resolve(null),
+    shouldLoadPrivacy ? getPrivacySettingsAction(session) : Promise.resolve(null),
     shouldLoadNotification
-      ? getNotificationSettingsAction()
+      ? getNotificationSettingsAction(currentUser?._id, session)
       : Promise.resolve(null),
   ]);
 

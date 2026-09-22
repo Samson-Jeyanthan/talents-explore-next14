@@ -5,6 +5,8 @@ import { ThemeProvider } from "@/context/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
 import AuthProvider from "@/context/AuthProvider";
 import { UtilsProvider } from "@/context/UtilsProvider";
+import { LoadingProvider } from "@/context/LoadingProvider";
+import NavigationLoader from "@/components/widgets/NavigationLoader";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -31,12 +33,15 @@ export default function RootLayout({
       className={`${poppins.variable} top-0 bg-dark-200 font-sans`}
     >
       <body>
-        <AuthProvider>
-          <UtilsProvider>
-            <ThemeProvider>{children}</ThemeProvider>
-          </UtilsProvider>
-          <Toaster position="top-right" />
-        </AuthProvider>
+        <LoadingProvider>
+          <AuthProvider>
+            <NavigationLoader />
+            <UtilsProvider>
+              <ThemeProvider>{children}</ThemeProvider>
+            </UtilsProvider>
+            <Toaster position="top-right" />
+          </AuthProvider>
+        </LoadingProvider>
       </body>
     </html>
   );

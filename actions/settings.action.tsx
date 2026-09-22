@@ -2,7 +2,7 @@
 
 import axios from "axios";
 import { getSession } from "@/lib/session";
-import { userPersonalInfoAction } from "./auth.action";
+import { getUserPersonalInfoAction } from "./auth.action";
 
 type PrivacyPayload = Record<string, any>;
 
@@ -11,6 +11,39 @@ type NotificationPayload = {
   quiteMode: boolean;
   quiteModeStartTime?: string | null;
   quiteModeEndTime?: string | null;
+};
+
+export type AdvertisementRequestPayload = {
+  firstName: string;
+  lastName: string;
+  companyName: string;
+  typeOfAdvertisement: string;
+  targetAudience: string;
+  preferredLocations: string;
+  budget: string;
+  startDate: string;
+  finishDate: string;
+  furtherDetails: string;
+  contactInfo: string;
+};
+
+export type PaidPromotionRequestPayload = {
+  firstName: string;
+  lastName: string;
+  dob: string;
+  profession: string;
+  teProfileUsername: string;
+  skills: string;
+  height: string;
+  ethnic: string;
+  language: string;
+  location: string;
+  previousExperience: string;
+  availability: string;
+  expectedPayPerPost: string;
+  followersByPlatform: string;
+  socialMediaLinks: string;
+  contactInfo: string;
 };
 
 async function getAccessToken() {
@@ -32,7 +65,7 @@ async function getCurrentUser() {
   }
 
   try {
-    const userRes = await userPersonalInfoAction(token);
+    const userRes = await getUserPersonalInfoAction(token);
     return {
       token,
       user: userRes?.response || null,
@@ -48,9 +81,58 @@ export async function getCurrentSettingsUserAction() {
   return user || null;
 }
 
-export async function getPrivacySettingsAction() {
+async function getRequestList(path: string) {
   try {
-    const { token } = await getCurrentUser();
+    const token = await getAccessToken();
+    if (!token) return [];
+
+    const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/${path}`, {
+      headers: getAuthHeaders(token),
+    });
+    const data = response.data;
+    return data?.status === "7400" && Array.isArray(data?.response) ? data.response : [];
+  } catch (error) {
+    console.error(`get ${path} failed:`, error);
+    return [];
+  }
+}
+
+async function submitRequest(path: string, payload: Record<string, string>) {
+  try {
+    const token = await getAccessToken();
+    if (!token) return { status: "7401", message: "Your session has expired. Please sign in again." };
+
+    const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/${path}`, payload, {
+      headers: { ...getAuthHeaders(token), "Content-Type": "application/json" },
+    });
+    return response.data;
+  } catch (error: any) {
+    return {
+      status: "5000",
+      message: error?.response?.data?.message || "Unable to submit your request",
+    };
+  }
+}
+
+export async function getAdvertisementRequestsAction() {
+  return getRequestList("advertisement-request");
+}
+
+export async function submitAdvertisementRequestAction(payload: AdvertisementRequestPayload) {
+  return submitRequest("advertisement-request", payload);
+}
+
+export async function getPaidPromotionRequestsAction() {
+  return getRequestList("promo-request");
+}
+
+export async function submitPaidPromotionRequestAction(payload: PaidPromotionRequestPayload) {
+  return submitRequest("promo-request", payload);
+}
+
+export async function getPrivacySettingsAction(accessToken?: string) {
+  try {
+    const token = accessToken || (await getCurrentUser()).token;
 
     if (!token) {
       return null;
@@ -116,16 +198,18 @@ export async function updateSocialLinksPrivacyAction(payload: any[]) {
   }
 }
 
-export async function getNotificationSettingsAction() {
+export async function getNotificationSettingsAction(userId?: string, accessToken?: string) {
   try {
-    const { token, user } = await getCurrentUser();
+    const sessionUser = userId ? null : await getCurrentUser();
+    const token = accessToken || sessionUser?.token || "";
+    const currentUserId = userId || sessionUser?.user?._id;
 
-    if (!token || !user?._id) {
+    if (!token || !currentUserId) {
       return null;
     }
 
     const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/notification/settings/${user._id}`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/notification/settings/${currentUserId}`,
       {
         headers: getAuthHeaders(token),
       }

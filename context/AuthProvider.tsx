@@ -3,9 +3,11 @@
 import { getUserPersonalInfoAction } from "@/actions/auth.action";
 import { getSession } from "@/lib/session";
 import { IContextType, ICurrentUser } from "@/types/auth.types";
-import { useRouter } from "next/navigation";
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
+import { useGlobalLoading } from "@/context/LoadingProvider";
+
+export const AUTH_USER_CACHE_KEY = "talents-explore-auth-user";
 
 export const INITIAL_USER = {
   currentUserId: "",
@@ -29,27 +31,46 @@ const AuthContext = createContext<IContextType>(INITIAL_STATE);
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<ICurrentUser>(INITIAL_USER);
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
+  const authCheckStarted = useRef(false);
+  const { beginLoading } = useGlobalLoading();
 
   async function checkAuthUser() {
-    setIsLoading(true);
-    const token = await getSession();
+    if (typeof window !== "undefined") {
+      const cachedUser = sessionStorage.getItem(AUTH_USER_CACHE_KEY);
+      if (cachedUser) {
+        try {
+          setUser(JSON.parse(cachedUser));
+          return;
+        } catch {
+          sessionStorage.removeItem(AUTH_USER_CACHE_KEY);
+        }
+      }
+    }
 
-    console.log(token, "// auth-provider-token - 38 //");
+    setIsLoading(true);
+    const finishLoading = beginLoading("Loading your account...");
+    let token = "";
+    try {
+      token = await getSession();
+    } catch (error) {
+      console.error("Error reading auth session:", error);
+      setIsLoading(false);
+      finishLoading();
+      return;
+    }
 
     if (!token) {
       setIsLoading(false);
+      finishLoading();
       return;
     }
 
     try {
       const res = await getUserPersonalInfoAction(token);
 
-      console.log(res, "// auth-provider-response //");
-
       if (res.status === "7400") {
         if (res?.response?.personalInfo?.firstName) {
-          setUser({
+          const nextUser = {
             currentUserId: res?.response?._id || "",
             firstName: res?.response?.personalInfo?.firstName,
             lastName: res?.response?.personalInfo?.lastName,
@@ -57,9 +78,11 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             email: res?.response?.email,
             imageUrl: res?.response?.personalInfo?.profileImage,
             isTalent: res?.response?.isTalent,
-          });
+          };
+          setUser(nextUser);
+          sessionStorage.setItem(AUTH_USER_CACHE_KEY, JSON.stringify(nextUser));
         } else {
-          setUser({
+          const nextUser = {
             currentUserId: res?.response?._id || "",
             firstName: "",
             lastName: "",
@@ -67,7 +90,9 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             email: res?.response?.email,
             imageUrl: null,
             isTalent: false,
-          });
+          };
+          setUser(nextUser);
+          sessionStorage.setItem(AUTH_USER_CACHE_KEY, JSON.stringify(nextUser));
           // router.push("/complete-profile");
           toast.info("Please complete your profile", {
             duration: 5000,
@@ -87,12 +112,14 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       throw error;
     } finally {
       setIsLoading(false);
+      finishLoading();
     }
   }
 
   useEffect(() => {
+    if (authCheckStarted.current) return;
+    authCheckStarted.current = true;
     checkAuthUser();
-    console.log("use effect call");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

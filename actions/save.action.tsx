@@ -4,7 +4,7 @@ import { SavedItemCard, SavedFolderCard } from "@/components/cards";
 import { ISavedFolder, ISavedItem } from "@/types/post.types";
 import { revalidatePath } from "next/cache";
 import { getSession } from "@/lib/session";
-import { userPersonalInfoAction } from "./auth.action";
+import { getUserPersonalInfoAction } from "./auth.action";
 
 type Props = {
   userId: string | undefined;
@@ -17,7 +17,7 @@ async function resolveRouteUserId(userOrToken: string | undefined) {
 
   if (userOrToken && sessionToken && userOrToken === sessionToken) {
     try {
-      const userRes = await userPersonalInfoAction(sessionToken);
+      const userRes = await getUserPersonalInfoAction(sessionToken);
       return userRes?.response?._id || userOrToken;
     } catch {
       return userOrToken;
