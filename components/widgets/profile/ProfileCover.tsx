@@ -8,14 +8,12 @@ type Props = {
   isLoggedIn: boolean;
 };
 
-const ProfileCover = async ({
+const ProfileCover = ({
   avgRating,
   coverPhoto,
   isTalent,
   isLoggedIn,
 }: Props) => {
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
   return (
     <div
       className={`${isTalent ? `sticky ${isLoggedIn ? "top-8 2xl:top-8" : "top-16 z-0 xl:top-16 2xl:top-16"}` : ""} w-full rounded-2xl`}

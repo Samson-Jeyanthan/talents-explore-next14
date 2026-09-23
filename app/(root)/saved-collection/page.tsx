@@ -18,7 +18,7 @@ const SavedCollection = async () => {
   if (data.status === 400) return null;
 
   return (
-    <section className="mt-4 flex w-full flex-col gap-8 p-8 px-10 2xl:max-w-[1600px]">
+    <section className="mt-4 flex w-full min-w-0 flex-col gap-8 p-4 sm:p-8 sm:px-10 2xl:max-w-[1600px]">
       <h1 className="flex flex-col gap-1 text-2xl font-semibold text-light-900 md:flex-row md:items-center md:justify-between md:text-3xl">
         Saved Collection
         <CreateSaveFolder />

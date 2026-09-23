@@ -2,7 +2,7 @@
 
 import axios from "axios";
 import { getSession } from "@/lib/session";
-import { userPersonalInfoAction } from "./auth.action";
+import { getUserPersonalInfoAction } from "./auth.action";
 
 const SUCCESS_STATUS = "7400";
 
@@ -70,7 +70,7 @@ async function getCurrentUserResponse() {
   }
 
   try {
-    const response = await userPersonalInfoAction(token);
+    const response = await getUserPersonalInfoAction(token);
     return {
       token,
       user: response?.response || null,

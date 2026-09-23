@@ -5,6 +5,7 @@ import {
   clearSession,
   createSession,
   getAuthHeaders,
+  getRefreshToken,
   getSession,
   storeIsAbout,
 } from "@/lib/session";
@@ -213,11 +214,21 @@ export async function checkIsAboutAction(token: any) {
 }
 
 export async function logoutAction(userId: string) {
-  const refreshToken = "";
+  const refreshToken = await getRefreshToken();
   try {
-    const response = await axiosInstance.post(
-      `/auth/logout?userId=${userId}&refresh_token=${refreshToken}&from_all=true`
-    );
-    console.log(response, "logout res");
-  } catch {}
+    if (refreshToken) {
+      const params = new URLSearchParams({
+        userId,
+        refresh_token: refreshToken,
+        from_all: "true",
+      });
+      await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/logout?${params}`, {
+        method: "POST",
+        cache: "no-store",
+        headers: await getAuthHeaders(),
+      });
+    }
+  } finally {
+    await clearSession();
+  }
 }

@@ -121,6 +121,7 @@ export async function handleResendForgotpasswordOtp(email: string) {
 
 // removing localstorage items when canceling the forgot password function
 export async function handleClearStorage() {
+  sessionStorage.removeItem("talents-explore-auth-user");
   localStorage.removeItem("countdown");
   localStorage.removeItem("isOTP");
   localStorage.removeItem("verifiedEmail");

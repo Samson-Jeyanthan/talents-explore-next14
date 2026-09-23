@@ -28,6 +28,8 @@ import {
 import { deleteToken } from "@/actions/auth.action";
 import { handleClearStorage } from "@/lib/functions/auth.functions";
 import { INITIAL_USER, useUserContext } from "@/context/AuthProvider";
+import PromotionRequests from "./PromotionRequests";
+import SupportFeedback from "./SupportFeedback";
 
 type Props = {
   slugPath: string;
@@ -63,6 +65,10 @@ const SETTINGS_LINKS = [
   { href: "/settings/notifications", label: "Notifications" },
   { href: "/settings/privacy", label: "Profile Privacy" },
   { href: "/settings/activity", label: "Your Activity" },
+  { href: "/settings/advertisement", label: "Advertisement Request" },
+  { href: "/settings/paid-promotions", label: "Paid Promotions" },
+  { href: "/settings/help-support", label: "Help / Support" },
+  { href: "/settings/feedback", label: "Feedback" },
 ];
 
 const PRIVACY_LINKS = [
@@ -798,6 +804,26 @@ function SettingsScreen({ slugPath, currentUser, initialPrivacy, initialNotifica
               description: "Review deleted content and star-rated posts.",
               forceReload: true,
             },
+            {
+              href: "/settings/advertisement",
+              title: "Advertisement Request",
+              description: "Request advertisement placement and track your submitted requests.",
+            },
+            {
+              href: "/settings/paid-promotions",
+              title: "Paid Promotions",
+              description: "Apply for paid promotion opportunities and track your requests.",
+            },
+            {
+              href: "/settings/help-support",
+              title: "Help / Support",
+              description: "Tell our team what you need help with.",
+            },
+            {
+              href: "/settings/feedback",
+              title: "Feedback",
+              description: "Share what is working well or what we can improve.",
+            },
           ]}
         />
 
@@ -1371,6 +1397,18 @@ function SettingsScreen({ slugPath, currentUser, initialPrivacy, initialNotifica
     content = activityDeletedContent;
   } else if (slugPath === "activity/star-ratings") {
     content = activityStarContent;
+  } else if (slugPath === "advertisement") {
+    content = <PromotionRequests feature="advertisement" view="list" />;
+  } else if (slugPath === "advertisement/request") {
+    content = <PromotionRequests feature="advertisement" view="form" />;
+  } else if (slugPath === "paid-promotions") {
+    content = <PromotionRequests feature="paid-promotions" view="list" />;
+  } else if (slugPath === "paid-promotions/request") {
+    content = <PromotionRequests feature="paid-promotions" view="form" />;
+  } else if (slugPath === "help-support") {
+    content = <SupportFeedback feature="help-support" currentUser={currentUser} />;
+  } else if (slugPath === "feedback") {
+    content = <SupportFeedback feature="feedback" currentUser={currentUser} />;
   }
 
   return (
