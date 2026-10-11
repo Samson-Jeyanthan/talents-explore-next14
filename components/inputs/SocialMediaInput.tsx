@@ -191,15 +191,11 @@ const SocialMediaInput = ({ values, fieldChange }: any) => {
 
         {/* button to confirm additional links to add by user */}
         <footer className="flex justify-end">
-          <div
-            className="flex-center size-12 cursor-pointer gap-2 rounded-full border-none bg-dark-400 fill-light-900 text-[13px] text-light-900"
-            onClick={handleOkClick}
-          >
+          <div className="teritory-button" onClick={handleOkClick}>
             OK
           </div>
         </footer>
-      </div>{" "}
-      */
+      </div>
     </div>
   );
 };

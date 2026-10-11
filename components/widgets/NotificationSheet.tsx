@@ -150,7 +150,9 @@ function NotificationSheet({ data }: { data: any[] }) {
 
   const handleMarkAllRead = async () => {
     const prev = notifications;
-    setNotifications((items) => items.map((item) => ({ ...item, status: "2" })));
+    setNotifications((items) =>
+      items.map((item) => ({ ...item, status: "2" }))
+    );
 
     startTransition(async () => {
       const res = await markAllNotificationsAsReadAction();
@@ -187,7 +189,11 @@ function NotificationSheet({ data }: { data: any[] }) {
 
   const handleLoadMore = async () => {
     const nextPage = pageNumber + 1;
-    const res = await getAllNotificationsAction(user?.currentUserId, nextPage, 10);
+    const res = await getAllNotificationsAction(
+      user?.currentUserId,
+      nextPage,
+      10
+    );
 
     if (!Array.isArray(res) || res.length === 0) {
       setHasMore(false);
@@ -204,7 +210,7 @@ function NotificationSheet({ data }: { data: any[] }) {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger className="relative z-[110] flex-center size-9 cursor-pointer rounded-full bg-dark-300 fill-light-600 hover:bg-dark-400 hover:fill-light-900 focus:outline-none">
+      <SheetTrigger className="flex-center relative z-[110] size-9 cursor-pointer rounded-full bg-dark-300 fill-light-600 hover:bg-dark-400 hover:fill-light-900 focus:outline-none">
         <NotificationIcon height="20px" width="20px" />
         {unreadCount > 0 ? (
           <span className="absolute -right-1 -top-1 flex min-h-5 min-w-5 items-center justify-center rounded-full bg-primary-500 px-1 text-[10px] font-semibold text-light-900">
@@ -253,7 +259,9 @@ function NotificationSheet({ data }: { data: any[] }) {
             ))}
 
             {notifications.length === 0 ? (
-              <p className="pt-6 text-sm text-light-500">No notifications found</p>
+              <p className="pt-6 text-sm text-light-500">
+                No notifications found
+              </p>
             ) : null}
 
             {notifications.length > 0 && hasMore ? (
@@ -291,7 +299,7 @@ function NotificationSheet({ data }: { data: any[] }) {
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
-              className="bg-primary-500 text-light-900 hover:bg-primary-600"
+              className="bg-primary-500 text-light-900 hover:bg-primary-500"
               onClick={confirmDeleteNotification}
             >
               Delete
@@ -318,7 +326,7 @@ function NotificationSheet({ data }: { data: any[] }) {
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
-              className="bg-primary-500 text-light-900 hover:bg-primary-600"
+              className="hover:bg-primary-600 bg-primary-500 text-light-900"
               onClick={() => {
                 setConfirmDeleteAll(false);
                 handleDeleteAll();

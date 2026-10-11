@@ -2,8 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import AllPostCard from "@/components/cards/AllPostCard";
-import { IComments, IPost } from "@/types/post.types";
-import { CommentCard, PostCard } from "@/components/cards";
+import { IPost } from "@/types/post.types";
 import { getUserPersonalInfoAction } from "./auth.action";
 import { getAuthHeaders, getSession } from "@/lib/session";
 import { resolveViewerIdAction } from "./tokenAndHeaders.action";
@@ -40,6 +39,42 @@ async function resolveRouteUserId(userOrToken: string | undefined) {
   }
 
   return userOrToken || "";
+}
+
+export async function createPostShareAction(
+  userId: string | undefined,
+  formData: unknown,
+  type: "POST" | "SHARE",
+  revalidatePathURL: string
+) {
+  console.log("formData", formData, userId, type, revalidatePathURL);
+
+  try {
+    const headers = await getAuthHeaders();
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/te-post`,
+      {
+        method: "POST",
+        headers,
+        body: JSON.stringify(formData),
+      }
+    );
+    const res = await response.json();
+    console.log("res", res);
+    if (res.status === "7400") {
+      revalidatePath(revalidatePathURL);
+      return res;
+    } else {
+      const data = {
+        status: 400,
+        message: "Could not upload post",
+      };
+      return data;
+    }
+  } catch (error) {
+    console.error("createPostShareAction failed:", error);
+    return {};
+  }
 }
 
 export async function getUserAllPostsAction(
@@ -202,70 +237,10 @@ export async function getPostByIdAction(
   }
 }
 
-export async function getPostCommentsAction(
-  postId: string | undefined,
-  _userId: string | undefined,
-  pageNo: number
-) {
-  try {
-    const headers = await getAuthHeaders();
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/comments?postId=${postId}&pageNo=${pageNo}&pageSize=${20}`,
-      {
-        cache: "no-store",
-        headers,
-      }
-    );
-    const res = await response.json();
-    if (res.status === "7400") {
-      const data = res.response;
-      return data.map((item: IComments, index: number) => (
-        <CommentCard key={index} commentCard={item} index={index} />
-      ));
-    } else {
-      const data = {
-        status: 400,
-        message: "Could not find post data",
-      };
-      return data;
-    }
-  } catch {}
-}
-
-export async function addPostCommentAction(
-  userId: string,
-  postId: string,
-  comment: string,
-  revalidatePathURL: string
-) {
-  const formData = {
-    userId,
-    postId,
-    comment,
-  };
-  try {
-    const headers = await getAuthHeaders();
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/comments`,
-      {
-        method: "POST",
-        headers,
-        body: JSON.stringify(formData),
-      }
-    );
-    const res = await response.json();
-    if (res.status === "7400") {
-      revalidatePath(revalidatePathURL);
-    }
-    return res;
-  } catch {}
-}
-
 export async function getAllPostsAction(
   pageNo: number,
   pageSize: number
-  // eslint-disable-next-line no-undef
-): Promise<JSX.Element[] | TPostActionError> {
+): Promise<IPost[] | TPostActionError> {
   try {
     const viewerId = await resolveViewerIdAction();
     const accessToken = await getSession();
@@ -278,7 +253,7 @@ export async function getAllPostsAction(
     }
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/home?&viewUserId=${viewerId}&userId=${viewerId}&pageNo=${pageNo}&pageSize=${pageSize}`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/home?viewUserId=${viewerId}&userId=${viewerId}&pageNo=${pageNo}&pageSize=${pageSize}`,
       {
         cache: "no-store",
         headers: {
@@ -297,19 +272,16 @@ export async function getAllPostsAction(
     const res = await response.json();
 
     if (res.status === "7400") {
-      const data = Array.isArray(res.response) ? res.response : [];
-      console.log("// [getAllPostsAction] res: //", data[0]);
-      return data.map((item: IPost, index: number) => (
-        <PostCard key={index} postFeedCard={item} index={index} />
-      ));
-    } else {
-      return {
-        status: 400,
-        message: res?.message || "Could not fetch all posts data",
-      };
+      return Array.isArray(res.response) ? res.response : [];
     }
+
+    return {
+      status: 400,
+      message: res?.message || "Could not fetch all posts data",
+    };
   } catch (error) {
     console.error("getAllPostsAction failed:", error);
+
     return {
       status: 500,
       message: "Something went wrong while loading the home feed.",

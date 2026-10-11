@@ -14,7 +14,6 @@ import {
   SaveIcon,
   SettingsIcon,
   SnapchatIcon,
-  SystemIcon,
   TikTokIcon,
   TwitterIcon,
   UploadIcon,
@@ -24,7 +23,6 @@ import {
 import { ITab, TConvertedSvgJsxProps } from "@/types/utils.types";
 import { AiOutlineLink } from "react-icons/ai";
 import { MdDelete, MdModeEdit } from "react-icons/md";
-import { RiUserSharedLine } from "react-icons/ri";
 
 export const LEVEL_VALUES = [
   { _id: "beginner", name: "Beginner" },
@@ -89,7 +87,7 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
     isLink: true,
   },
   {
-    icon: RiUserSharedLine,
+    icon: CommunityIcon,
     path: "/collaboration",
     name: "Collaboration",
     isLink: true,
@@ -98,12 +96,6 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
     icon: SaveIcon,
     path: "/saved-collection",
     name: "Saved Collection",
-    isLink: true,
-  },
-  {
-    icon: CommunityIcon,
-    path: "/community",
-    name: "Community",
     isLink: true,
   },
   {
@@ -373,5 +365,44 @@ export const SOCIAL_MEDIA_OPTIONS: ISocialMediaProps[] = [
     type: "portfolio",
     icon: LinkIcon,
     default: false,
+  },
+];
+
+export const RatioOptions = [
+  {
+    text: "16 : 9",
+    num: 169,
+    width: "1.7rem",
+    height: "1rem",
+  },
+  {
+    text: "4 : 3",
+    num: 43,
+    width: "1.2rem",
+    height: "1rem",
+  },
+  {
+    text: "3 : 2",
+    num: 32,
+    width: "1.5rem",
+    height: "1rem",
+  },
+  {
+    text: "1 : 1",
+    num: 11,
+    width: "1.1rem",
+    height: "1.1rem",
+  },
+  {
+    text: "3 : 4",
+    num: 34,
+    width: "1rem",
+    height: "1.4rem",
+  },
+  {
+    text: "2 : 3",
+    num: 23,
+    width: "1rem",
+    height: "1.5rem",
   },
 ];

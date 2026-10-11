@@ -13,7 +13,7 @@ import {
 
 export const getCategoryDetails = (name: string) => {
   switch (name) {
-    case "Sports & Fitness":
+    case "Sports":
       return {
         icon: HeadPhoneFillIcon,
         name,

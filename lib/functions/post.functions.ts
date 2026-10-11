@@ -1,7 +1,7 @@
 "use client";
 
+import { addCommentAction } from "@/actions/comment.action";
 import {
-  addPostCommentAction,
   addPostToBestWorkAction,
   removeFromBestWorkAction,
 } from "@/actions/post.action";
@@ -43,17 +43,12 @@ export async function handleRemoveFromProfile(
 }
 
 export async function handleCommentSubmit(
-  userId: string,
   postId: string,
   comment: string,
-  revalidatePathURL: string
+  revalidatePathURL?: string
 ) {
-  const res = await addPostCommentAction(
-    userId,
-    postId,
-    comment,
-    revalidatePathURL
-  );
+  const res = await addCommentAction(postId, comment);
+  console.log("Response of addCommentAction:", res);
   if (res.status === "7400") {
     toast.success("You commented on this post", { duration: 4000 });
   } else {

@@ -8,7 +8,7 @@ import { PostOptions } from "../options";
 import { PostUtilsButton } from "../buttons";
 import { PostFeedCarousel } from "../widgets";
 import { StarRating } from "../inputs";
-import { SaveCollectionModal } from "../modals";
+import { CommentModal, SaveCollectionModal } from "../modals";
 import { getProfileVisibilityState } from "@/lib/utils/profilePrivacy";
 
 interface Props {
@@ -92,7 +92,10 @@ const PostCard = ({ postFeedCard, index }: Props) => {
 
       <div className="flex items-center justify-between">
         <div className="flex gap-2">
-          <PostUtilsButton buttonFor="COMMENT" size="19px" />
+          <CommentModal
+            postId={postFeedCard._id}
+            numberOfComments={postFeedCard.totalComments}
+          />
           <PostUtilsButton buttonFor="SHARE" size="19px" />
           <SaveCollectionModal
             postId={postFeedCard._id}
@@ -119,8 +122,14 @@ const PostCard = ({ postFeedCard, index }: Props) => {
       </p>
 
       <div className="flex gap-2">
-        <p className="all-post-card-tags">{postFeedCard.about.mainCategory}</p>
-        <p className="all-post-card-tags">{postFeedCard.about.skill}</p>
+        {postFeedCard.about.mainCategory && (
+          <p className="all-post-card-tags">
+            {postFeedCard.about.mainCategory}
+          </p>
+        )}
+        {postFeedCard.about.skill && (
+          <p className="all-post-card-tags">{postFeedCard.about.skill}</p>
+        )}
       </div>
 
       <p className="line-clamp-3 text-justify text-[13px] text-light-700">

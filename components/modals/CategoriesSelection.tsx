@@ -22,6 +22,7 @@ const CategoriesSelection = ({ onClose, isOpen }: Props) => {
 
   async function fetchData() {
     const res: any = await getMainCategoriesAction();
+    console.log("res", res);
     if (res.status === "7400") {
       setCategories(res.response);
     }

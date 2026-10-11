@@ -14,11 +14,16 @@ import { Slider } from "@/components/ui/slider";
 import { Button } from "../ui/button";
 import { FaMinus, FaPlus } from "react-icons/fa";
 import getCroppedImg from "@/lib/utils/getCroppedImg";
+import { RatioOptions } from "@/constants";
 
 const CropImg = ({
   modalFor,
   media,
   handleCropComplete,
+  handleRatioChange,
+  setIsRatio,
+  isRatio,
+  isValues,
 }: TCropImgModalProps) => {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -56,7 +61,7 @@ const CropImg = ({
           setZoom(1);
           setCrop({ x: 0, y: 0 });
           handleCropComplete(img);
-          console.log(img, "cropped image---------");
+          // console.log(img, "cropped image---------");
         } else {
           return img;
         }
@@ -115,6 +120,35 @@ const CropImg = ({
             }}
           />
         )}
+        {modalFor === "post" && (
+          <Cropper
+            image={media.preview}
+            crop={crop}
+            zoom={zoom}
+            aspect={
+              isRatio.is16to9
+                ? 16 / 11
+                : isRatio.is4to3
+                  ? 4 / 3
+                  : isRatio.is3to2
+                    ? 3 / 2
+                    : isRatio.is1to1
+                      ? 1 / 1
+                      : isRatio.is3to4
+                        ? 3.6 / 4.495
+                        : isRatio.is2to3
+                          ? 2 / 3
+                          : 3.6 / 4.495
+            }
+            cropShape="rect"
+            onCropChange={setCrop}
+            onCropComplete={onCropComplete}
+            onZoomChange={setZoom}
+            showGrid={true}
+            maxZoom={4.6}
+            minZoom={1}
+          />
+        )}
       </div>
       <div className="flex-center w-full gap-2 p-4 pt-2">
         <div
@@ -139,6 +173,28 @@ const CropImg = ({
           <FaPlus />
         </div>
       </div>
+
+      {modalFor === "post" && !isValues && (
+        <div className="flex-center w-full gap-2 p-4">
+          {RatioOptions.map((item: any, index: number) => (
+            <div
+              key={index}
+              onClick={() => handleRatioChange?.(item.num)}
+              className="flex flex-col items-center text-sm text-light-850"
+            >
+              <p>{item.text}</p>
+              <div
+                style={{
+                  width: item.width,
+                  height: item.height,
+                }}
+                className="box-border rounded-sm border border-solid border-light-800 bg-light-500/50"
+              />
+            </div>
+          ))}
+        </div>
+      )}
+
       <footer className="flex w-full justify-end p-4">
         <Button
           onClick={() => getCroppedImage("show")}

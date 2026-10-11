@@ -18,6 +18,10 @@ export type TCropImgModalProps = {
   modalFor: "cover" | "profile" | "post";
   media: Media;
   handleCropComplete: (media: any) => void;
+  handleRatioChange?: (ratio: number) => void;
+  setIsRatio?: any;
+  isRatio?: any;
+  isValues?: boolean;
 };
 
 export type TCoverProfilePhotoProps = {

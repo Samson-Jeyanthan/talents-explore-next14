@@ -47,16 +47,17 @@ const Dropdown = ({
   resetFiled,
   isModal,
 }: Props) => {
-  const [selectedValue, setSelectedValue] = useState(value ?? "");
+  const [selectedValue, setSelectedValue] = useState(value || "");
 
   useEffect(() => {
-    setSelectedValue(value ?? "");
+    setSelectedValue(value || "");
   }, [value]);
 
   const handleOnChange = (_id: string, field: any) => {
     field.onChange(_id);
+    console.log(_id);
+    onValueChange?.(_id);
     setSelectedValue(_id);
-    onValueChange && onValueChange(_id);
   };
 
   return (
@@ -65,7 +66,9 @@ const Dropdown = ({
       name={inputName}
       render={({ field }) => (
         <FormItem className="w-full">
-          <FormLabel className="shad-auth_form_label">{formLabel}</FormLabel>
+          {formLabel && (
+            <FormLabel className="shad-auth_form_label">{formLabel}</FormLabel>
+          )}
           <FormControl>
             <Select
               value={selectedValue as string}

@@ -40,7 +40,7 @@ const LeftSidebar = () => {
 
   return (
     <>
-      <aside className="sticky inset-y-0 left-0 flex h-screen max-h-screen min-h-screen min-w-60 max-w-60 flex-col items-center justify-between bg-dark-100 py-6 max-lg:min-w-20 max-sm:hidden 2xl:py-8">
+      <aside className="!sticky !inset-y-0 left-0 flex !h-screen !min-h-screen min-w-60 max-w-60 flex-col items-center justify-between bg-dark-100 py-6 max-lg:min-w-20 max-sm:hidden 2xl:py-8">
         <div className="flex-center w-full flex-col gap-5 2xl:gap-8">
           <Image
             src="/assets/images/te-logo-expanded-light.png"

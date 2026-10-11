@@ -11,3 +11,6 @@ export { default as UserTagAndSearch } from "./UserTagAndSearch";
 export { default as SkillDropdown } from "./SkillDropdown";
 export { default as MyPhotosInput } from "./MyPhotosInput";
 export { default as SocialMediaInput } from "./SocialMediaInput";
+export { default as UsedToolsInput } from "./UsedToolsInput";
+export { default as CreditTagInput } from "./CreditTagInput";
+export { default as MediaInput } from "./MediaInput";

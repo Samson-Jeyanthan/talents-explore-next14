@@ -38,7 +38,10 @@ function AllPostCard({ allPostCard, index }: Prop) {
       viewport={{ amount: 0 }}
       className="relative flex w-full min-w-0 flex-col gap-3 rounded-[28px] border-2 border-dark-300 bg-dark-250 p-2 sm:flex-row"
     >
-      <Link href={postLink} className="relative h-60 w-full shrink-0 rounded-lg sm:w-[18rem] lg:w-[22rem]">
+      <Link
+        href={postLink}
+        className="relative h-60 w-full shrink-0 rounded-lg sm:w-72 lg:w-[22rem]"
+      >
         <span className="absolute left-3 top-3 flex gap-2 fill-white">
           {isPinned && <PinIcon height="18px" width="18px" />}
 
@@ -67,10 +70,10 @@ function AllPostCard({ allPostCard, index }: Prop) {
         </div>
       </Link>
 
-      <div className="flex min-w-0 w-full flex-col gap-2 pb-10 sm:w-3/5 sm:pb-0 2xl:w-4/6 2xl:gap-1">
+      <div className="flex w-full min-w-0 flex-col gap-2 pb-10 sm:w-3/5 sm:pb-0 2xl:w-4/6 2xl:gap-1">
         <Link
           href={postLink}
-          className="truncate cursor-pointer text-xl font-semibold capitalize text-light-900"
+          className="cursor-pointer truncate text-xl font-semibold capitalize text-light-900"
         >
           {allPostCard.about.title}
         </Link>
@@ -87,8 +90,12 @@ function AllPostCard({ allPostCard, index }: Prop) {
           {allPostCard.about.description}
         </p>
         <div className="absolute bottom-3 right-3 flex max-w-[calc(100%-1.5rem)] flex-wrap justify-end gap-2">
-          <RenderTag Icon="" name={allPostCard.about.mainCategory} />
-          <RenderTag Icon="" name={allPostCard.about.skill} />
+          {allPostCard.about.mainCategory && (
+            <RenderTag Icon="" name={allPostCard.about.mainCategory} />
+          )}
+          {allPostCard.about.skill && (
+            <RenderTag Icon="" name={allPostCard.about.skill} />
+          )}
         </div>
       </div>
 

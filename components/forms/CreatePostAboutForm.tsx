@@ -8,83 +8,21 @@ import {
   TextArea,
   UserTagAndSearch,
 } from "../inputs";
-import { UploadFormTooltip } from "../tooltips";
+import { ToolTip } from "../others";
 import { LEVEL_VALUES } from "@/constants";
-import {
-  getSkillsAction,
-  getStatesAction,
-  getSubCategoriesAction,
-} from "@/actions/utils.action";
-import { useState } from "react";
 
 const CreatePostAboutForm = ({
   form,
   langData,
   mainCategoryOptions,
   countryOptions,
+  fetchStates,
+  stateOptions,
+  fetchSubcategories,
+  subCategoryOptions,
+  fetchSkills,
+  skillOptions,
 }: any) => {
-  const [subCategoryOptions, setSubCategoryOptions] = useState([]);
-  const [skillOptions, setSkillOptions] = useState([]);
-  const [stateOptions, setStateOptions] = useState([]);
-
-  async function fetchSubcategories(mainCategory: string) {
-    form.resetField("subCategory");
-    form.setValue("skills", null);
-    form.setValue("skillLevel", null);
-    setSubCategoryOptions([]);
-    setSkillOptions([]);
-    try {
-      const res = await getSubCategoriesAction(mainCategory);
-      setSubCategoryOptions(
-        (res?.response || []).map((item: any) => ({
-          _id: item._id,
-          name: item.name,
-        }))
-      );
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
-  }
-
-  async function fetchSkills(subCategory: string) {
-    form.setValue("skills", null);
-    form.setValue("skillLevel", null);
-    setSkillOptions([]);
-    try {
-      const res = await getSkillsAction(subCategory);
-      const nextSkillOptions = (res?.response || []).map((item: any) => ({
-          _id: item._id,
-          name: item.name,
-        }));
-      setSkillOptions(nextSkillOptions);
-      if (nextSkillOptions.length === 0) {
-        form.setValue("skills", null);
-        form.setValue("skillLevel", null);
-      }
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
-  }
-
-  async function fetchStates(country: string) {
-    form.resetField("state");
-    setStateOptions([]);
-    try {
-      const res = await getStatesAction(country);
-      setStateOptions(
-        (res?.response || []).map((item: any) => ({
-          _id: item.state || item.name || item,
-          name: item.state || item.name || item,
-        }))
-      );
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
-  }
-
   return (
     <form className="flex w-full flex-col gap-6">
       <div className="flex w-full flex-col gap-2">
@@ -109,12 +47,12 @@ const CreatePostAboutForm = ({
           </p>
           <FormField
             control={form.control}
-            name="rating"
+            name="ownRating"
             render={({ field }) => (
               <FormItem className="!m-0 flex items-center justify-start gap-2 !p-0">
                 <FormControl>
                   <StarRating
-                    prevRatingValue={form.getValues("rating")}
+                    prevRatingValue={form.getValues("ownRating")}
                     ratingFor="UPLOAD"
                     authorId=""
                     revalidatePath=""
@@ -128,9 +66,9 @@ const CreatePostAboutForm = ({
       </div>
 
       <div className="flex w-full flex-col gap-2">
-        <UploadFormTooltip
+        <ToolTip
           title="Skills Info"
-          description="List individuals or contributors who participated in this work or post. include their titles and tag their names if applicable. Propper credit recognition is fosters a sense of community and collaboration"
+          description="Tell us what skills are showcased in this post. This helps people discover your work based on your expertise."
         />
 
         <Dropdown
@@ -157,10 +95,10 @@ const CreatePostAboutForm = ({
           <div className="flex w-full gap-4">
             <Dropdown
               form={form}
-              inputName="skills"
+              inputName="skill"
               placeholder="Select Skill Name"
               options={skillOptions}
-              value={form.getValues("skills")}
+              value={form.getValues("skill")}
               dependentFieldPlaceholder={"Please select sub category"}
               dependentFieldValue={form.getValues("subCategory") !== ""}
             />
@@ -176,9 +114,9 @@ const CreatePostAboutForm = ({
       </div>
 
       <div className="flex flex-col gap-2">
-        <UploadFormTooltip
+        <ToolTip
           title="Language Info"
-          description="List individuals or contributors who participated in this work or post. include their titles and tag their names if applicable. Propper credit recognition is fosters a sense of community and collaboration"
+          description="Tell us which languages are used in this post. This helps people understand and discover your content by language."
         />
         <Dropdown
           form={form}
@@ -197,7 +135,7 @@ const CreatePostAboutForm = ({
       </div>
 
       <div className="flex flex-col gap-2">
-        <UploadFormTooltip
+        <ToolTip
           title="Location Info"
           description="List individuals or contributors who participated in this work or post. include their titles and tag their names if applicable. Propper credit recognition is fosters a sense of community and collaboration"
         />
@@ -224,12 +162,22 @@ const CreatePostAboutForm = ({
         <p className="flex w-36 items-center gap-2 text-left text-sm text-light-800">
           Tags
         </p>
-        <UserTagAndSearch isTag={true} />
+        <FormField
+          control={form.control}
+          name="peopleTag"
+          render={({ field }) => (
+            <UserTagAndSearch
+              isTag={true}
+              fieldChange={field.onChange}
+              values={form.getValues("peopleTag")}
+            />
+          )}
+        />
         <FormInput
           form={form}
-          inputName="hashtag"
+          inputName="keywords"
           inputType="text"
-          placeholder="Add hashtags"
+          placeholder="Add hashtags ex- #art #design #coding"
         />
       </div>
     </form>

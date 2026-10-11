@@ -13,13 +13,13 @@ type Props = {
   className?: string;
 };
 
-const UploadForm = ({ title, description, className }: Props) => {
+const ToolTip = ({ title, description, className }: Props) => {
   return (
     <TooltipProvider delayDuration={200}>
       <Tooltip>
         <TooltipTrigger
           className={cn(
-            `-mb-1 flex w-36 items-center gap-2 text-left text-sm text-light-800`,
+            `mb-1 flex w-36 items-center gap-2 text-left text-sm text-light-800`,
             className
           )}
         >
@@ -37,4 +37,4 @@ const UploadForm = ({ title, description, className }: Props) => {
   );
 };
 
-export default UploadForm;
+export default ToolTip;

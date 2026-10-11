@@ -151,6 +151,9 @@ export type TPostProps = {
 export interface IComments {
   _id: string;
   comment: string;
+  isLiked: boolean;
+  totalLikes: number;
+  totalReplies: number;
   createdAt: string;
   author: {
     _id: string;
@@ -165,6 +168,20 @@ export interface IComments {
     coverImage: string | null;
     shortBio: string | null;
   };
+}
+
+export interface ICommentAuthor {
+  _id: string;
+  userName: string;
+  firstName: string;
+  lastName: string;
+  gender: string;
+  dob: string;
+  languageKnown: string;
+  professional: string;
+  profileImage: string | null;
+  coverImage: string | null;
+  shortBio: string | null;
 }
 
 export interface ISavedFolder {
@@ -218,3 +235,16 @@ export interface ISavedItem {
   postRating: number;
   shareLinkThumbnail: string | null;
 }
+
+export type TPostShareMedia = {
+  mediaType: string;
+  url: string;
+  urlKey: string;
+  thumbnailUrl: string;
+  thumbnailUrlKey: string;
+};
+
+export type TCredit = {
+  creditTitle: string;
+  peopleTag: [];
+};

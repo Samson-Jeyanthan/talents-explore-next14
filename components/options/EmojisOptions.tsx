@@ -24,7 +24,7 @@ const EmojisOptions = ({ onClick }: Props) => {
       <PopoverTrigger className="flex-center cursor-pointer rounded-full fill-light-500 p-2 hover:bg-dark-300 hover:fill-light-900">
         <SmilyIcon width={"18px"} height={"18px"} />
       </PopoverTrigger>
-      <PopoverContent className="flex w-max gap-1 rounded-full border-none bg-dark-300 p-1 text-xl">
+      <PopoverContent className="z-[110] flex w-max gap-1 rounded-full border-none bg-dark-300 p-1 text-xl">
         {emojiList.map((item, index) => (
           <PopoverClose
             key={index}

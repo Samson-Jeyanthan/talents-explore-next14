@@ -1,4 +1,4 @@
-import { getPostCommentsAction } from "@/actions/post.action";
+import { getCommentsAction } from "@/actions/comment.action";
 import { CommentInput } from "@/components/inputs";
 
 type Props = {
@@ -12,7 +12,7 @@ const Comments = async ({
   numberOfComments,
   canComment = true,
 }: Props) => {
-  const data = await getPostCommentsAction(params.id, "_", 1);
+  const data = await getCommentsAction(params.id, 1, true);
   if (data?.status === 400) return <p>Could not fetch comment data</p>;
   return (
     <section className="flex w-full flex-col gap-2">

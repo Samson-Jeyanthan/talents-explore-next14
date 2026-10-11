@@ -11,11 +11,7 @@ interface Props {
   onDelete: (notificationId: string) => void;
 }
 
-const NotificationCard = ({
-  notificationCard,
-  onOpen,
-  onDelete,
-}: Props) => {
+const NotificationCard = ({ notificationCard, onOpen, onDelete }: Props) => {
   return (
     <article
       className={`relative flex gap-3 rounded-[12px] border-2 p-3 ${
@@ -36,6 +32,9 @@ const NotificationCard = ({
         />
 
         <div className="flex w-full items-start justify-between gap-3">
+          {notificationCard?.status !== "2" ? (
+            <span className="absolute left-1.5 top-1.5 z-0 size-2 rounded-full bg-primary-500" />
+          ) : null}
           <div className="flex flex-col gap-[2px]">
             <div className="flex items-center gap-1">
               <p className="text-sm font-medium text-light-900">
@@ -53,10 +52,6 @@ const NotificationCard = ({
               {notificationCard?.message || "Open notification"}
             </p>
           </div>
-
-          {notificationCard?.status !== "2" ? (
-            <span className="mt-1 size-2 rounded-full bg-primary-500" />
-          ) : null}
         </div>
       </button>
 

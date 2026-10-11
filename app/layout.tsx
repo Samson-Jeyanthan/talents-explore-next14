@@ -30,7 +30,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning={true}
-      className={`${poppins.variable} top-0 bg-dark-200 font-sans`}
+      className={`${poppins.variable} relative top-0 bg-dark-200 font-sans`}
     >
       <body>
         <LoadingProvider>
