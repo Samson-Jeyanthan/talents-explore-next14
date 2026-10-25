@@ -4,6 +4,7 @@ import { FormControl, FormField, FormItem } from "../ui/form";
 import {
   Dropdown,
   FormInput,
+  ShareThumbnailInput,
   StarRating,
   TextArea,
   UserTagAndSearch,
@@ -22,10 +23,34 @@ const CreatePostAboutForm = ({
   subCategoryOptions,
   fetchSkills,
   skillOptions,
+  formType,
 }: any) => {
+  const isPost = formType === "POST";
   return (
     <form className="flex w-full flex-col gap-6">
       <div className="flex w-full flex-col gap-2">
+        {!isPost && (
+          <div className="mb-4 flex w-full items-center gap-4 rounded-lg border border-solid border-dark-300 p-4">
+            <FormField
+              control={form.control}
+              name="shareLinkThumbnail"
+              render={({ field }) => (
+                <ShareThumbnailInput
+                  fieldChange={field.onChange}
+                  values={form.getValues("shareLinkThumbnail")}
+                />
+              )}
+            />
+            <TextArea
+              form={form}
+              inputName="website"
+              placeholder="Share Link URL"
+              maxLength={500}
+              className="h-20 w-auto"
+            />
+          </div>
+        )}
+
         <FormInput
           form={form}
           inputName="title"
@@ -36,14 +61,15 @@ const CreatePostAboutForm = ({
         <TextArea
           form={form}
           inputName="description"
-          placeholder="Add description to your post"
-          maxLength={800}
+          placeholder={`${isPost ? "Add description to your work" : "Add description to share content"}`}
+          maxLength={1000}
           className="h-80"
         />
 
         <div className="flex-between gap-2">
           <p className="text-sm text-light-500">
-            Your rating to your work / post
+            Your rating{" "}
+            {isPost ? "to your work / post" : "for this share content"}
           </p>
           <FormField
             control={form.control}

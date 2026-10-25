@@ -1,6 +1,6 @@
 "use client";
 
-import { defaultMediaState, useImageSelection } from "@/lib/hooks/useMedia";
+import { defaultMediaState, useMediaSelection } from "@/lib/hooks/useMedia";
 import Image from "next/image";
 import React, { ChangeEvent, useRef, useState } from "react";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
@@ -13,8 +13,8 @@ const MediaInput = ({ fieldChange, values }: any) => {
   const [isOpen, setIsOpen] = useState(false);
   // const [mediaHeight, setMediaHeight] = useState("auto");
   const [activeIndex, setActiveIndex] = useState(0);
-  const { handleImageInput, media, resetMedia, error, setError, setMedia } =
-    useImageSelection();
+  const { handleMediaInput, media, resetMedia, error, setError, setMedia } =
+    useMediaSelection(true);
   const [isRatio, setIsRatio] = useState({
     is16to9: false,
     is4to3: false,
@@ -25,7 +25,7 @@ const MediaInput = ({ fieldChange, values }: any) => {
   });
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    handleImageInput(event);
+    handleMediaInput(event);
     if (!event.target.files) return; // Exit if no files are selected
     setIsOpen(true);
   };

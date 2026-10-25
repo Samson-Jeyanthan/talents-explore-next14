@@ -1,5 +1,6 @@
 "use client";
 
+import { getLanguagesAction } from "@/actions/utils.action";
 import { PostFilterForm, TalentsFilterForm } from "@/components/forms";
 import {
   Sheet,
@@ -10,17 +11,34 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SlEqualizer } from "react-icons/sl";
 
 const ExploreFilterSheet = ({
-  langData,
   professionData,
   countryData,
   stateData,
 }: any) => {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [langData, setLangData] = useState<{ _id: string; name: string }[]>([]);
+
+  async function fetchLangData() {
+    const data = await getLanguagesAction();
+    console.log("fetch-lang-data", data);
+
+    const langOptions = data?.response?.map((item: any) => ({
+      _id: item._id,
+      name: item.language,
+    }));
+
+    setLangData(langOptions ?? []);
+  }
+
+  useEffect(() => {
+    fetchLangData();
+  }, [open]);
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger className="flex-center h-11 w-[5.5rem] rounded-lg border-dark-400 bg-dark-250 text-lg text-light-500 hover:text-light-900">
@@ -42,11 +60,7 @@ const ExploreFilterSheet = ({
             onClose={() => setOpen(false)}
           />
         ) : (
-          <PostFilterForm
-            langData={langData}
-            professionData={professionData}
-            onClose={() => setOpen(false)}
-          />
+          <PostFilterForm langData={langData} onClose={() => setOpen(false)} />
         )}
       </SheetContent>
     </Sheet>

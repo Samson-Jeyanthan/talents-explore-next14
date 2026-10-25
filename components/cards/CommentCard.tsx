@@ -12,6 +12,7 @@ interface Prop {
   index: number;
   canReply?: boolean;
   handleIsReplyComment: (commentId: string, author: ICommentAuthor) => void;
+  commentType: "PAGE" | "MODAL";
 }
 
 const variants = {
@@ -24,6 +25,7 @@ const CommentCard = ({
   index,
   canReply,
   handleIsReplyComment,
+  commentType,
 }: Prop) => {
   const [replies, setReplies] = useState<IComments[]>([]);
   const [isReplyOpen, setIsReplyOpen] = useState(false);
@@ -85,6 +87,7 @@ const CommentCard = ({
           canReply={canReply}
           handleViewReplies={handleViewReplies}
           handleIsReplyComment={handleIsReplyComment}
+          commentType={commentType}
         />
 
         {isReplyOpen && (
@@ -99,6 +102,7 @@ const CommentCard = ({
                   commentDetails={reply}
                   canReply={canReply}
                   handleIsReplyComment={handleIsReplyComment}
+                  commentType={commentType}
                 />
               ))
             )}

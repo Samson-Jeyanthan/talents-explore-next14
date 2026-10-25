@@ -28,6 +28,9 @@ const ProfileTabs = ({
 }: ProfileTabsProps) => {
   const pathname = usePathname();
 
+  const currentPath = pathname.replace(/\/+$/, "");
+  const isProfileOverview = /^\/profile\/[^/]+\/[^/]+$/.test(currentPath);
+
   // const [active, setActive] = useState<Tab>(propTabs[0]);
   // const [tabs, setTabs] = useState<Tab[]>(propTabs);
 
@@ -49,7 +52,9 @@ const ProfileTabs = ({
       )}
     >
       {propTabs.map((tab, idx) => {
-        const isActive = pathname.includes(`/${tab.value}`);
+        const isActive = isProfileOverview
+          ? tab.title.toLowerCase() === "overview"
+          : currentPath.endsWith(`/${tab.value}`);
 
         return (
           <Link

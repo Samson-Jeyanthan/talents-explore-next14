@@ -22,8 +22,8 @@ type Props = {
   formLabel?: string;
   inputName: string;
   placeholder?: string;
-  options: { _id: string; name: string }[];
-  value: string | boolean | null | undefined;
+  options: { _id: string | number; name: string | number }[];
+  value: string | boolean | number | null | undefined;
   formDescription?: string;
   // it is usefull for skils and countries related onChanges, bcz it is dependent on another field
   dependentFieldPlaceholder?: string;
@@ -65,7 +65,7 @@ const Dropdown = ({
       control={form.control}
       name={inputName}
       render={({ field }) => (
-        <FormItem className="w-full">
+        <FormItem className={`${isModal ? "-mt-2" : ""} w-full`}>
           {formLabel && (
             <FormLabel className="shad-auth_form_label">{formLabel}</FormLabel>
           )}
@@ -96,7 +96,7 @@ const Dropdown = ({
                   options?.map((option, index) => (
                     <SelectItem
                       key={index}
-                      value={option?._id && option?._id}
+                      value={String(option._id)}
                       className="shad-auth_form_select_item"
                     >
                       {option?.name}

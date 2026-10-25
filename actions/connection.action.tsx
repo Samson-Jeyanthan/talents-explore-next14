@@ -105,16 +105,31 @@ export async function getProfileRatingList(
         headers,
       }
     );
+
+    console.log("response", response);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch ratings: ${response.status}`);
+    }
+
     const res = await response.json();
-    const data = res.response;
-    return data;
-  } catch {}
+    console.log("res", res);
+    return res;
+  } catch (error) {
+    console.error("getProfileRatingList error:", error);
+    throw error;
+  }
 }
 
 export async function getProfileOverallRating(userId: string | undefined) {
   try {
+    const headers = await getAuthHeaders();
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/rating/splitup/${userId}`
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/rating/splitup/${userId}`,
+      {
+        cache: "no-store",
+        headers,
+      }
     );
     const res = await response.json();
     return res;

@@ -41,7 +41,7 @@ const SavedItemCard = ({ itemCard, index }: Props) => {
           />
         ) : (
           <Image
-            src={"/assets/images/sample-post-img.jpg"}
+            src={"/assets/images/default-save-folder.png"}
             width={1024}
             height={1024}
             className="max-h-[400px] min-h-[180px] w-full rounded-[20px] object-cover"
@@ -64,9 +64,6 @@ const SavedItemCard = ({ itemCard, index }: Props) => {
           {getFormattedDecimal(itemCard.postRating)}
         </span>
       </div>
-      {/* {itemCard.media[0]?.thumbnailUrl}
-      {itemCard.media.length}
-      {itemCard.postRating} */}
     </MotionDiv>
   );
 };

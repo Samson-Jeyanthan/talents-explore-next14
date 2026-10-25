@@ -4,8 +4,13 @@ import type { NextRequest } from "next/server";
 function isAccessTokenExpired(token: string) {
   try {
     const payload = token.split(".")[1];
-    const decoded = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/")));
-    return typeof decoded.exp !== "number" || Date.now() >= decoded.exp * 1000 - 60_000;
+    const decoded = JSON.parse(
+      atob(payload.replace(/-/g, "+").replace(/_/g, "/"))
+    );
+    return (
+      typeof decoded.exp !== "number" ||
+      Date.now() >= decoded.exp * 1000 - 60_000
+    );
   } catch {
     return true;
   }
@@ -31,6 +36,7 @@ export async function middleware(request: NextRequest) {
     "/collaboration",
     "/chat",
     "/create-post",
+    "/share",
     "/profile/edit",
     "/settings",
     "/share-something",
@@ -40,9 +46,15 @@ export async function middleware(request: NextRequest) {
   const protectAuthRoutes = ["/sign-in", "/join-us", "/forgot-password"];
 
   if (token && isAccessTokenExpired(token)) {
-    if (protectedRoutes.some((route) => pathname.startsWith(route)) && refreshToken) {
+    if (
+      protectedRoutes.some((route) => pathname.startsWith(route)) &&
+      refreshToken
+    ) {
       const refreshUrl = new URL("/api/auth/refresh", request.url);
-      refreshUrl.searchParams.set("next", `${pathname}${request.nextUrl.search}`);
+      refreshUrl.searchParams.set(
+        "next",
+        `${pathname}${request.nextUrl.search}`
+      );
       return NextResponse.redirect(refreshUrl);
     }
 

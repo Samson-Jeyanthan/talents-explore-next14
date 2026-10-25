@@ -4,9 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 
 type TDateSelectorProps = {
   isPresent?: boolean;
-  yearValue: any;
-  monthValue: any;
-  dayValue: any;
+  yearValue?: any;
+  monthValue?: any;
+  dayValue?: any;
 };
 
 type TDays = {

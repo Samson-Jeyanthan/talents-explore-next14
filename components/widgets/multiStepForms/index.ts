@@ -1,2 +1,2 @@
-export { default as ParentCreatePostForm } from "./ParentCreatePostForm";
+export { default as ParentCreatePostShareForm } from "./ParentCreatePostShareForm";
 export { default as EditProfileForm } from "./EditProfileForm";

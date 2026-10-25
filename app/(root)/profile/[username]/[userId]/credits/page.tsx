@@ -1,12 +1,12 @@
 import { getSession } from "@/lib/session";
-import { ProfileURLProps } from "../layout";
 import { getUserCreditPostsAction } from "@/actions/post.action";
 import AlertNote from "@/components/others/AlertNote";
 import { fetchUserDataAction } from "@/actions/user.action";
 import { getCurrentChatUserAction } from "@/actions/chat.action";
 import { getProfileVisibilityState } from "@/lib/utils/profilePrivacy";
+import { TProfileURLProps } from "@/types/utils.types";
 
-async function Credits({ params }: ProfileURLProps) {
+async function Credits({ params }: TProfileURLProps) {
   const userData = await fetchUserDataAction(params.userId, params.username);
   const currentUser = await getCurrentChatUserAction();
   const isOwnProfile = currentUser?._id === params.userId;
@@ -18,7 +18,11 @@ async function Credits({ params }: ProfileURLProps) {
   const visibility = getProfileVisibilityState(userData, isOwnProfile);
 
   if (!visibility.canViewSharedPosts) {
-    return <p className="text-light-900">This user&apos;s shared posts are private.</p>;
+    return (
+      <p className="text-light-900">
+        This user&apos;s shared posts are private.
+      </p>
+    );
   }
 
   const token = await getSession();
@@ -28,7 +32,9 @@ async function Credits({ params }: ProfileURLProps) {
     return <AlertNote />;
   }
 
-  return <section className="my-8 flex flex-col gap-4">{data}</section>;
+  return (
+    <section className="my-8 flex min-h-80 flex-col gap-4">{data}</section>
+  );
 }
 
 export default Credits;

@@ -174,26 +174,31 @@ const CropImg = ({
         </div>
       </div>
 
-      {modalFor === "post" && !isValues && (
-        <div className="flex-center w-full gap-2 p-4">
-          {RatioOptions.map((item: any, index: number) => (
-            <div
-              key={index}
-              onClick={() => handleRatioChange?.(item.num)}
-              className="flex flex-col items-center text-sm text-light-850"
-            >
-              <p>{item.text}</p>
+      <div className="flex-center w-full">
+        {modalFor === "post" && !isValues && (
+          <div className="flex-center my-3 w-max rounded-md bg-dark-300">
+            {RatioOptions.map((item: any, index: number) => (
               <div
-                style={{
-                  width: item.width,
-                  height: item.height,
-                }}
-                className="box-border rounded-sm border border-solid border-light-800 bg-light-500/50"
-              />
-            </div>
-          ))}
-        </div>
-      )}
+                key={index}
+                onClick={() => handleRatioChange?.(item.num)}
+                className={`
+                 ${
+                   index === 0
+                     ? "rounded-l-lg border"
+                     : `${
+                         index === RatioOptions.length - 1
+                           ? "rounded-r-lg border-y border-r"
+                           : "border-y border-r"
+                       }`
+                 }
+                     cursor-pointer border-light-850 p-[5px] px-3 text-center text-sm text-light-850 hover:bg-light-850  hover:text-dark-100`}
+              >
+                {item.text}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       <footer className="flex w-full justify-end p-4">
         <Button

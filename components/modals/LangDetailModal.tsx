@@ -40,6 +40,11 @@ const LangDetailModal = ({
   // const [open, setOpen] = useState(false);
   const [langDataOptions, setLangDataOptions] = useState<LangDataOption[]>([]);
 
+  useEffect(() => {
+    console.log(data);
+    // fetchLangData();
+  }, []);
+
   async function fetchLangData() {
     const data = await getLanguagesAction();
     const options: LangDataOption[] = data.response.map((item: any) => ({
@@ -69,7 +74,7 @@ const LangDetailModal = ({
   const form = useForm<z.infer<typeof languageValidation>>({
     resolver: zodResolver(languageValidation),
     defaultValues: {
-      languageId: data?.languageName || "",
+      languageId: data?.language || "",
       languageName: data?._id || "",
       languageLevel: data?.level || "",
     },

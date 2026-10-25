@@ -1,14 +1,11 @@
 "use server";
 
-import { CommentCard } from "@/components/cards";
 import { getAuthHeaders } from "@/lib/session";
-import { IComments } from "@/types/post.types";
 import { revalidatePath } from "next/cache";
 
 export async function getCommentsAction(
   postId: string | undefined,
-  pageNo: number,
-  returnAsCard: boolean
+  pageNo: number
 ) {
   try {
     const headers = await getAuthHeaders();
@@ -22,11 +19,7 @@ export async function getCommentsAction(
     const res = await response.json();
     if (res.status === "7400") {
       const data = res.response;
-      if (returnAsCard) {
-        return data.map((item: IComments, index: number) => (
-          <CommentCard key={index} commentDetails={item} index={index} />
-        ));
-      }
+
       const result = {
         status: 200,
         response: data,
@@ -36,6 +29,7 @@ export async function getCommentsAction(
       const data = {
         status: 400,
         message: "Could not find comments",
+        response: [],
       };
       return data;
     }

@@ -153,6 +153,7 @@ function UserTagAndSearch({
                     <Link
                       href={`/profile/${item.personalInfo.firstName}/${item._id}`}
                       className="flex items-center gap-3 p-2 px-3 text-light-500 hover:bg-dark-300 hover:text-light-800"
+                      onClick={() => setTypingVal("")}
                     >
                       <UserProfileImg
                         userName={item.personalInfo.firstName}

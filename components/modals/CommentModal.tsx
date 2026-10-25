@@ -42,10 +42,10 @@ const CommentModal = ({
 
   async function fetchCommentData() {
     try {
-      const res = await getCommentsAction(postId, 1, false);
-      if (res.status === 200) {
-        console.log(res.response);
-        setData(res.response);
+      const res = await getCommentsAction(postId, 1);
+      if (res?.status === 200) {
+        console.log(res?.response);
+        setData(res?.response);
       } else {
         toast.error("Couldn't fetch comments ", { duration: 4000 });
         return false;
@@ -106,6 +106,7 @@ const CommentModal = ({
                   index={index}
                   canReply={canComment}
                   handleIsReplyComment={handleIsReplyComment}
+                  commentType="MODAL"
                   // isReplyOpen={isReplyOpen}
                   // setIsReplyOpen={setIsReplyOpen}
                 />

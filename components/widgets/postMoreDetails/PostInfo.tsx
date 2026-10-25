@@ -27,7 +27,7 @@ const PostInfo = ({ postData }: Props) => {
       <h2 className="font-medium text-light-900">Description</h2>
       <div
         ref={postDescRef}
-        className={`${isSeeMore ? "[h-300px]" : "h-max"} w-full overflow-hidden border border-solid border-custom-200 transition-all duration-300 ease-in-out`}
+        className={`${isSeeMore ? "[h-300px]" : "h-max"} w-full overflow-hidden transition-all duration-300 ease-in-out`}
       >
         <div className="text-justify">
           {addLineBreaks(postData.about.description)}

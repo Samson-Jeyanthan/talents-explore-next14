@@ -75,7 +75,6 @@ export type TPeopleTagSearch = {
 };
 export interface ISearchProps {
   searchType: "ALL" | "FEED" | "SHARE" | "TALENT" | "CREDITS";
-  userId: string;
   viewUserId?: string;
   pageNo: number;
   pageSize: number;
@@ -94,7 +93,7 @@ export interface ISearchProps {
   state?: string;
   creditTitle?: string;
   creditPeopleTag?: string;
-  resultTime?: string;
+  resultTime?: "one month" | "six month" | "one year" | "two year";
   userRating?: number;
   userGender?: string;
   ethnic?: string;

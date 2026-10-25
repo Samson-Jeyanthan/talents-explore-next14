@@ -7,3 +7,6 @@ export { default as CreatePostAboutForm } from "./CreatePostAboutForm";
 export { default as CreatePostCreditForm } from "./CreatePostCreditForm";
 export { default as EditPersonalInfoForm } from "./EditPersonalInfoForm";
 export { default as EditProInfoForm } from "./EditProInfoForm";
+export { default as LanguageEditForm } from "./LanguageEditForm";
+export { default as EductionEditForm } from "./EductionEditForm";
+export { default as AwardEditForm } from "./AwardEditForm";

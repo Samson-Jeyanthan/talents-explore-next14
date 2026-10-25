@@ -1,3 +1,5 @@
+"use client";
+
 import {
   IEducation,
   ILanguage,
@@ -7,21 +9,24 @@ import { MotionDiv } from "../others/MotionDiv";
 import { ProInfoEditOptions } from "../options";
 
 interface EProp {
-  userEducationCard: IEducation;
+  data: IEducation;
   index: number;
   length: number;
+  dataArray?: IEducation[];
 }
 
 interface LProp {
-  userLangCard: ILanguage;
+  data: ILanguage;
   index: number;
   length: number;
+  dataArray?: ILanguage[];
 }
 
 interface AProp {
-  userAwardCard: IAwardsOrCertificate;
+  data: IAwardsOrCertificate;
   index: number;
   length: number;
+  dataArray?: IAwardsOrCertificate[];
 }
 
 const variants = {
@@ -29,7 +34,7 @@ const variants = {
   visible: { opacity: 1 },
 };
 
-export const EducationCard = ({ userEducationCard, index, length }: EProp) => {
+export const EducationCard = ({ data, index, length, dataArray }: EProp) => {
   return (
     <MotionDiv
       variants={variants}
@@ -43,25 +48,26 @@ export const EducationCard = ({ userEducationCard, index, length }: EProp) => {
       viewport={{ amount: 0 }}
       className={`${index < length - 1 ? "border-b-2 border-dark-400" : ""} professional-info-card`}
     >
-      <h1 className="max-w-[85%] text-[13px] text-light-900">
-        {userEducationCard.course}
-      </h1>
-      <h2 className="text-[13px] text-light-500">
-        {userEducationCard.institution}
-      </h2>
+      <h1 className="max-w-[85%] text-[13px] text-light-900">{data.course}</h1>
+      <h2 className="text-[13px] text-light-500">{data.institution}</h2>
       <div className="flex items-center gap-2 text-xs text-light-500">
-        <p>{userEducationCard.from}</p>
+        <p>{data.from}</p>
         <p>-</p>
-        <p>{userEducationCard.to}</p>
+        <p>{data.to}</p>
       </div>
       <div className="pro-info-options-wrap">
-        <ProInfoEditOptions id={userEducationCard._id} cardName="education" />
+        <ProInfoEditOptions
+          cardName="education"
+          selectedIndex={index}
+          data={data}
+          dataArray={dataArray}
+        />
       </div>
     </MotionDiv>
   );
 };
 
-export const LanguageCard = ({ userLangCard, index, length }: LProp) => {
+export const LanguageCard = ({ index, length, data, dataArray }: LProp) => {
   return (
     <MotionDiv
       variants={variants}
@@ -76,17 +82,22 @@ export const LanguageCard = ({ userLangCard, index, length }: LProp) => {
       className={`${index < length - 1 ? "border-b-2 border-dark-400" : ""}  professional-info-card`}
     >
       <h1 className="max-w-[85%] text-[13px] text-light-900">
-        {userLangCard.languageName}
+        {data.languageName}
       </h1>
-      <p className="text-xs text-light-500">{userLangCard.level}</p>
+      <p className="text-xs text-light-500">{data.level}</p>
       <div className="pro-info-options-wrap">
-        <ProInfoEditOptions cardName="language" data={userLangCard} />
+        <ProInfoEditOptions
+          cardName="language"
+          selectedIndex={index}
+          data={data}
+          dataArray={dataArray}
+        />
       </div>
     </MotionDiv>
   );
 };
 
-export const AwardCard = ({ userAwardCard, index, length }: AProp) => {
+export const AwardCard = ({ data, index, length, dataArray }: AProp) => {
   return (
     <MotionDiv
       variants={variants}
@@ -101,13 +112,16 @@ export const AwardCard = ({ userAwardCard, index, length }: AProp) => {
       className={`${index < length - 1 ? "border-b-2 border-dark-400" : ""} 
       professional-info-card`}
     >
-      <h1 className="max-w-[85%] text-[13px] text-light-900">
-        {userAwardCard.name}
-      </h1>
-      <p className="text-xs text-light-500">{userAwardCard.givenBy}</p>
-      <p className="text-xs text-light-500">{userAwardCard.year}</p>
+      <h1 className="max-w-[85%] text-[13px] text-light-900">{data.name}</h1>
+      <p className="text-xs text-light-500">{data.givenBy}</p>
+      <p className="text-xs text-light-500">{data.year}</p>
       <div className="pro-info-options-wrap">
-        <ProInfoEditOptions id={userAwardCard._id} cardName="award" />
+        <ProInfoEditOptions
+          cardName="award"
+          selectedIndex={index}
+          data={data}
+          dataArray={dataArray}
+        />
       </div>
     </MotionDiv>
   );

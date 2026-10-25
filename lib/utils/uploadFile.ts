@@ -7,14 +7,17 @@ export type UploadedFile = {
 export async function uploadFileToStorage(
   file: File,
   prefix: string,
-  userName: string,
+  userName: string
 ): Promise<UploadedFile> {
   const extension = file.name.split(".").pop() || "file";
   const fileName = `${prefix}-${userName || "user"}-${Date.now()}.${extension}`;
   const signedUrlResponse = await fetch("/api/s3/signedUrl", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ fileName, contentType: file.type || "application/octet-stream" }),
+    body: JSON.stringify({
+      fileName,
+      contentType: file.type || "application/octet-stream",
+    }),
   });
 
   if (!signedUrlResponse.ok) {
@@ -22,6 +25,7 @@ export async function uploadFileToStorage(
   }
 
   const signedUrlData = await signedUrlResponse.json();
+  console.log("signedUrlData", signedUrlData);
   const signedUrl = signedUrlData?.url;
   const key = signedUrlData?.key;
   if (typeof signedUrl !== "string" || typeof key !== "string") {
@@ -33,5 +37,9 @@ export async function uploadFileToStorage(
     throw new Error("Unable to upload the attachment.");
   }
 
+  console.log("uploadResponse", uploadResponse);
+  console.log("signedUrl", signedUrl);
+
   return { key, url: signedUrl.split("?")[0] };
+  // url: signedUrl.split("?")[0]
 }

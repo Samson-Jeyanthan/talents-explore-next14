@@ -43,7 +43,6 @@ export async function searchPeopleTag(
 
 export async function searchAction({
   searchType,
-  userId,
   viewUserId,
   pageNo,
   pageSize,
@@ -74,7 +73,7 @@ export async function searchAction({
     const queryParams = new URLSearchParams();
 
     queryParams.append("searchType", searchType);
-    queryParams.append("userId", userId);
+    // queryParams.append("userId", userId);
     queryParams.append("pageNo", pageNo.toString());
     queryParams.append("pageSize", pageSize.toString());
 
@@ -120,7 +119,20 @@ export async function searchAction({
       throw new Error(`Error: ${response.statusText}`);
     }
 
-    return await response.json();
+    const res = await response.json();
+    if (res.status === "7400") {
+      return {
+        status: res.status,
+        response: res.response,
+        message: res.message,
+      };
+    } else {
+      return {
+        status: 400,
+        response: null,
+        message: "Something went wrong",
+      };
+    }
   } catch (error) {
     // Handle any errors
     console.error("Search API call failed:", error);

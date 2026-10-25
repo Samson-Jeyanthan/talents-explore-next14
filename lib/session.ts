@@ -57,7 +57,7 @@ function getTokenPair(payload: unknown): TokenPair | null {
 
 export async function createSession(
   accessToken: string,
-  refreshToken: string,
+  refreshToken: string
 ): Promise<{ success: boolean }> {
   try {
     const cookieStore = await cookies();
@@ -110,7 +110,7 @@ export async function clearSession(): Promise<{ success: boolean }> {
 
 async function requestRefreshToken(
   refreshToken: string,
-  accessToken: string,
+  accessToken: string
 ): Promise<TokenPair | null> {
   const endpoint = process.env.NEXT_PUBLIC_BACKEND_URL;
   if (!endpoint) {
@@ -147,9 +147,11 @@ export async function refreshSession(): Promise<TokenPair | null> {
   const pending = refreshInFlight.get(refreshToken);
   if (pending) return pending;
 
-  const refreshPromise = requestRefreshToken(refreshToken, accessToken).finally(() => {
-    refreshInFlight.delete(refreshToken);
-  });
+  const refreshPromise = requestRefreshToken(refreshToken, accessToken).finally(
+    () => {
+      refreshInFlight.delete(refreshToken);
+    }
+  );
   refreshInFlight.set(refreshToken, refreshPromise);
 
   const tokens = await refreshPromise;
@@ -187,4 +189,14 @@ export async function storeIsAbout(isAbout: boolean) {
 export async function checkIsAbout() {
   const cookieStore = await cookies();
   return cookieStore.get(COOKIE_NAMES.isAbout)?.value === "true";
+}
+
+export async function getCurrentUserId() {
+  const session = await getSession();
+
+  if (session) {
+    const res = jwtDecode(session);
+    console.log(res, "jwt-decode");
+    return res.sub;
+  }
 }

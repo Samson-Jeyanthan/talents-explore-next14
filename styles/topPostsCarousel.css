@@ -6,15 +6,15 @@
   max-width: 50.5rem;
   margin: auto;
   --slide-height: 14rem;
-  --slide-spacing: 1rem;
+  --slide-spacing: 0rem;
   --slide-size: 42%;
 }
 .embla__two {
   max-width: 60rem;
   margin: auto;
   --slide-height: 14rem;
-  --slide-spacing: 1rem;
-  --slide-size: 50%;
+  --slide-spacing: -1rem;
+  --slide-size: 45%;
 }
 .embla__viewport {
   overflow: hidden;
@@ -22,6 +22,7 @@
 }
 .embla__container {
   display: flex;
+  gap: 5px;
   touch-action: pan-y pinch-zoom;
   margin-left: calc(var(--slide-spacing) * -1);
 }

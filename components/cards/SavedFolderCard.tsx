@@ -50,7 +50,7 @@ async function SavedFolderCard({ folderCard, userId, index }: Props) {
           src={
             itemsOfFolder[0]?.media[0]?.mediaType === "image"
               ? mediaUrl
-              : "/assets/images/sample-post-img.jpg"
+              : "/assets/images/default-save-folder.png"
           }
           width={512}
           height={512}
@@ -67,7 +67,7 @@ async function SavedFolderCard({ folderCard, userId, index }: Props) {
         src={
           itemsOfFolder[0]?.media[0]?.mediaType === "image"
             ? mediaUrl
-            : "/assets/images/save-folder-default-bg.png"
+            : "/assets/images/default-save-folder.png"
         }
         width={512}
         height={512}

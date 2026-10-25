@@ -5,6 +5,8 @@ import AlertNote from "@/components/others/AlertNote";
 import { fetchUserDataAction } from "@/actions/user.action";
 import { getCurrentChatUserAction } from "@/actions/chat.action";
 import { getProfileVisibilityState } from "@/lib/utils/profilePrivacy";
+import { CameraIcon } from "@/public/assets/svgs";
+import { EmptyDetails } from "@/components/others";
 
 async function AllPosts({ params }: TProfileURLProps) {
   const userData = await fetchUserDataAction(params.userId, params.username);
@@ -18,7 +20,9 @@ async function AllPosts({ params }: TProfileURLProps) {
   const visibility = getProfileVisibilityState(userData, isOwnProfile);
 
   if (!visibility.canViewPosts) {
-    return <p className="text-light-900">This user&apos;s posts are private.</p>;
+    return (
+      <p className="text-light-900">This user&apos;s posts are private.</p>
+    );
   }
 
   const token = await getSession();
@@ -29,8 +33,18 @@ async function AllPosts({ params }: TProfileURLProps) {
   }
 
   return (
-    <section className="my-8 flex min-h-96 w-full flex-col gap-4">
-      {data.length > 0 ? data : <p className="text-light-900">NO DATA FOUND</p>}
+    <section className="my-8 flex min-h-80 w-full flex-col gap-4">
+      {data.length > 0 ? (
+        data
+      ) : (
+        <div className="flex w-full justify-center pt-8">
+          <EmptyDetails
+            Icon={CameraIcon}
+            text="No Posts Available"
+            size="56px"
+          />
+        </div>
+      )}
     </section>
   );
 }

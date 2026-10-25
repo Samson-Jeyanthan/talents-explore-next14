@@ -7,6 +7,20 @@ export const languageValidation = z.object({
   languageLevel: z.string().min(1, { message: "Level is required" }),
 });
 
+export const awardValidation = z.object({
+  name: z.string().min(1, { message: "Award / Certificate Name is required" }),
+  givenBy: z.string().min(1, { message: "Given By is required" }),
+  year: z.string().min(1, { message: "Year is required" }),
+  certificate: z.custom<File>().optional(),
+});
+
+export const educationValidation = z.object({
+  course: z.string().min(1, { message: "Course is required" }),
+  institution: z.string().min(1, { message: "Institution is required" }),
+  from: z.string().optional(),
+  to: z.string().optional(),
+});
+
 // export const EditProfileValidation = z
 //   .object({
 //     firstName: z.string().min(1, { message: "First name is required" }).trim(),

@@ -84,9 +84,10 @@ export default function Feed({ initialPosts }: FeedProps) {
 
   return (
     <div className="flex w-full max-w-xl flex-col gap-4 pb-8">
-      {posts.map((post, index) => (
-        <PostCard key={post._id ?? index} postFeedCard={post} index={index} />
-      ))}
+      {posts.length > 0 &&
+        posts.map((post, index) => (
+          <PostCard key={post._id ?? index} postFeedCard={post} index={index} />
+        ))}
 
       {/* Infinite scroll trigger */}
       <div

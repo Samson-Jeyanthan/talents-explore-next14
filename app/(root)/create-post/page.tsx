@@ -3,7 +3,7 @@ import {
   getLanguagesAction,
   getMainCategoriesAction,
 } from "@/actions/utils.action";
-import { ParentCreatePostForm } from "@/components/widgets/multiStepForms";
+import { ParentCreatePostShareForm } from "@/components/widgets/multiStepForms";
 
 const CreatePost = async () => {
   const langData = await getLanguagesAction();
@@ -12,10 +12,11 @@ const CreatePost = async () => {
 
   return (
     <section className="w-full py-8 2xl:max-w-screen-xl">
-      <ParentCreatePostForm
+      <ParentCreatePostShareForm
         langData={langData}
         mainCategoryData={mainCategoryData}
         countryData={countryData}
+        formType="POST"
       />
     </section>
   );

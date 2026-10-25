@@ -14,19 +14,14 @@ import qs from "query-string";
 
 type Props = {
   langData: any;
-  professionData: any;
   onClose: () => void;
 };
 
-function PostFilterForm({ langData, professionData, onClose }: Props) {
+function PostFilterForm({ langData, onClose }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const LangOptions = langData.response.map((item: any) => ({
-    _id: item._id,
-    name: item.language,
-  }));
 
-  // const professionOptions = professionData.response.map((item: any) => ({
+  // const professionOptions = langData.response.map((item: any) => ({
   //   _id: item._id,
   //   name: item.professional,
   // }));
@@ -98,20 +93,21 @@ function PostFilterForm({ langData, professionData, onClose }: Props) {
         className="mt-4 flex w-full flex-col gap-8"
       >
         <div className="explore-filter-h3-wrap">
-          <h3 className="explore-filter-h3">Categories</h3>
+          <h3 className="explore-filter-h3">Sub Categories</h3>
           <Dropdown
             form={form}
             value={form.getValues("primaryLanguage")}
             inputName="primaryLanguage"
             placeholder="Select primary language"
-            options={LangOptions}
+            options={langData.length > 0 ? langData : []}
+            isModal={true}
           />
           <Dropdown
             form={form}
             value={form.getValues("secondaryLanguage")}
             inputName="secondaryLanguage"
             placeholder="Select primary language"
-            options={LangOptions}
+            options={langData.length > 0 ? langData : []}
           />
         </div>
 
@@ -183,33 +179,33 @@ function PostFilterForm({ langData, professionData, onClose }: Props) {
             value={form.getValues("primaryLanguage")}
             inputName="primaryLanguage"
             placeholder="Select primary language"
-            options={LangOptions}
+            options={langData}
           />
           <Dropdown
             form={form}
             value={form.getValues("secondaryLanguage")}
             inputName="secondaryLanguage"
             placeholder="Select primary language"
-            options={LangOptions}
+            options={langData}
           />
         </div>
 
         <div className="explore-filter-h3-wrap">
           <h3 className="explore-filter-h3">Location</h3>
-          <Dropdown
+          {/* <Dropdown
             form={form}
             value={form.getValues("primaryLanguage")}
             inputName="primaryLanguage"
             placeholder="Select primary language"
-            options={LangOptions}
+            options={langData}
           />
           <Dropdown
             form={form}
             value={form.getValues("secondaryLanguage")}
             inputName="secondaryLanguage"
             placeholder="Select primary language"
-            options={LangOptions}
-          />
+            options={langData}
+          /> */}
         </div>
 
         <div className="explore-filter-h3-wrap">

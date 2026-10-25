@@ -16,6 +16,7 @@ import { getSession } from "@/lib/session";
 import { EmblaOptionsType } from "embla-carousel";
 import { getCurrentChatUserAction } from "@/actions/chat.action";
 import { getProfileVisibilityState } from "@/lib/utils/profilePrivacy";
+import { redirect } from "next/navigation";
 
 export const revalidate = 1800;
 
@@ -50,7 +51,12 @@ async function Post({ params }: TPostURLProps) {
   const session = await getSession();
   const userId = session || "no_user";
   const data: TPostProps = await getPostByIdAction(params.id, userId);
+  console.log("post-more-data", data);
   const currentUser = await getCurrentChatUserAction();
+
+  if (userId === "no_user") {
+    redirect("/sign-in");
+  }
 
   if (data?.status === 400) {
     return <NotFound />;

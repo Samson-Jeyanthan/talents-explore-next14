@@ -27,7 +27,7 @@ const ProfileCover = ({
       ) : null}
 
       <Image
-        src={coverPhoto || "/assets/images/sample-profile-cover-photo-5.jpg"}
+        src={coverPhoto || "/assets/images/default-profile-cover-img.png"}
         width={2048}
         height={1024}
         alt="cover photo"

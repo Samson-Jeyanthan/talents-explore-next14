@@ -18,7 +18,7 @@ export async function generateMetadata(
   parent: ResolvingMetadata
 ): Promise<Metadata> {
   const userData = await fetchUserDataAction(params.userId, params.username);
-
+  // const visibility = getProfileVisibilityState(userData, isOwnProfile);
   // optionally access and extend (rather than replace) parent metadata
   // const previousImages = (await parent).openGraph?.images || [];
 
@@ -53,7 +53,6 @@ async function layout({
 
   const res = await getUserPersonalInfoAction("");
   const currentUser = res?.response;
-  console.log(currentUser, " // current-user //");
 
   const isOwnProfile = currentUser?._id === params.userId;
 

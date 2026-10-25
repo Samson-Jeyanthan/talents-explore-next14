@@ -2,7 +2,7 @@
 
 import React, { useRef, ChangeEvent } from "react";
 import Image from "next/image";
-import { useImageSelection } from "@/lib/hooks/useMedia";
+import { useMediaSelection } from "@/lib/hooks/useMedia";
 import { BiPlus } from "react-icons/bi";
 import { MdDelete } from "react-icons/md";
 
@@ -28,10 +28,10 @@ export const MyPhotosImgCard = ({ onClick, src, alt }: any) => {
 
 const MyPhotosInput = ({ prevURLs, setPrevURLs, values, fieldChange }: any) => {
   const myPhotoRefs = useRef<(HTMLInputElement | null)[]>([]); // Store refs as an array
-  const { handleImageInput, error } = useImageSelection();
+  const { handleMediaInput, error } = useMediaSelection(true);
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    handleImageInput(event);
+    handleMediaInput(event);
     console.log(error);
     if (!event.target.files) return; // Exit if no files are selected
 

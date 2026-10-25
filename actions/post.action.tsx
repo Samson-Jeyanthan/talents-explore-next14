@@ -44,13 +44,14 @@ async function resolveRouteUserId(userOrToken: string | undefined) {
 export async function createPostShareAction(
   userId: string | undefined,
   formData: unknown,
-  type: "POST" | "SHARE",
+  type: "POST" | "SHARELINK",
   revalidatePathURL: string
 ) {
   console.log("formData", formData, userId, type, revalidatePathURL);
 
   try {
     const headers = await getAuthHeaders();
+    console.log("headers", headers);
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/te-post`,
       {
@@ -59,8 +60,12 @@ export async function createPostShareAction(
         body: JSON.stringify(formData),
       }
     );
+
+    console.log("response", response);
+
     const res = await response.json();
     console.log("res", res);
+
     if (res.status === "7400") {
       revalidatePath(revalidatePathURL);
       return res;
@@ -73,7 +78,37 @@ export async function createPostShareAction(
     }
   } catch (error) {
     console.error("createPostShareAction failed:", error);
-    return {};
+
+    return {
+      status: 500,
+      message:
+        error instanceof Error ? error.message : "Unknown error occurred",
+    };
+  }
+}
+
+export async function getWebCrawlerLinkAction(url: string) {
+  try {
+    const headers = await getAuthHeaders();
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/website-link-crawler/${url}`,
+      {
+        cache: "no-store",
+        headers,
+      }
+    );
+    console.log("website-link-crawler response", response);
+    const res = await response.json();
+    console.log("website-link-crawler res", res);
+    return res;
+  } catch (error) {
+    console.error("getWebCrawlerLinkAction failed:", error);
+
+    return {
+      status: 500,
+      message:
+        error instanceof Error ? error.message : "Unknown error occurred",
+    };
   }
 }
 
@@ -252,8 +287,18 @@ export async function getAllPostsAction(
       };
     }
 
+    // const response = await fetch(
+    //   `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/home?viewUserId=${viewerId}&userId=${viewerId}&pageNo=${pageNo}&pageSize=${pageSize}`,
+    //   {
+    //     cache: "no-store",
+    //     headers: {
+    //       Authorization: `Bearer ${accessToken}`,
+    //     },
+    //   }
+    // );
+
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/home?viewUserId=${viewerId}&userId=${viewerId}&pageNo=${pageNo}&pageSize=${pageSize}`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/sharelinks?viewUserId=${viewerId}&userId=${viewerId}&pageNo=${pageNo}&pageSize=${pageSize}`,
       {
         cache: "no-store",
         headers: {

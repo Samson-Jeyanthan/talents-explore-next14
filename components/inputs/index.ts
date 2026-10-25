@@ -14,3 +14,5 @@ export { default as SocialMediaInput } from "./SocialMediaInput";
 export { default as UsedToolsInput } from "./UsedToolsInput";
 export { default as CreditTagInput } from "./CreditTagInput";
 export { default as MediaInput } from "./MediaInput";
+export { default as ShareThumbnailInput } from "./ShareThumbnailInput";
+export { default as CertificateInput } from "./CertificateInput";

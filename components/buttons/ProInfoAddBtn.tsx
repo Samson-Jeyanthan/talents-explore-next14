@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { ProDetailsModal } from "../modals";
-import { Dialog } from "../ui/dialog";
 import { TProfessionalDetailName } from "@/types/utils.types";
 import { IEducation } from "@/types/profile.types";
 import { useUserContext } from "@/context/AuthProvider";
@@ -30,15 +29,14 @@ const ProInfoAddBtn = ({ detailName, dataArray }: Prop) => {
         </p>
       )}
 
-      <Dialog open={open}>
-        <ProDetailsModal
-          isEdit={false}
-          detailModalFor={detailName}
-          onClick={() => setOpen(!open)}
-          dataArray={dataArray}
-          selectedIndex={dataArray.length}
-        />
-      </Dialog>
+      <ProDetailsModal
+        isEdit={false}
+        detailModalFor={detailName}
+        isOpen={open}
+        onClick={() => setOpen(!open)}
+        dataArray={dataArray}
+        selectedIndex={dataArray.length}
+      />
     </>
   );
 };

@@ -1,43 +1,52 @@
 "use client";
 
-import { DialogClose, DialogContent, DialogTitle } from "../ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogTitle } from "../ui/dialog";
 import { z } from "zod";
 import { MdClose } from "react-icons/md";
 import { TProfessionalDetailName } from "@/types/utils.types";
 import { useEffect, useState } from "react";
-import { IEducation } from "@/types/profile.types";
+import {
+  IAwardsOrCertificate,
+  IEducation,
+  ILanguage,
+} from "@/types/profile.types";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { languageValidation } from "@/lib/validations/profile.validation";
+import {
+  awardValidation,
+  educationValidation,
+  languageValidation,
+} from "@/lib/validations/profile.validation";
 import { Form } from "../ui/form";
-import { Dropdown } from "../inputs";
 import { getLanguagesAction } from "@/actions/utils.action";
-import { LEVEL_VALUES } from "@/constants";
+import {
+  editUserEducationInfoAction,
+  editUserLanguageInfoAction,
+} from "@/actions/user.action";
+import { toast } from "sonner";
+import { usePathname } from "next/navigation";
+import { AwardEditForm, EductionEditForm, LanguageEditForm } from "../forms";
 
 type Prop = {
   isEdit: boolean;
   detailModalFor: TProfessionalDetailName;
-  onClick: () => void;
-  dataArray: IEducation[] | any[];
+  isOpen: boolean;
+  onClick?: () => void;
+  data?: IEducation | ILanguage | IAwardsOrCertificate | any;
+  dataArray?: IEducation[] | ILanguage[] | IAwardsOrCertificate[] | any[];
   selectedIndex: number;
 };
 
 const ProDetailsModal = ({
   isEdit,
   detailModalFor,
+  isOpen,
   onClick,
+  data,
   dataArray,
   selectedIndex,
 }: Prop) => {
-  // education
-  // courseName: dataArray[selectedIndex]?.course || "",
-  // institutionName: dataArray[selectedIndex]?.institution || "",
-  // educationFrom: dataArray[selectedIndex]?.from || "",
-  // educationTo: dataArray[selectedIndex]?.to || "",
-  // award
-  // awardName: dataArray[selectedIndex]?.name || "",
-  // awardGivenBy: dataArray[selectedIndex]?.givenBy || "",
-  // awardDate: dataArray[selectedIndex]?.year || "",
+  const pathName = usePathname();
 
   // get the modal title
   const getTitle = () => {
@@ -59,65 +68,200 @@ const ProDetailsModal = ({
     }
   };
 
+  const languageForm = useForm<z.infer<typeof languageValidation>>({
+    resolver: zodResolver(languageValidation),
+    defaultValues: {
+      languageId: data?.languageId || "",
+      languageName: data?.languageName || "",
+      languageLevel: data?.level || "",
+    },
+  });
+
+  const educationForm = useForm<z.infer<typeof educationValidation>>({
+    resolver: zodResolver(educationValidation),
+    defaultValues: {
+      course: data?.course || "",
+      institution: data?.institution || "",
+      from: String(data?.from) || "",
+      to: String(data?.to) || "",
+    },
+  });
+
+  const awardForm = useForm<z.infer<typeof awardValidation>>({
+    resolver: zodResolver(awardValidation),
+    defaultValues: {
+      name: data?.name || "",
+      givenBy: data?.givenBy || "",
+      year: String(data?.year) || "",
+      certificate: undefined,
+    },
+  });
+
+  const handleClose = () => {
+    languageForm.reset();
+    educationForm.reset();
+    awardForm.reset();
+    onClick?.();
+  };
+
   // language related data and form initialization
   const [langData, setLangData] = useState<{ _id: string; name: string }[]>([]);
 
   async function fetchLangData() {
     const data = await getLanguagesAction();
-    setLangData(data);
-    console.log(data, "Lang data");
+
+    const langOptions = data?.response?.map((item: any) => ({
+      _id: item._id,
+      name: item.language,
+    }));
+
+    setLangData(langOptions ?? []);
   }
 
   useEffect(() => {
-    fetchLangData();
-  }, []);
+    if (
+      isOpen &&
+      (detailModalFor === "language" || detailModalFor === "languageEdit")
+    ) {
+      fetchLangData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [detailModalFor, isOpen]);
 
-  const languageForm = useForm<z.infer<typeof languageValidation>>({
-    resolver: zodResolver(languageValidation),
-    defaultValues: {
-      languageId: dataArray[selectedIndex]?.languageId || "",
-      languageName: dataArray[selectedIndex]?.languageName || "",
-      languageLevel: dataArray[selectedIndex]?.level || "",
-    },
-  });
+  // Language submit
+  async function handleLanguageSubmit(
+    values: z.infer<typeof languageValidation>
+  ) {
+    const existingLanguages = dataArray ?? [];
+    const formData = {
+      languageId: values.languageName,
+      level: values.languageLevel,
+    };
+
+    const updatedLanguages = isEdit
+      ? existingLanguages.map((lang: ILanguage) =>
+          lang._id === data?._id ? { ...lang, ...formData } : lang
+        )
+      : [...existingLanguages, formData];
+
+    const response = await editUserLanguageInfoAction({
+      formData: updatedLanguages,
+      path: pathName,
+    });
+
+    if (response?.status === "7400") {
+      toast.success(`Language ${isEdit ? "Updated" : "Added"} Successfully`, {
+        duration: 5000,
+      });
+      languageForm.reset();
+      onClick?.();
+    } else {
+      toast.error("Something went wrong, please try again", {
+        duration: 5000,
+      });
+    }
+  }
+
+  // Education submit
+  async function handleEducationSubmit(
+    values: z.infer<typeof educationValidation>
+  ) {
+    const existingEducations = dataArray ?? [];
+    const formData = {
+      course: values.course,
+      institution: values.institution,
+      from: values.from,
+      to: values.to,
+    };
+
+    const updatedEducations = isEdit
+      ? existingEducations.map((lang: IEducation) =>
+          lang._id === data?._id ? { ...lang, ...formData } : lang
+        )
+      : [...existingEducations, formData];
+
+    const response = await editUserEducationInfoAction({
+      formData: updatedEducations,
+      path: pathName,
+    });
+
+    if (response?.status === "7400") {
+      toast.success(`Education ${isEdit ? "Updated" : "Added"} Successfully`, {
+        duration: 5000,
+      });
+      educationForm.reset();
+      onClick?.();
+    } else {
+      toast.error("Something went wrong, please try again", {
+        duration: 5000,
+      });
+    }
+  }
+
+  // Award submit
+  async function handleAwardSubmit(values: z.infer<typeof awardValidation>) {
+    const existingAwards = dataArray ?? [];
+    const formData = {
+      name: values.name,
+      givenBy: values.givenBy,
+      year: values.year,
+      cretificateUrl: "",
+      certificateUrlKey: "",
+    };
+  }
 
   return (
-    <DialogContent
-      className="modal-content-container"
-      aria-describedby={undefined}
-      onFocus={() => {}}
-    >
-      <DialogTitle className="text-light-900">{getTitle()}</DialogTitle>
-
-      {detailModalFor === "language" && (
-        <Form {...languageForm}>
-          <form className="flex flex-col gap-2">
-            <Dropdown
-              form={languageForm}
-              value={languageForm.getValues("languageName")}
-              inputName="languageName"
-              placeholder="Select your known language"
-              options={langData.length > 0 ? langData : []}
-              isModal={true}
-            />
-            <Dropdown
-              form={languageForm}
-              value={languageForm.getValues("languageLevel")}
-              inputName="languageLevel"
-              placeholder="Select language level"
-              options={LEVEL_VALUES}
-              isModal={true}
-            />
-          </form>
-        </Form>
-      )}
-      <DialogClose
-        className="absolute -right-8 -top-8 cursor-pointer rounded-full bg-dark-400 p-[6px] text-light-900 focus:outline-none"
-        onClick={onClick}
+    <Dialog open={isOpen}>
+      <DialogContent
+        className="modal-content-container"
+        aria-describedby={undefined}
+        onFocus={() => {}}
       >
-        <MdClose className="text-2xl" />
-      </DialogClose>
-    </DialogContent>
+        <DialogTitle className="mb-2 border-b border-dark-400 pb-2 text-center text-light-900">
+          {getTitle()}
+        </DialogTitle>
+
+        {(detailModalFor === "language" ||
+          detailModalFor === "languageEdit") && (
+          <Form {...languageForm}>
+            <LanguageEditForm
+              isEdit={detailModalFor === "languageEdit"}
+              form={languageForm}
+              options={langData}
+              onSubmit={handleLanguageSubmit}
+            />
+          </Form>
+        )}
+
+        {(detailModalFor === "education" ||
+          detailModalFor === "educationEdit") && (
+          <Form {...educationForm}>
+            <EductionEditForm
+              isEdit={detailModalFor === "educationEdit"}
+              form={educationForm}
+              onSubmit={handleEducationSubmit}
+            />
+          </Form>
+        )}
+
+        {(detailModalFor === "award" || detailModalFor === "awardEdit") && (
+          <Form {...awardForm}>
+            <AwardEditForm
+              isEdit={detailModalFor === "awardEdit"}
+              form={awardForm}
+              onSubmit={handleAwardSubmit}
+            />
+          </Form>
+        )}
+
+        <DialogClose
+          className="absolute -right-8 -top-8 cursor-pointer rounded-full bg-dark-400 p-[6px] text-light-900 focus:outline-none"
+          onClick={handleClose}
+        >
+          <MdClose className="text-2xl" />
+        </DialogClose>
+      </DialogContent>
+    </Dialog>
   );
 };
 

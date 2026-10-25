@@ -17,7 +17,7 @@ const optionalSkillLevelField = z.preprocess(
   z.enum(["beginner", "intermediate", "advanced"]).nullable()
 );
 
-export const createPostValidation = z.object({
+export const createPostShareValidation = z.object({
   media: z.array(
     z.object({
       mediaType: z.enum(["image", "video"]),
@@ -72,4 +72,7 @@ export const createPostValidation = z.object({
       level: z.enum(["", "beginner", "intermediate", "advanced"]),
     })
   ),
+  // sharelink
+  website: z.string().optional(),
+  shareLinkThumbnail: z.custom<File>().optional(),
 });

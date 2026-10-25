@@ -1,5 +1,5 @@
-import { Media } from "@/types/utils.types";
 import { ChangeEvent, useState } from "react";
+import { Media } from "@/types/utils.types";
 
 export const defaultMediaState: Media = {
   data: null,
@@ -9,47 +9,61 @@ export const defaultMediaState: Media = {
   mediaType: "",
 };
 
-export function useImageSelection() {
+const imageTypes = ["image/jpeg", "image/png", "image/webp"];
+
+const maxFileSize = 8 * 1024 * 1024;
+
+export function useMediaSelection(isImageOnly: boolean) {
   const [error, setError] = useState("");
   const [media, setMedia] = useState<Media>(defaultMediaState);
 
-  const handleImageInput = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleMediaInput = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (
-      !["image/jpeg", "image/jpg", "image/png", "image/webp"].includes(
-        file.type
-      )
-    ) {
+    const isImage = imageTypes.includes(file.type);
+    const isPdf = file.type === "application/pdf";
+
+    if (!isImage && (isImageOnly || !isPdf)) {
       setError(
-        "Invalid file type. Please choose a file in JPEG, JPG, PNG or WEB format and try again."
+        isImageOnly
+          ? "Choose a JPEG, PNG, or WebP image."
+          : "Choose a JPEG, PNG, WebP image, or PDF."
       );
+      e.target.value = "";
       return;
     }
 
-    if (file.size > 1024 * 1024 * 8) {
-      setError(
-        `${file.name} is too large, maximum 8mb allowed. Please select another image or compress it.`
-      );
+    if (file.size > maxFileSize) {
+      setError(`${file.name} is too large. The maximum allowed size is 8 MB.`);
+      e.target.value = "";
       return;
     }
 
+    setError("");
     setMedia({
-      ...media,
       data: file,
       preview: URL.createObjectURL(file),
       fileType: file.type,
       fileName: file.name,
-      mediaType: "image",
+      mediaType: isPdf ? "pdf" : "image",
     });
+  };
+
+  const resetMedia = () => {
+    if (media.preview) {
+      URL.revokeObjectURL(media.preview);
+    }
+
+    setMedia(defaultMediaState);
+    setError("");
   };
 
   return {
     media,
     error,
-    handleImageInput,
-    resetMedia: () => setMedia(defaultMediaState),
+    handleMediaInput,
+    resetMedia,
     setError,
     setMedia,
   };

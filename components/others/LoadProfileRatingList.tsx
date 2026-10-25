@@ -8,6 +8,7 @@ import { getProfileRatingList } from "@/actions/connection.action";
 import RadialBar from "./RadialBar";
 import { fetchProfileOverallRating } from "@/lib/functions/connect.functions";
 import HorzBar from "./HorzBar";
+import { toast } from "sonner";
 
 function LoadProfileRatingList() {
   const params = useParams();
@@ -15,6 +16,7 @@ function LoadProfileRatingList() {
   const [data, setData] = useState<IRatingListProp[]>([]);
   const [isEnd, setIsEnd] = useState(false);
   const [page, setPage] = useState(1);
+
   const urlId: any = params.userId;
 
   const [isOverallListLoading, setIsOverallListLoading] = useState(true);
@@ -29,20 +31,32 @@ function LoadProfileRatingList() {
   });
 
   useEffect(() => {
-    if (!isEnd) {
-      if (inView) {
-        getProfileRatingList(urlId, page, 10).then((res) => {
-          setData([...data, ...res]);
-          if (res.length === 0) {
-            setIsEnd(true);
+    const fetchData = async () => {
+      if (!isEnd && inView) {
+        try {
+          const res = await getProfileRatingList(urlId, page, 10);
+
+          if (res.status === "7400") {
+            setData((prevData) => [...prevData, ...res.response]);
+            if (res.response.length === 0) {
+              setIsEnd(true);
+            } else {
+              setPage((prevPage) => prevPage + 1);
+            }
           } else {
-            setPage(page + 1);
+            toast.error("Could not fetch rating list", { duration: 4000 });
+            setIsEnd(true);
           }
-        });
+        } catch (error) {
+          console.log("Error fetching rating list:", error);
+          setIsEnd(true);
+        }
       }
-    }
+    };
+
+    fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inView, data, isEnd, page]);
+  }, [inView, isEnd, page]);
 
   useEffect(() => {
     fetchProfileOverallRating(setOverallList, urlId, setIsOverallListLoading);

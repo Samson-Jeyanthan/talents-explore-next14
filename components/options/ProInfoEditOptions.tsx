@@ -18,15 +18,21 @@ import { MdDelete, MdModeEdit } from "react-icons/md";
 import { ProInfoDeleteAlert } from "../alerts";
 import { useUserContext } from "@/context/AuthProvider";
 import { useParams } from "next/navigation";
-import { LangDetailModal } from "../modals";
+import { ProDetailsModal } from "../modals";
 
 type Props = {
-  // id: string;
+  selectedIndex: number;
   cardName: "award" | "education" | "language";
   data?: IEducation | ILanguage | IAwardsOrCertificate | any;
+  dataArray?: IEducation[] | ILanguage[] | IAwardsOrCertificate[] | any[];
 };
 
-const ProInfoEditOptions = ({ cardName, data }: Props) => {
+const ProInfoEditOptions = ({
+  cardName,
+  data,
+  selectedIndex,
+  dataArray,
+}: Props) => {
   const { user } = useUserContext();
   const params = useParams<{ username: string; userId: string }>();
   const isOwnProfile = user.currentUserId === params.userId;
@@ -66,16 +72,45 @@ const ProInfoEditOptions = ({ cardName, data }: Props) => {
           isOpen={isDelete}
           modalFor={cardName}
           onCancel={() => setIsDelete(false)}
+          selectedIndex={selectedIndex}
+          data={data}
+          dataArray={dataArray}
         />
       )}
 
       {isEdit && cardName === "language" && (
-        <LangDetailModal
+        <ProDetailsModal
           isEdit={true}
           isOpen={isEdit}
-          onClose={() => setIsEdit(false)}
+          detailModalFor="languageEdit"
+          onClick={() => setIsEdit(false)}
+          selectedIndex={selectedIndex}
           data={data}
-          selectedIndex={0}
+          dataArray={dataArray}
+        />
+      )}
+
+      {isEdit && cardName === "education" && (
+        <ProDetailsModal
+          isEdit={true}
+          isOpen={isEdit}
+          detailModalFor="educationEdit"
+          onClick={() => setIsEdit(false)}
+          selectedIndex={selectedIndex}
+          data={data}
+          dataArray={dataArray}
+        />
+      )}
+
+      {isEdit && cardName === "award" && (
+        <ProDetailsModal
+          isEdit={true}
+          isOpen={isEdit}
+          detailModalFor="awardEdit"
+          onClick={() => setIsEdit(false)}
+          selectedIndex={selectedIndex}
+          data={data}
+          dataArray={dataArray}
         />
       )}
     </>

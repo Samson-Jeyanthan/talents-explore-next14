@@ -80,7 +80,9 @@ const CommentInput = ({
   };
 
   return (
-    <div className="flex w-full flex-col rounded-b-2xl bg-dark-250">
+    <div
+      className={`${commentType === "MODAL" ? "rounded-b-2xl bg-dark-250" : ""} flex w-full flex-col`}
+    >
       {replyCommentId && (
         <div className="flex w-full items-center justify-between gap-2 border-t border-solid border-dark-300 px-4 py-2">
           <p className="flex gap-2 text-start text-[13px] text-light-500">
@@ -100,7 +102,7 @@ const CommentInput = ({
         </div>
       )}
       <div
-        className={`${commentType === "MODAL" ? "border-t px-4 pb-1 pt-3" : "border-b pb-4"} flex h-auto w-full items-center gap-3 rounded-b-3xl border-solid border-dark-300`}
+        className={`${commentType === "MODAL" ? "items-end rounded-b-3xl border-t border-solid px-4 pb-1 pt-3" : "items-start border-b pb-4"} flex h-auto w-full gap-3 border-dark-300`}
       >
         <UserProfileImg
           userName={user.username}
@@ -109,7 +111,7 @@ const CommentInput = ({
         />
         <EmojisOptions onClick={handleEmojiClick} />
         <div
-          className={`${commentType === "MODAL" ? "items-center" : "flex-col items-end "} flex w-full gap-3`}
+          className={`${commentType === "MODAL" ? "items-end" : "flex-col items-end "} flex w-full gap-3`}
         >
           <Textarea
             ref={textAreaRef}

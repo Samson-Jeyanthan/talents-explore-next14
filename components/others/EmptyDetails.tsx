@@ -10,7 +10,7 @@ type Props = {
 
 const EmptyDetails = ({ Icon, text, size }: Props) => {
   return (
-    <div className="flex flex-col items-center gap-4 fill-light-500/40 p-5 text-[13px] text-light-500/60">
+    <div className="flex flex-col items-center gap-3 fill-light-500/40 p-5 text-[13px] text-light-500/60">
       <Icon width={size} height={size} />
       <p className="text-center">{text}</p>
     </div>

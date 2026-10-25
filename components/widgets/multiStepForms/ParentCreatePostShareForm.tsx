@@ -2,14 +2,14 @@
 
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { FieldErrors, useForm } from "react-hook-form";
 import { z } from "zod";
 import { CreatePostAboutForm, CreatePostCreditForm } from "@/components/forms";
 import { TransparentLoader } from "@/components/modals";
 import { Button } from "@/components/ui/button";
 import Footer from "../Footer";
 import { Form, FormField } from "@/components/ui/form";
-import { createPostValidation } from "@/lib/validations/post.validation";
+import { createPostShareValidation } from "@/lib/validations/post.validation";
 import {
   getSkillsAction,
   getStatesAction,
@@ -26,15 +26,20 @@ import { useRouter } from "next/navigation";
 interface Props {
   langData: any;
   mainCategoryData: any;
-  subCategoryData?: any;
-  skillData?: any;
   countryData: any;
+  formType: "POST" | "SHARELINK";
 }
 
-const ParentCreatePostForm = ({
+type TShareLinkThumbnail = {
+  url: string;
+  urlKey: string;
+};
+
+const ParentCreatePostShareForm = ({
   langData,
   mainCategoryData,
   countryData,
+  formType,
 }: Props) => {
   const LangOptions = (langData?.response || []).map((item: any) => ({
     _id: item._id,
@@ -119,8 +124,8 @@ const ParentCreatePostForm = ({
     }
   }
 
-  const form = useForm<z.infer<typeof createPostValidation>>({
-    resolver: zodResolver(createPostValidation),
+  const form = useForm<z.infer<typeof createPostShareValidation>>({
+    resolver: zodResolver(createPostShareValidation),
     defaultValues: {
       media: [],
       title: "",
@@ -142,18 +147,47 @@ const ParentCreatePostForm = ({
       productionName: "",
       productionDate: "",
       toolsUsed: [],
+      // share form section
+      website: "",
+      shareLinkThumbnail: undefined,
     },
   });
 
-  async function onSubmit(values: z.infer<typeof createPostValidation>) {
-    // console.log("values", values);
+  const PAGE_ONE_FIELDS = [
+    "title",
+    "description",
+    "mainCategory",
+    "subCategory",
+    "skill",
+    "skillLevel",
+    "primaryLanguage",
+    "country",
+    "state",
+  ] as const;
 
+  const onInvalid = (
+    errors: FieldErrors<z.infer<typeof createPostShareValidation>>
+  ) => {
+    const hasPageOneErrors = PAGE_ONE_FIELDS.some(
+      (field) => errors[field] !== undefined
+    );
+
+    if (hasPageOneErrors) {
+      toast.error(
+        "Please complete the required fields on page 1 before submitting."
+      );
+    } else {
+      toast.error("Please check the form for validation errors.");
+    }
+  };
+
+  async function onSubmit(values: z.infer<typeof createPostShareValidation>) {
     const formData = {
-      type: "POST",
+      type: formType,
       userId: user?.currentUserId,
       media: [] as TPostShareMedia[],
-      website: null,
-      shareLinkThumbnail: null,
+      website: formType === "POST" ? null : values.website,
+      shareLinkThumbnail: null as TShareLinkThumbnail | null,
       about: {
         title: values.title,
         description: values.description,
@@ -162,33 +196,35 @@ const ParentCreatePostForm = ({
         skillId: values.skill,
         level: values.skillLevel,
         primaryLanguage: values.primaryLanguage,
-        secondaryLanguage: values.secondaryLanguage,
+        secondaryLanguage: values.secondaryLanguage
+          ? values.secondaryLanguage
+          : null,
         ownRating: values.ownRating,
         keywords: values.keywords,
         country: values.country,
         state: values.state,
         peopleTag: [] as any,
         productionName: values.productionName,
-        productionDate: values.productionDate,
+        productionDate: values.productionDate ? values.productionDate : null,
       },
       isCreditWork: values.isCreditWork === "true",
       credit: [] as TCredit[],
       toolsUsed: values.toolsUsed,
     };
 
+    console.log("form-data", formData, values.shareLinkThumbnail);
+
     // Media upload
     for (let i = 0; i < values.media.length; i++) {
       const postShareMediaKey = await uploadFileToStorage(
         values.media[i].croppedData,
-        user?.firstName,
-        "post-share"
+        formType === "POST" ? "POST" : "SHARELINK",
+        user?.username
       );
       const media = {
         mediaType: values.media[i].mediaType,
         url: postShareMediaKey.url,
         urlKey: postShareMediaKey.key,
-        thumbnailUrl: "",
-        thumbnailUrlKey: "",
       };
       formData.media.push(media);
     }
@@ -213,16 +249,36 @@ const ParentCreatePostForm = ({
       formData.credit.push(newCredit);
     }
 
+    // Share thumbnail upload
+    if (formType === "SHARELINK" && values.shareLinkThumbnail) {
+      const shareLinkThumbnailKey = await uploadFileToStorage(
+        values.shareLinkThumbnail,
+        "share",
+        user?.username
+      );
+
+      const shareLinkThumbnail = {
+        url: shareLinkThumbnailKey.url,
+        urlKey: shareLinkThumbnailKey.key,
+      };
+      formData.shareLinkThumbnail = shareLinkThumbnail;
+    }
+
     const res = await createPostShareAction(
       user.currentUserId,
       formData,
-      "POST",
+      formType === "POST" ? "POST" : "SHARELINK",
       "/home"
     );
     console.log("res", res);
     if (res.status === "7400") {
-      toast.success("Post created successfully", { duration: 4000 });
-      router.push("/home");
+      if (formType === "POST") {
+        toast.success("Post created successfully", { duration: 4000 });
+        router.push("/home");
+      } else {
+        toast.success("Share created successfully", { duration: 4000 });
+        router.push("/home");
+      }
     } else {
       toast.error("Something went wrong", { duration: 4000 });
     }
@@ -250,6 +306,7 @@ const ParentCreatePostForm = ({
           subCategoryOptions={subCategoryOptions}
           fetchSkills={fetchSkills}
           skillOptions={skillOptions}
+          formType={formType}
         />
       ),
     },
@@ -279,7 +336,9 @@ const ParentCreatePostForm = ({
           </form>
           <div className="flex w-full max-w-2xl flex-col gap-6">
             <header className="flex-between text-light-850">
-              <h1 className="text-3xl font-semibold">Create Post</h1>
+              <h1 className="text-3xl font-semibold">
+                {formType === "POST" ? "Create Post" : "Share Content"}
+              </h1>
               <div className="flex items-center gap-2 rounded-md bg-dark-300 px-3 py-1.5">
                 Step
                 <span className="text-sm text-light-500">
@@ -294,10 +353,10 @@ const ParentCreatePostForm = ({
                 <Button
                   type="submit"
                   disabled={form.formState.isSubmitting}
-                  onClick={form.handleSubmit(onSubmit)}
+                  onClick={form.handleSubmit(onSubmit, onInvalid)}
                   className="shad-button_primary"
                 >
-                  Upload
+                  {formType === "POST" ? "Upload Post" : "Upload Share"}
                 </Button>
               ) : (
                 <Button
@@ -329,4 +388,4 @@ const ParentCreatePostForm = ({
   );
 };
 
-export default ParentCreatePostForm;
+export default ParentCreatePostShareForm;

@@ -1,3 +1,4 @@
+import { searchAction } from "@/actions/search.action";
 import {
   getLanguagesAction,
   getProfessionsAction,
@@ -5,11 +6,21 @@ import {
 import { ExploreBgCarousel, ExploreSearchSection } from "@/components/widgets";
 import { EXPLORE_BG_IMAGES } from "@/constants";
 import { getNameOfCategory } from "@/lib/utils/ReactElementUtils";
+import Feed from "./feed";
 
-const TagPage = async ({ params }: { params: { id: string } }) => {
+const TagPage = async ({ params, searchParams }: any) => {
   const categoryData = await getNameOfCategory(params.id);
   const langData = await getLanguagesAction();
   const professionData = await getProfessionsAction();
+
+  const res = await searchAction({
+    searchType: "ALL",
+    pageNo: 1,
+    pageSize: 20,
+    primaryLanguage: searchParams.primaryLanguage,
+  });
+
+  console.log("res-of-category-search", res.response);
   return (
     <main className="flex w-full flex-col items-center justify-center">
       <header className="sticky top-14 w-full">
@@ -32,7 +43,7 @@ const TagPage = async ({ params }: { params: { id: string } }) => {
         </div>
       </header>
       <section className="z-30 -mt-5 w-full rounded-t-[30px] bg-dark-200 p-8 backdrop-blur-[80px]">
-        posts
+        <Feed initialPosts={res.response} />
       </section>
     </main>
   );
