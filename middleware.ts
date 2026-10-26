@@ -28,7 +28,7 @@ export async function middleware(request: NextRequest) {
   }
 
   const protectedRoutes = [
-    "/complete/profile",
+    "/complete-profile",
     "/home",
     "/saved-collection",
     "/settings",
@@ -41,6 +41,9 @@ export async function middleware(request: NextRequest) {
     "/settings",
     "/share-something",
     "/explore",
+    "/saved-collection",
+    "/onboarding",
+    "talent-registration",
   ];
 
   const protectAuthRoutes = ["/sign-in", "/join-us", "/forgot-password"];

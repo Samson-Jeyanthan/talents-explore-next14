@@ -25,6 +25,7 @@ import {
 } from "@/components/widgets/collaboration/CollaborationFieldPickers";
 import { GENDER_VALUES, LEVEL_VALUES } from "@/constants";
 import { ArrowLeft, ArrowRight, Plus, Trash2 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -669,10 +670,12 @@ export default function CollaborationEditor({
             <div className="grid gap-4">
               <label className="flex min-h-[220px] cursor-pointer items-center justify-center rounded-[28px] border border-dashed border-dark-300 bg-dark-200">
                 {posterPreview || form.poster.url ? (
-                  <img
+                  <Image
                     src={posterPreview || form.poster.url}
                     alt="Poster"
                     className="max-h-[340px] w-full rounded-[28px] object-contain"
+                    width={500}
+                    height={500}
                   />
                 ) : (
                   <span className="text-sm text-light-500">
@@ -1532,10 +1535,11 @@ export default function CollaborationEditor({
             locationPicker.field === "timeline" &&
             locationPicker.index !== undefined
           ) {
+            const timelineIndex = locationPicker.index;
             setDraft((previous: any) => {
               const timeLine = [...previous.timeLine];
-              timeLine[locationPicker.index] = {
-                ...timeLine[locationPicker.index],
+              timeLine[timelineIndex] = {
+                ...timeLine[timelineIndex],
                 location: address,
                 latitude,
                 longitude,

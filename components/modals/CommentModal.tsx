@@ -30,7 +30,7 @@ const CommentModal = ({
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState<IComments[]>([]);
-  const [replies, setReplies] = useState<IComments[]>([]);
+  // const [replies, setReplies] = useState<IComments[]>([]);
   // const [isReplyOpen, setIsReplyOpen] = useState(false);
   const [replyCommentId, setReplyCommentId] = useState<{
     commentId: string | null;

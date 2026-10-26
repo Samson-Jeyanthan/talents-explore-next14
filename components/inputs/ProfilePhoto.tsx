@@ -6,13 +6,13 @@ import { MdEdit } from "react-icons/md";
 import { Dialog } from "../ui/dialog";
 import { CropImgModal, ErrorAlert, PhotoActionModal } from "../modals";
 import { CameraIcon } from "@/public/assets/svgs";
-import { defaultMediaState, useImageSelection } from "@/lib/hooks/useMedia";
+import { defaultMediaState, useMediaSelection } from "@/lib/hooks/useMedia";
 import { TCoverProfilePhotoProps } from "@/types/utils.types";
 
 const ProfilePhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
   const photoRef = useRef<HTMLInputElement>(null);
-  const { handleImageInput, media, resetMedia, error, setError, setMedia } =
-    useImageSelection();
+  const { handleMediaInput, media, resetMedia, error, setError, setMedia } =
+    useMediaSelection(true);
   const [isOpen, setIsOpen] = useState(false);
   const [isActionOpen, setIsActionOpen] = useState(false);
   const [prevMedia, setPrevMedia] = useState(mediaUrl || null);
@@ -20,7 +20,7 @@ const ProfilePhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
 
   // handle image input change
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    handleImageInput(event);
+    handleMediaInput(event);
     setIsOpen(true);
     setIsActionOpen(false);
   };

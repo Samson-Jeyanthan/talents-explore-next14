@@ -97,3 +97,61 @@ export const CompleteProfileValidation = z
       path: ["dob"],
     }
   );
+
+export const TalentRegisterValidation = z.object({
+  bio: z.string().min(1, { message: "Bio is required" }).trim(),
+  ethnic: z.string().optional(),
+  featuredPhotos: z
+    .array(
+      z.custom<File>((file) => file instanceof File, {
+        message: "Expected a file",
+      })
+    )
+    .optional(),
+  socialLinks: z
+    .array(
+      z.object({
+        type: z.string(),
+        url: z.string(),
+      })
+    )
+    .optional(),
+  skillSets: z
+    .array(
+      z.object({
+        mainCategoryId: z.string(),
+        subCategoryId: z.string(),
+        skillsHave: z.array(
+          z.object({
+            skillId: z.string(),
+            level: z.string(),
+          })
+        ),
+        description: z.string(),
+        hashTags: z.string(),
+      })
+    )
+    .optional(),
+  languageKnown: z.array(
+    z.object({
+      language: z.string(),
+      level: z.string(),
+    })
+  ),
+  education: z.array(
+    z.object({
+      course: z.string(),
+      institution: z.string(),
+      from: z.string(),
+      to: z.string(),
+    })
+  ),
+  awardsOrCertificate: z.array(
+    z.object({
+      name: z.string(),
+      givenBy: z.string(),
+      year: z.string(),
+      certificate: z.custom<File>().optional(),
+    })
+  ),
+});

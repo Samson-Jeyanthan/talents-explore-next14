@@ -7,7 +7,7 @@ function ChatNavButton({ unreadCount }: { unreadCount: number }) {
   return (
     <Link
       href="/chat"
-      className="relative z-[110] flex-center size-9 cursor-pointer rounded-full bg-dark-300 fill-light-600 hover:bg-dark-400 hover:fill-light-900"
+      className="flex-center relative z-[110] size-9 cursor-pointer rounded-full bg-dark-300 fill-light-600 hover:bg-dark-400 hover:fill-light-900"
     >
       <MessageIcon height="18px" width="18px" />
       {unreadCount > 0 ? (

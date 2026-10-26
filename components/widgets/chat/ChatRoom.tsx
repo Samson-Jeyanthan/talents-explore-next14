@@ -49,7 +49,11 @@ type Props = {
 const RECENT_CHATS_KEY = "te-web-recent-chats";
 const RECENT_GROUPS_KEY = "te-web-recent-groups";
 
-function persistRecentRoom(key: string, room: Record<string, any>, roomLimit = 25) {
+function persistRecentRoom(
+  key: string,
+  room: Record<string, any>,
+  roomLimit = 25
+) {
   if (typeof window === "undefined") {
     return;
   }
@@ -200,7 +204,14 @@ function ChatRoom({
       initialType === "group" ? RECENT_GROUPS_KEY : RECENT_CHATS_KEY,
       roomPayload
     );
-  }, [roomId, initialType, initialGroupChatDetails, chatInfo, sender, messages]);
+  }, [
+    roomId,
+    initialType,
+    initialGroupChatDetails,
+    chatInfo,
+    sender,
+    messages,
+  ]);
 
   useEffect(() => {
     const container = listRef.current;
@@ -429,8 +440,8 @@ function ChatRoom({
 
   return (
     <>
-      <div className="flex h-[calc(100vh-3.5rem)] w-full max-w-6xl flex-col px-4 py-4 text-light-900 sm:px-6">
-        <div className="flex items-center justify-between rounded-t-[28px] border border-dark-300 bg-dark-250 px-4 py-4">
+      <div className="flex h-[calc(100vh-3.5rem)] w-full max-w-6xl flex-col p-4 text-light-900 sm:px-6">
+        <div className="flex items-center justify-between rounded-t-[28px] border border-dark-300 bg-dark-250 p-4">
           <div className="flex min-w-0 items-center gap-3">
             <Button
               type="button"
@@ -489,7 +500,7 @@ function ChatRoom({
             </Button>
           </div>
 
-          <div ref={listRef} className="flex-1 overflow-y-auto px-4 py-4">
+          <div ref={listRef} className="flex-1 overflow-y-auto p-4">
             <div className="flex flex-col gap-3">
               {messages.length === 0 ? (
                 <div className="rounded-[22px] border border-dashed border-dark-300 bg-dark-250 px-4 py-10 text-center text-sm text-light-500">
@@ -500,21 +511,28 @@ function ChatRoom({
               {messages.map((item, index) => {
                 if (item?.type === "date") {
                   return (
-                    <div key={`date-${item?._id || index}`} className="py-2 text-center text-xs text-light-500">
+                    <div
+                      key={`date-${item?._id || index}`}
+                      className="py-2 text-center text-xs text-light-500"
+                    >
                       {formatMessageDate(item?.dateGroup)}
                     </div>
                   );
                 }
 
                 if (item?.type === "join" || item?.isLeft || item?.isDeleted) {
-                  const statusText = item?.type === "join"
-                    ? `${item?.name || item?.userName} joined`
-                    : item?.isLeft
-                      ? `${item?.name || item?.userName} left`
-                      : `${item?.name || item?.userName} removed`;
+                  const statusText =
+                    item?.type === "join"
+                      ? `${item?.name || item?.userName} joined`
+                      : item?.isLeft
+                        ? `${item?.name || item?.userName} left`
+                        : `${item?.name || item?.userName} removed`;
 
                   return (
-                    <div key={item?._id || index} className="py-1 text-center text-xs italic text-light-500">
+                    <div
+                      key={item?._id || index}
+                      className="py-1 text-center text-xs italic text-light-500"
+                    >
                       {statusText}
                     </div>
                   );
@@ -525,7 +543,10 @@ function ChatRoom({
                 return (
                   <div
                     key={item?._id || index}
-                    className={cn("flex", isOwn ? "justify-end" : "justify-start")}
+                    className={cn(
+                      "flex",
+                      isOwn ? "justify-end" : "justify-start"
+                    )}
                   >
                     <div
                       className={cn(
@@ -599,7 +620,7 @@ function ChatRoom({
                 <Button
                   type="button"
                   disabled={isPending || !message.trim()}
-                  className="rounded-full bg-primary-500 px-4 text-light-900 hover:bg-primary-600"
+                  className="rounded-full bg-primary-500 px-4 text-light-900"
                   onClick={handleSendMessage}
                 >
                   <Send className="mr-2 size-4" />
@@ -630,7 +651,7 @@ function ChatRoom({
               <Button
                 type="button"
                 disabled={isPending}
-                className="mt-3 rounded-full bg-primary-500 px-5 text-light-900 hover:bg-primary-600"
+                className="mt-3 rounded-full bg-primary-500 px-5 text-light-900 hover:bg-primary-500"
                 onClick={handleAcceptRequest}
               >
                 {isPending ? "Accepting..." : "Accept"}
@@ -660,7 +681,7 @@ function ChatRoom({
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
-              className="bg-primary-500 text-light-900 hover:bg-primary-600"
+              className="bg-primary-500 text-light-900"
               onClick={handleDeleteMessage}
             >
               Delete
@@ -685,7 +706,7 @@ function ChatRoom({
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
-              className="bg-primary-500 text-light-900 hover:bg-primary-600"
+              className="bg-primary-500 text-light-900"
               onClick={handleDeleteConversation}
             >
               Delete

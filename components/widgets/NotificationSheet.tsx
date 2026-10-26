@@ -326,7 +326,7 @@ function NotificationSheet({ data }: { data: any[] }) {
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
-              className="hover:bg-primary-600 bg-primary-500 text-light-900"
+              className="bg-primary-500 text-light-900"
               onClick={() => {
                 setConfirmDeleteAll(false);
                 handleDeleteAll();

@@ -22,7 +22,7 @@ const SavedFolder = async ({ params }: { params: { id: string } }) => {
       </h1>
       <Link
         href="/saved-collection"
-        className="flex-center absolute left-4 top-4 z-10 rounded-full bg-dark-100 p-2 pr-3 text-sm text-light-500 shadow-sm hover:text-light-900 sm:left-8 sm:top-8 max-md:p-3 md:pr-4"
+        className="flex-center absolute left-4 top-4 z-10 rounded-full bg-dark-100 p-2 pr-3 text-sm text-light-500 shadow-sm hover:text-light-900 max-md:p-3 sm:left-8 sm:top-8 md:pr-4"
       >
         <IoIosArrowBack className="text-lg" />
         <p className="max-md:hidden">back</p>

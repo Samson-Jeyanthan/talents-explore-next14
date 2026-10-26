@@ -50,7 +50,7 @@ const Comments = ({ params, numberOfComments, canComment = true }: Props) => {
     commentId: string,
     author: ICommentAuthor
   ) => {
-    console.log(commentId);
+    console.log(commentId, replyCommentId);
     setReplyCommentId({ commentId, author });
   };
 

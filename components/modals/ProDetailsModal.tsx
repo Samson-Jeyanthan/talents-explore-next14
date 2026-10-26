@@ -208,6 +208,8 @@ const ProDetailsModal = ({
       cretificateUrl: "",
       certificateUrlKey: "",
     };
+
+    console.log(formData, existingAwards, "values.certificate");
   }
 
   return (

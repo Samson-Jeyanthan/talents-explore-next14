@@ -2,6 +2,7 @@
 
 import UserProfileImg from "@/components/others/UserProfileImg";
 import { format } from "date-fns";
+import Image from "next/image";
 import Link from "next/link";
 
 function getDurationLabel(item: any) {
@@ -56,18 +57,24 @@ function CollaborationCard({ collaboration }: { collaboration: any }) {
             {owner?.userName || "Unknown user"}
           </p>
           <p className="truncate text-xs text-light-500">
-            {owner?.professional || owner?.personalInfo?.professional || "Collaboration owner"}
+            {owner?.professional ||
+              owner?.personalInfo?.professional ||
+              "Collaboration owner"}
           </p>
         </div>
-        <span className="shrink-0 text-xs text-light-500">{collaboration?.timeAgo || ""}</span>
+        <span className="shrink-0 text-xs text-light-500">
+          {collaboration?.timeAgo || ""}
+        </span>
       </div>
 
       {collaborationInfo?.poster?.url ? (
         <div className="mt-4 overflow-hidden rounded-[24px] bg-black">
-          <img
+          <Image
             src={collaborationInfo.poster.url}
             alt={collaborationInfo?.title || "Collaboration poster"}
             className="h-64 w-full object-contain"
+            width={500}
+            height={500}
           />
         </div>
       ) : null}
@@ -77,29 +84,43 @@ function CollaborationCard({ collaboration }: { collaboration: any }) {
           {collaborationInfo?.title || "Untitled collaboration"}
         </h3>
         <p className="line-clamp-3 pt-2 text-sm text-light-500">
-          {collaborationInfo?.description || "No collaboration description provided yet."}
+          {collaborationInfo?.description ||
+            "No collaboration description provided yet."}
         </p>
       </div>
 
       <div className="grid gap-2 pt-4 text-sm sm:grid-cols-3">
         <div>
-          <p className="text-xs uppercase tracking-[0.14em] text-light-500">Location</p>
-          <p className="pt-1 text-light-900">{collaborationInfo?.location || "-"}</p>
+          <p className="text-xs uppercase tracking-[0.14em] text-light-500">
+            Location
+          </p>
+          <p className="pt-1 text-light-900">
+            {collaborationInfo?.location || "-"}
+          </p>
         </div>
         <div>
-          <p className="text-xs uppercase tracking-[0.14em] text-light-500">Duration</p>
-          <p className="pt-1 text-light-900">{getDurationLabel(collaboration)}</p>
+          <p className="text-xs uppercase tracking-[0.14em] text-light-500">
+            Duration
+          </p>
+          <p className="pt-1 text-light-900">
+            {getDurationLabel(collaboration)}
+          </p>
         </div>
         <div>
-          <p className="text-xs uppercase tracking-[0.14em] text-light-500">Expires on</p>
-          <p className="pt-1 text-custom-100">{getDeadlineLabel(collaborationInfo?.deadlineToApply)}</p>
+          <p className="text-xs uppercase tracking-[0.14em] text-light-500">
+            Expires on
+          </p>
+          <p className="pt-1 text-custom-100">
+            {getDeadlineLabel(collaborationInfo?.deadlineToApply)}
+          </p>
         </div>
       </div>
 
       <div className="flex flex-wrap gap-2 pt-4">
         {collaboration?.rolesCount > 0 ? (
           <span className="rounded-full border border-dark-300 bg-dark-200 px-3 py-1 text-xs text-light-900">
-            {collaboration.rolesCount} {collaboration.rolesCount > 1 ? "Roles" : "Role"}
+            {collaboration.rolesCount}{" "}
+            {collaboration.rolesCount > 1 ? "Roles" : "Role"}
           </span>
         ) : null}
         {collaborationInfo?.productionInfo?.type ? (

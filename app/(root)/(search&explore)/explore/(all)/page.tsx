@@ -20,12 +20,16 @@ async function page({ searchParams }: ISearchParamsProps) {
   // search function in the explore
   const searchData = await searchAction({
     searchType: "ALL",
-    userId: token,
     viewUserId: token,
     pageNo: 1,
     pageSize: 12,
     searchText: searchParams?.q,
-    resultTime: searchParams?.timeDuration,
+    resultTime: searchParams?.timeDuration as
+      | "one month"
+      | "six month"
+      | "one year"
+      | "two year"
+      | undefined,
     publicRating: Number(searchParams?.postRating),
   });
 
@@ -33,7 +37,6 @@ async function page({ searchParams }: ISearchParamsProps) {
   const mainCategoriesData: any = await getMainCategoriesAction();
   const topTalentsData = await searchAction({
     searchType: "TALENT",
-    userId: token,
     viewUserId: token,
     pageNo: 1,
     pageSize: 12,
@@ -41,7 +44,6 @@ async function page({ searchParams }: ISearchParamsProps) {
   });
   const topPostsData = await searchAction({
     searchType: "FEED",
-    userId: token,
     viewUserId: token,
     pageNo: 1,
     pageSize: 12,

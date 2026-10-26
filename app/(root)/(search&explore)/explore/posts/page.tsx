@@ -11,12 +11,16 @@ async function Posts({ searchParams }: ISearchParamsProps) {
 
   const postsData = await searchAction({
     searchType: "FEED",
-    userId: token,
     viewUserId: token,
     pageNo: 1,
     pageSize: 20,
     searchText: searchParams?.q,
-    resultTime: searchParams?.timeDuration,
+    resultTime: searchParams?.timeDuration as
+      | "one month"
+      | "six month"
+      | "one year"
+      | "two year"
+      | undefined,
     publicRating: Number(searchParams?.publicRating),
   });
 

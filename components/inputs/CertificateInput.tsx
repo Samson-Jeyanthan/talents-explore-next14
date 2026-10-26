@@ -20,9 +20,9 @@ const CertificateInput = ({ fieldChange, values }: any) => {
     }
   };
 
-  const handleInputDelete = () => {
-    fieldChange(null);
-  };
+  // const handleInputDelete = () => {
+  //   fieldChange(null);
+  // };
 
   return (
     <>
@@ -38,7 +38,11 @@ const CertificateInput = ({ fieldChange, values }: any) => {
         {values ? (
           <div className="flex-center gap-2">
             <Image
-              src="/assets/images/pdf.png"
+              src={
+                media.fileType === "application/pdf"
+                  ? "/assets/images/pdf.png"
+                  : "/assets/images/image.png"
+              }
               width={512}
               height={512}
               alt="profile-pic"
@@ -48,7 +52,7 @@ const CertificateInput = ({ fieldChange, values }: any) => {
           </div>
         ) : (
           <div
-            className="flex-center cursor-pointer gap-2"
+            className="flex-center size-full cursor-pointer gap-2"
             onClick={() => mediaRef.current?.click()}
           >
             <Paperclip className="size-5" />

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { ProDetailsModal } from "../../modals";
-import { Dialog } from "../../ui/dialog";
 import { TProfessionalDetailName } from "@/types/utils.types";
 import { IEducation } from "@/types/profile.types";
 
@@ -42,15 +41,14 @@ const ProfDetailsHeader = ({ detailName, dataArray }: Prop) => {
         </p>
       </div>
 
-      <Dialog open={open}>
-        <ProDetailsModal
-          isEdit={false}
-          detailModalFor={detailName}
-          onClick={() => setOpen(!open)}
-          dataArray={dataArray}
-          selectedIndex={0}
-        />
-      </Dialog>
+      <ProDetailsModal
+        isEdit={false}
+        isOpen={open}
+        detailModalFor={detailName}
+        onClick={() => setOpen(!open)}
+        dataArray={dataArray}
+        selectedIndex={0}
+      />
     </>
   );
 };

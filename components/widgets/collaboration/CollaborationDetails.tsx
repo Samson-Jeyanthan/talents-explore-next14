@@ -29,10 +29,18 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { format } from "date-fns";
-import { Calendar, ClipboardList, Copy, FileText, MapPin, MessageSquare } from "lucide-react";
+import {
+  Calendar,
+  ClipboardList,
+  Copy,
+  FileText,
+  MapPin,
+  MessageSquare,
+} from "lucide-react";
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
+import Image from "next/image";
 
 type Props = {
   collaborationId: string;
@@ -86,7 +94,11 @@ function getTimelineLabel(role: any) {
   return "-";
 }
 
-function CollaborationDetails({ collaborationId, currentUser, initialDetails }: Props) {
+function CollaborationDetails({
+  collaborationId,
+  currentUser,
+  initialDetails,
+}: Props) {
   const [details, setDetails] = useState(initialDetails);
   const [selectedRole, setSelectedRole] = useState<any>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -124,7 +136,9 @@ function CollaborationDetails({ collaborationId, currentUser, initialDetails }: 
 
   const handleCopyLink = async () => {
     try {
-      await navigator.clipboard.writeText(`${window.location.origin}/collaboration/${collaborationId}`);
+      await navigator.clipboard.writeText(
+        `${window.location.origin}/collaboration/${collaborationId}`
+      );
       toast.success("Collaboration link copied");
     } catch {
       toast.error("Could not copy collaboration link");
@@ -196,7 +210,11 @@ function CollaborationDetails({ collaborationId, currentUser, initialDetails }: 
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="flex items-center gap-3">
               <UserProfileImg
-                src={owner?.profileImage || owner?.personalInfo?.profileImage || null}
+                src={
+                  owner?.profileImage ||
+                  owner?.personalInfo?.profileImage ||
+                  null
+                }
                 userName={owner?.userName || "User"}
                 className="size-14 min-h-14 min-w-14"
               />
@@ -205,7 +223,9 @@ function CollaborationDetails({ collaborationId, currentUser, initialDetails }: 
                   {owner?.userName || "Unknown user"}
                 </p>
                 <p className="text-sm text-light-500">
-                  {owner?.professional || owner?.personalInfo?.professional || "Collaboration owner"}
+                  {owner?.professional ||
+                    owner?.personalInfo?.professional ||
+                    "Collaboration owner"}
                 </p>
               </div>
             </div>
@@ -262,15 +282,18 @@ function CollaborationDetails({ collaborationId, currentUser, initialDetails }: 
             {collaboration?.title || "Untitled collaboration"}
           </h1>
           <p className="pt-3 text-sm text-light-500">
-            {collaboration?.description || "No collaboration description provided yet."}
+            {collaboration?.description ||
+              "No collaboration description provided yet."}
           </p>
 
           {collaboration?.poster?.url ? (
             <div className="mt-5 overflow-hidden rounded-[28px] bg-black">
-              <img
+              <Image
                 src={collaboration.poster.url}
                 alt={collaboration?.title || "Collaboration poster"}
                 className="max-h-[520px] w-full object-contain"
+                width={1920}
+                height={1080}
               />
             </div>
           ) : null}
@@ -279,21 +302,31 @@ function CollaborationDetails({ collaborationId, currentUser, initialDetails }: 
             <div>
               <div className="flex items-center gap-2 text-light-500">
                 <Calendar className="size-4" />
-                <span className="text-xs uppercase tracking-[0.16em]">Duration</span>
+                <span className="text-xs uppercase tracking-[0.16em]">
+                  Duration
+                </span>
               </div>
-              <p className="pt-2 text-sm text-light-900">{getDuration(details)}</p>
+              <p className="pt-2 text-sm text-light-900">
+                {getDuration(details)}
+              </p>
             </div>
             <div>
               <div className="flex items-center gap-2 text-light-500">
                 <MapPin className="size-4" />
-                <span className="text-xs uppercase tracking-[0.16em]">Location</span>
+                <span className="text-xs uppercase tracking-[0.16em]">
+                  Location
+                </span>
               </div>
-              <p className="pt-2 text-sm text-light-900">{collaboration?.location || "-"}</p>
+              <p className="pt-2 text-sm text-light-900">
+                {collaboration?.location || "-"}
+              </p>
             </div>
             <div>
               <div className="flex items-center gap-2 text-light-500">
                 <FileText className="size-4" />
-                <span className="text-xs uppercase tracking-[0.16em]">Production</span>
+                <span className="text-xs uppercase tracking-[0.16em]">
+                  Production
+                </span>
               </div>
               <p className="pt-2 text-sm text-light-900">
                 {collaboration?.productionInfo?.title || "-"}
@@ -305,7 +338,9 @@ function CollaborationDetails({ collaborationId, currentUser, initialDetails }: 
             <div>
               <div className="flex items-center gap-2 text-light-500">
                 <MessageSquare className="size-4" />
-                <span className="text-xs uppercase tracking-[0.16em]">Contact</span>
+                <span className="text-xs uppercase tracking-[0.16em]">
+                  Contact
+                </span>
               </div>
               <p className="pt-2 text-sm text-light-900">
                 {collaboration?.contactInfo?.email || "-"}
@@ -322,7 +357,8 @@ function CollaborationDetails({ collaborationId, currentUser, initialDetails }: 
             <div>
               <h2 className="text-2xl font-semibold text-light-900">Roles</h2>
               <p className="pt-1 text-sm text-light-500">
-                {roles.length} {roles.length === 1 ? "role" : "roles"} currently open.
+                {roles.length} {roles.length === 1 ? "role" : "roles"} currently
+                open.
               </p>
             </div>
             {collaboration?.roomId ? (
@@ -359,14 +395,19 @@ function CollaborationDetails({ collaborationId, currentUser, initialDetails }: 
                 >
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <div>
-                      <h3 className="text-lg font-semibold text-primary-500">{role?.name || "Role"}</h3>
-                      <p className="pt-1 text-sm text-light-500">{role?.subtitle || ""}</p>
+                      <h3 className="text-lg font-semibold text-primary-500">
+                        {role?.name || "Role"}
+                      </h3>
+                      <p className="pt-1 text-sm text-light-500">
+                        {role?.subtitle || ""}
+                      </p>
                     </div>
 
                     <div className="flex flex-wrap gap-2">
                       {role?.paymentDetails?.amount ? (
                         <span className="rounded-full border border-dark-300 bg-dark-250 px-3 py-1 text-xs text-light-900">
-                          {role.paymentDetails.amount} {role.paymentDetails.currency || ""}
+                          {role.paymentDetails.amount}{" "}
+                          {role.paymentDetails.currency || ""}
                         </span>
                       ) : null}
                       {role?.paymentDetails?.type ? (
@@ -384,20 +425,36 @@ function CollaborationDetails({ collaborationId, currentUser, initialDetails }: 
 
                   <div className="grid gap-3 pt-4 sm:grid-cols-2 xl:grid-cols-4">
                     <div>
-                      <p className="text-xs uppercase tracking-[0.16em] text-light-500">Gender</p>
-                      <p className="pt-1 text-sm text-light-900">{role?.gender || "-"}</p>
+                      <p className="text-xs uppercase tracking-[0.16em] text-light-500">
+                        Gender
+                      </p>
+                      <p className="pt-1 text-sm text-light-900">
+                        {role?.gender || "-"}
+                      </p>
                     </div>
                     <div>
-                      <p className="text-xs uppercase tracking-[0.16em] text-light-500">Language</p>
-                      <p className="pt-1 text-sm text-light-900">{role?.languageSeekingName || "-"}</p>
+                      <p className="text-xs uppercase tracking-[0.16em] text-light-500">
+                        Language
+                      </p>
+                      <p className="pt-1 text-sm text-light-900">
+                        {role?.languageSeekingName || "-"}
+                      </p>
                     </div>
                     <div>
-                      <p className="text-xs uppercase tracking-[0.16em] text-light-500">Ethnicity</p>
-                      <p className="pt-1 text-sm text-light-900">{role?.ethnicName || "-"}</p>
+                      <p className="text-xs uppercase tracking-[0.16em] text-light-500">
+                        Ethnicity
+                      </p>
+                      <p className="pt-1 text-sm text-light-900">
+                        {role?.ethnicName || "-"}
+                      </p>
                     </div>
                     <div>
-                      <p className="text-xs uppercase tracking-[0.16em] text-light-500">Timeline</p>
-                      <p className="pt-1 text-sm text-light-900">{getTimelineLabel(role)}</p>
+                      <p className="text-xs uppercase tracking-[0.16em] text-light-500">
+                        Timeline
+                      </p>
+                      <p className="pt-1 text-sm text-light-900">
+                        {getTimelineLabel(role)}
+                      </p>
                     </div>
                   </div>
 
@@ -417,7 +474,8 @@ function CollaborationDetails({ collaborationId, currentUser, initialDetails }: 
                           </span>
                           <span className="text-light-500">
                             {" "}
-                            {skill?.subCategoryName || ""} {skill?.skillName ? `- ${skill.skillName}` : ""}{" "}
+                            {skill?.subCategoryName || ""}{" "}
+                            {skill?.skillName ? `- ${skill.skillName}` : ""}{" "}
                             {skill?.level ? `- ${skill.level}` : ""}
                           </span>
                         </span>
@@ -428,7 +486,9 @@ function CollaborationDetails({ collaborationId, currentUser, initialDetails }: 
                   <div className="flex flex-wrap items-center justify-end gap-2 pt-5">
                     {isOwner ? (
                       <>
-                        <Link href={`/collaboration/${collaborationId}/roles/${role?._id}/applicants`}>
+                        <Link
+                          href={`/collaboration/${collaborationId}/roles/${role?._id}/applicants`}
+                        >
                           <Button
                             type="button"
                             className="rounded-full bg-dark-250 text-light-900 hover:bg-dark-300"
@@ -436,7 +496,9 @@ function CollaborationDetails({ collaborationId, currentUser, initialDetails }: 
                             Applicants
                           </Button>
                         </Link>
-                        <Link href={`/collaboration/${collaborationId}/roles/${role?._id}/schedule`}>
+                        <Link
+                          href={`/collaboration/${collaborationId}/roles/${role?._id}/schedule`}
+                        >
                           <Button
                             type="button"
                             className="rounded-full bg-dark-250 text-light-900 hover:bg-dark-300"
@@ -520,7 +582,10 @@ function CollaborationDetails({ collaborationId, currentUser, initialDetails }: 
         </div>
       </section>
 
-      <Dialog open={Boolean(selectedRole)} onOpenChange={(open) => !open && setSelectedRole(null)}>
+      <Dialog
+        open={Boolean(selectedRole)}
+        onOpenChange={(open) => !open && setSelectedRole(null)}
+      >
         <DialogContent className="max-w-2xl rounded-[28px] border-dark-300 bg-dark-200 text-light-900">
           <DialogHeader>
             <DialogTitle className="text-2xl font-semibold text-light-900">
@@ -537,7 +602,10 @@ function CollaborationDetails({ collaborationId, currentUser, initialDetails }: 
             <Input
               value={applyForm.applicantName}
               onChange={(event) =>
-                setApplyForm((prev) => ({ ...prev, applicantName: event.target.value }))
+                setApplyForm((prev) => ({
+                  ...prev,
+                  applicantName: event.target.value,
+                }))
               }
               placeholder="Full name"
               className="h-11 rounded-2xl border-dark-300 bg-dark-250 text-light-900 placeholder:text-light-500"
@@ -545,7 +613,10 @@ function CollaborationDetails({ collaborationId, currentUser, initialDetails }: 
             <Input
               value={applyForm.applicantEmail}
               onChange={(event) =>
-                setApplyForm((prev) => ({ ...prev, applicantEmail: event.target.value }))
+                setApplyForm((prev) => ({
+                  ...prev,
+                  applicantEmail: event.target.value,
+                }))
               }
               placeholder="Contact email"
               className="h-11 rounded-2xl border-dark-300 bg-dark-250 text-light-900 placeholder:text-light-500"
@@ -553,7 +624,10 @@ function CollaborationDetails({ collaborationId, currentUser, initialDetails }: 
             <Input
               value={applyForm.applicantPhone}
               onChange={(event) =>
-                setApplyForm((prev) => ({ ...prev, applicantPhone: event.target.value }))
+                setApplyForm((prev) => ({
+                  ...prev,
+                  applicantPhone: event.target.value,
+                }))
               }
               placeholder="Contact number"
               className="h-11 rounded-2xl border-dark-300 bg-dark-250 text-light-900 placeholder:text-light-500"
@@ -561,7 +635,10 @@ function CollaborationDetails({ collaborationId, currentUser, initialDetails }: 
             <Textarea
               value={applyForm.message}
               onChange={(event) =>
-                setApplyForm((prev) => ({ ...prev, message: event.target.value }))
+                setApplyForm((prev) => ({
+                  ...prev,
+                  message: event.target.value,
+                }))
               }
               placeholder="Why should they collaborate with you?"
               className="min-h-[180px] rounded-2xl border-dark-300 bg-dark-250 text-light-900 placeholder:text-light-500"

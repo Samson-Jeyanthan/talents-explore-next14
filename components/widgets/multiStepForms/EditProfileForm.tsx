@@ -6,7 +6,7 @@ import { TransparentLoader } from "@/components/modals";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { useUserContext } from "@/context/AuthProvider";
-import { EditProfileValidation } from "@/lib/validations/profile.validation";
+import { getEditProfileValidation } from "@/lib/validations/profile.validation";
 import { TCurrentUserData } from "@/types/profile.types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -36,7 +36,30 @@ const EditProfileForm = ({ langData, professionData, userData }: Props) => {
     name: item.professional,
   }));
 
-  async function onSubmit(values: z.infer<typeof EditProfileValidation>) {
+  const isTalent = userData?.isTalent === true;
+  const validationSchema = getEditProfileValidation(isTalent);
+
+  const form = useForm<z.infer<typeof validationSchema>>({
+    resolver: zodResolver(validationSchema),
+    defaultValues: {
+      firstName: userData?.personalInfo.firstName || "",
+      lastName: userData?.personalInfo.lastName || "",
+      knownLanguage: userData?.personalInfo.languageKnown || "",
+      profession: userData?.personalInfo.professionalId || "",
+      dob: userData?.personalInfo?.dob,
+      gender: userData?.personalInfo.gender || "",
+      quotes: userData?.personalInfo.shortBio || "",
+      coverPhoto: userData?.personalInfo.coverImage || undefined,
+      profilePhoto: userData?.personalInfo.profileImage || undefined,
+      // professional info
+      bio: userData?.morePersonalInfo.bio || "",
+      ethnic: userData?.morePersonalInfo.ethnic || "",
+      featuredPhotos: [],
+      socialLinks: userData?.morePersonalInfo.socialLinks || [],
+    },
+  });
+
+  async function onSubmit(values: z.infer<typeof validationSchema>) {
     console.log(values);
     // personal information form data
     const personalInfo = {
@@ -60,27 +83,8 @@ const EditProfileForm = ({ langData, professionData, userData }: Props) => {
     };
     const res = await userPersonalInfoEditAction(personalInfo);
     console.log(res, "// res of personal info edit // ");
+    console.log(professionalInfo);
   }
-
-  const form = useForm<z.infer<typeof EditProfileValidation>>({
-    resolver: zodResolver(EditProfileValidation),
-    defaultValues: {
-      firstName: userData?.personalInfo.firstName || "",
-      lastName: userData?.personalInfo.lastName || "",
-      knownLanguage: userData?.personalInfo.languageKnown || "",
-      profession: userData?.personalInfo.professionalId || "",
-      dob: userData?.personalInfo?.dob,
-      gender: userData?.personalInfo.gender || "",
-      quotes: userData?.personalInfo.shortBio || "",
-      coverPhoto: userData?.personalInfo.coverImage || undefined,
-      profilePhoto: userData?.personalInfo.profileImage || undefined,
-      // professional info
-      bio: userData?.morePersonalInfo.bio || "",
-      ethnic: userData?.morePersonalInfo.ethnic || "",
-      featuredPhotos: [],
-      socialLinks: userData?.morePersonalInfo.socialLinks || [],
-    },
-  });
 
   return (
     <>

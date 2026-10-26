@@ -10,3 +10,8 @@ export { default as EditProInfoForm } from "./EditProInfoForm";
 export { default as LanguageEditForm } from "./LanguageEditForm";
 export { default as EductionEditForm } from "./EductionEditForm";
 export { default as AwardEditForm } from "./AwardEditForm";
+export { default as MoreDetailsForm } from "./talentsRegistration/MoreDetailsForm";
+export { default as SkillsForm } from "./talentsRegistration/SkillsForm";
+export { default as LangEducationForm } from "./talentsRegistration/LangEducationForm";
+export { default as AwardsForm } from "./talentsRegistration/AwardsForm";
+export { default as CompleteForm } from "./talentsRegistration/CompleteForm";

@@ -33,8 +33,9 @@ const VideoCard: React.FC<VideoCardProps> = ({ videoUrl, thumbnailUrl }) => {
     };
   }, []);
 
+  // className="video-card"
   return (
-    <div className="video-card">
+    <div className="">
       <video
         ref={videoRef}
         controls

@@ -406,3 +406,31 @@ export const RatioOptions = [
     height: "1.5rem",
   },
 ];
+
+export const TALENT_REG_FORM_DETAILS = [
+  {
+    title: "More Information",
+    description:
+      "Provide essential information, including description about you and your profession, social media links, and showcase you with 3 photos.",
+  },
+  {
+    title: "Skills Details",
+    description:
+      "Highlight your expertise with main and sub-categories, and showcase your skill names and levels to demonstrate your proficiency.",
+  },
+  {
+    title: "Languages & Education Details",
+    description:
+      "Share your educational background, institutions attended, language proficiency, and level of expertise to showcase your academic achievements.",
+  },
+  {
+    title: "Awards & Certificates Details",
+    description:
+      "Display your accolades and certificates, showcasing recognition for your talents and skills from various sources.",
+  },
+  {
+    title: "Complete Registration",
+    description:
+      "Once you've provided all the necessary information, click the 'Complete Registration' button to finalize your account.",
+  },
+];

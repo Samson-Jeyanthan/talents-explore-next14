@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, useTransition, type ReactNode } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  useTransition,
+  type ReactNode,
+} from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,8 +45,16 @@ type Props = {
 };
 
 type VisibilityValue = "NO_ONE" | "FOLLOW" | "EVERY_ONE";
-type ActivityMode = "deleted-post" | "deleted-share" | "star-post" | "star-share";
-type ActivityCollectionKey = "deletedPost" | "deletedShare" | "starPost" | "starShare";
+type ActivityMode =
+  | "deleted-post"
+  | "deleted-share"
+  | "star-post"
+  | "star-share";
+type ActivityCollectionKey =
+  | "deletedPost"
+  | "deletedShare"
+  | "starPost"
+  | "starShare";
 type ConfirmAccountAction = "" | "deactivate" | "delete";
 
 type ActivityCollections = {
@@ -75,19 +89,46 @@ const PRIVACY_LINKS = [
   { href: "/settings/privacy/profile", label: "Profile" },
   { href: "/settings/privacy/comments-tags", label: "Comments and Tags" },
   { href: "/settings/privacy/star-ratings", label: "Star Ratings" },
-  { href: "/settings/privacy/following-followers", label: "Following and Followers" },
+  {
+    href: "/settings/privacy/following-followers",
+    label: "Following and Followers",
+  },
   { href: "/settings/privacy/messages", label: "Messages" },
 ];
 
-const VISIBILITY_OPTIONS: { value: VisibilityValue; label: string; description: string }[] = [
-  { value: "NO_ONE", label: "No one", description: "Keep this detail private from everyone." },
-  { value: "FOLLOW", label: "Followers", description: "Only people in your network can see this." },
-  { value: "EVERY_ONE", label: "Everyone", description: "Anyone can view this detail on your profile." },
+const VISIBILITY_OPTIONS: {
+  value: VisibilityValue;
+  label: string;
+  description: string;
+}[] = [
+  {
+    value: "NO_ONE",
+    label: "No one",
+    description: "Keep this detail private from everyone.",
+  },
+  {
+    value: "FOLLOW",
+    label: "Followers",
+    description: "Only people in your network can see this.",
+  },
+  {
+    value: "EVERY_ONE",
+    label: "Everyone",
+    description: "Anyone can view this detail on your profile.",
+  },
 ];
 
 const MESSAGE_REQUEST_OPTIONS = [
-  { value: true, label: "On", description: "Allow new message requests from other users." },
-  { value: false, label: "Off", description: "Turn off incoming message requests." },
+  {
+    value: true,
+    label: "On",
+    description: "Allow new message requests from other users.",
+  },
+  {
+    value: false,
+    label: "Off",
+    description: "Turn off incoming message requests.",
+  },
 ];
 
 const ACTIVITY_TABS = [
@@ -114,17 +155,22 @@ function normalizePrivacy(initialPrivacy: any) {
     language: Boolean(initialPrivacy?.language),
     email: Boolean(initialPrivacy?.email),
     phone: Boolean(initialPrivacy?.phone),
-    profileView: (initialPrivacy?.profileView || "EVERY_ONE") as VisibilityValue,
+    profileView: (initialPrivacy?.profileView ||
+      "EVERY_ONE") as VisibilityValue,
     postView: (initialPrivacy?.postView || "EVERY_ONE") as VisibilityValue,
     postShare: (initialPrivacy?.postShare || "EVERY_ONE") as VisibilityValue,
-    postComments: (initialPrivacy?.postComments || "EVERY_ONE") as VisibilityValue,
+    postComments: (initialPrivacy?.postComments ||
+      "EVERY_ONE") as VisibilityValue,
     mention: (initialPrivacy?.mention || "EVERY_ONE") as VisibilityValue,
-    profileRating: (initialPrivacy?.profileRating || "EVERY_ONE") as VisibilityValue,
+    profileRating: (initialPrivacy?.profileRating ||
+      "EVERY_ONE") as VisibilityValue,
     postRating: (initialPrivacy?.postRating || "EVERY_ONE") as VisibilityValue,
     followers: (initialPrivacy?.followers || "EVERY_ONE") as VisibilityValue,
     followings: (initialPrivacy?.followings || "EVERY_ONE") as VisibilityValue,
     messageRequest:
-      typeof initialPrivacy?.messageRequest === "boolean" ? initialPrivacy.messageRequest : true,
+      typeof initialPrivacy?.messageRequest === "boolean"
+        ? initialPrivacy.messageRequest
+        : true,
   };
 }
 
@@ -133,7 +179,9 @@ function formatTimeValue(value?: string | null) {
     return "";
   }
 
-  const normalized = value.includes("T") ? value.split("T")[1]?.slice(0, 5) : value.slice(0, 5);
+  const normalized = value.includes("T")
+    ? value.split("T")[1]?.slice(0, 5)
+    : value.slice(0, 5);
   return normalized || "";
 }
 
@@ -159,20 +207,42 @@ function getActivityCollectionKey(mode: ActivityMode): ActivityCollectionKey {
 }
 
 function getActivityTitle(item: any) {
-  return item?.about?.title || item?.postData?.about?.title || item?.shareData?.about?.title || item?.title || "Untitled post";
+  return (
+    item?.about?.title ||
+    item?.postData?.about?.title ||
+    item?.shareData?.about?.title ||
+    item?.title ||
+    "Untitled post"
+  );
 }
 
 function getActivityDescription(item: any) {
-  return item?.about?.description || item?.postData?.about?.description || item?.shareData?.about?.description || item?.description || "No description available.";
+  return (
+    item?.about?.description ||
+    item?.postData?.about?.description ||
+    item?.shareData?.about?.description ||
+    item?.description ||
+    "No description available."
+  );
 }
 
 function getActivityPostId(item: any) {
-  return item?._id || item?.postId || item?.contentId || item?.postData?._id || item?.shareData?._id || "";
+  return (
+    item?._id ||
+    item?.postId ||
+    item?.contentId ||
+    item?.postData?._id ||
+    item?.shareData?._id ||
+    ""
+  );
 }
 
 function getActivityMeta(item: any) {
-  const about = item?.about || item?.postData?.about || item?.shareData?.about || {};
-  return [about?.country, about?.state, about?.mainCategory, about?.skill].filter(Boolean).slice(0, 3);
+  const about =
+    item?.about || item?.postData?.about || item?.shareData?.about || {};
+  return [about?.country, about?.state, about?.mainCategory, about?.skill]
+    .filter(Boolean)
+    .slice(0, 3);
 }
 
 function PageShell({
@@ -195,8 +265,12 @@ function PageShell({
           </p>
           <div className="flex flex-col gap-1">
             {SETTINGS_LINKS.map((item) => {
-              const itemPath = item.href.replace("/settings", "").replace(/^\//, "");
-              const isActive = currentPath === itemPath || (itemPath && currentPath.startsWith(itemPath));
+              const itemPath = item.href
+                .replace("/settings", "")
+                .replace(/^\//, "");
+              const isActive =
+                currentPath === itemPath ||
+                (itemPath && currentPath.startsWith(itemPath));
 
               return (
                 <Link
@@ -247,8 +321,12 @@ function PageShell({
 
       <div className="min-w-0 flex-1">
         <div className="rounded-[32px] border border-dark-300 bg-dark-250 p-5 sm:p-6">
-          <h1 className="text-2xl font-semibold text-light-900 sm:text-3xl">{title}</h1>
-          {description ? <p className="pt-2 text-sm text-light-500">{description}</p> : null}
+          <h1 className="text-2xl font-semibold text-light-900 sm:text-3xl">
+            {title}
+          </h1>
+          {description ? (
+            <p className="pt-2 text-sm text-light-500">{description}</p>
+          ) : null}
         </div>
         <div className="pt-5">{children}</div>
       </div>
@@ -278,9 +356,13 @@ function CardList({
               onClick={() => window.location.assign(item.href!)}
               className="rounded-[26px] border border-dark-300 bg-dark-250 p-5 text-left transition hover:border-primary-500/40 hover:bg-dark-200"
             >
-              <p className="text-base font-medium text-light-900">{item.title}</p>
+              <p className="text-base font-medium text-light-900">
+                {item.title}
+              </p>
               {item.description ? (
-                <p className="pt-1 text-sm text-light-500">{item.description}</p>
+                <p className="pt-1 text-sm text-light-500">
+                  {item.description}
+                </p>
               ) : null}
             </button>
           ) : (
@@ -290,9 +372,13 @@ function CardList({
               target={item.external ? "_blank" : undefined}
               className="rounded-[26px] border border-dark-300 bg-dark-250 p-5 transition hover:border-primary-500/40 hover:bg-dark-200"
             >
-              <p className="text-base font-medium text-light-900">{item.title}</p>
+              <p className="text-base font-medium text-light-900">
+                {item.title}
+              </p>
               {item.description ? (
-                <p className="pt-1 text-sm text-light-500">{item.description}</p>
+                <p className="pt-1 text-sm text-light-500">
+                  {item.description}
+                </p>
               ) : null}
             </Link>
           )
@@ -314,7 +400,9 @@ function SectionBlock({
   return (
     <div className="rounded-[28px] border border-dark-300 bg-dark-250 p-5">
       <p className="text-lg font-medium text-light-900">{title}</p>
-      {description ? <p className="pt-1 text-sm text-light-500">{description}</p> : null}
+      {description ? (
+        <p className="pt-1 text-sm text-light-500">{description}</p>
+      ) : null}
       <div className="pt-4">{children}</div>
     </div>
   );
@@ -337,7 +425,9 @@ function SwitchRow({
     <div className="flex items-center justify-between gap-4 rounded-2xl border border-dark-300 bg-dark-200 px-4 py-3">
       <div>
         <p className="text-sm font-medium text-light-900">{title}</p>
-        {description ? <p className="pt-1 text-xs text-light-500">{description}</p> : null}
+        {description ? (
+          <p className="pt-1 text-xs text-light-500">{description}</p>
+        ) : null}
       </div>
       <button
         type="button"
@@ -346,7 +436,7 @@ function SwitchRow({
         className={`relative h-7 w-12 rounded-full transition ${value ? "bg-primary-500" : "bg-dark-300"}`}
       >
         <span
-          className={`absolute top-1 h-5 w-5 rounded-full bg-light-900 transition ${
+          className={`absolute top-1 size-5 rounded-full bg-light-900 transition ${
             value ? "left-6" : "left-1"
           }`}
         />
@@ -382,15 +472,21 @@ function ChoiceGroup({
               disabled={disabled}
               onClick={() => onChange(option.value)}
               className={`flex items-center justify-between gap-4 rounded-2xl border px-4 py-3 text-left transition ${
-                isActive ? "border-primary-500 bg-primary-500/10" : "border-dark-300 bg-dark-200 hover:border-primary-500/30"
+                isActive
+                  ? "border-primary-500 bg-primary-500/10"
+                  : "border-dark-300 bg-dark-200 hover:border-primary-500/30"
               }`}
             >
               <div>
-                <p className="text-sm font-medium text-light-900">{option.label}</p>
-                <p className="pt-1 text-xs text-light-500">{option.description}</p>
+                <p className="text-sm font-medium text-light-900">
+                  {option.label}
+                </p>
+                <p className="pt-1 text-xs text-light-500">
+                  {option.description}
+                </p>
               </div>
               <span
-                className={`h-5 w-5 rounded-full border-2 ${isActive ? "border-primary-500 bg-primary-500" : "border-dark-300"}`}
+                className={`size-5 rounded-full border-2 ${isActive ? "border-primary-500 bg-primary-500" : "border-dark-300"}`}
               />
             </button>
           );
@@ -415,7 +511,9 @@ function ActivityTabs({
           type="button"
           onClick={() => onChange(tab.key)}
           className={`rounded-full px-5 py-2 text-sm transition ${
-            activeTab === tab.key ? "bg-primary-500 text-light-900" : "text-light-500 hover:text-light-900"
+            activeTab === tab.key
+              ? "bg-primary-500 text-light-900"
+              : "text-light-500 hover:text-light-900"
           }`}
         >
           {tab.label}
@@ -469,10 +567,14 @@ function ActivityGrid({
           >
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
-                <p className="text-lg font-medium text-light-900">{getActivityTitle(item)}</p>
-                <p className="pt-2 text-sm text-light-500">{getActivityDescription(item)}</p>
+                <p className="text-lg font-medium text-light-900">
+                  {getActivityTitle(item)}
+                </p>
+                <p className="pt-2 text-sm text-light-500">
+                  {getActivityDescription(item)}
+                </p>
               </div>
-              <div className="h-14 w-14 shrink-0 rounded-2xl bg-gradient-to-br from-primary-500/30 to-dark-200" />
+              <div className="size-14 shrink-0 rounded-2xl bg-gradient-to-br from-primary-500/30 to-dark-200" />
             </div>
 
             {meta.length ? (
@@ -526,9 +628,16 @@ function ActivityGrid({
   );
 }
 
-function SettingsScreen({ slugPath, currentUser, initialPrivacy, initialNotification }: Props) {
+function SettingsScreen({
+  slugPath,
+  currentUser,
+  initialPrivacy,
+  initialNotification,
+}: Props) {
   const { setUser } = useUserContext();
-  const [notification, setNotification] = useState<NotificationState>(normalizeNotification(initialNotification));
+  const [notification, setNotification] = useState<NotificationState>(
+    normalizeNotification(initialNotification)
+  );
   const [privacy, setPrivacy] = useState(normalizePrivacy(initialPrivacy));
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -559,12 +668,18 @@ function SettingsScreen({ slugPath, currentUser, initialPrivacy, initialNotifica
   }, [initialNotification]);
 
   useEffect(() => {
-    if (slugPath === "activity/deleted" || slugPath === "activity/star-ratings") {
+    if (
+      slugPath === "activity/deleted" ||
+      slugPath === "activity/star-ratings"
+    ) {
       setActivityTab("post");
     }
   }, [slugPath]);
 
-  const socialLinkMap = useMemo(() => getSocialLinkMap(currentUser), [currentUser]);
+  const socialLinkMap = useMemo(
+    () => getSocialLinkMap(currentUser),
+    [currentUser]
+  );
 
   const runSignedOutRedirect = async () => {
     await deleteToken();
@@ -581,13 +696,19 @@ function SettingsScreen({ slugPath, currentUser, initialPrivacy, initialNotifica
     startTransition(async () => {
       const res = await updateNotificationSettingsAction(currentUser?._id, {
         ...next,
-        quiteModeStartTime: next.quiteModeStartTime ? toApiTime(next.quiteModeStartTime) : "",
-        quiteModeEndTime: next.quiteModeEndTime ? toApiTime(next.quiteModeEndTime) : "",
+        quiteModeStartTime: next.quiteModeStartTime
+          ? toApiTime(next.quiteModeStartTime)
+          : "",
+        quiteModeEndTime: next.quiteModeEndTime
+          ? toApiTime(next.quiteModeEndTime)
+          : "",
       });
 
       if (!res || res.status !== "7400") {
         setNotification(previous);
-        toast.error(res?.message || "Couldn't update notification setting", { duration: 4000 });
+        toast.error(res?.message || "Couldn't update notification setting", {
+          duration: 4000,
+        });
         return;
       }
 
@@ -605,7 +726,9 @@ function SettingsScreen({ slugPath, currentUser, initialPrivacy, initialNotifica
 
       if (!res || res.status !== "7400") {
         setPrivacy(previous);
-        toast.error(res?.message || "Couldn't update privacy setting", { duration: 4000 });
+        toast.error(res?.message || "Couldn't update privacy setting", {
+          duration: 4000,
+        });
         return;
       }
 
@@ -617,7 +740,9 @@ function SettingsScreen({ slugPath, currentUser, initialPrivacy, initialNotifica
     const socialLink = socialLinkMap[type];
 
     if (!socialLink?.type || !socialLink?.url) {
-      toast.error(`No ${type} link is connected on this account`, { duration: 3000 });
+      toast.error(`No ${type} link is connected on this account`, {
+        duration: 3000,
+      });
       return;
     }
 
@@ -627,7 +752,9 @@ function SettingsScreen({ slugPath, currentUser, initialPrivacy, initialNotifica
       ]);
 
       if (!res || res.status !== "7400") {
-        toast.error(res?.message || `Couldn't update ${type} visibility`, { duration: 4000 });
+        toast.error(res?.message || `Couldn't update ${type} visibility`, {
+          duration: 4000,
+        });
         return;
       }
 
@@ -642,15 +769,22 @@ function SettingsScreen({ slugPath, currentUser, initialPrivacy, initialNotifica
     }
 
     if (newPassword !== confirmPassword) {
-      toast.error("New password and confirm password must match", { duration: 3000 });
+      toast.error("New password and confirm password must match", {
+        duration: 3000,
+      });
       return;
     }
 
     startTransition(async () => {
-      const res = await changePasswordSettingsAction({ oldPassword, newPassword });
+      const res = await changePasswordSettingsAction({
+        oldPassword,
+        newPassword,
+      });
 
       if (!res || res.status !== "7400") {
-        toast.error(res?.message || "Couldn't change password", { duration: 4000 });
+        toast.error(res?.message || "Couldn't change password", {
+          duration: 4000,
+        });
         return;
       }
 
@@ -673,7 +807,9 @@ function SettingsScreen({ slugPath, currentUser, initialPrivacy, initialNotifica
           : await deactivateAccountSettingsAction();
 
       if (!res || res.status !== "7400") {
-        toast.error(res?.message || `Couldn't ${confirmAction} account`, { duration: 4000 });
+        toast.error(res?.message || `Couldn't ${confirmAction} account`, {
+          duration: 4000,
+        });
         return;
       }
 
@@ -709,7 +845,11 @@ function SettingsScreen({ slugPath, currentUser, initialPrivacy, initialNotifica
         loadActivity("deleted-share");
       }
     }
-  }, [activityData.deletedPost.length, activityData.deletedShare.length, slugPath]);
+  }, [
+    activityData.deletedPost.length,
+    activityData.deletedShare.length,
+    slugPath,
+  ]);
 
   useEffect(() => {
     if (slugPath === "activity/star-ratings") {
@@ -734,7 +874,9 @@ function SettingsScreen({ slugPath, currentUser, initialPrivacy, initialNotifica
       const res = await restoreDeletedPostSettingsAction(postId);
 
       if (!res || res.status !== "7400") {
-        toast.error(res?.message || "Couldn't restore this post", { duration: 4000 });
+        toast.error(res?.message || "Couldn't restore this post", {
+          duration: 4000,
+        });
         return;
       }
 
@@ -781,7 +923,8 @@ function SettingsScreen({ slugPath, currentUser, initialPrivacy, initialNotifica
             {
               href: "/settings/account-centre",
               title: "Account Centre",
-              description: "Change password, deactivate account, or delete account.",
+              description:
+                "Change password, deactivate account, or delete account.",
             },
             {
               href: "/settings/notifications",
@@ -807,12 +950,14 @@ function SettingsScreen({ slugPath, currentUser, initialPrivacy, initialNotifica
             {
               href: "/settings/advertisement",
               title: "Advertisement Request",
-              description: "Request advertisement placement and track your submitted requests.",
+              description:
+                "Request advertisement placement and track your submitted requests.",
             },
             {
               href: "/settings/paid-promotions",
               title: "Paid Promotions",
-              description: "Apply for paid promotion opportunities and track your requests.",
+              description:
+                "Apply for paid promotion opportunities and track your requests.",
             },
             {
               href: "/settings/help-support",
@@ -832,15 +977,16 @@ function SettingsScreen({ slugPath, currentUser, initialPrivacy, initialNotifica
             <div className="rounded-2xl border border-dark-300 bg-dark-200 p-4">
               <p className="text-sm font-medium text-light-900">Help</p>
               <p className="pt-1 text-xs text-light-500">
-                Need support with your account or settings? Use the in-app flows above
-                first, then reach out to your team support channel if needed.
+                Need support with your account or settings? Use the in-app flows
+                above first, then reach out to your team support channel if
+                needed.
               </p>
             </div>
             <div className="rounded-2xl border border-dark-300 bg-dark-200 p-4">
               <p className="text-sm font-medium text-light-900">About</p>
               <p className="pt-1 text-xs text-light-500">
-                Talents Explore settings on web follow the same account, privacy,
-                notification, and activity rules as the mobile app.
+                Talents Explore settings on web follow the same account,
+                privacy, notification, and activity rules as the mobile app.
               </p>
             </div>
           </div>
@@ -891,7 +1037,9 @@ function SettingsScreen({ slugPath, currentUser, initialPrivacy, initialNotifica
             value={notification.pushNotofication}
             disabled={isPending}
             onToggle={() =>
-              updateNotification({ pushNotofication: !notification.pushNotofication })
+              updateNotification({
+                pushNotofication: !notification.pushNotofication,
+              })
             }
           />
         </SectionBlock>
@@ -903,13 +1051,17 @@ function SettingsScreen({ slugPath, currentUser, initialPrivacy, initialNotifica
               description="Automatically pause notifications at night."
               value={notification.quiteMode}
               disabled={isPending}
-              onToggle={() => updateNotification({ quiteMode: !notification.quiteMode })}
+              onToggle={() =>
+                updateNotification({ quiteMode: !notification.quiteMode })
+              }
             />
 
             {notification.quiteMode ? (
               <div className="grid gap-3 sm:grid-cols-2">
                 <label className="rounded-2xl border border-dark-300 bg-dark-200 px-4 py-3">
-                  <span className="block pb-2 text-sm text-light-500">Start time</span>
+                  <span className="block pb-2 text-sm text-light-500">
+                    Start time
+                  </span>
                   <input
                     type="time"
                     value={formatTimeValue(notification.quiteModeStartTime)}
@@ -923,7 +1075,9 @@ function SettingsScreen({ slugPath, currentUser, initialPrivacy, initialNotifica
                   />
                 </label>
                 <label className="rounded-2xl border border-dark-300 bg-dark-200 px-4 py-3">
-                  <span className="block pb-2 text-sm text-light-500">End time</span>
+                  <span className="block pb-2 text-sm text-light-500">
+                    End time
+                  </span>
                   <input
                     type="time"
                     value={formatTimeValue(notification.quiteModeEndTime)}
@@ -942,8 +1096,12 @@ function SettingsScreen({ slugPath, currentUser, initialPrivacy, initialNotifica
                   className="w-fit rounded-full bg-primary-500 text-light-900"
                   onClick={() =>
                     updateNotification({
-                      quiteModeStartTime: formatTimeValue(notification.quiteModeStartTime),
-                      quiteModeEndTime: formatTimeValue(notification.quiteModeEndTime),
+                      quiteModeStartTime: formatTimeValue(
+                        notification.quiteModeStartTime
+                      ),
+                      quiteModeEndTime: formatTimeValue(
+                        notification.quiteModeEndTime
+                      ),
                     })
                   }
                 >
@@ -1004,8 +1162,16 @@ function SettingsScreen({ slugPath, currentUser, initialPrivacy, initialNotifica
       <SectionBlock title="Password">
         <div className="grid gap-3">
           {[
-            { label: "Current password", value: oldPassword, onChange: setOldPassword },
-            { label: "New password", value: newPassword, onChange: setNewPassword },
+            {
+              label: "Current password",
+              value: oldPassword,
+              onChange: setOldPassword,
+            },
+            {
+              label: "New password",
+              value: newPassword,
+              onChange: setNewPassword,
+            },
             {
               label: "Confirm new password",
               value: confirmPassword,
@@ -1016,7 +1182,9 @@ function SettingsScreen({ slugPath, currentUser, initialPrivacy, initialNotifica
               key={field.label}
               className="rounded-2xl border border-dark-300 bg-dark-200 px-4 py-3"
             >
-              <span className="block pb-2 text-sm text-light-500">{field.label}</span>
+              <span className="block pb-2 text-sm text-light-500">
+                {field.label}
+              </span>
               <input
                 type="password"
                 value={field.value}
@@ -1045,7 +1213,10 @@ function SettingsScreen({ slugPath, currentUser, initialPrivacy, initialNotifica
       currentPath={slugPath}
     >
       <div className="grid gap-4">
-        <SectionBlock title="Basic Info" description="Choose what profile basics are visible.">
+        <SectionBlock
+          title="Basic Info"
+          description="Choose what profile basics are visible."
+        >
           <div className="grid gap-3">
             <SwitchRow
               title="First name"
@@ -1115,21 +1286,34 @@ function SettingsScreen({ slugPath, currentUser, initialPrivacy, initialNotifica
               title="Facebook"
               value={socialLinkMap.facebook?.show === true}
               disabled={isPending}
-              onToggle={() => updateSocialPrivacy("facebook", socialLinkMap.facebook?.show !== true)}
+              onToggle={() =>
+                updateSocialPrivacy(
+                  "facebook",
+                  socialLinkMap.facebook?.show !== true
+                )
+              }
             />
             <SwitchRow
               title="Instagram"
               value={socialLinkMap.instagram?.show === true}
               disabled={isPending}
               onToggle={() =>
-                updateSocialPrivacy("instagram", socialLinkMap.instagram?.show !== true)
+                updateSocialPrivacy(
+                  "instagram",
+                  socialLinkMap.instagram?.show !== true
+                )
               }
             />
             <SwitchRow
               title="LinkedIn"
               value={socialLinkMap.linkedin?.show === true}
               disabled={isPending}
-              onToggle={() => updateSocialPrivacy("linkedin", socialLinkMap.linkedin?.show !== true)}
+              onToggle={() =>
+                updateSocialPrivacy(
+                  "linkedin",
+                  socialLinkMap.linkedin?.show !== true
+                )
+              }
             />
           </div>
         </SectionBlock>
@@ -1282,7 +1466,8 @@ function SettingsScreen({ slugPath, currentUser, initialPrivacy, initialNotifica
           {
             href: "/settings/activity/star-ratings",
             title: "Star Ratings",
-            description: "Review posts and shared items from your ratings activity.",
+            description:
+              "Review posts and shared items from your ratings activity.",
             forceReload: true,
           },
         ]}
@@ -1290,10 +1475,20 @@ function SettingsScreen({ slugPath, currentUser, initialPrivacy, initialNotifica
     </PageShell>
   );
 
-  const deletedItems = activityTab === "post" ? activityData.deletedPost : activityData.deletedShare;
-  const deletedLoading = activityTab === "post" ? activityLoading.deletedPost : activityLoading.deletedShare;
-  const starItems = activityTab === "post" ? activityData.starPost : activityData.starShare;
-  const starLoading = activityTab === "post" ? activityLoading.starPost : activityLoading.starShare;
+  const deletedItems =
+    activityTab === "post"
+      ? activityData.deletedPost
+      : activityData.deletedShare;
+  const deletedLoading =
+    activityTab === "post"
+      ? activityLoading.deletedPost
+      : activityLoading.deletedShare;
+  const starItems =
+    activityTab === "post" ? activityData.starPost : activityData.starShare;
+  const starLoading =
+    activityTab === "post"
+      ? activityLoading.starPost
+      : activityLoading.starShare;
 
   const activityDeletedContent = (
     <PageShell
@@ -1365,7 +1560,9 @@ function SettingsScreen({ slugPath, currentUser, initialPrivacy, initialNotifica
       description="This settings section is being wired into the web app."
       currentPath={slugPath}
     >
-      <CardList items={[{ href: "/settings", title: "Back to Settings Home" }]} />
+      <CardList
+        items={[{ href: "/settings", title: "Back to Settings Home" }]}
+      />
     </PageShell>
   );
 
@@ -1406,7 +1603,9 @@ function SettingsScreen({ slugPath, currentUser, initialPrivacy, initialNotifica
   } else if (slugPath === "paid-promotions/request") {
     content = <PromotionRequests feature="paid-promotions" view="form" />;
   } else if (slugPath === "help-support") {
-    content = <SupportFeedback feature="help-support" currentUser={currentUser} />;
+    content = (
+      <SupportFeedback feature="help-support" currentUser={currentUser} />
+    );
   } else if (slugPath === "feedback") {
     content = <SupportFeedback feature="feedback" currentUser={currentUser} />;
   }
@@ -1426,7 +1625,9 @@ function SettingsScreen({ slugPath, currentUser, initialPrivacy, initialNotifica
         <AlertDialogContent className="border-dark-300 bg-dark-200 text-light-900">
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {confirmAction === "delete" ? "Delete Account?" : "Deactivate Account?"}
+              {confirmAction === "delete"
+                ? "Delete Account?"
+                : "Deactivate Account?"}
             </AlertDialogTitle>
             <AlertDialogDescription className="text-light-500">
               {confirmAction === "delete"
@@ -1460,8 +1661,8 @@ function SettingsScreen({ slugPath, currentUser, initialPrivacy, initialNotifica
           <AlertDialogHeader>
             <AlertDialogTitle>Delete this post permanently?</AlertDialogTitle>
             <AlertDialogDescription className="text-light-500">
-              This action can&apos;t be undone. The deleted item will be removed from
-              your account for good.
+              This action can&apos;t be undone. The deleted item will be removed
+              from your account for good.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

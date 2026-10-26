@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 import { Search, Star } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -92,15 +93,23 @@ function CollaborationApplicants({
   const [search, setSearch] = useState("");
   const [applicants, setApplicants] = useState(initialApplicants || []);
   const [pageNo, setPageNo] = useState(1);
-  const [hasMore, setHasMore] = useState((initialApplicants || []).length >= PAGE_SIZE);
+  const [hasMore, setHasMore] = useState(
+    (initialApplicants || []).length >= PAGE_SIZE
+  );
   const [isPending, startTransition] = useTransition();
 
   const reloadStats = async () => {
-    const nextStats = await getCollaborationApplicantsStatsAction(collaborationId);
+    const nextStats =
+      await getCollaborationApplicantsStatsAction(collaborationId);
     setStats(nextStats || {});
   };
 
-  const loadApplicants = (filter: string, nextPage = 1, append = false, searchValue = search) => {
+  const loadApplicants = (
+    filter: string,
+    nextPage = 1,
+    append = false,
+    searchValue = search
+  ) => {
     startTransition(async () => {
       const response = await getCollaborationApplicantsAction(collaborationId, {
         filter,
@@ -117,7 +126,9 @@ function CollaborationApplicants({
         return;
       }
 
-      const nextApplicants = Array.isArray(response.response) ? response.response : [];
+      const nextApplicants = Array.isArray(response.response)
+        ? response.response
+        : [];
 
       setApplicants((prev) =>
         append
@@ -125,7 +136,10 @@ function CollaborationApplicants({
               ...prev,
               ...nextApplicants.filter(
                 (item) =>
-                  !prev.some((prevItem) => prevItem?.applicationId === item?.applicationId)
+                  !prev.some(
+                    (prevItem) =>
+                      prevItem?.applicationId === item?.applicationId
+                  )
               ),
             ]
           : nextApplicants
@@ -149,11 +163,14 @@ function CollaborationApplicants({
 
   const handleReview = (item: any, action: string) => {
     startTransition(async () => {
-      const response = await reviewCollaborationApplicantAction(collaborationId, {
-        collaborationRoleId: item?.roleId,
-        applicantId: item?.applicant?.id || item?.applicant?._id,
-        action,
-      });
+      const response = await reviewCollaborationApplicantAction(
+        collaborationId,
+        {
+          collaborationRoleId: item?.roleId,
+          applicantId: item?.applicant?.id || item?.applicant?._id,
+          action,
+        }
+      );
 
       if (response?.status === "7400") {
         toast.success(response?.message || "Applicant updated");
@@ -171,7 +188,8 @@ function CollaborationApplicants({
       <div className="rounded-[32px] border border-dark-300 bg-dark-250 p-5 sm:p-6">
         <h1 className="text-3xl font-semibold text-light-900">Applicants</h1>
         <p className="pt-2 text-sm text-light-500">
-          Review applicants, invites, shortlisted talent, and role-wise demand for this collaboration.
+          Review applicants, invites, shortlisted talent, and role-wise demand
+          for this collaboration.
         </p>
       </div>
 
@@ -243,8 +261,12 @@ function CollaborationApplicants({
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-lg font-semibold text-primary-500">{item?.name || "Role"}</p>
-                  <p className="pt-1 text-sm text-light-500">{item?.subtitle || ""}</p>
+                  <p className="text-lg font-semibold text-primary-500">
+                    {item?.name || "Role"}
+                  </p>
+                  <p className="pt-1 text-sm text-light-500">
+                    {item?.subtitle || ""}
+                  </p>
                 </div>
                 <span className="rounded-full border border-dark-300 bg-dark-200 px-3 py-1 text-xs text-light-500">
                   Role overview
@@ -302,16 +324,18 @@ function CollaborationApplicants({
                     <Link
                       key={`${item?.applicationId}-work-${workIndex}`}
                       href={`/post/${work?._id || work?.postId || ""}`}
-                      className="block h-24 w-24 shrink-0 overflow-hidden rounded-2xl border border-dark-300 bg-dark-200"
+                      className="block size-24 shrink-0 overflow-hidden rounded-2xl border border-dark-300 bg-dark-200"
                     >
                       {work?.media?.[0]?.url ? (
-                        <img
+                        <Image
                           src={work.media[0].url}
                           alt={work?.about?.title || "Best work"}
-                          className="h-full w-full object-cover"
+                          className="size-full object-cover"
+                          width={700}
+                          height={700}
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center px-2 text-center text-[10px] text-light-500">
+                        <div className="flex size-full items-center justify-center px-2 text-center text-[10px] text-light-500">
                           Best work
                         </div>
                       )}
@@ -325,7 +349,9 @@ function CollaborationApplicants({
                   item?.applicantStatus === "ACCEPTED" ||
                   item?.applicantStatus === "FINALIZED") &&
                 (item?.applicant?.id || item?.applicant?._id) ? (
-                  <Link href={`/chat/start/${item?.applicant?.id || item?.applicant?._id}`}>
+                  <Link
+                    href={`/chat/start/${item?.applicant?.id || item?.applicant?._id}`}
+                  >
                     <Button
                       type="button"
                       className="rounded-full bg-dark-200 text-custom-100 hover:bg-dark-300"
@@ -335,7 +361,8 @@ function CollaborationApplicants({
                   </Link>
                 ) : null}
 
-                {item?.applicant?.userName && (item?.applicant?.id || item?.applicant?._id) ? (
+                {item?.applicant?.userName &&
+                (item?.applicant?.id || item?.applicant?._id) ? (
                   <Link
                     href={`/collaboration/${collaborationId}/applicants/${item?.applicationId}`}
                   >
@@ -348,7 +375,8 @@ function CollaborationApplicants({
                   </Link>
                 ) : null}
 
-                {item?.applicant?.userName && (item?.applicant?.id || item?.applicant?._id) ? (
+                {item?.applicant?.userName &&
+                (item?.applicant?.id || item?.applicant?._id) ? (
                   <Link
                     href={`/profile/${item.applicant.userName}/${item.applicant.id || item.applicant._id}`}
                   >
@@ -415,7 +443,8 @@ function CollaborationApplicants({
                   </Button>
                 ) : null}
 
-                {item?.applicantType === "APPLIED" && item?.applicantStatus === "APPLIED" ? (
+                {item?.applicantType === "APPLIED" &&
+                item?.applicantStatus === "APPLIED" ? (
                   <Button
                     type="button"
                     disabled={isPending}
@@ -426,9 +455,9 @@ function CollaborationApplicants({
                   </Button>
                 ) : null}
 
-                {(item?.applicantStatus === "SHORTLISTED" ||
-                  item?.applicantStatus === "ACCEPTED" ||
-                  item?.applicantStatus === "FINALIZED") ? (
+                {item?.applicantStatus === "SHORTLISTED" ||
+                item?.applicantStatus === "ACCEPTED" ||
+                item?.applicantStatus === "FINALIZED" ? (
                   <Button
                     type="button"
                     disabled={isPending}

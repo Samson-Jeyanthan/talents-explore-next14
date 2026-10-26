@@ -48,7 +48,7 @@ export function NativePickerField({
         type={type}
         value={value || ""}
         onChange={(event) => onChange(event.target.value)}
-        className="pointer-events-none absolute inset-0 h-full w-full opacity-0"
+        className="pointer-events-none absolute inset-0 size-full opacity-0"
         tabIndex={-1}
         aria-hidden="true"
       />
@@ -102,7 +102,11 @@ export function LocationPickerDialog({
   title: string;
   initialAddress?: string;
   onClose: () => void;
-  onApply: (value: { address: string; latitude: number; longitude: number }) => void;
+  onApply: (value: {
+    address: string;
+    latitude: number;
+    longitude: number;
+  }) => void;
 }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<LocationResult[]>([]);
@@ -125,9 +129,12 @@ export function LocationPickerDialog({
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
       <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto rounded-[28px] border-dark-300 bg-dark-200 text-light-900">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-semibold text-light-900">{title}</DialogTitle>
+          <DialogTitle className="text-2xl font-semibold text-light-900">
+            {title}
+          </DialogTitle>
           <DialogDescription className="text-light-500">
-            Select your location on web the same way as mobile: use current location or search an address.
+            Select your location on web the same way as mobile: use current
+            location or search an address.
           </DialogDescription>
         </DialogHeader>
 
@@ -146,8 +153,12 @@ export function LocationPickerDialog({
               navigator.geolocation.getCurrentPosition(
                 async (position) => {
                   try {
-                    const latitude = Number(position.coords.latitude.toFixed(6));
-                    const longitude = Number(position.coords.longitude.toFixed(6));
+                    const latitude = Number(
+                      position.coords.latitude.toFixed(6)
+                    );
+                    const longitude = Number(
+                      position.coords.longitude.toFixed(6)
+                    );
                     const resolved = await reverseLocation(latitude, longitude);
                     onApply(resolved);
                     onClose();
@@ -165,7 +176,9 @@ export function LocationPickerDialog({
               );
             }}
           >
-            {detecting ? "Detecting current location..." : "Click here to select your current location"}
+            {detecting
+              ? "Detecting current location..."
+              : "Click here to select your current location"}
           </Button>
 
           <div className="relative">
@@ -223,7 +236,9 @@ export function LocationPickerDialog({
                   }}
                   className="rounded-[20px] border border-dark-300 bg-dark-250 p-4 text-left transition hover:border-primary-500/40"
                 >
-                  <p className="text-sm text-light-900">{result.display_name}</p>
+                  <p className="text-sm text-light-900">
+                    {result.display_name}
+                  </p>
                 </button>
               ))
             ) : (

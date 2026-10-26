@@ -59,7 +59,6 @@ const SigninForm = () => {
         // to be visible to middleware and server components immediately.
         redirecting = true;
         window.location.assign(redirectPath);
-        return;
       } else {
         toast.error("Sign In Failed, Invalid Email or Password.", {
           duration: 4000,
@@ -67,7 +66,9 @@ const SigninForm = () => {
       }
     } catch (error) {
       console.error("Sign in failed:", error);
-      toast.error("Unable to sign in right now. Please try again.", { duration: 4000 });
+      toast.error("Unable to sign in right now. Please try again.", {
+        duration: 4000,
+      });
     } finally {
       if (!redirecting) {
         finishLoading();

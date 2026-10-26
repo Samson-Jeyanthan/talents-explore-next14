@@ -7,6 +7,7 @@ import {
 import UserProfileImg from "@/components/others/UserProfileImg";
 import { Button } from "@/components/ui/button";
 import { FileText, Star } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -24,7 +25,10 @@ export default function CollaborationApplicantDetails({
   const [pending, startTransition] = useTransition();
 
   const reload = async () => {
-    const next = await getCollaborationApplicantDetailsAction(collaborationId, applicationId);
+    const next = await getCollaborationApplicantDetailsAction(
+      collaborationId,
+      applicationId
+    );
     setApplication(next);
   };
 
@@ -85,34 +89,64 @@ export default function CollaborationApplicantDetails({
         </div>
 
         <div className="pt-5">
-          <p className="text-2xl font-semibold text-light-900">{application?.roleName}</p>
-          <p className="pt-1 text-sm text-light-500">{application?.subtitle || ""}</p>
+          <p className="text-2xl font-semibold text-light-900">
+            {application?.roleName}
+          </p>
+          <p className="pt-1 text-sm text-light-500">
+            {application?.subtitle || ""}
+          </p>
         </div>
 
         <div className="flex flex-wrap gap-2 pt-5">
           {application?.applicantStatus === "ACCEPTED" ? (
-            <Button type="button" disabled={pending} className="rounded-full bg-primary-500 text-light-900" onClick={() => review("SHORTLIST")}>
+            <Button
+              type="button"
+              disabled={pending}
+              className="rounded-full bg-primary-500 text-light-900"
+              onClick={() => review("SHORTLIST")}
+            >
               Add to Shortlist
             </Button>
           ) : null}
           {application?.applicantStatus === "SHORTLISTED" ? (
             <>
-              <Button type="button" disabled={pending} className="rounded-full bg-primary-500 text-light-900" onClick={() => review("FINALIZED")}>
+              <Button
+                type="button"
+                disabled={pending}
+                className="rounded-full bg-primary-500 text-light-900"
+                onClick={() => review("FINALIZED")}
+              >
                 Add to Finalist
               </Button>
-              <Button type="button" disabled={pending} className="rounded-full bg-dark-200 text-custom-100 hover:bg-dark-300" onClick={() => review("ACCEPT")}>
+              <Button
+                type="button"
+                disabled={pending}
+                className="rounded-full bg-dark-200 text-custom-100 hover:bg-dark-300"
+                onClick={() => review("ACCEPT")}
+              >
                 Remove from Shortlist
               </Button>
             </>
           ) : null}
-          {application?.applicantType === "APPLIED" && application?.applicantStatus === "APPLIED" ? (
-            <Button type="button" disabled={pending} className="rounded-full bg-dark-200 text-custom-100 hover:bg-dark-300" onClick={() => review("ACCEPT")}>
+          {application?.applicantType === "APPLIED" &&
+          application?.applicantStatus === "APPLIED" ? (
+            <Button
+              type="button"
+              disabled={pending}
+              className="rounded-full bg-dark-200 text-custom-100 hover:bg-dark-300"
+              onClick={() => review("ACCEPT")}
+            >
               Accept Request
             </Button>
           ) : null}
           {application?.applicant?.userName && application?.applicantId ? (
-            <Link href={`/profile/${application.applicant.userName}/${application.applicantId}`}>
-              <Button type="button" className="rounded-full bg-dark-200 text-light-900 hover:bg-dark-300">
+            <Link
+              href={`/profile/${application.applicant.userName}/${application.applicantId}`}
+            >
+              <Button
+                type="button"
+                className="rounded-full bg-dark-200 text-light-900 hover:bg-dark-300"
+              >
                 View Profile
               </Button>
             </Link>
@@ -131,7 +165,12 @@ export default function CollaborationApplicantDetails({
                 {application?.resumeFileKey?.split("/")?.pop() || "Resume"}
               </p>
             </div>
-            <a href={application.resumeFileUrl} target="_blank" className="text-sm text-custom-100" rel="noreferrer">
+            <a
+              href={application.resumeFileUrl}
+              target="_blank"
+              className="text-sm text-custom-100"
+              rel="noreferrer"
+            >
               Open
             </a>
           </div>
@@ -140,12 +179,15 @@ export default function CollaborationApplicantDetails({
 
       {application?.message ? (
         <div className="rounded-[28px] border border-dark-300 bg-dark-250 p-5">
-          <p className="text-lg font-semibold text-light-900">Why You Should Collab With Me</p>
+          <p className="text-lg font-semibold text-light-900">
+            Why You Should Collab With Me
+          </p>
           <p className="pt-3 text-sm text-light-500">{application.message}</p>
         </div>
       ) : null}
 
-      {Array.isArray(application?.bestWork) && application.bestWork.length > 0 ? (
+      {Array.isArray(application?.bestWork) &&
+      application.bestWork.length > 0 ? (
         <div className="rounded-[28px] border border-dark-300 bg-dark-250 p-5">
           <p className="text-lg font-semibold text-light-900">Best Works</p>
           <div className="mt-4 flex gap-3 overflow-x-auto pb-1">
@@ -153,12 +195,18 @@ export default function CollaborationApplicantDetails({
               <Link
                 key={`best-work-${index}`}
                 href={`/post/${item?._id || item?.postId || ""}`}
-                className="block h-24 w-24 shrink-0 overflow-hidden rounded-2xl border border-dark-300 bg-dark-200"
+                className="block size-24 shrink-0 overflow-hidden rounded-2xl border border-dark-300 bg-dark-200"
               >
                 {item?.media?.[0]?.url ? (
-                  <img src={item.media[0].url} alt={item?.about?.title || "Best work"} className="h-full w-full object-cover" />
+                  <Image
+                    src={item.media[0].url}
+                    alt={item?.about?.title || "Best work"}
+                    className="size-full object-cover"
+                    width={100}
+                    height={100}
+                  />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center px-2 text-center text-[10px] text-light-500">
+                  <div className="flex size-full items-center justify-center px-2 text-center text-[10px] text-light-500">
                     Best work
                   </div>
                 )}
@@ -169,8 +217,12 @@ export default function CollaborationApplicantDetails({
       ) : null}
 
       <div className="rounded-[28px] border border-dark-300 bg-dark-250 p-5">
-        <p className="text-lg font-semibold text-light-900">Profile Description</p>
-        <p className="pt-3 text-sm text-light-500">{application?.applicant?.shortBio || "No bio available."}</p>
+        <p className="text-lg font-semibold text-light-900">
+          Profile Description
+        </p>
+        <p className="pt-3 text-sm text-light-500">
+          {application?.applicant?.shortBio || "No bio available."}
+        </p>
       </div>
     </section>
   );
