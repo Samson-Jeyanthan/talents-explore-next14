@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { Poppins } from "next/font/google";
 import type { Metadata } from "next";
 import { ThemeProvider } from "@/context/ThemeProvider";
@@ -35,7 +35,9 @@ export default function RootLayout({
       <body>
         <LoadingProvider>
           <AuthProvider>
-            <NavigationLoader />
+            <Suspense>
+              <NavigationLoader />
+            </Suspense>
             <UtilsProvider>
               <ThemeProvider>{children}</ThemeProvider>
             </UtilsProvider>

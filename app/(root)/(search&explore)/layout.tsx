@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { ExploreBgCarousel, ExploreSearchSection } from "@/components/widgets";
 import { Tabs } from "@/components/others";
 import { EXPLORE_BG_IMAGES, EXPLORE_TABS } from "@/constants";
@@ -15,10 +15,12 @@ async function layout({ children }: { children: React.ReactNode }) {
     <main className="flex w-full flex-col items-center justify-center">
       <header className="sticky top-14 w-full">
         <div className="flex-center relative -mt-10 h-[26rem] w-full flex-col gap-2">
-          <ExploreSearchSection
-            langData={langData}
-            professionData={professionData}
-          />
+          <Suspense fallback={<div>Loading...</div>}>
+            <ExploreSearchSection
+              langData={langData}
+              professionData={professionData}
+            />
+          </Suspense>
           <Tabs
             tabs={EXPLORE_TABS}
             activeTabClassName="bg-light-900 top-8 left-[44%] transform translate-x-1/2 size-2"
