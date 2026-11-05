@@ -63,7 +63,9 @@ export const userPublicInfoAction = async (
         headers,
       }
     );
-    return await response.json();
+    const res = await response.json();
+    console.log(res, "userPublicInfoAction-response");
+    return res;
   } catch (error) {
     console.error(error);
     return error;
@@ -80,9 +82,11 @@ export async function fetchUserDataAction(userId: string, viewerId: string) {
     if (resolvedViewerId === userId) {
       res = await getUserPersonalInfoAction(token);
     } else {
+      console.log("viewing public profile of another user");
       res = await userPublicInfoAction(userId, resolvedViewerId);
     }
   } else {
+    console.log("viewing else public profile of another user");
     res = await userPublicInfoAction(userId, viewerId);
   }
 
@@ -242,6 +246,7 @@ export async function getUserLanguageInfoAction(userId: string | undefined) {
 }
 
 export async function userPersonalInfoEditAction(formData: unknown) {
+  console.log("formData", formData);
   try {
     const headers = await getAuthHeaders();
     const response = await fetch(
@@ -261,15 +266,19 @@ export async function userPersonalInfoEditAction(formData: unknown) {
     console.log("// user-personal-info-edit //", res);
 
     if (res.status === "7400") {
-      return res.response;
+      return res;
     } else {
-      return undefined;
+      const data = {
+        status: 400,
+        message: "Could not edit personal info data",
+      };
+      return data;
     }
   } catch (error) {
     console.error("user-personal-edit error:", error);
     return {
       status: 500,
-      message: "Internal server error",
+      message: "Internal server error - client side",
     };
   }
 }

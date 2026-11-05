@@ -287,15 +287,57 @@ export async function getAllPostsAction(
       };
     }
 
-    // const response = await fetch(
-    //   `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/home?viewUserId=${viewerId}&userId=${viewerId}&pageNo=${pageNo}&pageSize=${pageSize}`,
-    //   {
-    //     cache: "no-store",
-    //     headers: {
-    //       Authorization: `Bearer ${accessToken}`,
-    //     },
-    //   }
-    // );
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/home?viewUserId=${viewerId}&userId=${viewerId}&pageNo=${pageNo}&pageSize=${pageSize}`,
+      {
+        cache: "no-store",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      return {
+        status: response.status,
+        message: "Could not fetch home feed posts.",
+      };
+    }
+
+    const res = await response.json();
+
+    if (res.status === "7400") {
+      return Array.isArray(res.response) ? res.response : [];
+    }
+
+    return {
+      status: 400,
+      message: res?.message || "Could not fetch all posts data",
+    };
+  } catch (error) {
+    console.error("getAllPostsAction failed:", error);
+
+    return {
+      status: 500,
+      message: "Something went wrong while loading the home feed.",
+    };
+  }
+}
+
+export async function getAllSharesAction(
+  pageNo: number,
+  pageSize: number
+): Promise<IPost[] | TPostActionError> {
+  try {
+    const viewerId = await resolveViewerIdAction();
+    const accessToken = await getSession();
+
+    if (!viewerId) {
+      return {
+        status: 401,
+        message: "Could not identify the logged-in user for the home feed.",
+      };
+    }
 
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/sharelinks?viewUserId=${viewerId}&userId=${viewerId}&pageNo=${pageNo}&pageSize=${pageSize}`,

@@ -8,33 +8,34 @@ import { useParams } from "next/navigation";
 
 interface ConnectionButtonProps {
   isFollow: number;
-  viewerId: string | undefined;
   userId: string;
   userName: string;
-  isOwnProfile: boolean;
   connectionTab?: number;
 }
 
 function ConnectionButton({
   isFollow,
-  viewerId,
   userId,
   userName,
-  isOwnProfile,
   connectionTab,
 }: ConnectionButtonProps) {
   const [isFollowed, setIsFollowed] = useState(isFollow);
   const { user } = useUserContext();
   const params = useParams();
-  const isCurrentUserProfile = user.currentUserId === params.userId;
+  const isOwnProfile = user.currentUserId === params.userId;
 
   const handleConnection = () => {
-    handleFollowUnFollow(isFollowed, viewerId, userId, userName, setIsFollowed);
+    handleFollowUnFollow({
+      isFollowed,
+      followingId: userId,
+      followingUserName: userName,
+      setIsFollowed,
+    });
   };
 
   return (
     <>
-      {isOwnProfile ? (
+      {user.currentUserId === userId ? (
         <p className="flex-center h-8 w-24 text-sm text-light-600">You</p>
       ) : (
         <Button
@@ -42,7 +43,7 @@ function ConnectionButton({
           onClick={handleConnection}
         >
           {isFollowed === 1
-            ? isCurrentUserProfile && connectionTab === 2
+            ? isOwnProfile && connectionTab === 2
               ? "Unfollow"
               : "Following"
             : "Follow"}

@@ -51,21 +51,30 @@ export async function resendOtpAction(userId: string) {
   }
 }
 
-export async function completeProfileAction(userId: string, formData: unknown) {
+export async function completeProfileAction(formData: unknown) {
+  console.log("formdata-of-complete-profile", formData);
   try {
     const headers = await getAuthHeaders();
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/personalInfo/`,
       {
         method: "PUT",
-        cache: "no-store",
         headers,
         body: JSON.stringify(formData),
       }
     );
 
-    const data = await response.json();
-    return data;
+    const res = await response.json();
+
+    if (res.status === "7400") {
+      await storeIsAbout(true);
+
+      const data = {
+        status: "7400",
+        response: "Profile updated successfully",
+      };
+      return data;
+    }
   } catch (error) {
     console.error(error);
     return error;
@@ -159,10 +168,23 @@ export async function verifyForgotPasswordAction(formData: unknown) {
   }
 }
 
+// TODO: Function not working properly. Bad Request, need to check backend
+
 export async function resetPasswordAction(formData: unknown) {
   try {
-    const response = await axiosInstance.post("/auth/resetPassword", formData);
-    return response.data;
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/resetPassword`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      }
+    );
+
+    console.log(response, "reset-password-action");
+    // return response.data;
   } catch (error) {
     console.error(error);
     return error;
@@ -222,11 +244,14 @@ export async function logoutAction(userId: string) {
         refresh_token: refreshToken,
         from_all: "true",
       });
-      await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/logout?${params}`, {
-        method: "POST",
-        cache: "no-store",
-        headers: await getAuthHeaders(),
-      });
+      await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/logout?${params}`,
+        {
+          method: "POST",
+          cache: "no-store",
+          headers: await getAuthHeaders(),
+        }
+      );
     }
   } finally {
     await clearSession();

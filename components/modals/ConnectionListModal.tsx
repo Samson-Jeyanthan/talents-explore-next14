@@ -25,23 +25,24 @@ function ConnectionListModal({
   canViewFollowers?: boolean;
   canViewFollowings?: boolean;
 }) {
-  const safeTab = currentTab === 0 && !canViewRatings
-    ? canViewFollowers
-      ? 1
-      : 2
-    : currentTab === 1 && !canViewFollowers
-      ? canViewFollowings
-        ? 2
-        : canViewRatings
-          ? 0
-          : undefined
-      : currentTab === 2 && !canViewFollowings
-        ? canViewRatings
-          ? 0
-          : canViewFollowers
-            ? 1
+  const safeTab =
+    currentTab === 0 && !canViewRatings
+      ? canViewFollowers
+        ? 1
+        : 2
+      : currentTab === 1 && !canViewFollowers
+        ? canViewFollowings
+          ? 2
+          : canViewRatings
+            ? 0
             : undefined
-        : currentTab;
+        : currentTab === 2 && !canViewFollowings
+          ? canViewRatings
+            ? 0
+            : canViewFollowers
+              ? 1
+              : undefined
+          : currentTab;
 
   return (
     <DialogContent
@@ -52,30 +53,30 @@ function ConnectionListModal({
         {isTalent ? (
           <>
             {canViewRatings ? (
-              <h3
+              <p
                 className={`${safeTab === 0 ? "active-connection-tab" : "text-light-600"} default-connection-tab`}
                 onClick={() => setCuurentTab && setCuurentTab(0)}
               >
                 Ratings
-              </h3>
+              </p>
             ) : null}
             {canViewFollowers ? (
-              <h3
+              <p
                 className={`${safeTab === 1 ? "active-connection-tab" : "text-light-600"} default-connection-tab`}
                 onClick={() => setCuurentTab && setCuurentTab(1)}
               >
                 Followers
-              </h3>
+              </p>
             ) : null}
           </>
         ) : null}
         {canViewFollowings ? (
-          <h3
+          <p
             className={`${safeTab === 2 ? "active-connection-tab" : "text-light-600"} default-connection-tab`}
             onClick={() => setCuurentTab && setCuurentTab(2)}
           >
             Following
-          </h3>
+          </p>
         ) : null}
       </DialogTitle>
 

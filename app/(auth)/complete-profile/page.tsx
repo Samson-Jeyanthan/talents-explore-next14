@@ -1,13 +1,9 @@
-import { checkIsAboutAction } from "@/actions/auth.action";
 import {
   getLanguagesAction,
   getProfessionsAction,
 } from "@/actions/utils.action";
 import { CompleteProfileForm } from "@/components/forms";
-import { getSession } from "@/lib/session";
 import { Metadata } from "next";
-import { redirect } from "next/navigation";
-
 export const metadata: Metadata = {
   title: "Complete Profile | Talents Explore",
   description: "",
@@ -16,17 +12,6 @@ export const metadata: Metadata = {
 const CompleteProfile = async () => {
   const langData = await getLanguagesAction();
   const professionData = await getProfessionsAction();
-  const token = await getSession();
-
-  console.log(langData, "LangData");
-  console.log(professionData, "ProfessionData");
-
-  if (token !== "") {
-    const res = await checkIsAboutAction(token);
-    if (res) redirect("/home");
-  } else {
-    redirect("/sign-in");
-  }
 
   return (
     <div className="flex-start min-h-screen w-full flex-col">

@@ -7,7 +7,7 @@ function useTimer() {
   const initialCountdown = (): number => {
     if (typeof window !== "undefined") {
       const savedCountdown = localStorage.getItem("countdown");
-      return savedCountdown ? parseInt(savedCountdown, 10) : 1 * 40;
+      return savedCountdown ? parseInt(savedCountdown, 10) : 180;
     }
     return 0;
   };

@@ -74,7 +74,7 @@ const Dropdown = ({
               value={selectedValue as string}
               onValueChange={(_id: string) => handleOnChange(_id, field)}
             >
-              <SelectTrigger className="flex-between shad-auth_form_input">
+              <SelectTrigger className="shad-auth_form_input capitalize">
                 {options?.find((option) => option._id === selectedValue)
                   ?.name || <SelectValue />}
 
@@ -97,9 +97,9 @@ const Dropdown = ({
                     <SelectItem
                       key={index}
                       value={String(option._id)}
-                      className="shad-auth_form_select_item"
+                      className="shad-auth_form_select_item capitalize"
                     >
-                      {option?.name}
+                      {option.name}
                     </SelectItem>
                   ))}
               </SelectContent>

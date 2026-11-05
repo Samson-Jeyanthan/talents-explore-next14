@@ -2,7 +2,7 @@ import {
   getLanguagesAction,
   getMainCategoriesAction,
 } from "@/actions/utils.action";
-import { ParentTalentRegisterForm } from "@/components/widgets/multiStepForms";
+import { ParentTalentRegisterForm } from "@/components/multiStepForms";
 import React from "react";
 
 const TalentRegistration = async () => {

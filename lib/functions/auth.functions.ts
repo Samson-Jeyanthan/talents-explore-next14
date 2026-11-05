@@ -14,6 +14,15 @@ import {
 import { jwtDecode } from "jwt-decode";
 import { toast } from "sonner";
 
+// removing localstorage items when canceling the forgot password function
+export async function handleClearStorage() {
+  sessionStorage.removeItem("talents-explore-auth-user");
+  localStorage.removeItem("countdown");
+  localStorage.removeItem("isOTP");
+  localStorage.removeItem("verifiedEmail");
+  localStorage.removeItem("registerUserId");
+}
+
 // signup otp function
 export async function handleVerifyEmailOtp(formData: TVerifyOTPProps) {
   const res = await otpVerificationAction(formData);
@@ -117,13 +126,4 @@ export async function handleResendForgotpasswordOtp(email: string) {
     });
     return false;
   }
-}
-
-// removing localstorage items when canceling the forgot password function
-export async function handleClearStorage() {
-  sessionStorage.removeItem("talents-explore-auth-user");
-  localStorage.removeItem("countdown");
-  localStorage.removeItem("isOTP");
-  localStorage.removeItem("verifiedEmail");
-  localStorage.removeItem("registerUserId");
 }

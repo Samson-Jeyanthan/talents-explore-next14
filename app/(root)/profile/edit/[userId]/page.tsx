@@ -4,10 +4,10 @@ import {
   getProfessionsAction,
 } from "@/actions/utils.action";
 import { Footer } from "@/components/widgets";
-import { EditProfileForm } from "@/components/widgets/multiStepForms";
 import { Metadata, ResolvingMetadata } from "next";
 import { redirect } from "next/navigation";
 import { getUserPersonalInfoAction } from "@/actions/auth.action";
+import { EditProfileForm } from "@/components/multiStepForms";
 
 type ParamsProps = {
   params: { userId: string };

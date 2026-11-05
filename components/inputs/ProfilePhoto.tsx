@@ -75,7 +75,7 @@ const ProfilePhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
           alt="profile_pic"
           width={512}
           height={512}
-          className="size-36 rounded-full object-cover"
+          className="!size-36 rounded-full object-cover"
         />
 
         <div

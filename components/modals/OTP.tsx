@@ -28,6 +28,7 @@ const OTP = ({ userId, isSignup, setIsOpen, setVerifiedUserId }: TOTPProps) => {
   const [value, setValue] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [success, setSuccess] = useState<boolean>(false);
   const {
     isTimerRunning,
     countdown,
@@ -84,6 +85,7 @@ const OTP = ({ userId, isSignup, setIsOpen, setVerifiedUserId }: TOTPProps) => {
           };
           const res = await handleVerifyEmailOtp(formData);
           if (res) {
+            setSuccess(true);
             router.push("/complete-profile/");
           } else {
             setError("Invalid OTP");
@@ -98,7 +100,7 @@ const OTP = ({ userId, isSignup, setIsOpen, setVerifiedUserId }: TOTPProps) => {
   const handleOTPStates = () => {
     localStorage.setItem("countdown", "");
     setIsTimerRunning(true);
-    setCountdown(1 * 40); // 10 min 10 * 60
+    setCountdown(180); // 3 min
     setError(null);
   };
 
@@ -160,7 +162,7 @@ const OTP = ({ userId, isSignup, setIsOpen, setVerifiedUserId }: TOTPProps) => {
           </h4>
         ) : (
           <>
-            {!error && (
+            {!error && !success && (
               <p className="font-regular my-2 text-custom-100">
                 Your OTP has expired. Try again!
               </p>
@@ -183,14 +185,14 @@ const OTP = ({ userId, isSignup, setIsOpen, setVerifiedUserId }: TOTPProps) => {
           </p>
         </div>
 
-        {!isSignup && (
+        {
           <p
             className="font-regular my-4 mb-1 cursor-pointer text-light-700 hover:text-light-900"
             onClick={handleCancel}
           >
             Cancel
           </p>
-        )}
+        }
       </form>
     </DialogContent>
   );

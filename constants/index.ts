@@ -13,6 +13,7 @@ import {
   PinIcon,
   SaveIcon,
   SettingsIcon,
+  ShareFeedIcon,
   SnapchatIcon,
   TikTokIcon,
   TwitterIcon,
@@ -66,6 +67,12 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
     icon: HomeIcon,
     path: "/home",
     name: "Home",
+    isLink: true,
+  },
+  {
+    icon: ShareFeedIcon,
+    path: "/share-feed",
+    name: "Share Feed",
     isLink: true,
   },
   {

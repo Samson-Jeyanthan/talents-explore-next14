@@ -3,7 +3,7 @@ import {
   getLanguagesAction,
   getMainCategoriesAction,
 } from "@/actions/utils.action";
-import { ParentCreatePostShareForm } from "@/components/widgets/multiStepForms";
+import { ParentCreatePostShareForm } from "@/components/multiStepForms";
 
 const CreatePost = async () => {
   const langData = await getLanguagesAction();

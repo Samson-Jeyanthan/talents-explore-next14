@@ -122,7 +122,7 @@ const DateInput = ({
         </Select>
 
         <Select
-          onValueChange={(id: any) => {
+          onValueChange={(id: string) => {
             setDates({
               ...dates,
               selectedDay: id,
@@ -130,20 +130,18 @@ const DateInput = ({
           }}
         >
           <SelectTrigger className="flex-between shad-auth_form_input">
-            {days?.find((day) => day.id === dates.selectedDay)?.label || (
-              <SelectValue />
+            {days?.find((day) => Number(day.id) === Number(dates.selectedDay))
+              ?.label || <SelectValue />}
+            {!dates.selectedDay && (
+              <p className="flex w-full items-start text-light-500">Day</p>
             )}
-            {!dates.selectedDay ||
-              (!days?.some((day) => day.id === dates.selectedDay) && (
-                <p className="flex w-full items-start text-light-500">Day</p>
-              ))}
           </SelectTrigger>
           {days.length > 0 && (
             <SelectContent className="shad-auth_form_select_option">
               {days.map((option, index) => (
                 <SelectItem
                   key={index}
-                  value={option.id}
+                  value={String(option.id)}
                   className="shad-auth_form_select_item"
                 >
                   {option.label}

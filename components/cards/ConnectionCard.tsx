@@ -19,7 +19,6 @@ export interface IConnectionListProp {
 interface Prop {
   connectCard: IConnectionListProp;
   index: number;
-  viewerId: string | undefined;
   connectionTab?: number;
 }
 
@@ -28,7 +27,7 @@ const variants = {
   visible: { opacity: 1 },
 };
 
-function ConnectionCard({ connectCard, index, viewerId, connectionTab }: Prop) {
+function ConnectionCard({ connectCard, index, connectionTab }: Prop) {
   return (
     <MotionDiv
       variants={variants}
@@ -67,13 +66,12 @@ function ConnectionCard({ connectCard, index, viewerId, connectionTab }: Prop) {
           </p>
         </Link>
       </div>
+
       {connectCard.isTalent && (
         <ConnectionButton
           isFollow={connectCard.isFollow}
-          viewerId={viewerId}
           userId={connectCard._id}
           userName={connectCard.userName}
-          isOwnProfile={connectCard._id === viewerId}
           connectionTab={connectionTab}
         />
       )}

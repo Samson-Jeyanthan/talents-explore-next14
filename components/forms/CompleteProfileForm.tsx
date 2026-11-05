@@ -18,10 +18,10 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { completeProfileAction } from "@/actions/auth.action";
 import { toast } from "sonner";
-import { getFileUpload } from "@/lib/utils/getFileUpload";
 import { useRouter } from "next/navigation";
 import { useUserContext } from "@/context/AuthProvider";
 import { TransparentLoader } from "../modals";
+import { uploadFileToStorage } from "@/lib/utils/uploadFile";
 
 const CompleteProfileForm = ({ langData, professionData }: any) => {
   const { user, setUser } = useUserContext();
@@ -55,25 +55,23 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
     console.log(values.profilePhoto, "values.profilePhoto");
     console.log(values.coverPhoto, "values.coverPhoto");
 
-    let profileImageKey: string = "";
-    let coverImageKey: string = "";
+    let profileImageKey: any;
+    let coverImageKey: any;
 
     if (values.profilePhoto) {
-      profileImageKey = await getFileUpload(
+      profileImageKey = await uploadFileToStorage(
         values.profilePhoto,
-        values.firstName,
-        "profile-pic"
+        "profile-pic",
+        values.firstName
       );
       console.log("profile-photo - values.profilephoto true", profileImageKey);
-    } else {
-      console.log("profile-photo - values.profilephoto false");
     }
 
     if (values.coverPhoto) {
-      coverImageKey = await getFileUpload(
+      coverImageKey = await uploadFileToStorage(
         values.coverPhoto,
-        values.firstName,
-        "cover-pic"
+        "cover-pic",
+        values.firstName
       );
       console.log("hi there cover photo", coverImageKey);
     }
@@ -84,8 +82,8 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
       dob: values.dob,
       gender: values.gender,
       languageKnown: values.knownLanguage,
-      profileImage: profileImageKey && profileImageKey,
-      coverImage: coverImageKey && coverImageKey,
+      profileImage: profileImageKey && profileImageKey.url,
+      coverImage: coverImageKey && coverImageKey.url,
       shortBio: values.quotes,
       professional: values.profession,
       location: "trincomalee, srilanka",
@@ -94,7 +92,7 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
     };
     console.log(formData, "formData");
 
-    const res = await completeProfileAction(user.currentUserId, formData);
+    const res: any = await completeProfileAction(formData);
 
     console.log(res, "res");
 
@@ -108,10 +106,10 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
         imageUrl: formData.profileImage,
         isTalent: false,
       });
-      toast.success("Profile Updated Successfully", { duration: 5000 });
+      toast.success("Profile Created Successfully", { duration: 5000 });
       router.push("/onboarding");
     } else {
-      toast.error("Profile Update Failed", { duration: 4000 });
+      toast.error("Profile Creation Failed", { duration: 4000 });
     }
   }
 

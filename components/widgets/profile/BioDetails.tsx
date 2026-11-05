@@ -16,7 +16,11 @@ type Props = {
 };
 
 const BioDetails = ({ userData, isOwnProfile }: Props) => {
-  const showFirstName = canViewBooleanField(userData, "firstName", isOwnProfile);
+  const showFirstName = canViewBooleanField(
+    userData,
+    "firstName",
+    isOwnProfile
+  );
   const showLastName = canViewBooleanField(userData, "lastName", isOwnProfile);
   const showLocation = canViewBooleanField(userData, "location", isOwnProfile);
   const showDob = canViewBooleanField(userData, "dob", isOwnProfile);
@@ -71,7 +75,7 @@ const BioDetails = ({ userData, isOwnProfile }: Props) => {
         </div>
       ) : null}
 
-      {isOwnProfile && (
+      {isOwnProfile && userData?.morePersonalInfo?.ethnic && (
         <div className="bio-element-wrap">
           <span className="bio-details-icon">
             <EthnicIcon width="17px" height="17px" />

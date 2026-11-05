@@ -7,7 +7,6 @@ import { z } from "zod";
 import { CreatePostAboutForm, CreatePostCreditForm } from "@/components/forms";
 import { TransparentLoader } from "@/components/modals";
 import { Button } from "@/components/ui/button";
-import Footer from "../Footer";
 import { Form, FormField } from "@/components/ui/form";
 import { createPostShareValidation } from "@/lib/validations/post.validation";
 import {
@@ -22,6 +21,7 @@ import { toast } from "sonner";
 import { TCredit, TPostShareMedia } from "@/types/post.types";
 import { uploadFileToStorage } from "@/lib/utils/uploadFile";
 import { useRouter } from "next/navigation";
+import { Footer } from "../widgets";
 
 interface Props {
   langData: any;

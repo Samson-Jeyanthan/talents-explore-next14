@@ -52,7 +52,7 @@ export function getFormattedDate(date: string | null): string {
 
 // formatting decimal number 4.3333 -> 4.3
 export function getFormattedDecimal(num: number): string {
-  return Math.floor(num) === 0 ? "N/A" : num.toFixed(1);
+  return Math.floor(num) === 0 || isNaN(num) ? "N/A" : num.toFixed(1);
 }
 
 export function decodeString(encodedStr: string): string {

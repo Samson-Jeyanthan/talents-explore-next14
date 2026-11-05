@@ -1,0 +1,55 @@
+import React from "react";
+import { getAllSharesAction } from "@/actions/post.action";
+import { RightSidebar } from "@/components/widgets";
+import { redirect } from "next/navigation";
+import Feed from "./feed";
+
+function FeedShell({ children }: { children: React.ReactNode }) {
+  return (
+    <section className="flex w-full min-w-0 items-start justify-between gap-2 overflow-x-clip">
+      <div className="flex-center w-full min-w-0 px-3 pt-8 sm:px-4">
+        {children}
+      </div>
+
+      <RightSidebar />
+    </section>
+  );
+}
+
+function FeedMessage({ message }: { message: string }) {
+  return (
+    <div className="w-full max-w-xl rounded-[28px] border-2 border-dark-300 bg-dark-250 p-6 text-sm text-light-700">
+      {message}
+    </div>
+  );
+}
+
+export default async function Home() {
+  const data = await getAllSharesAction(1, 10);
+
+  if (!Array.isArray(data)) {
+    if (data.status === 401) {
+      redirect("/sign-in");
+    }
+
+    return (
+      <FeedShell>
+        <FeedMessage message={data.message} />
+      </FeedShell>
+    );
+  }
+
+  if (data.length === 0) {
+    return (
+      <FeedShell>
+        <FeedMessage message="No posts found in your home feed yet." />
+      </FeedShell>
+    );
+  }
+
+  return (
+    <FeedShell>
+      <Feed initialPosts={data} />
+    </FeedShell>
+  );
+}

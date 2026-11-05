@@ -80,7 +80,7 @@ const PostCard = ({ postFeedCard, index }: Props) => {
 
       <Link
         href={postLink}
-        className="my-1 w-max text-lg font-medium first-letter:capitalize"
+        className="my-1 text-wrap text-lg font-medium first-letter:capitalize"
       >
         {postFeedCard.about.title}
       </Link>

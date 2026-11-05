@@ -13,6 +13,7 @@ import { TCurrentUserData, TPublicUserData } from "@/types/profile.types";
 import { usePathname, useRouter } from "next/navigation";
 import ChatLauncher from "../ChatLauncher";
 import { getProfileVisibilityState } from "@/lib/utils/profilePrivacy";
+import { handleFollowUnFollow } from "@/lib/functions/connect.functions";
 
 const ProfileHeader = ({
   userData,
@@ -47,6 +48,18 @@ const ProfileHeader = ({
     setCurrentTab(currentTab);
   };
 
+  const isFollowing =
+    "isFollowing" in userData && userData.isFollowing === true ? 1 : 0;
+
+  const handleConnection = () => {
+    handleFollowUnFollow({
+      isFollowed: isFollowing,
+      followingId: userData._id,
+      followingUserName: userData.userName,
+      revalidatePathURL: pathname,
+    });
+  };
+
   return (
     <header className="flex w-full flex-col bg-gradient-to-b from-[rgb(17,19,27,0.45)] to-[rgba(17,19,27)] p-2 pt-1 backdrop-blur-lg 2xl:-mt-10 2xl:p-0">
       <section className="flex items-start justify-between p-2 2xl:p-3">
@@ -79,9 +92,13 @@ const ProfileHeader = ({
               </Button>
             ) : (
               <>
-                <Button className="shad-button_primary w-36 rounded-full">
-                  Follow
+                <Button
+                  className={`${isFollowing === 1 ? "border border-solid border-primary-500 !bg-transparent text-primary-500" : "bg-primary-500 text-light-900"} w-36 rounded-full`}
+                  onClick={handleConnection}
+                >
+                  {isFollowing === 1 ? "Following" : "Follow"}
                 </Button>
+
                 {visibility.canReceiveMessages ? (
                   <ChatLauncher
                     userId={userData?._id}

@@ -16,7 +16,7 @@ const PhotoViewModal = ({
     >
       <DialogTitle>
         <Image
-          src={imgURL}
+          src={imgURL || "/assets/images/default_profile_pic_2.png"}
           width={1024}
           height={1024}
           alt="profile photo"

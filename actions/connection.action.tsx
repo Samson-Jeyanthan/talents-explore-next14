@@ -44,11 +44,10 @@ export async function getFollowingList(
 }
 
 export async function followUserAction(
-  userId: string | undefined,
-  followingId: string
+  followingId: string,
+  revalidatePathURL: string
 ) {
   const formData = {
-    userId,
     followingId,
   };
   try {
@@ -61,6 +60,7 @@ export async function followUserAction(
         body: JSON.stringify(formData),
       }
     );
+    revalidatePath(revalidatePathURL);
     return await response.json();
   } catch (error) {
     console.error("Unable to follow user", error);
@@ -68,11 +68,10 @@ export async function followUserAction(
 }
 
 export async function unFollowUserAction(
-  userId: string | undefined,
-  followingId: string
+  followingId: string,
+  revalidatePathURL: string
 ) {
   const formData = {
-    userId,
     followingId,
   };
   try {
@@ -85,6 +84,7 @@ export async function unFollowUserAction(
         body: JSON.stringify(formData),
       }
     );
+    revalidatePath(revalidatePathURL);
     return await response.json();
   } catch (error) {
     console.error("Unable to unfollow user", error);
@@ -153,6 +153,33 @@ export async function addPostRating(
   try {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/te-post/rating`,
+      {
+        method: "POST",
+        headers: await getAuthHeaders(),
+        body: JSON.stringify(formData),
+      }
+    );
+    const res = await response.json();
+    if (res.status === "7400") {
+      revalidatePath(revalidatePathURL);
+    }
+    return res;
+  } catch {}
+}
+
+export async function addProfileRatingAction(
+  ratingUserId: string,
+  rating: number,
+  revalidatePathURL: string
+) {
+  try {
+    const formData = {
+      ratingUserId,
+      rating,
+    };
+
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/rating`,
       {
         method: "POST",
         headers: await getAuthHeaders(),

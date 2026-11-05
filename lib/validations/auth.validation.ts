@@ -68,8 +68,8 @@ export const CompleteProfileValidation = z
     profession: z.string().min(1, { message: "Profession is required" }),
     quotes: z.string().trim(),
     dob: z.string().min(1, { message: "Date of Birth is required" }),
-    coverPhoto: z.custom<File[]>().optional(),
-    profilePhoto: z.custom<File[]>().optional(),
+    coverPhoto: z.custom<File>().optional(),
+    profilePhoto: z.custom<File>().optional(),
   })
   .refine(
     (data) => {

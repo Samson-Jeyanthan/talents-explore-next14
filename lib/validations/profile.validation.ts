@@ -83,8 +83,8 @@ const baseObjectSchema = z.object({
   dob: z.string().min(1, { message: "Date of Birth is required" }),
   gender: z.string().min(1, { message: "Gender is required" }),
   quotes: z.string().trim(),
-  coverPhoto: z.union([z.custom<File[]>(), z.string()]).optional(),
-  profilePhoto: z.union([z.custom<File[]>(), z.string()]).optional(),
+  coverPhoto: z.custom<File>().optional(),
+  profilePhoto: z.custom<File>().optional(),
 
   // professional info — required ONLY for talents, enforced via superRefine below
   bio: z.string().trim().optional(),
@@ -100,7 +100,8 @@ const baseObjectSchema = z.object({
     .array(
       z.object({
         type: z.string(),
-        url: z.string(),
+        url: z.string().optional().default(""),
+        show: z.boolean().optional().default(true),
       })
     )
     .optional(),

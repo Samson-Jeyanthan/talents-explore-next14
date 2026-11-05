@@ -9,6 +9,7 @@ export async function uploadFileToStorage(
   prefix: string,
   userName: string
 ): Promise<UploadedFile> {
+  console.log("file", file, "prefix", prefix, "userName", userName);
   const extension = file.name.split(".").pop() || "file";
   const fileName = `${prefix}-${userName || "user"}-${Date.now()}.${extension}`;
   const signedUrlResponse = await fetch("/api/s3/signedUrl", {
@@ -19,6 +20,8 @@ export async function uploadFileToStorage(
       contentType: file.type || "application/octet-stream",
     }),
   });
+
+  console.log("signedUrlResponse", signedUrlResponse);
 
   if (!signedUrlResponse.ok) {
     throw new Error("Unable to prepare the attachment upload.");
@@ -41,5 +44,4 @@ export async function uploadFileToStorage(
   console.log("signedUrl", signedUrl);
 
   return { key, url: signedUrl.split("?")[0] };
-  // url: signedUrl.split("?")[0]
 }

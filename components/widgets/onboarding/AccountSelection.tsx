@@ -15,7 +15,7 @@ const AccountSelection = () => {
     if (skip) {
       router.push(`/profile/${user.username}/${user.currentUserId}`);
     } else {
-      router.push("/talent-account-register-form");
+      router.push("/talent-registration");
     }
   };
 
@@ -56,7 +56,10 @@ const AccountSelection = () => {
           Type
         </h1>
 
-        <div className="account_selection_button mt-16">
+        <div
+          className="account_selection_button mt-16"
+          onClick={() => handleAccountSelection(false)}
+        >
           <Image
             src="/assets/images/become-talent-icon.png"
             width={512}

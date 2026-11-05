@@ -6,8 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useState } from "react";
 import { Form, useForm } from "react-hook-form";
 import { z } from "zod";
-import Footer from "../Footer";
-import { TalentRegisterStatusBar } from "../navigation";
 import { TALENT_REG_FORM_DETAILS } from "@/constants";
 import {
   AwardsForm,
@@ -17,6 +15,15 @@ import {
   SkillsForm,
 } from "@/components/forms";
 import { Button } from "@/components/ui/button";
+import {
+  AtomicIcon,
+  AwardsIcon,
+  GraduationIcon,
+  UserIcon,
+} from "@/public/assets/svgs";
+import { CheckIcon } from "lucide-react";
+import { TalentRegisterStatusBar } from "../widgets/navigation";
+import { Footer } from "../widgets";
 
 interface Props {
   langData: any;
@@ -35,7 +42,7 @@ const ParentTalentRegisterForm = ({ langData, mainCategoryData }: Props) => {
       name: item.name,
     })
   );
-  const [page, setPage] = useState(4);
+  const [page, setPage] = useState(0);
 
   const form = useForm({
     resolver: zodResolver(TalentRegisterValidation),
@@ -71,6 +78,39 @@ const ParentTalentRegisterForm = ({ langData, mainCategoryData }: Props) => {
     setPage((currentPage) => currentPage - 1);
   };
 
+  const TalentsFormStatus = [
+    {
+      title: "More Info",
+      subTitle: "About Talent",
+      icon: <UserIcon />,
+      complete: "",
+    },
+    {
+      title: "Skills",
+      subTitle: "Abilities Showcase",
+      icon: <AtomicIcon />,
+      complete: "",
+    },
+    {
+      title: "Education",
+      subTitle: "Academic Background",
+      icon: <GraduationIcon />,
+      complete: "",
+    },
+    {
+      title: "Awards",
+      subTitle: "Achievements Highlight",
+      icon: <AwardsIcon />,
+      complete: "",
+    },
+    {
+      title: "Complete",
+      subTitle: "Finalize & Submit",
+      icon: <CheckIcon />,
+      complete: "",
+    },
+  ];
+
   async function onSubmit(values: z.infer<typeof TalentRegisterValidation>) {}
 
   return (
@@ -79,8 +119,8 @@ const ParentTalentRegisterForm = ({ langData, mainCategoryData }: Props) => {
         <TransparentLoader text="Uploading Post" />
       )}
       <Form {...form}>
-        <section className="flex w-full max-w-screen-lg flex-col">
-          <header className="border-b border-solid border-dark-300 py-4">
+        <section className="flex w-[1024px] max-w-screen-lg flex-col">
+          <header className="h-28 border-b border-solid border-dark-300 pt-4">
             {TALENT_REG_FORM_DETAILS.filter((_, index) => index === page).map(
               (item, index) => (
                 <div key={index} className="flex flex-col gap-2">
@@ -94,10 +134,20 @@ const ParentTalentRegisterForm = ({ langData, mainCategoryData }: Props) => {
           </header>
 
           <div className="flex gap-4">
-            <TalentRegisterStatusBar />
+            <TalentRegisterStatusBar data={TalentsFormStatus} page={page} />
             <div className="flex min-h-[85vh] w-full flex-col">
               {RegisterForm[page].form}
-              <footer className="">
+              <footer
+                className={`${page === 0 ? "justify-end" : "justify-between"} flex gap-4`}
+              >
+                {page > 0 && (
+                  <Button
+                    onClick={handlePrevious}
+                    className="shad-button_secondary"
+                  >
+                    Back
+                  </Button>
+                )}
                 {RegisterForm.length - 1 === page ? (
                   <Button
                     type="submit"
@@ -114,15 +164,6 @@ const ParentTalentRegisterForm = ({ langData, mainCategoryData }: Props) => {
                     className="shad-button_primary"
                   >
                     Next
-                  </Button>
-                )}
-
-                {page > 0 && (
-                  <Button
-                    onClick={handlePrevious}
-                    className="shad-button_secondary"
-                  >
-                    Back
                   </Button>
                 )}
               </footer>

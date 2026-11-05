@@ -66,7 +66,7 @@ async function layout({
 
   return (
     <main
-      className={`${isLoggedIn && "pt-6"} container-wrapper flex-col gap-6 pb-6`}
+      className={`${isLoggedIn && "pt-6"} container-wrapper mt-3 flex-col gap-6 pb-6`}
     >
       <ProfileCover
         coverPhoto={userData?.personalInfo?.coverImage}

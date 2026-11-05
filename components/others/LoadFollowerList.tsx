@@ -54,12 +54,7 @@ function LoadFollowerList() {
     <>
       {data.length > 0 &&
         data.map((item, index) => (
-          <ConnectionCard
-            key={item._id}
-            connectCard={item}
-            index={index}
-            viewerId={user.currentUserId}
-          />
+          <ConnectionCard key={item._id} connectCard={item} index={index} />
         ))}
       {!isEnd && <div ref={ref}>loading...</div>}
     </>

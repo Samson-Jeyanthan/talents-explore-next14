@@ -1,98 +1,120 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-function isAccessTokenExpired(token: string) {
+const protectedRoutes = [
+  "/complete-profile",
+  "/home",
+  "/saved-collection",
+  "/settings",
+  "/community",
+  "/collaboration",
+  "/chat",
+  "/create-post",
+  "/share",
+  "/profile/edit",
+  "/explore",
+  "/share-feed",
+  "/onboarding",
+  "/talent-registration",
+];
+
+const authRoutes = ["/sign-in", "/join-us", "/forgot-password"];
+
+function matchesRoute(pathname: string, route: string): boolean {
+  return pathname === route || pathname.startsWith(`${route}/`);
+}
+
+function matchesAnyRoute(pathname: string, routes: string[]): boolean {
+  return routes.some((route) => matchesRoute(pathname, route));
+}
+
+// This decodes the expiry as a routing hint. It does not verify the JWT signature.
+function isAccessTokenExpired(token: string): boolean {
   try {
     const payload = token.split(".")[1];
-    const decoded = JSON.parse(
-      atob(payload.replace(/-/g, "+").replace(/_/g, "/"))
-    );
+    if (!payload) return true;
+
+    const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, "=");
+    const decoded: unknown = JSON.parse(atob(padded));
+
+    if (!decoded || typeof decoded !== "object" || !("exp" in decoded)) {
+      return true;
+    }
+
+    const exp = (decoded as { exp?: unknown }).exp;
+
     return (
-      typeof decoded.exp !== "number" ||
-      Date.now() >= decoded.exp * 1000 - 60_000
+      typeof exp !== "number" ||
+      !Number.isFinite(exp) ||
+      Date.now() >= exp * 1000 - 60_000
     );
   } catch {
     return true;
   }
 }
 
-export async function middleware(request: NextRequest) {
-  const token = request.cookies.get("access_token")?.value;
-  const refreshToken = request.cookies.get("refresh_token")?.value;
-  const isAbout = request.cookies.get("is_about")?.value === "true";
-  const pathname = request.nextUrl.pathname;
+export function middleware(request: NextRequest) {
+  const { pathname, search } = request.nextUrl;
 
-  // This route owns the refresh operation and must never be redirected by middleware.
+  // Let the refresh handler complete its work without middleware intercepting it.
   if (pathname === "/api/auth/refresh") {
     return NextResponse.next();
   }
 
-  const protectedRoutes = [
-    "/complete-profile",
-    "/home",
-    "/saved-collection",
-    "/settings",
-    "/community",
-    "/collaboration",
-    "/chat",
-    "/create-post",
-    "/share",
-    "/profile/edit",
-    "/settings",
-    "/share-something",
-    "/explore",
-    "/saved-collection",
-    "/onboarding",
-    "talent-registration",
-  ];
+  const token = request.cookies.get("access_token")?.value;
+  const refreshToken = request.cookies.get("refresh_token")?.value;
+  const isAbout = request.cookies.get("is_about")?.value === "true";
 
-  const protectAuthRoutes = ["/sign-in", "/join-us", "/forgot-password"];
+  const isProtectedRoute = matchesAnyRoute(pathname, protectedRoutes);
+  const isAuthRoute = matchesAnyRoute(pathname, authRoutes);
+  const isApiRequest = pathname.startsWith("/api/");
 
-  if (token && isAccessTokenExpired(token)) {
-    if (
-      protectedRoutes.some((route) => pathname.startsWith(route)) &&
-      refreshToken
-    ) {
+  // Handle both missing and expired access tokens.
+  if (isProtectedRoute && (!token || isAccessTokenExpired(token))) {
+    if (refreshToken) {
       const refreshUrl = new URL("/api/auth/refresh", request.url);
-      refreshUrl.searchParams.set(
-        "next",
-        `${pathname}${request.nextUrl.search}`
-      );
+      refreshUrl.searchParams.set("next", `${pathname}${search}`);
       return NextResponse.redirect(refreshUrl);
     }
 
-    const response = NextResponse.next();
+    if (isApiRequest) {
+      const response = NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+      response.cookies.delete("access_token");
+      response.cookies.delete("refresh_token");
+      return response;
+    }
+
+    const signInUrl = new URL("/sign-in", request.url);
+    signInUrl.searchParams.set("next", `${pathname}${search}`);
+
+    const response = NextResponse.redirect(signInUrl);
     response.cookies.delete("access_token");
     response.cookies.delete("refresh_token");
     return response;
   }
 
-  if (!token) {
-    // user is not loggedin
-    console.log("token not found");
-
-    if (protectedRoutes.some((route) => pathname.startsWith(route))) {
-      return NextResponse.redirect(new URL("/sign-in", request.url));
-    }
-  } else {
-    // ignore isAbout check on complete profile page - bcz it will check on that ppage
-    if (!pathname.startsWith("/complete-profile")) {
-      // check loggedin user has completed the profile on other routes
-      if (!isAbout) {
-        return NextResponse.redirect(new URL("/complete-profile", request.url));
-      } else if (
-        protectAuthRoutes.some((route) => pathname.startsWith(route))
-      ) {
-        // restrict user to access for authentication pages
-        return NextResponse.redirect(new URL("/home", request.url));
-      }
-    }
+  if (
+    token &&
+    isProtectedRoute &&
+    pathname !== "/complete-profile" &&
+    !isAbout
+  ) {
+    return NextResponse.redirect(new URL("/complete-profile", request.url));
   }
+
+  if (token && isAuthRoute) {
+    return NextResponse.redirect(new URL("/home", request.url));
+  }
+
+  return NextResponse.next();
 }
 
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    "/(api|trpc)(.*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|map)$).*)",
   ],
 };
