@@ -1,7 +1,8 @@
 "use server";
 
 import SkillCard from "@/components/cards/SkillCard";
-import { getAuthHeaders, getSession } from "@/lib/session";
+import { getAuthHeaders } from "@/lib/session";
+import { getSession } from "./session.action";
 import { IProfileSkills, ITopPost } from "@/types/profile.types";
 import { getUserPersonalInfoAction } from "./auth.action";
 import { resolveViewerIdAction } from "./tokenAndHeaders.action";
@@ -80,13 +81,17 @@ export async function fetchUserDataAction(userId: string, viewerId: string) {
 
   if (token) {
     if (resolvedViewerId === userId) {
+      // If the viewer is the same as the userId, fetch personal info
       res = await getUserPersonalInfoAction(token);
     } else {
-      console.log("viewing public profile of another user");
+      // If the viewer is different, fetch public info
+      console.log(
+        "viewing public profile of another user -- user.action.ts --"
+      );
       res = await userPublicInfoAction(userId, resolvedViewerId);
     }
   } else {
-    console.log("viewing else public profile of another user");
+    // If no token, fetch public info
     res = await userPublicInfoAction(userId, viewerId);
   }
 

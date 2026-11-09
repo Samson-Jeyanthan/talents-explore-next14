@@ -1,11 +1,12 @@
 import { searchAction } from "@/actions/search.action";
+import { getSession } from "@/actions/session.action";
 import { getMainCategoriesAction } from "@/actions/utils.action";
 import {
   ExploreCategories,
   ExploreTopPosts,
   ExploreTopTalents,
 } from "@/components/widgets";
-import { getSession } from "@/lib/session";
+// import { getSession } from "@/lib/session";
 import { ISearchParamsProps } from "@/types/utils.types";
 
 async function page({ searchParams }: ISearchParamsProps) {

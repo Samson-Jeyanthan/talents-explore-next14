@@ -1,5 +1,6 @@
 import { exploreAllTalentsAction } from "@/actions/search.action";
-import { getSession } from "@/lib/session";
+import { getSession } from "@/actions/session.action";
+// import { getSession } from "@/lib/session";
 import { ISearchParamsProps } from "@/types/utils.types";
 
 async function Talents({ searchParams }: ISearchParamsProps) {

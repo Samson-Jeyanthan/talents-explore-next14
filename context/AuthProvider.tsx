@@ -1,11 +1,17 @@
 "use client";
 
 import { getUserPersonalInfoAction } from "@/actions/auth.action";
-import { getSession } from "@/lib/session";
+import { getSession } from "@/actions/session.action";
+// import { getSession } from "@/lib/session";
 import { IContextType, ICurrentUser } from "@/types/auth.types";
-import React, { createContext, useContext, useState, useEffect, useRef } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+} from "react";
 import { toast } from "sonner";
-import { useGlobalLoading } from "@/context/LoadingProvider";
 
 export const AUTH_USER_CACHE_KEY = "talents-explore-auth-user";
 
@@ -32,7 +38,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<ICurrentUser>(INITIAL_USER);
   const [isLoading, setIsLoading] = useState(false);
   const authCheckStarted = useRef(false);
-  const { beginLoading } = useGlobalLoading();
 
   async function checkAuthUser() {
     if (typeof window !== "undefined") {
@@ -48,20 +53,17 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     setIsLoading(true);
-    const finishLoading = beginLoading("Loading your account...");
     let token = "";
     try {
       token = await getSession();
     } catch (error) {
       console.error("Error reading auth session:", error);
       setIsLoading(false);
-      finishLoading();
       return;
     }
 
     if (!token) {
       setIsLoading(false);
-      finishLoading();
       return;
     }
 
@@ -112,7 +114,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       throw error;
     } finally {
       setIsLoading(false);
-      finishLoading();
     }
   }
 

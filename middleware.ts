@@ -3,114 +3,85 @@ import type { NextRequest } from "next/server";
 
 const protectedRoutes = [
   "/complete-profile",
-  "/home",
-  "/saved-collection",
-  "/settings",
-  "/community",
-  "/collaboration",
-  "/chat",
-  "/create-post",
-  "/share",
-  "/profile/edit",
-  "/explore",
-  "/share-feed",
   "/onboarding",
   "/talent-registration",
+  "/home",
+  "/share-feed",
+  "/explore",
+  "/create-post",
+  "/share",
+  "/chat",
+  "/collaboration",
+  "/saved-collection",
+  "/category",
+  "/settings",
+  "/post",
+  "/profile",
 ];
 
 const authRoutes = ["/sign-in", "/join-us", "/forgot-password"];
 
-function matchesRoute(pathname: string, route: string): boolean {
-  return pathname === route || pathname.startsWith(`${route}/`);
-}
-
 function matchesAnyRoute(pathname: string, routes: string[]): boolean {
-  return routes.some((route) => matchesRoute(pathname, route));
+  return routes.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`)
+  );
 }
 
-// This decodes the expiry as a routing hint. It does not verify the JWT signature.
-function isAccessTokenExpired(token: string): boolean {
+// Routing hint only: no signature check, no network call.
+// Used so an expired token can't cause a sign-in <-> home redirect loop.
+function isExpired(token: string): boolean {
   try {
     const payload = token.split(".")[1];
     if (!payload) return true;
-
-    const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
-    const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, "=");
-    const decoded: unknown = JSON.parse(atob(padded));
-
-    if (!decoded || typeof decoded !== "object" || !("exp" in decoded)) {
-      return true;
-    }
-
-    const exp = (decoded as { exp?: unknown }).exp;
-
-    return (
-      typeof exp !== "number" ||
-      !Number.isFinite(exp) ||
-      Date.now() >= exp * 1000 - 60_000
+    const b64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const { exp } = JSON.parse(
+      atob(b64.padEnd(Math.ceil(b64.length / 4) * 4, "="))
     );
+    return typeof exp !== "number" || Date.now() >= exp * 1000 - 60_000;
   } catch {
     return true;
   }
 }
 
+function currentPath(request: NextRequest): string {
+  const url = request.nextUrl.clone();
+  url.searchParams.delete("_rsc");
+  return `${url.pathname}${url.search}`;
+}
+
 export function middleware(request: NextRequest) {
-  const { pathname, search } = request.nextUrl;
+  const { pathname } = request.nextUrl;
 
-  // Let the refresh handler complete its work without middleware intercepting it.
-  if (pathname === "/api/auth/refresh") {
-    return NextResponse.next();
-  }
-
-  const token = request.cookies.get("access_token")?.value;
+  const accessToken = request.cookies.get("access_token")?.value;
   const refreshToken = request.cookies.get("refresh_token")?.value;
   const isAbout = request.cookies.get("is_about")?.value === "true";
 
-  const isProtectedRoute = matchesAnyRoute(pathname, protectedRoutes);
+  const isProtected = matchesAnyRoute(pathname, protectedRoutes);
   const isAuthRoute = matchesAnyRoute(pathname, authRoutes);
-  const isApiRequest = pathname.startsWith("/api/");
 
-  // Handle both missing and expired access tokens.
-  if (isProtectedRoute && (!token || isAccessTokenExpired(token))) {
-    if (refreshToken) {
-      const refreshUrl = new URL("/api/auth/refresh", request.url);
-      refreshUrl.searchParams.set("next", `${pathname}${search}`);
-      return NextResponse.redirect(refreshUrl);
-    }
+  // An expired access token is fine as long as a refresh token exists.
+  // The refresh itself happens at API-call time, not here.
+  const hasSession = Boolean(accessToken || refreshToken);
 
-    if (isApiRequest) {
-      const response = NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-      response.cookies.delete("access_token");
-      response.cookies.delete("refresh_token");
-      return response;
-    }
-
+  if (isProtected && !hasSession) {
     const signInUrl = new URL("/sign-in", request.url);
-    signInUrl.searchParams.set("next", `${pathname}${search}`);
-
-    const response = NextResponse.redirect(signInUrl);
-    response.cookies.delete("access_token");
-    response.cookies.delete("refresh_token");
-    return response;
+    signInUrl.searchParams.set("next", currentPath(request));
+    return NextResponse.redirect(signInUrl);
   }
 
-  if (
-    token &&
-    isProtectedRoute &&
-    pathname !== "/complete-profile" &&
-    !isAbout
-  ) {
+  if (isProtected && pathname !== "/complete-profile" && !isAbout) {
     return NextResponse.redirect(new URL("/complete-profile", request.url));
   }
 
-  if (token && isAuthRoute) {
+  // Only a still-valid access token counts here, so a failed refresh can't loop.
+  if (isAuthRoute && accessToken && !isExpired(accessToken)) {
     return NextResponse.redirect(new URL("/home", request.url));
   }
 
-  return NextResponse.next();
+  // Lets Server Components know the current path (used by the refresh hand-off).
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", currentPath(request));
+  return NextResponse.next({ request: { headers: requestHeaders } });
 }
 
 export const config = {

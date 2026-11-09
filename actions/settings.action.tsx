@@ -1,7 +1,8 @@
 "use server";
 
 import axios from "axios";
-import { getSession } from "@/lib/session";
+// import { getSession } from "@/lib/session";
+import { getSession } from "./session.action";
 import { getUserPersonalInfoAction } from "./auth.action";
 
 type PrivacyPayload = Record<string, any>;
@@ -104,11 +105,16 @@ async function getRequestList(path: string) {
     const token = await getAccessToken();
     if (!token) return [];
 
-    const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/${path}`, {
-      headers: getAuthHeaders(token),
-    });
+    const response = await axios.get(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/${path}`,
+      {
+        headers: getAuthHeaders(token),
+      }
+    );
     const data = response.data;
-    return data?.status === "7400" && Array.isArray(data?.response) ? data.response : [];
+    return data?.status === "7400" && Array.isArray(data?.response)
+      ? data.response
+      : [];
   } catch (error) {
     console.error(`get ${path} failed:`, error);
     return [];
@@ -118,16 +124,28 @@ async function getRequestList(path: string) {
 async function submitRequest(path: string, payload: Record<string, string>) {
   try {
     const token = await getAccessToken();
-    if (!token) return { status: "7401", message: "Your session has expired. Please sign in again." };
+    if (!token)
+      return {
+        status: "7401",
+        message: "Your session has expired. Please sign in again.",
+      };
 
-    const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/${path}`, payload, {
-      headers: { ...getAuthHeaders(token), "Content-Type": "application/json" },
-    });
+    const response = await axios.post(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/${path}`,
+      payload,
+      {
+        headers: {
+          ...getAuthHeaders(token),
+          "Content-Type": "application/json",
+        },
+      }
+    );
     return response.data;
   } catch (error: any) {
     return {
       status: "5000",
-      message: error?.response?.data?.message || "Unable to submit your request",
+      message:
+        error?.response?.data?.message || "Unable to submit your request",
     };
   }
 }
@@ -136,7 +154,9 @@ export async function getAdvertisementRequestsAction() {
   return getRequestList("advertisement-request");
 }
 
-export async function submitAdvertisementRequestAction(payload: AdvertisementRequestPayload) {
+export async function submitAdvertisementRequestAction(
+  payload: AdvertisementRequestPayload
+) {
   return submitRequest("advertisement-request", payload);
 }
 
@@ -144,7 +164,9 @@ export async function getPaidPromotionRequestsAction() {
   return getRequestList("promo-request");
 }
 
-export async function submitPaidPromotionRequestAction(payload: PaidPromotionRequestPayload) {
+export async function submitPaidPromotionRequestAction(
+  payload: PaidPromotionRequestPayload
+) {
   return submitRequest("promo-request", payload);
 }
 
@@ -171,7 +193,9 @@ export async function getPrivacySettingsAction(accessToken?: string) {
       }
     );
 
-    return response.data?.status === "7400" ? response.data?.response || null : null;
+    return response.data?.status === "7400"
+      ? response.data?.response || null
+      : null;
   } catch (error) {
     console.error("getPrivacySettingsAction failed:", error);
     return null;
@@ -224,7 +248,10 @@ export async function updateSocialLinksPrivacyAction(payload: any[]) {
   }
 }
 
-export async function getNotificationSettingsAction(userId?: string, accessToken?: string) {
+export async function getNotificationSettingsAction(
+  userId?: string,
+  accessToken?: string
+) {
   try {
     const sessionUser = userId ? null : await getCurrentUser();
     const token = accessToken || sessionUser?.token || "";
@@ -241,7 +268,9 @@ export async function getNotificationSettingsAction(userId?: string, accessToken
       }
     );
 
-    return response.data?.status === "7400" ? response.data?.response || null : null;
+    return response.data?.status === "7400"
+      ? response.data?.response || null
+      : null;
   } catch (error) {
     console.error("getNotificationSettingsAction failed:", error);
     return null;
@@ -375,7 +404,8 @@ export async function getSettingsActivityFeedAction(
       }
     );
 
-    return response.data?.status === "7400" && Array.isArray(response.data?.response)
+    return response.data?.status === "7400" &&
+      Array.isArray(response.data?.response)
       ? response.data.response
       : [];
   } catch (error) {

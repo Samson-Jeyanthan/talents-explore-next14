@@ -88,9 +88,11 @@ const NormalUserProfileHeader = ({
           </Button>
         ) : (
           <>
-            <Button className="h-11 w-max rounded-full border border-solid border-primary-500 bg-none text-primary-500 hover:bg-primary-500 hover:text-light-900">
-              Remove from Follower
-            </Button>
+            {userData?.isFollowing === 1 && (
+              <Button className="h-11 w-max rounded-full border border-solid border-primary-500 bg-none text-primary-500 hover:bg-primary-500 hover:text-light-900">
+                Remove from Follower
+              </Button>
+            )}
             {visibility.canReceiveMessages ? (
               <ChatLauncher
                 userId={userData?._id}

@@ -1,14 +1,8 @@
 "use server";
 
 import axiosInstance from "@/lib/config/axiosInstance";
-import {
-  clearSession,
-  createSession,
-  getAuthHeaders,
-  getRefreshToken,
-  getSession,
-  storeIsAbout,
-} from "@/lib/session";
+import { createSession, getAuthHeaders, getRefreshToken } from "@/lib/session";
+import { clearSession, getSession, storeIsAbout } from "./session.action";
 
 export async function registerAction(formData: unknown) {
   try {
@@ -195,7 +189,6 @@ export async function getUserPersonalInfoAction(token: string | undefined) {
   let headers = {};
   if (token === undefined || token === "") {
     headers = await getAuthHeaders();
-    console.log(headers, "auth.action-headers");
   }
   try {
     const response = await fetch(
@@ -244,7 +237,7 @@ export async function logoutAction(userId: string) {
         refresh_token: refreshToken,
         from_all: "true",
       });
-      await fetch(
+      const res = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/logout?${params}`,
         {
           method: "POST",
@@ -252,6 +245,7 @@ export async function logoutAction(userId: string) {
           headers: await getAuthHeaders(),
         }
       );
+      console.log(res, "logout-action");
     }
   } finally {
     await clearSession();

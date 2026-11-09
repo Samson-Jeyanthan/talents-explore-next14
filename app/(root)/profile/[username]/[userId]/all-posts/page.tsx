@@ -1,5 +1,5 @@
 import { getUserAllPostsAction } from "@/actions/post.action";
-import { getSession } from "@/lib/session";
+// import { getSession } from "@/lib/session";
 import { TProfileURLProps } from "@/types/utils.types";
 import AlertNote from "@/components/others/AlertNote";
 import { fetchUserDataAction } from "@/actions/user.action";
@@ -7,6 +7,7 @@ import { getCurrentChatUserAction } from "@/actions/chat.action";
 import { getProfileVisibilityState } from "@/lib/utils/profilePrivacy";
 import { CameraIcon } from "@/public/assets/svgs";
 import { EmptyDetails } from "@/components/others";
+import { getSession } from "@/actions/session.action";
 
 async function AllPosts({ params }: TProfileURLProps) {
   const userData = await fetchUserDataAction(params.userId, params.username);

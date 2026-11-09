@@ -1,8 +1,9 @@
 "use server";
 
 import axios from "axios";
-import { getSession } from "@/lib/session";
+// import { getSession } from "@/lib/session";
 import { getUserPersonalInfoAction } from "./auth.action";
+import { getSession } from "./session.action";
 
 const SUCCESS_STATUS = "7400";
 
@@ -233,7 +234,10 @@ export async function getChatRoomsAction(
 
     const normalizedRooms = normalizeChatRoomResponse(response.data);
 
-    if (response.data?.status === SUCCESS_STATUS || normalizedRooms.length > 0) {
+    if (
+      response.data?.status === SUCCESS_STATUS ||
+      normalizedRooms.length > 0
+    ) {
       return normalizedRooms;
     }
 
@@ -241,7 +245,9 @@ export async function getChatRoomsAction(
     return [];
   } catch (error) {
     const axiosError = error as any;
-    const normalizedRooms = normalizeChatRoomResponse(axiosError?.response?.data);
+    const normalizedRooms = normalizeChatRoomResponse(
+      axiosError?.response?.data
+    );
 
     if (normalizedRooms.length > 0) {
       return normalizedRooms;
@@ -275,15 +281,23 @@ export async function getGroupChatRoomsAction(pageNumber = 1, pageSize = 10) {
 
     const normalizedRooms = normalizeChatRoomResponse(response.data);
 
-    if (response.data?.status === SUCCESS_STATUS || normalizedRooms.length > 0) {
+    if (
+      response.data?.status === SUCCESS_STATUS ||
+      normalizedRooms.length > 0
+    ) {
       return normalizedRooms;
     }
 
-    console.error("getGroupChatRoomsAction unexpected response:", response.data);
+    console.error(
+      "getGroupChatRoomsAction unexpected response:",
+      response.data
+    );
     return [];
   } catch (error) {
     const axiosError = error as any;
-    const normalizedRooms = normalizeChatRoomResponse(axiosError?.response?.data);
+    const normalizedRooms = normalizeChatRoomResponse(
+      axiosError?.response?.data
+    );
 
     if (normalizedRooms.length > 0) {
       return normalizedRooms;
@@ -313,7 +327,9 @@ export async function createOneToOneChatAction(userIdB: string) {
       }
     );
 
-    return response.data?.status === SUCCESS_STATUS ? response.data?.response : null;
+    return response.data?.status === SUCCESS_STATUS
+      ? response.data?.response
+      : null;
   } catch (error) {
     console.error("createOneToOneChatAction failed:", error);
     return null;

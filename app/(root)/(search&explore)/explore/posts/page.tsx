@@ -1,6 +1,7 @@
 import { searchAction } from "@/actions/search.action";
+import { getSession } from "@/actions/session.action";
 import { ExplorePostCard } from "@/components/cards";
-import { getSession } from "@/lib/session";
+// import { getSession } from "@/lib/session";
 import { ISearchParamsProps } from "@/types/utils.types";
 
 async function Posts({ searchParams }: ISearchParamsProps) {

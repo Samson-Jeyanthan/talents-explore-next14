@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  clearSession,
-  getActiveAccessToken,
-  refreshSession,
-} from "@/lib/session";
+import { refreshSession } from "@/lib/session";
+import { clearSession, getSession } from "@/actions/session.action";
 
 const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -47,7 +44,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const accessToken = await getActiveAccessToken();
+  const accessToken = await getSession();
   if (!accessToken) {
     await clearSession();
     return NextResponse.json(
@@ -59,7 +56,7 @@ export async function POST(request: NextRequest) {
   let upstream = await requestSignedUrl(payload, accessToken);
   if (upstream.status === 401) {
     const refreshed = await refreshSession();
-    if (!refreshed) {
+    if (!refreshed.ok) {
       await clearSession();
       return NextResponse.json(
         { message: "Your session has expired." },

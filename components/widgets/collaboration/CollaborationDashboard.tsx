@@ -16,17 +16,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { GENDER_VALUES, LEVEL_VALUES, TIME_DURATION_FILTERS } from "@/constants";
+import {
+  GENDER_VALUES,
+  LEVEL_VALUES,
+  TIME_DURATION_FILTERS,
+} from "@/constants";
 import { Filter, Search, Sparkles } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 
-type CollaborationTabType =
-  | "ALL"
-  | "COMMITTED"
-  | "RECEIVED"
-  | "MY"
-  | "APPLIED";
+type CollaborationTabType = "ALL" | "COMMITTED" | "RECEIVED" | "MY" | "APPLIED";
 
 type FilterState = {
   keywords: string;
@@ -82,7 +81,8 @@ function mergeByCollaborationId(current: any[], next: any[]) {
   const map = new Map<string, any>();
 
   [...current, ...next].forEach((item) => {
-    const key = item?.collaboration?._id || item?.collaboration?.id || item?._id;
+    const key =
+      item?.collaboration?._id || item?.collaboration?.id || item?._id;
     if (key) {
       map.set(key, item);
     }
@@ -94,14 +94,17 @@ function mergeByCollaborationId(current: any[], next: any[]) {
 function toOptions(items: any[], valueKey: string, labelKeys: string[]) {
   return items
     .map((item) => {
-      const value = item?.[valueKey] || item?._id || item?.id || item?.value || item?.name;
+      const value =
+        item?.[valueKey] || item?._id || item?.id || item?.value || item?.name;
       const label =
         labelKeys.map((key) => item?.[key]).find(Boolean) ||
         item?.name ||
         item?.label ||
         value;
 
-      return value && label ? { value: String(value), label: String(label) } : null;
+      return value && label
+        ? { value: String(value), label: String(label) }
+        : null;
     })
     .filter(Boolean) as { value: string; label: string }[];
 }
@@ -124,7 +127,10 @@ function FilterSelect({
       </SelectTrigger>
       <SelectContent className="border-dark-300 bg-dark-250 text-light-900">
         {options.map((option) => (
-          <SelectItem key={`${placeholder}-${option.value}`} value={option.value}>
+          <SelectItem
+            key={`${placeholder}-${option.value}`}
+            value={option.value}
+          >
             {option.label}
           </SelectItem>
         ))}
@@ -133,7 +139,17 @@ function FilterSelect({
   );
 }
 
-function CollaborationDashboard({ currentUser, initialLists, lookupData }: Props) {
+function CollaborationDashboard({
+  currentUser,
+  initialLists,
+  lookupData,
+}: Props) {
+  console.log(
+    "CollaborationDashboard initialLists:",
+    initialLists,
+    currentUser,
+    lookupData
+  );
   const [activeTab, setActiveTab] = useState<CollaborationTabType>("ALL");
   const [isPending, startTransition] = useTransition();
   const [lists, setLists] = useState(initialLists);
@@ -144,14 +160,18 @@ function CollaborationDashboard({ currentUser, initialLists, lookupData }: Props
     MY: 1,
     APPLIED: 1,
   });
-  const [hasMore, setHasMore] = useState<Record<CollaborationTabType, boolean>>({
-    ALL: (initialLists.ALL || []).length >= PAGE_SIZE,
-    COMMITTED: (initialLists.COMMITTED || []).length >= PAGE_SIZE,
-    RECEIVED: (initialLists.RECEIVED || []).length >= PAGE_SIZE,
-    MY: (initialLists.MY || []).length >= PAGE_SIZE,
-    APPLIED: (initialLists.APPLIED || []).length >= PAGE_SIZE,
-  });
-  const [filtersByTab, setFiltersByTab] = useState<Record<CollaborationTabType, FilterState>>({
+  const [hasMore, setHasMore] = useState<Record<CollaborationTabType, boolean>>(
+    {
+      ALL: (initialLists.ALL || []).length >= PAGE_SIZE,
+      COMMITTED: (initialLists.COMMITTED || []).length >= PAGE_SIZE,
+      RECEIVED: (initialLists.RECEIVED || []).length >= PAGE_SIZE,
+      MY: (initialLists.MY || []).length >= PAGE_SIZE,
+      APPLIED: (initialLists.APPLIED || []).length >= PAGE_SIZE,
+    }
+  );
+  const [filtersByTab, setFiltersByTab] = useState<
+    Record<CollaborationTabType, FilterState>
+  >({
     ALL: { ...EMPTY_FILTERS },
     COMMITTED: { ...EMPTY_FILTERS },
     RECEIVED: { ...EMPTY_FILTERS },
@@ -166,15 +186,26 @@ function CollaborationDashboard({ currentUser, initialLists, lookupData }: Props
   const activeFilters = filtersByTab[activeTab];
   const activeList = lists[activeTab] || [];
 
-  const mainCategoryOptions = toOptions(
-    lookupData.mainCategories,
-    "_id",
-    ["name", "mainCategory"]
-  );
-  const languageOptions = toOptions(lookupData.languages, "_id", ["language", "name"]);
-  const countryOptions = toOptions(lookupData.countries, "name", ["name", "country"]);
-  const ethnicOptions = toOptions(lookupData.ethnicities, "_id", ["ethnic", "name"]);
-  const subCategoryOptions = toOptions(subCategories, "_id", ["name", "subCategory"]);
+  const mainCategoryOptions = toOptions(lookupData.mainCategories, "_id", [
+    "name",
+    "mainCategory",
+  ]);
+  const languageOptions = toOptions(lookupData.languages, "_id", [
+    "language",
+    "name",
+  ]);
+  const countryOptions = toOptions(lookupData.countries, "name", [
+    "name",
+    "country",
+  ]);
+  const ethnicOptions = toOptions(lookupData.ethnicities, "_id", [
+    "ethnic",
+    "name",
+  ]);
+  const subCategoryOptions = toOptions(subCategories, "_id", [
+    "name",
+    "subCategory",
+  ]);
   const skillOptions = toOptions(skills, "_id", ["name", "skill"]);
   const stateOptions = toOptions(states, "name", ["name", "state"]);
   const levelOptions = LEVEL_VALUES.map((item) => ({
@@ -195,7 +226,9 @@ function CollaborationDashboard({ currentUser, initialLists, lookupData }: Props
 
     async function loadDependentOptions() {
       if (activeFilters.mainCategoryId) {
-        const response = await getSubCategoriesAction(activeFilters.mainCategoryId);
+        const response = await getSubCategoriesAction(
+          activeFilters.mainCategoryId
+        );
         if (active) {
           setSubCategories(response?.response || []);
         }
@@ -227,7 +260,11 @@ function CollaborationDashboard({ currentUser, initialLists, lookupData }: Props
     return () => {
       active = false;
     };
-  }, [activeFilters.country, activeFilters.mainCategoryId, activeFilters.subCategoryId]);
+  }, [
+    activeFilters.country,
+    activeFilters.mainCategoryId,
+    activeFilters.subCategoryId,
+  ]);
 
   const fetchTab = (tab: CollaborationTabType, pageNo = 1, append = false) => {
     startTransition(async () => {
@@ -249,11 +286,15 @@ function CollaborationDashboard({ currentUser, initialLists, lookupData }: Props
         return;
       }
 
-      const nextItems = Array.isArray(response.response) ? response.response : [];
+      const nextItems = Array.isArray(response.response)
+        ? response.response
+        : [];
 
       setLists((prev) => ({
         ...prev,
-        [tab]: append ? mergeByCollaborationId(prev[tab] || [], nextItems) : nextItems,
+        [tab]: append
+          ? mergeByCollaborationId(prev[tab] || [], nextItems)
+          : nextItems,
       }));
       setPages((prev) => ({ ...prev, [tab]: pageNo }));
       setHasMore((prev) => ({ ...prev, [tab]: nextItems.length >= PAGE_SIZE }));
@@ -313,9 +354,12 @@ function CollaborationDashboard({ currentUser, initialLists, lookupData }: Props
                 Collaboration
               </p>
             </div>
-            <h1 className="pt-2 text-3xl font-semibold text-light-900">Build together</h1>
+            <h1 className="pt-2 text-3xl font-semibold text-light-900">
+              Build together
+            </h1>
             <p className="pt-2 text-sm text-light-500">
-              Open projects, received invites, my collaborations, and applied roles in one place.
+              Open projects, received invites, my collaborations, and applied
+              roles in one place.
             </p>
           </div>
 
@@ -368,7 +412,7 @@ function CollaborationDashboard({ currentUser, initialLists, lookupData }: Props
           </div>
 
           <div className="flex flex-wrap gap-2">
-            {(activeTab === "ALL" || activeTab === "MY") ? (
+            {activeTab === "ALL" || activeTab === "MY" ? (
               <Button
                 type="button"
                 className="rounded-full bg-dark-200 text-light-900 hover:bg-dark-300"
@@ -496,14 +540,18 @@ function CollaborationDashboard({ currentUser, initialLists, lookupData }: Props
       <div className="grid gap-4">
         {activeList.map((item) => (
           <CollaborationCard
-            key={item?.collaboration?._id || item?.collaboration?.id || item?._id}
+            key={
+              item?.collaboration?._id || item?.collaboration?.id || item?._id
+            }
             collaboration={item}
           />
         ))}
 
         {activeList.length === 0 ? (
           <div className="rounded-[28px] border border-dashed border-dark-300 bg-dark-250 px-4 py-12 text-center text-sm text-light-500">
-            {isPending ? "Loading collaborations..." : "No collaborations found."}
+            {isPending
+              ? "Loading collaborations..."
+              : "No collaborations found."}
           </div>
         ) : null}
 

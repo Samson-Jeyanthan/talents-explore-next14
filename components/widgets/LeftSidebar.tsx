@@ -8,12 +8,12 @@ import Link from "next/link";
 import { AiOutlineLogout } from "react-icons/ai";
 import { Button } from "../ui/button";
 import { INITIAL_USER, useUserContext } from "@/context/AuthProvider";
-import { deleteToken } from "@/actions/auth.action";
+import { deleteToken, logoutAction } from "@/actions/auth.action";
 import { handleClearStorage } from "@/lib/functions/auth.functions";
 import { CategoriesSelectionModal, UploadDrawer } from "../modals";
 
 const LeftSidebar = () => {
-  const { setUser } = useUserContext();
+  const { user, setUser } = useUserContext();
   const pathname = usePathname();
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -24,6 +24,7 @@ const LeftSidebar = () => {
   }, [router]);
 
   const handleLogoutClick = async () => {
+    await logoutAction(user.currentUserId);
     await deleteToken();
     await handleClearStorage();
     setUser(INITIAL_USER);

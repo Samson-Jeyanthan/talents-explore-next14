@@ -37,7 +37,8 @@ customAxiosInstance.interceptors.response.use((response) => { return response; }
             const response = await appapi
                 .get(
                     `auth/access_token?grant_type=refresh_token&refresh_token=${refreshToken}&device_id=${deviceId}`
-                );
+          );
+          
             if (response && response.ok) {
                 const data: any = response.data;
                 access_token = data.accessToken;

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { SigninValidation } from "@/lib/validations/auth.validation";
 import { signinAction } from "@/actions/auth.action";
 import { AUTH_USER_CACHE_KEY, useUserContext } from "@/context/AuthProvider";
-import { useGlobalLoading } from "@/context/LoadingProvider";
+// import { useGlobalLoading } from "@/context/LoadingProvider";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -15,7 +15,7 @@ import { FormInput } from "../inputs";
 
 const SigninForm = () => {
   const { setUser } = useUserContext();
-  const { beginLoading } = useGlobalLoading();
+  // const { beginLoading } = useGlobalLoading();
   const form = useForm<z.infer<typeof SigninValidation>>({
     resolver: zodResolver(SigninValidation),
     defaultValues: {
@@ -25,13 +25,13 @@ const SigninForm = () => {
   });
 
   async function onSubmit(values: z.infer<typeof SigninValidation>) {
-    const finishLoading = beginLoading("Signing in...");
+    // const finishLoading = beginLoading("Signing in...");
     let redirecting = false;
     const formData = {
       email: values.email,
       password: values.password,
-      deviceId: "string",
-      appVersion: "string",
+      deviceId: "deviceId",
+      appVersion: "Application.nativeApplicationVersion",
     };
 
     try {
@@ -71,7 +71,7 @@ const SigninForm = () => {
       });
     } finally {
       if (!redirecting) {
-        finishLoading();
+        // finishLoading();
       }
     }
   }

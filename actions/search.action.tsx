@@ -1,7 +1,8 @@
 "use server";
 
 import AllTalentsCard from "@/components/cards/AllTalentsCard";
-import { getSession } from "@/lib/session";
+// import { getSession } from "@/lib/session";
+import { getSession } from "./session.action";
 import {
   IExploreTalentsProps,
   ISearchAllTalentsProps,

@@ -12,7 +12,8 @@ import {
   MoreDetailPostCarousel,
   Footer,
 } from "@/components/widgets";
-import { getSession } from "@/lib/session";
+// import { getSession } from "@/lib/session";
+import { getSession } from "@/actions/session.action";
 import { EmblaOptionsType } from "embla-carousel";
 import { getCurrentChatUserAction } from "@/actions/chat.action";
 import { getProfileVisibilityState } from "@/lib/utils/profilePrivacy";

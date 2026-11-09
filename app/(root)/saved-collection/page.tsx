@@ -1,6 +1,7 @@
 import { getAllSavedFoldersAction } from "@/actions/save.action";
+import { getSession } from "@/actions/session.action";
+// import { getSession } from "@/lib/session";
 import { CreateSaveFolder } from "@/components/buttons";
-import { getSession } from "@/lib/session";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

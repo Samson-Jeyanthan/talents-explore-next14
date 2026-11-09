@@ -1,10 +1,11 @@
-import { getSession } from "@/lib/session";
+// import { getSession } from "@/lib/session";
 import { getUserCreditPostsAction } from "@/actions/post.action";
 import AlertNote from "@/components/others/AlertNote";
 import { fetchUserDataAction } from "@/actions/user.action";
 import { getCurrentChatUserAction } from "@/actions/chat.action";
 import { getProfileVisibilityState } from "@/lib/utils/profilePrivacy";
 import { TProfileURLProps } from "@/types/utils.types";
+import { getSession } from "@/actions/session.action";
 
 async function Credits({ params }: TProfileURLProps) {
   const userData = await fetchUserDataAction(params.userId, params.username);

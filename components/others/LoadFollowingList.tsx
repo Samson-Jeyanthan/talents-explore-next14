@@ -58,7 +58,6 @@ function LoadFollowingList() {
           key={item._id}
           connectCard={item}
           index={index}
-          viewerId={user.currentUserId}
           connectionTab={2}
         />
       ))}

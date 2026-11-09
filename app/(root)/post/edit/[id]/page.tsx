@@ -1,5 +1,6 @@
 import { getPostByIdAction } from "@/actions/post.action";
-import { getSession } from "@/lib/session";
+// import { getSession } from "@/lib/session";
+import { getSession } from "@/actions/session.action";
 import { TPostProps } from "@/types/post.types";
 import NotFound from "../../[id]/not-found";
 

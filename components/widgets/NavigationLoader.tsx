@@ -33,19 +33,36 @@ export default function NavigationLoader() {
 
   useEffect(() => {
     const onClick = (event: MouseEvent) => {
-      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      )
+        return;
 
-      const anchor = (event.target as HTMLElement | null)?.closest<HTMLAnchorElement>("a[href]");
+      const anchor = (
+        event.target as HTMLElement | null
+      )?.closest<HTMLAnchorElement>("a[href]");
       if (!anchor || anchor.target || anchor.hasAttribute("download")) return;
 
       const destination = new URL(anchor.href, window.location.href);
       if (destination.origin !== window.location.origin) return;
-      if (destination.pathname === window.location.pathname && destination.search === window.location.search) return;
+      if (
+        destination.pathname === window.location.pathname &&
+        destination.search === window.location.search
+      )
+        return;
 
       clearPendingNavigation();
       timer.current = setTimeout(() => {
         finish.current = beginLoading("Loading page...");
-        timeout.current = setTimeout(clearPendingNavigation, NAVIGATION_TIMEOUT_MS);
+        timeout.current = setTimeout(
+          clearPendingNavigation,
+          NAVIGATION_TIMEOUT_MS
+        );
       }, LOADER_DELAY_MS);
     };
 

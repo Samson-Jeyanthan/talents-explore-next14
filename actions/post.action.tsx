@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import AllPostCard from "@/components/cards/AllPostCard";
 import { IPost } from "@/types/post.types";
 import { getUserPersonalInfoAction } from "./auth.action";
-import { getAuthHeaders, getSession } from "@/lib/session";
+import { getAuthHeaders } from "@/lib/session";
+import { getSession } from "./session.action";
 import { resolveViewerIdAction } from "./tokenAndHeaders.action";
 
 type TPostActionError = {
@@ -279,6 +280,12 @@ export async function getAllPostsAction(
   try {
     const viewerId = await resolveViewerIdAction();
     const accessToken = await getSession();
+
+    console.log(
+      "getAllPostsAction viewerId: --283--ost.action--",
+      accessToken,
+      viewerId
+    );
 
     if (!viewerId) {
       return {

@@ -1,5 +1,6 @@
-import { getSession } from "@/lib/session";
+// import { getSession } from "@/lib/session";
 import { getUserPersonalInfoAction } from "@/actions/auth.action";
+import { getSession } from "@/actions/session.action";
 import axios from "axios";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -150,7 +151,9 @@ export async function GET(request: NextRequest) {
         status: raw?.status || error?.response?.status || null,
         message: raw?.message || error?.message || "Unknown error",
         normalizedCount: rooms.length,
-        responseType: Array.isArray(raw?.response) ? "array" : typeof raw?.response,
+        responseType: Array.isArray(raw?.response)
+          ? "array"
+          : typeof raw?.response,
       },
     });
   }

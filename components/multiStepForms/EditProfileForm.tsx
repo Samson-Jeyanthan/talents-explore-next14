@@ -2,7 +2,7 @@
 
 import { userPersonalInfoEditAction } from "@/actions/user.action";
 import { EditPersonalInfoForm, EditProInfoForm } from "@/components/forms";
-import { TransparentLoader } from "@/components/modals";
+// import { TransparentLoader } from "@/components/modals";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { useUserContext } from "@/context/AuthProvider";
@@ -128,9 +128,9 @@ const EditProfileForm = ({ langData, professionData, userData }: Props) => {
 
   return (
     <>
-      {form.formState.isSubmitting && (
+      {/* {form.formState.isSubmitting && (
         <TransparentLoader text="Updating Profile" />
-      )}
+      )} */}
       <Form {...form}>
         <EditPersonalInfoForm
           form={form}
@@ -163,7 +163,9 @@ const EditProfileForm = ({ langData, professionData, userData }: Props) => {
           onClick={form.handleSubmit(onSubmit, onInvalid)}
           className="shad-button_primary w-40"
         >
-          {form.formState.isSubmitting ? "Updating Profile..." : "Edit Profile"}
+          {form.formState.isSubmitting
+            ? "Updating Profile..."
+            : "Update Profile"}
         </Button>
       </div>
     </>

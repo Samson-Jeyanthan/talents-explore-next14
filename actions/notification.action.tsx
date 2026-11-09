@@ -1,7 +1,8 @@
 "use server";
 
 import axios from "axios";
-import { getSession } from "@/lib/session";
+// import { getSession } from "@/lib/session";
+import { getSession } from "./session.action";
 import { getUserPersonalInfoAction } from "./auth.action";
 
 async function getAccessToken() {

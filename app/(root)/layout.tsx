@@ -1,6 +1,7 @@
 import React from "react";
 import { LeftSidebar, Navbar } from "@/components/widgets";
-import { getSession } from "@/lib/session";
+import { getSession } from "@/actions/session.action";
+// import { getSession } from "@/lib/session";
 
 type Props = {
   children: React.ReactNode;

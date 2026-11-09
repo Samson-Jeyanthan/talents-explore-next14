@@ -1,4 +1,5 @@
-import { getSession, checkIsAbout } from "@/lib/session";
+import { checkIsAbout, getSession } from "@/actions/session.action";
+// import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 
 export default async function Home() {

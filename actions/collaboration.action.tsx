@@ -1,17 +1,13 @@
 "use server";
 
 import axios from "axios";
-import { getSession } from "@/lib/session";
+// import { getSession } from "@/lib/session";
+import { getSession } from "./session.action";
 import { getUserPersonalInfoAction } from "./auth.action";
 
 const SUCCESS_STATUS = "7400";
 
-type CollaborationTabType =
-  | "ALL"
-  | "COMMITTED"
-  | "RECEIVED"
-  | "MY"
-  | "APPLIED";
+type CollaborationTabType = "ALL" | "COMMITTED" | "RECEIVED" | "MY" | "APPLIED";
 
 type CollaborationFilters = {
   keywords?: string;
@@ -65,12 +61,16 @@ type CollaborationPeopleSearchParams = {
 async function getCurrentUserResponse() {
   const token = await getSession();
 
+  console.log(token, "getCurrentUserResponse token: --68--collaborat", token);
+
   if (!token) {
+    console.log("no-token-found");
     return { token: "", user: null };
   }
 
   try {
     const response = await getUserPersonalInfoAction(token);
+    console.log(response, "--71--res-of-user-collab.action--");
     return {
       token,
       user: response?.response || null,
@@ -201,7 +201,9 @@ export async function getCollaborationDetailsAction(collaborationId: string) {
       }
     );
 
-    return response.data?.status === SUCCESS_STATUS ? response.data?.response : null;
+    return response.data?.status === SUCCESS_STATUS
+      ? response.data?.response
+      : null;
   } catch (error) {
     console.error("getCollaborationDetailsAction failed:", error);
     return null;
@@ -293,7 +295,9 @@ export async function respondCollaborationInviteAction(
   }
 }
 
-export async function getCollaborationApplicantsStatsAction(collaborationId: string) {
+export async function getCollaborationApplicantsStatsAction(
+  collaborationId: string
+) {
   try {
     const { token } = await getCurrentUserResponse();
 
@@ -308,7 +312,9 @@ export async function getCollaborationApplicantsStatsAction(collaborationId: str
       }
     );
 
-    return response.data?.status === SUCCESS_STATUS ? response.data?.response : null;
+    return response.data?.status === SUCCESS_STATUS
+      ? response.data?.response
+      : null;
   } catch (error) {
     console.error("getCollaborationApplicantsStatsAction failed:", error);
     return null;
@@ -333,7 +339,9 @@ export async function getCollaborationApplicantsRoleStatsAction(
       }
     );
 
-    return response.data?.status === SUCCESS_STATUS ? response.data?.response : null;
+    return response.data?.status === SUCCESS_STATUS
+      ? response.data?.response
+      : null;
   } catch (error) {
     console.error("getCollaborationApplicantsRoleStatsAction failed:", error);
     return null;
@@ -438,7 +446,9 @@ export async function getCollaborationApplicantDetailsAction(
       }
     );
 
-    return response.data?.status === SUCCESS_STATUS ? response.data?.response : null;
+    return response.data?.status === SUCCESS_STATUS
+      ? response.data?.response
+      : null;
   } catch (error) {
     console.error("getCollaborationApplicantDetailsAction failed:", error);
     return null;
@@ -474,29 +484,32 @@ export async function searchCollaborationPeopleAction({
       };
     }
 
-    const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/search`, {
-      headers: getAuthHeaders(token),
-      params: {
-        pageSize,
-        pageNo,
-        viewUserId: user._id,
-        searchType: "TALENT",
-        searchText,
-        userRating,
-        mainCategoryId,
-        subCategoryId,
-        skillId,
-        level,
-        profession,
-        userGender,
-        userLanguage,
-        ethnic,
-        country,
-        state,
-        city,
-        resultTime,
-      },
-    });
+    const response = await axios.get(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/search`,
+      {
+        headers: getAuthHeaders(token),
+        params: {
+          pageSize,
+          pageNo,
+          viewUserId: user._id,
+          searchType: "TALENT",
+          searchText,
+          userRating,
+          mainCategoryId,
+          subCategoryId,
+          skillId,
+          level,
+          profession,
+          userGender,
+          userLanguage,
+          ethnic,
+          country,
+          state,
+          city,
+          resultTime,
+        },
+      }
+    );
 
     return {
       status: response.data?.status || "400",
@@ -536,7 +549,10 @@ export async function createCollaborationAction(payload: any) {
   }
 }
 
-export async function updateCollaborationAction(collaborationId: string, payload: any) {
+export async function updateCollaborationAction(
+  collaborationId: string,
+  payload: any
+) {
   try {
     const { token } = await getCurrentUserResponse();
 

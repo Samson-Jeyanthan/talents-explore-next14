@@ -1,12 +1,12 @@
-import React, { Suspense } from "react";
+import React from "react";
 import { Poppins } from "next/font/google";
 import type { Metadata } from "next";
 import { ThemeProvider } from "@/context/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
 import AuthProvider from "@/context/AuthProvider";
 import { UtilsProvider } from "@/context/UtilsProvider";
-import { LoadingProvider } from "@/context/LoadingProvider";
-import NavigationLoader from "@/components/widgets/NavigationLoader";
+// import { LoadingProvider } from "@/context/LoadingProvider";
+// import NavigationLoader from "@/components/widgets/NavigationLoader";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -33,17 +33,17 @@ export default function RootLayout({
       className={`${poppins.variable} relative top-0 bg-dark-200 font-sans`}
     >
       <body>
-        <LoadingProvider>
-          <AuthProvider>
-            <Suspense>
+        {/* <LoadingProvider> */}
+        <AuthProvider>
+          {/* <Suspense>
               <NavigationLoader />
-            </Suspense>
-            <UtilsProvider>
-              <ThemeProvider>{children}</ThemeProvider>
-            </UtilsProvider>
-            <Toaster position="top-right" />
-          </AuthProvider>
-        </LoadingProvider>
+            </Suspense> */}
+          <UtilsProvider>
+            <ThemeProvider>{children}</ThemeProvider>
+          </UtilsProvider>
+          <Toaster position="top-right" />
+        </AuthProvider>
+        {/* </LoadingProvider> */}
       </body>
     </html>
   );

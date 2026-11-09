@@ -2,10 +2,11 @@
 
 import { jwtDecode } from "jwt-decode";
 import {
-  getSession,
+  // getSession,
   isAccessTokenExpired,
   refreshSession,
 } from "@/lib/session";
+import { getSession } from "./session.action";
 import { getUserPersonalInfoAction } from "./auth.action";
 
 export async function refreshAccessTokenAction() {
@@ -14,7 +15,6 @@ export async function refreshAccessTokenAction() {
 
 export async function resolveViewerIdAction() {
   const accessToken = await getSession();
-  if (!accessToken) return "";
 
   if (await isAccessTokenExpired()) {
     const userRes = await getUserPersonalInfoAction("");
@@ -22,7 +22,7 @@ export async function resolveViewerIdAction() {
   }
 
   try {
-    return String((jwtDecode<{ sub?: string }>(accessToken)).sub || "");
+    return String(jwtDecode<{ sub?: string }>(accessToken).sub || "");
   } catch {
     return "";
   }

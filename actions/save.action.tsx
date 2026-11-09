@@ -3,7 +3,8 @@
 import { SavedItemCard, SavedFolderCard } from "@/components/cards";
 import { ISavedFolder, ISavedItem } from "@/types/post.types";
 import { revalidatePath } from "next/cache";
-import { getSession } from "@/lib/session";
+// import { getSession } from "@/lib/session";
+import { getSession } from "./session.action";
 import { getUserPersonalInfoAction } from "./auth.action";
 
 type Props = {
@@ -58,13 +59,13 @@ export async function getAllSavedFoldersAction({
       if (returnAsCard) {
         const reversedList = data?.slice().reverse();
         return reversedList.map((item: ISavedFolder, index: number) => (
-            <SavedFolderCard
-              key={item._id}
-              folderCard={item}
-              userId={resolvedUserId}
-              index={index}
-            />
-          ));
+          <SavedFolderCard
+            key={item._id}
+            folderCard={item}
+            userId={resolvedUserId}
+            index={index}
+          />
+        ));
       } else {
         const result = {
           status: 200,
