@@ -5,7 +5,7 @@ import { Button } from "../ui/button";
 import { Dropdown, FormInput } from "../inputs";
 import useDateSelector from "@/lib/hooks/useDateSelector";
 
-const EductionEditForm = ({ isEdit, form, options, onSubmit }: any) => {
+const EducationEditForm = ({ isEdit, form, options, onSubmit }: any) => {
   const { years } = useDateSelector({});
 
   const YEARS = years.map((item) => ({
@@ -69,4 +69,4 @@ const EductionEditForm = ({ isEdit, form, options, onSubmit }: any) => {
   );
 };
 
-export default EductionEditForm;
+export default EducationEditForm;

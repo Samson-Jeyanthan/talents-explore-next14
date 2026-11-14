@@ -119,21 +119,26 @@ export const TalentRegisterValidation = z.object({
   skillSets: z
     .array(
       z.object({
+        mainCategory: z.string(),
         mainCategoryId: z.string(),
+        subCategory: z.string(),
         subCategoryId: z.string(),
         skillsHave: z.array(
           z.object({
             skillId: z.string(),
+            skill: z.string(),
             level: z.string(),
+            // levelName: z.string()
           })
         ),
         description: z.string(),
-        hashTags: z.string(),
+        hashTags: z.array(z.string()),
       })
     )
     .optional(),
   languageKnown: z.array(
     z.object({
+      languageId: z.string(),
       language: z.string(),
       level: z.string(),
     })
@@ -154,4 +159,5 @@ export const TalentRegisterValidation = z.object({
       certificate: z.custom<File>().optional(),
     })
   ),
+  completeForm: z.boolean(),
 });

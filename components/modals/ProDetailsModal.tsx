@@ -25,7 +25,7 @@ import {
 } from "@/actions/user.action";
 import { toast } from "sonner";
 import { usePathname } from "next/navigation";
-import { AwardEditForm, EductionEditForm, LanguageEditForm } from "../forms";
+import { AwardEditForm, EducationEditForm, LanguageEditForm } from "../forms";
 
 type Prop = {
   isEdit: boolean;
@@ -238,7 +238,7 @@ const ProDetailsModal = ({
         {(detailModalFor === "education" ||
           detailModalFor === "educationEdit") && (
           <Form {...educationForm}>
-            <EductionEditForm
+            <EducationEditForm
               isEdit={detailModalFor === "educationEdit"}
               form={educationForm}
               onSubmit={handleEducationSubmit}

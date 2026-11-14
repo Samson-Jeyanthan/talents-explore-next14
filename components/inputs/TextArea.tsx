@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/form";
 import { Textarea } from "../ui/textarea";
 import { cn } from "@/lib/utils";
+import { ChangeEvent } from "react";
 
 type TInputProps = {
   form: any;
@@ -17,6 +18,7 @@ type TInputProps = {
   maxLength?: number | undefined;
   formDescription?: string;
   className?: string;
+  onChange?: (e: ChangeEvent<HTMLTextAreaElement>) => void;
 };
 
 const TextArea = ({
@@ -27,6 +29,7 @@ const TextArea = ({
   maxLength,
   formDescription,
   className,
+  onChange,
 }: TInputProps) => {
   return (
     <FormField
@@ -43,6 +46,10 @@ const TextArea = ({
               className={cn(className, `shad-auth_form_textarea resize-none`)}
               maxLength={maxLength}
               {...field}
+              onChange={(e) => {
+                field.onChange(e); // keep react-hook-form in sync
+                onChange?.(e); // then call the custom handler
+              }}
             />
           </FormControl>
           <FormMessage className="shad-auth_form_message" />

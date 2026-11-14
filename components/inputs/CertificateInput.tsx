@@ -1,7 +1,7 @@
 "use client";
 
 import { useMediaSelection } from "@/lib/hooks/useMedia";
-import { Paperclip } from "lucide-react";
+import { Paperclip, X } from "lucide-react";
 import Image from "next/image";
 import { ChangeEvent, useRef } from "react";
 
@@ -20,9 +20,9 @@ const CertificateInput = ({ fieldChange, values }: any) => {
     }
   };
 
-  // const handleInputDelete = () => {
-  //   fieldChange(null);
-  // };
+  const handleInputDelete = () => {
+    fieldChange(null);
+  };
 
   return (
     <>
@@ -34,7 +34,7 @@ const CertificateInput = ({ fieldChange, values }: any) => {
         accept="image/jpeg,image/jpg,image/png,image/webp/application/pdf"
       />
 
-      <div className="flex-center !h-20 w-full gap-2 rounded-lg border border-solid border-dark-300 bg-dark-300 p-2 text-light-500">
+      <div className="flex-center relative !h-20 w-full gap-2 rounded-lg border border-solid border-dark-300 bg-dark-300 p-2 text-light-500">
         {values ? (
           <div className="flex-center gap-2">
             <Image
@@ -48,7 +48,12 @@ const CertificateInput = ({ fieldChange, values }: any) => {
               alt="profile-pic"
               className="h-10 w-auto bg-transparent object-cover"
             />
-            <p className="text-sm">{media.fileName}</p>
+            <p
+              className="w-3/5 truncate text-sm"
+              title={media?.fileName ?? undefined}
+            >
+              {media.fileName}
+            </p>
           </div>
         ) : (
           <div
@@ -58,6 +63,14 @@ const CertificateInput = ({ fieldChange, values }: any) => {
             <Paperclip className="size-5" />
             <p className="text-center text-sm">Upload document</p>
           </div>
+        )}
+        {values && (
+          <span
+            className="absolute right-3 top-3 cursor-pointer text-white"
+            onClick={handleInputDelete}
+          >
+            <X size={16} />
+          </span>
         )}
       </div>
     </>

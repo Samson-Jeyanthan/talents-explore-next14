@@ -102,6 +102,38 @@ export async function fetchUserDataAction(userId: string, viewerId: string) {
   }
 }
 
+export async function editUserProfessionalInfoAction(formData: any) {
+  try {
+    const headers = await getAuthHeaders();
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/professionalInfo`,
+      {
+        method: "PUT",
+        cache: "no-store",
+        headers: {
+          ...headers,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      }
+    );
+
+    const res = await response.json();
+
+    console.log("response_from_edit_action", res);
+
+    if (res.status === "7400") {
+      return { success: true, data: res };
+    }
+    
+    console.error("Update talent profile failed:", response.status, res);
+    return { success: false, status: response.status, error: res };
+  } catch (error) {
+    console.error("editUserProfessionalInfoAction error:", error);
+    return { success: false, error: "Something went wrong" };
+  }
+}
+
 export async function userTopPostInfoAction(
   userId: string | undefined,
   returnAsCard: boolean
@@ -153,6 +185,9 @@ export async function userSkillsInfoAction(userId: string | undefined) {
       }
     );
     const res = await response.json();
+    console.log("skills-info", res.response[0]);
+    console.log("skills-info", res.response[1]);
+
     if (res.status === "7400") {
       const data = res.response;
       return data.map((item: IProfileSkills, index: number) => (

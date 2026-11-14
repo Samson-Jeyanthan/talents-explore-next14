@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useState } from "react";
 import { SOCIAL_MEDIA_OPTIONS } from "@/constants";
 import {
   Select,
@@ -8,193 +9,156 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import React, { useState } from "react";
 import { Input } from "../ui/input";
-import { TConvertedSvgJsxProps } from "@/types/utils.types";
-import { IconType } from "react-icons/lib";
 import { LinkIcon } from "@/public/assets/svgs";
 
-type TLink = {
+type SocialLink = { type: string; url: string };
+
+interface Props {
+  values?: SocialLink[];
+  fieldChange: (links: SocialLink[]) => void;
+}
+
+// computed once at module level, not on every render
+const DEFAULT_OPTIONS = SOCIAL_MEDIA_OPTIONS.filter((o) => o.default);
+const EXTRA_OPTIONS = SOCIAL_MEDIA_OPTIONS.filter((o) => !o.default);
+const OPTION_BY_TYPE = new Map(SOCIAL_MEDIA_OPTIONS.map((o) => [o.type, o]));
+
+const LinkRow = ({
+  type,
+  url,
+  onChange,
+}: {
   type: string;
   url: string;
-  icon?: IconType | React.ComponentType<TConvertedSvgJsxProps>;
-  default?: boolean;
-};
-
-type SocialMediaLink = {
-  type: string;
-  url: string;
-};
-
-// function to add default links when its seen first
-export const processLinks = (links: SocialMediaLink[]): TLink[] => {
-  const alreadyEntered: Set<string> = new Set();
-  return links.map((link) => {
-    const isDefault =
-      (link.type === "facebook" ||
-        link.type === "instagram" ||
-        link.type === "linkedin" ||
-        link.type === "youtube") &&
-      !alreadyEntered.has(link.type);
-
-    if (isDefault) {
-      alreadyEntered.add(link.type); // already entered
-    }
-
-    return { ...link, default: isDefault };
-  });
-};
-
-const SocialMediaInput = ({ values, fieldChange }: any) => {
-  console.log(values, "social-links");
-  const processedLinks = processLinks(values);
-
-  const [addedLinks, setAddedLinks] = useState<TLink[]>(
-    processedLinks || [
-      {
-        url: "",
-        type: "",
-        icon: undefined,
-        default: false,
-      },
-    ]
+  onChange: (url: string) => void;
+}) => {
+  const Icon = OPTION_BY_TYPE.get(type)?.icon ?? LinkIcon;
+  return (
+    <div className="flex w-full items-center justify-start gap-4">
+      <span className="social-link-icon">
+        <Icon height="20px" width="20px" />
+      </span>
+      <Input
+        value={url}
+        onChange={(e) => onChange(e.target.value)}
+        className="shad-auth_form_input"
+        placeholder={`Add ${type.toLowerCase()} URL`}
+      />
+    </div>
   );
-  const [additionalLink, setAdditionalLink] = useState<TLink>({
-    type: "",
-    url: "",
-    icon: undefined,
-    default: false,
-  });
+};
+
+const SocialMediaInput = ({ values = [], fieldChange }: Props) => {
+  const [pending, setPending] = useState<SocialLink>({ type: "", url: "" });
   const [error, setError] = useState("");
 
-  // handler for updating default link URLs
-  const handleDefaultLinkChange = (type: string, url: string) => {
-    const updated = addedLinks.map((link) =>
-      link.type === type && link.default ? { ...link, url } : link
+  const urlFor = (type: string) =>
+    values.find((l) => l.type === type)?.url ?? "";
+
+  // update if it exists, otherwise add it
+  const setUrl = (type: string, url: string) => {
+    const exists = values.some((l) => l.type === type);
+    fieldChange(
+      exists
+        ? values.map((l) => (l.type === type ? { ...l, url } : l))
+        : [...values, { type, url }]
     );
-    setAddedLinks(updated);
-    fieldChange(updated);
   };
 
+  const addedExtras = values.filter(
+    (l) => !OPTION_BY_TYPE.get(l.type)?.default
+  );
+  const availableExtras = EXTRA_OPTIONS.filter(
+    (o) => !values.some((l) => l.type === o.type)
+  );
+
   const handleOkClick = () => {
-    if (additionalLink.type === "" || additionalLink.url === "") {
+    if (!pending.type || !pending.url.trim()) {
       setError("Please fill all the fields");
-    } else {
-      setAddedLinks([...addedLinks, additionalLink]);
-      setAdditionalLink({ icon: LinkIcon, type: "", url: "" });
-      fieldChange([...addedLinks, additionalLink]);
+      return;
     }
+    fieldChange([...values, { type: pending.type, url: pending.url.trim() }]);
+    setPending({ type: "", url: "" });
+    setError("");
   };
 
   return (
-    <div className="flex w-[70%] flex-col gap-3">
-      {/* display default links */}
-      {SOCIAL_MEDIA_OPTIONS.map((option, index) => {
-        const matched = addedLinks.find(
-          (link) => link.type === option.type && link.default
-        );
-        return (
-          <React.Fragment key={index}>
-            {option.default && (
-              <div className="flex w-full items-center justify-start gap-4">
-                <span className="social-link-icon">
-                  <option.icon height="20px" width="20px" />
-                </span>
-                <Input
-                  value={matched ? matched.url : ""}
-                  onChange={(e) =>
-                    handleDefaultLinkChange(option.type, e.target.value)
-                  }
-                  className="shad-auth_form_input"
-                  placeholder={`Add ${option.type.toLowerCase()} URL`}
-                />
-              </div>
-            )}
-          </React.Fragment>
-        );
-      })}
-      {/* display added links
-      {addedLinks.map((link, index) => {
-        const Icon =
-          SOCIAL_MEDIA_OPTIONS.find((option) => option.type === link.type)
-            ?.icon || LinkIcon;
-        return (
-          <React.Fragment key={index}>
-            {!link.default && (
-              <div className="flex w-full items-center justify-start gap-4">
-                <span className="social-link-icon">
-                  <Icon height={"20px"} width={"20px"} />
-                </span>
-                <Input
-                  value={link.url}
-                  onChange={(e) => {
-                    fieldChange(e.target.value, index);
-                  }}
-                  placeholder={`Add ${link.type.toLowerCase()} URL`}
-                  className="shad-auth_form_input"
-                />
-              </div>
-            )}
-          </React.Fragment>
-        );
-      })}
+    <div className="flex w-full flex-col gap-2">
+      <label className="shad-auth_form_label">Social Links</label>
 
-      {/* additional links - which are not default */}
-      <div className="mt-4 flex flex-col gap-2">
-        <div className="flex gap-2">
-          <Select
-            onValueChange={(id: string) => {
-              setAdditionalLink({
-                ...additionalLink,
-                type: id,
-                icon:
-                  SOCIAL_MEDIA_OPTIONS.find((option) => option.type === id)
-                    ?.icon || LinkIcon,
-              });
-            }}
-          >
-            <SelectTrigger className="flex-between shad-auth_form_input !w-[45%]">
-              {!additionalLink.type ? (
-                <p className="flex w-full items-start text-light-500">
-                  Choose link type
-                </p>
-              ) : (
-                <SelectValue />
-              )}
-            </SelectTrigger>
-            <SelectContent className="shad-auth_form_select_option">
-              {SOCIAL_MEDIA_OPTIONS.map((option, index) => (
-                <SelectItem
-                  key={index}
-                  value={String(option.type)}
-                  className="shad-auth_form_select_item"
-                >
-                  <p className="first-letter:capitalize">{option.type}</p>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Input
-            value={additionalLink.url}
-            onChange={(e) => {
-              setAdditionalLink({
-                ...additionalLink,
-                url: e.target.value,
-              });
-            }}
-            placeholder="Add related URL"
-            className="shad-auth_form_input"
+      <div className="flex w-[70%] flex-col gap-3">
+        {DEFAULT_OPTIONS.map((option) => (
+          <LinkRow
+            key={option.type}
+            type={option.type}
+            url={urlFor(option.type)}
+            onChange={(url) => setUrl(option.type, url)}
           />
-        </div>
+        ))}
 
-        {error && <p className="shad-auth_form_message">{error}</p>}
+        <p className="text-[13px] text-light-600">
+          Add links to your social media profiles to help others find you.
+        </p>
 
-        {/* button to confirm additional links to add by user */}
-        <footer className="flex justify-end">
-          <div className="teritory-button" onClick={handleOkClick}>
-            OK
+        {addedExtras.map((link) => (
+          <LinkRow
+            key={link.type}
+            type={link.type}
+            url={link.url}
+            onChange={(url) => setUrl(link.type, url)}
+          />
+        ))}
+
+        {availableExtras.length > 0 && (
+          <div className="mt-4 flex flex-col gap-2">
+            <div className="flex gap-2">
+              <Select
+                value={pending.type}
+                onValueChange={(type) => {
+                  setPending((p) => ({ ...p, type }));
+                  setError("");
+                }}
+              >
+                <SelectTrigger className="flex-between shad-auth_form_input !w-[45%] !text-light-500">
+                  <SelectValue placeholder="Choose link type" />
+                </SelectTrigger>
+                <SelectContent className="shad-auth_form_select_option">
+                  {availableExtras.map((option) => (
+                    <SelectItem
+                      key={option.type}
+                      value={option.type}
+                      className="shad-auth_form_select_item"
+                    >
+                      <p className="first-letter:capitalize">{option.type}</p>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Input
+                value={pending.url}
+                onChange={(e) => {
+                  setPending((p) => ({ ...p, url: e.target.value }));
+                  setError("");
+                }}
+                placeholder="Add related URL"
+                className="shad-auth_form_input"
+              />
+            </div>
+
+            {error && <p className="shad-auth_form_message">{error}</p>}
+
+            <footer className="flex justify-end">
+              <button
+                type="button"
+                className="teritory-button"
+                onClick={handleOkClick}
+              >
+                OK
+              </button>
+            </footer>
           </div>
-        </footer>
+        )}
       </div>
     </div>
   );

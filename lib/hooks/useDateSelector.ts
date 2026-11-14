@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 
 type TDateSelectorProps = {
-  isPresent?: boolean;
   yearValue?: any;
   monthValue?: any;
   dayValue?: any;
@@ -15,7 +14,6 @@ type TDays = {
 };
 
 const useDateSelector = ({
-  isPresent,
   yearValue,
   monthValue,
   dayValue,
@@ -25,14 +23,20 @@ const useDateSelector = ({
   // get years function
   const years = useMemo(() => {
     const years = [];
-    if (isPresent) {
-      years.push({ id: "Present", label: 0 });
-    }
     for (let i = currentYear; i > 1900; i--) {
       years.push({ id: i, label: i.toString() });
     }
     return years;
-  }, [currentYear, isPresent]);
+  }, [currentYear]);
+
+  const presentAddedYears = useMemo(() => {
+    const years = [];
+    years.push({ id: "Present", label: 0 });
+    for (let i = currentYear; i > 1900; i--) {
+      years.push({ id: i, label: i.toString() });
+    }
+    return years;
+  }, [currentYear]);
 
   // get months function
   const months = useMemo(() => {
@@ -99,6 +103,7 @@ const useDateSelector = ({
   }, [yearValue, monthValue, dayValue]);
 
   return {
+    presentAddedYears,
     years,
     months,
     days,

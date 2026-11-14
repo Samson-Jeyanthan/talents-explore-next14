@@ -28,7 +28,7 @@ type Props = {
   // it is usefull for skils and countries related onChanges, bcz it is dependent on another field
   dependentFieldPlaceholder?: string;
   dependentFieldValue?: boolean;
-  onValueChange?: (_id: string) => {};
+  onValueChange?: (value: string) => void;
   resetFiled?: () => void;
   isModal?: boolean;
 };
