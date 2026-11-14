@@ -228,7 +228,7 @@ function refreshOnce(
   accessToken: string
 ): Promise<RefreshResult> {
   const now = Date.now();
-  for (const [key, entry] of recentRefreshes) {
+  for (const [key, entry] of Array.from(recentRefreshes.entries())) {
     if (now - entry.at >= REFRESH_REUSE_MS) recentRefreshes.delete(key);
   }
 

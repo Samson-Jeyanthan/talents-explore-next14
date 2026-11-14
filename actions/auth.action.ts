@@ -177,8 +177,17 @@ export async function resetPasswordAction(formData: unknown) {
       }
     );
 
-    console.log(response, "reset-password-action");
-    // return response.data;
+    console.log(await response.json());
+
+    if (!response.ok) {
+      return {
+        status: false,
+      };
+    } else {
+      return {
+        status: true,
+      };
+    }
   } catch (error) {
     console.error(error);
     return error;

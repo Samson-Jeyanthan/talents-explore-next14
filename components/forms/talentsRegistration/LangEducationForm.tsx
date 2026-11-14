@@ -1,3 +1,5 @@
+"use client";
+
 import { Dropdown } from "@/components/inputs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

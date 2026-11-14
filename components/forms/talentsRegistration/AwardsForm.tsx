@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { CertificateInput, Dropdown } from "@/components/inputs";
 import { Button } from "@/components/ui/button";

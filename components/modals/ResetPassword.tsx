@@ -40,7 +40,7 @@ const ResetPassword = ({
       newPassword: values.password,
     };
     const res = await resetPasswordAction(formData);
-    if (res?.status === "7400") {
+    if (res) {
       toast.success("Password Has Reset Successfully", { duration: 5000 });
       router.push("/sign-in");
     } else {
