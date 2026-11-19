@@ -14,7 +14,7 @@ const optionalSkillLevelField = z.preprocess(
     }
     return value;
   },
-  z.enum(["beginner", "intermediate", "advanced"]).nullable()
+  z.enum(["beginner", "intermediate", "advanced"]).nullable(),
 );
 
 export const createPostShareValidation = z.object({
@@ -23,7 +23,9 @@ export const createPostShareValidation = z.object({
       mediaType: z.enum(["image", "video"]),
       croppedData: z.custom<File>(),
       croppedPrev: z.string().nullable(),
-    })
+      thumbnail: z.custom<File>().optional(),
+      thumbnailPreview: z.string().optional(),
+    }),
   ),
   title: z.string().min(5, { message: "Title is required" }).max(130),
   description: z
@@ -47,7 +49,7 @@ export const createPostShareValidation = z.object({
       firstName: z.string(),
       lastName: z.string(),
       profileImage: z.string(),
-    })
+    }),
   ),
   keywords: z.string(),
   isCreditWork: z.string(),
@@ -62,15 +64,15 @@ export const createPostShareValidation = z.object({
           firstName: z.string(),
           lastName: z.string(),
           profileImage: z.string(),
-        })
+        }),
       ),
-    })
+    }),
   ),
   toolsUsed: z.array(
     z.object({
       toolName: z.string(),
       level: z.enum(["", "beginner", "intermediate", "advanced"]),
-    })
+    }),
   ),
   // sharelink
   website: z.string().optional(),

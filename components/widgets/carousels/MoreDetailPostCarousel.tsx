@@ -36,6 +36,7 @@ type Props = {
 const MoreDetailPostCarousel = ({ slides, options }: Props) => {
   const safeSlides = Array.isArray(slides) ? slides : [];
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const { setmdSelectedMediaIndex } = useUtils();
   const [emblaRef, emblaApi] = useEmblaCarousel(options);
   const tweenFactor = useRef(0);
@@ -46,6 +47,11 @@ const MoreDetailPostCarousel = ({ slides, options }: Props) => {
     // scrollSnaps,
     // onDotButtonClick
   } = useDotButton(emblaApi);
+  useEffect(() => {
+    videoRefs.current.forEach((video, index) => {
+      if (isFullScreen || index !== selectedIndex) video?.pause();
+    });
+  }, [isFullScreen, selectedIndex]);
 
   const {
     prevBtnDisabled,
@@ -57,7 +63,7 @@ const MoreDetailPostCarousel = ({ slides, options }: Props) => {
   const setTweenNodes = useCallback((emblaApi: EmblaCarouselType): void => {
     tweenNodes.current = emblaApi.slideNodes().map((slideNode) => {
       return slideNode.querySelector(
-        ".mdp-embla__slide__number"
+        ".mdp-embla__slide__number",
       ) as HTMLElement;
     });
   }, []);
@@ -105,7 +111,7 @@ const MoreDetailPostCarousel = ({ slides, options }: Props) => {
         });
       });
     },
-    []
+    [],
   );
 
   useEffect(() => {
@@ -136,7 +142,7 @@ const MoreDetailPostCarousel = ({ slides, options }: Props) => {
     };
 
     if (elem.requestFullscreen) {
-      elem.requestFullscreen();
+      void elem.requestFullscreen().catch(() => {});
     } else if (elem.webkitRequestFullscreen) {
       /* Safari */
       elem.webkitRequestFullscreen();
@@ -178,20 +184,30 @@ const MoreDetailPostCarousel = ({ slides, options }: Props) => {
               >
                 <div className="relative h-auto w-max">
                   {}
-                  <Image
-                    src={
-                      media.mediaType === "image"
-                        ? media.url
-                        : "/assets/images/sample-post-img.jpg"
-                    }
-                    width={1024}
-                    height={1024}
-                    alt="media"
-                    className="mdp-embla__slide__number h-[30rem] w-auto rounded-2xl bg-none object-contain"
-                  />
+                  {media.mediaType === "video" ? (
+                    <video
+                      ref={(element) => {
+                        videoRefs.current[index] = element;
+                      }}
+                      src={media.url}
+                      poster={media.thumbnailUrl || undefined}
+                      controls
+                      playsInline
+                      preload="metadata"
+                      className="mdp-embla__slide__number h-[30rem] max-w-full rounded-2xl object-contain"
+                    />
+                  ) : (
+                    <Image
+                      src={media.url}
+                      width={1024}
+                      height={1024}
+                      alt="media"
+                      className="mdp-embla__slide__number h-[30rem] w-auto rounded-2xl bg-none object-contain"
+                    />
+                  )}
                   {selectedIndex === index && (
                     <div
-                      className="absolute bottom-3 right-3 grid size-[34px] cursor-pointer place-items-center rounded-full bg-dark-200 fill-light-900 pt-[2px]"
+                      className="absolute right-3 top-3 grid size-[34px] cursor-pointer place-items-center rounded-full bg-dark-200 fill-light-900 pt-[2px]"
                       onClick={handleFullScreen}
                     >
                       <FullScreenIcon width={"17px"} height={"17px"} />
@@ -205,7 +221,8 @@ const MoreDetailPostCarousel = ({ slides, options }: Props) => {
 
         <div className="mdp-embla__controls">
           <div className="text-sm text-light-500">
-            {safeSlides.length > 0 ? selectedIndex + 1 : 0} / {safeSlides.length}
+            {safeSlides.length > 0 ? selectedIndex + 1 : 0} /{" "}
+            {safeSlides.length}
           </div>
           <div className="mdp-embla__buttons">
             <PrevButton
@@ -219,9 +236,14 @@ const MoreDetailPostCarousel = ({ slides, options }: Props) => {
           </div>
         </div>
       </div>
-      <Dialog open={isFullScreen}>
+      <Dialog
+        open={isFullScreen}
+        onOpenChange={(open) => !open && handleMinScreen()}
+      >
         <FullScreenModal
-          mediaType="image"
+          mediaType={
+            safeSlides[selectedIndex]?.mediaType === "video" ? "video" : "image"
+          }
           mediaUrl={safeSlides[selectedIndex]?.url}
           onClose={handleMinScreen}
         />

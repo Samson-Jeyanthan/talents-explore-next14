@@ -1,20 +1,53 @@
 "use client";
 
-import { defaultMediaState, useMediaSelection } from "@/lib/hooks/useMedia";
+import { defaultMediaState } from "@/lib/hooks/useMedia";
+import { Media } from "@/types/utils.types";
+import {
+  createPostVideoThumbnail,
+  validatePostFile,
+} from "@/lib/utils/postMedia";
 import Image from "next/image";
-import React, { ChangeEvent, useRef, useState } from "react";
+import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { MdDelete } from "react-icons/md";
 import { CropImgModal, ErrorAlert } from "../modals";
 import { Dialog } from "../ui/dialog";
 
-const MediaInput = ({ fieldChange, values }: any) => {
+const MediaInput = ({ fieldChange, values, onProcessingChange }: any) => {
   const mediaRef = useRef<HTMLInputElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   // const [mediaHeight, setMediaHeight] = useState("auto");
   const [activeIndex, setActiveIndex] = useState(0);
-  const { handleMediaInput, media, resetMedia, error, setError, setMedia } =
-    useMediaSelection(true);
+  const [media, setMedia] = useState<Media>(defaultMediaState);
+  const [error, setError] = useState("");
+  const [checking, setChecking] = useState(false);
+  useEffect(() => {
+    onProcessingChange?.(checking || isOpen);
+    return () => onProcessingChange?.(false);
+  }, [checking, isOpen, onProcessingChange]);
+  const urls = useRef(new Set<string>());
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    const previewUrls = urls.current;
+    return () => {
+      mounted.current = false;
+      previewUrls.forEach((url) => URL.revokeObjectURL(url));
+      previewUrls.clear();
+    };
+  }, []);
+  const trackUrl = (file: Blob) => {
+    const url = URL.createObjectURL(file);
+    urls.current.add(url);
+    return url;
+  };
+  const releaseUrl = (url: string) => {
+    if (urls.current.delete(url)) URL.revokeObjectURL(url);
+  };
+  const resetMedia = () => {
+    if (media.preview) releaseUrl(media.preview);
+    setMedia(defaultMediaState);
+  };
   const [isRatio, setIsRatio] = useState({
     is16to9: false,
     is4to3: false,
@@ -24,16 +57,56 @@ const MediaInput = ({ fieldChange, values }: any) => {
     is2to3: false,
   });
 
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    handleMediaInput(event);
-    if (!event.target.files) return; // Exit if no files are selected
-    setIsOpen(true);
+  const handleInputChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file || checking) return;
+    if (values.length >= 9) {
+      setError("You can add up to 9 media files.");
+      return;
+    }
+    setError("");
+    setChecking(true);
+    try {
+      validatePostFile(file);
+      if (file.type.startsWith("video/")) {
+        const thumbnail = await createPostVideoThumbnail(file);
+        if (!mounted.current) return;
+        fieldChange([
+          ...values,
+          {
+            mediaType: "video",
+            croppedData: file,
+            croppedPrev: trackUrl(file),
+            thumbnail,
+            thumbnailPreview: trackUrl(thumbnail),
+          },
+        ]);
+        setActiveIndex(values.length);
+      } else {
+        setMedia({
+          data: file,
+          preview: trackUrl(file),
+          fileName: file.name,
+          fileType: file.type,
+          mediaType: "image",
+        });
+        setIsOpen(true);
+      }
+    } catch (error) {
+      if (mounted.current)
+        setError(
+          error instanceof Error ? error.message : "Unable to read this file.",
+        );
+    } finally {
+      if (mounted.current) setChecking(false);
+    }
   };
 
   // handling invalid media
   const handleOkClick = () => {
     setError("");
-    setMedia(defaultMediaState);
+    resetMedia();
     setIsOpen(false);
   };
 
@@ -121,7 +194,11 @@ const MediaInput = ({ fieldChange, values }: any) => {
 
   // image crop compelte function
   const handleCropComplete = (img: any) => {
-    console.log(img, "img");
+    if (!img?.croppedData || !img?.croppedPrev) {
+      setError("Unable to crop this image.");
+      return;
+    }
+    urls.current.add(img.croppedPrev);
     const currentValues = Array.isArray(values) ? values : [];
     const updatedMedia = [...currentValues, img];
 
@@ -140,8 +217,12 @@ const MediaInput = ({ fieldChange, values }: any) => {
   };
 
   const handleMediaDelete = (itemIndex: number) => {
+    if (checking) return;
+    releaseUrl(values[itemIndex].croppedPrev);
+    if (values[itemIndex].thumbnailPreview)
+      releaseUrl(values[itemIndex].thumbnailPreview);
     const updatedValues = values.filter(
-      (_: any, index: number) => index !== itemIndex
+      (_: any, index: number) => index !== itemIndex,
     );
 
     fieldChange(updatedValues);
@@ -192,6 +273,7 @@ const MediaInput = ({ fieldChange, values }: any) => {
       <input
         ref={mediaRef}
         type="file"
+        disabled={checking}
         onChange={handleInputChange}
         accept="image/jpeg, image/png, image/webp, video/mp4, video/quicktime, video/*"
         hidden
@@ -202,19 +284,33 @@ const MediaInput = ({ fieldChange, values }: any) => {
             <React.Fragment key={index}>
               {activeIndex === index && (
                 <>
-                  <span
-                    className="media-prev-btn absolute bottom-2 left-2 z-10 cursor-pointer"
+                  <button
+                    type="button"
+                    aria-label="Remove selected media"
+                    disabled={checking}
+                    className="media-prev-btn absolute left-2 top-2 z-10 cursor-pointer"
                     onClick={() => handleMediaDelete(index)}
                   >
                     <MdDelete />
-                  </span>
-                  <Image
-                    src={media.croppedPrev}
-                    height={1000}
-                    alt="img"
-                    width={1000}
-                    className="size-full rounded-xl object-cover"
-                  />
+                  </button>
+                  {media.mediaType === "video" ? (
+                    <video
+                      key={media.croppedPrev}
+                      src={media.croppedPrev}
+                      poster={media.thumbnailPreview}
+                      controls
+                      preload="metadata"
+                      className="max-h-[32rem] w-full rounded-xl"
+                    />
+                  ) : (
+                    <Image
+                      src={media.croppedPrev}
+                      height={1000}
+                      alt="img"
+                      width={1000}
+                      className="size-full rounded-xl object-cover"
+                    />
+                  )}
                 </>
               )}
             </React.Fragment>
@@ -248,6 +344,12 @@ const MediaInput = ({ fieldChange, values }: any) => {
         </div>
       )}
 
+      <p role="status" className="text-sm text-light-500">
+        {checking
+          ? "Checking video and generating preview..."
+          : "Up to 9 images or videos. Each file: 1 GB maximum. Videos: 10 minutes maximum."}
+      </p>
+
       <ErrorAlert
         isOpen={Boolean(error)}
         title="OOPS! Something went wrong"
@@ -265,7 +367,7 @@ const MediaInput = ({ fieldChange, values }: any) => {
             >
               <Image
                 className="relative z-[1] size-full rounded-lg object-cover"
-                src={media.croppedPrev}
+                src={media.thumbnailPreview || media.croppedPrev}
                 alt={`Image ${index}`}
                 width={500}
                 height={500}
@@ -286,7 +388,10 @@ const MediaInput = ({ fieldChange, values }: any) => {
 
       <Dialog
         open={isOpen && media && !error}
-        onOpenChange={() => setIsOpen(false)}
+        onOpenChange={() => {
+          setIsOpen(false);
+          resetMedia();
+        }}
       >
         <CropImgModal
           modalFor="post"

@@ -7,6 +7,7 @@ import { getUserPersonalInfoAction } from "./auth.action";
 import { getAuthHeaders } from "@/lib/session";
 import { getSession } from "./session.action";
 import { resolveViewerIdAction } from "./tokenAndHeaders.action";
+import { isRedirectError } from "next/dist/client/components/redirect";
 
 type TPostActionError = {
   status: number;
@@ -23,6 +24,7 @@ async function resolveViewerId(accessToken: string | undefined) {
 
     return userRes?.response?._id || "";
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error("resolveViewerId failed:", error);
     return "";
   }
@@ -46,34 +48,35 @@ export async function createPostShareAction(
   userId: string | undefined,
   formData: unknown,
   type: "POST" | "SHARELINK",
-  revalidatePathURL: string
+  revalidatePathURL: string,
 ) {
-  console.log("formData", formData, userId, type, revalidatePathURL);
-
   try {
     const headers = await getAuthHeaders();
-    console.log("headers", headers);
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/te-post`,
       {
         method: "POST",
         headers,
         body: JSON.stringify(formData),
-      }
+      },
     );
 
-    console.log("response", response);
-
     const res = await response.json();
-    console.log("res", res);
 
-    if (res.status === "7400") {
+    if (response.ok && res.status === "7400") {
       revalidatePath(revalidatePathURL);
       return res;
     } else {
       const data = {
         status: 400,
-        message: "Could not upload post",
+        message:
+          typeof res?.message === "string"
+            ? res.message
+            : Array.isArray(res?.message)
+              ? res.message
+                  .filter((message: unknown) => typeof message === "string")
+                  .join(". ")
+              : "Could not upload post",
       };
       return data;
     }
@@ -96,7 +99,7 @@ export async function getWebCrawlerLinkAction(url: string) {
       {
         cache: "no-store",
         headers,
-      }
+      },
     );
     console.log("website-link-crawler response", response);
     const res = await response.json();
@@ -117,7 +120,7 @@ export async function getUserAllPostsAction(
   userId: string | undefined,
   viewerId: string | undefined,
   pageNo: number,
-  pageSize: number
+  pageSize: number,
 ) {
   try {
     const resolvedViewerId = await resolveRouteUserId(viewerId);
@@ -127,7 +130,7 @@ export async function getUserAllPostsAction(
       {
         cache: "no-store",
         headers,
-      }
+      },
     );
     const res = await response.json();
     if (res.status === "7400") {
@@ -148,7 +151,7 @@ export async function getUserAllPostsAction(
 export async function addPostToBestWorkAction(
   userId: string,
   postId: string,
-  revalidatePathURL: string
+  revalidatePathURL: string,
 ) {
   const formData = {
     userId,
@@ -162,7 +165,7 @@ export async function addPostToBestWorkAction(
         method: "POST",
         headers,
         body: JSON.stringify(formData),
-      }
+      },
     );
     const res = await response.json();
     console.log(res);
@@ -174,7 +177,7 @@ export async function addPostToBestWorkAction(
 export async function removeFromBestWorkAction(
   userId: string,
   postId: string,
-  revalidatePathURL: string
+  revalidatePathURL: string,
 ) {
   const formData = {
     userId,
@@ -188,7 +191,7 @@ export async function removeFromBestWorkAction(
         method: "POST",
         headers,
         body: JSON.stringify(formData),
-      }
+      },
     );
     const res = await response.json();
     revalidatePath(revalidatePathURL);
@@ -203,7 +206,7 @@ export async function getUserCreditPostsAction(
   userId: string | undefined,
   viewerId: string | undefined,
   pageNo: number,
-  pageSize: number
+  pageSize: number,
 ) {
   try {
     const resolvedViewerId = await resolveRouteUserId(viewerId);
@@ -213,7 +216,7 @@ export async function getUserCreditPostsAction(
       {
         cache: "no-store",
         headers,
-      }
+      },
     );
     const res = await response.json();
     if (res.status === "7400") {
@@ -233,7 +236,7 @@ export async function getUserCreditPostsAction(
 
 export async function getPostByIdAction(
   postId: string | undefined,
-  userId: string | undefined
+  userId: string | undefined,
 ) {
   try {
     const resolvedUserId = (await resolveRouteUserId(userId)) || "no_user";
@@ -243,7 +246,7 @@ export async function getPostByIdAction(
       {
         cache: "no-store",
         headers,
-      }
+      },
     );
 
     if (!response.ok) {
@@ -265,6 +268,7 @@ export async function getPostByIdAction(
       return data;
     }
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error("getPostByIdAction failed:", error);
     return {
       status: 500,
@@ -275,17 +279,11 @@ export async function getPostByIdAction(
 
 export async function getAllPostsAction(
   pageNo: number,
-  pageSize: number
+  pageSize: number,
 ): Promise<IPost[] | TPostActionError> {
   try {
     const viewerId = await resolveViewerIdAction();
     const accessToken = await getSession();
-
-    console.log(
-      "getAllPostsAction viewerId: --283--ost.action--",
-      accessToken,
-      viewerId
-    );
 
     if (!viewerId) {
       return {
@@ -301,7 +299,7 @@ export async function getAllPostsAction(
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
-      }
+      },
     );
 
     if (!response.ok) {
@@ -322,6 +320,7 @@ export async function getAllPostsAction(
       message: res?.message || "Could not fetch all posts data",
     };
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error("getAllPostsAction failed:", error);
 
     return {
@@ -333,7 +332,7 @@ export async function getAllPostsAction(
 
 export async function getAllSharesAction(
   pageNo: number,
-  pageSize: number
+  pageSize: number,
 ): Promise<IPost[] | TPostActionError> {
   try {
     const viewerId = await resolveViewerIdAction();
@@ -353,7 +352,7 @@ export async function getAllSharesAction(
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
-      }
+      },
     );
 
     if (!response.ok) {
@@ -374,6 +373,7 @@ export async function getAllSharesAction(
       message: res?.message || "Could not fetch all posts data",
     };
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error("getAllPostsAction failed:", error);
 
     return {

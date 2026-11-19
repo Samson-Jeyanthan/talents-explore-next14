@@ -68,18 +68,16 @@ function getSafeDestination(value: string | null): string {
 
 export async function GET(request: NextRequest) {
   const destination = getSafeDestination(
-    request.nextUrl.searchParams.get("next")
+    request.nextUrl.searchParams.get("next"),
   );
 
   // Writes the new cookies on success (allowed in a Route Handler).
   const result = await refreshSession();
 
-  console.log("[auth/refresh] result", result);
-
   // Never log `result`: on success it contains the new access and refresh tokens.
   console.log(
     "[auth/refresh]",
-    result.ok ? "refreshed" : `failed (invalid=${result.invalid})`
+    result.ok ? "refreshed" : `failed (invalid=${result.invalid})`,
   );
 
   if (result.ok) {

@@ -240,6 +240,8 @@ export type TPostShareMedia = {
   mediaType: string;
   url: string;
   urlKey: string;
+  thumbnailUrl?: string | null;
+  thumbnailUrlkey?: string | null;
 };
 
 export type TCredit = {

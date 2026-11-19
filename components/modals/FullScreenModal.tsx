@@ -16,7 +16,16 @@ const FullScreenModal = ({ mediaType, mediaUrl, onClose }: Props) => {
       className="h-screen max-h-full w-screen max-w-full border-none p-0"
       aria-describedby={undefined}
     >
-      <DialogTitle className="m-0 h-screen w-full space-y-0 bg-red-400/30 p-0">
+      <DialogTitle className="sr-only">Media preview</DialogTitle>
+      {mediaType === "video" ? (
+        <video
+          src={mediaUrl}
+          controls
+          playsInline
+          preload="metadata"
+          className="h-screen w-full bg-dark-100 object-contain"
+        />
+      ) : (
         <Image
           src={mediaUrl}
           width={1024}
@@ -24,7 +33,7 @@ const FullScreenModal = ({ mediaType, mediaUrl, onClose }: Props) => {
           alt="image"
           className="h-screen w-full bg-dark-100 object-contain"
         />
-      </DialogTitle>
+      )}
       <DialogClose
         onClick={onClose}
         className="flex-center fixed bottom-3 right-3 size-[34px] cursor-pointer rounded-full bg-dark-200 fill-light-900 pt-[2px]"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FieldErrors, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -19,7 +19,8 @@ import { useUserContext } from "@/context/AuthProvider";
 import { createPostShareAction } from "@/actions/post.action";
 import { toast } from "sonner";
 import { TCredit, TPostShareMedia } from "@/types/post.types";
-import { uploadFileToStorage } from "@/lib/utils/uploadFile";
+import { uploadFileToStorage, UploadedFile } from "@/lib/utils/uploadFile";
+import { validatePostFile } from "@/lib/utils/postMedia";
 import { useRouter } from "next/navigation";
 import { Footer } from "../widgets";
 
@@ -50,7 +51,7 @@ const ParentCreatePostShareForm = ({
     (item: any) => ({
       _id: item._id,
       name: item.name,
-    })
+    }),
   );
 
   const countryOptions = (countryData?.response || []).map((item: any) => ({
@@ -61,6 +62,25 @@ const ParentCreatePostShareForm = ({
   const router = useRouter();
   const { user } = useUserContext();
   const [page, setPage] = useState(0);
+  const [processingMedia, setProcessingMedia] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState("Uploading Post");
+  const uploadedFiles = useRef(new WeakMap<File, UploadedFile>());
+
+  async function uploadPostFile(file: File, prefix: string, label: string) {
+    const cached = uploadedFiles.current.get(file);
+    if (cached) return cached;
+    setUploadStatus(label);
+    const result = await uploadFileToStorage(
+      file,
+      prefix,
+      user?.username,
+      (percent) => {
+        setUploadStatus(`${label}: ${percent}%`);
+      },
+    );
+    uploadedFiles.current.set(file, result);
+    return result;
+  }
   const [stateOptions, setStateOptions] = useState([]);
   const [subCategoryOptions, setSubCategoryOptions] = useState([]);
   const [skillOptions, setSkillOptions] = useState([]);
@@ -77,7 +97,7 @@ const ParentCreatePostShareForm = ({
         (res?.response || []).map((item: any) => ({
           _id: item._id,
           name: item.name,
-        }))
+        })),
       );
     } catch (error) {
       console.error(error);
@@ -116,7 +136,7 @@ const ParentCreatePostShareForm = ({
         (res?.response || []).map((item: any) => ({
           _id: item.state || item.name || item,
           name: item.state || item.name || item,
-        }))
+        })),
       );
     } catch (error) {
       console.error(error);
@@ -166,15 +186,15 @@ const ParentCreatePostShareForm = ({
   ] as const;
 
   const onInvalid = (
-    errors: FieldErrors<z.infer<typeof createPostShareValidation>>
+    errors: FieldErrors<z.infer<typeof createPostShareValidation>>,
   ) => {
     const hasPageOneErrors = PAGE_ONE_FIELDS.some(
-      (field) => errors[field] !== undefined
+      (field) => errors[field] !== undefined,
     );
 
     if (hasPageOneErrors) {
       toast.error(
-        "Please complete the required fields on page 1 before submitting."
+        "Please complete the required fields on page 1 before submitting.",
       );
     } else {
       toast.error("Please check the form for validation errors.");
@@ -182,105 +202,140 @@ const ParentCreatePostShareForm = ({
   };
 
   async function onSubmit(values: z.infer<typeof createPostShareValidation>) {
-    const formData = {
-      type: formType,
-      userId: user?.currentUserId,
-      media: [] as TPostShareMedia[],
-      website: formType === "POST" ? null : values.website,
-      shareLinkThumbnail: null as TShareLinkThumbnail | null,
-      about: {
-        title: values.title,
-        description: values.description,
-        mainCategoryId: values.mainCategory,
-        subCategoryId: values.subCategory,
-        skillId: values.skill,
-        level: values.skillLevel,
-        primaryLanguage: values.primaryLanguage,
-        secondaryLanguage: values.secondaryLanguage
-          ? values.secondaryLanguage
-          : null,
-        ownRating: values.ownRating,
-        keywords: values.keywords,
-        country: values.country,
-        state: values.state,
-        peopleTag: [] as any,
-        productionName: values.productionName,
-        productionDate: values.productionDate ? values.productionDate : null,
-      },
-      isCreditWork: values.isCreditWork === "true",
-      credit: [] as TCredit[],
-      toolsUsed: values.toolsUsed,
-    };
+    if (processingMedia) {
+      toast.error("Please finish selecting your media first.");
+      return;
+    }
+    if (formType === "POST" && values.media.length === 0) {
+      toast.error("Please add an image or video to your post.");
+      return;
+    }
+    try {
+      // Validate every item before starting any upload.
+      for (const item of values.media) {
+        validatePostFile(item.croppedData);
+        if (item.mediaType === "video" && !item.thumbnail)
+          throw new Error(
+            "Please select the video again to generate its thumbnail.",
+          );
+      }
+      const formData = {
+        type: formType,
+        userId: user?.currentUserId,
+        media: [] as TPostShareMedia[],
+        website: formType === "POST" ? null : values.website,
+        shareLinkThumbnail: null as TShareLinkThumbnail | null,
+        about: {
+          title: values.title,
+          description: values.description,
+          mainCategoryId: values.mainCategory,
+          subCategoryId: values.subCategory,
+          skillId: values.skill,
+          level: values.skillLevel,
+          primaryLanguage: values.primaryLanguage,
+          secondaryLanguage: values.secondaryLanguage
+            ? values.secondaryLanguage
+            : null,
+          ownRating: values.ownRating,
+          keywords: values.keywords,
+          country: values.country,
+          state: values.state,
+          peopleTag: [] as any,
+          productionName: values.productionName,
+          productionDate: values.productionDate ? values.productionDate : null,
+        },
+        isCreditWork: values.isCreditWork === "true",
+        credit: [] as TCredit[],
+        toolsUsed: values.toolsUsed,
+      };
 
-    console.log("form-data", formData, values.shareLinkThumbnail);
+      // Media upload
+      for (let i = 0; i < values.media.length; i++) {
+        const postShareMediaKey = await uploadPostFile(
+          values.media[i].croppedData,
+          formType === "POST" ? "POST" : "SHARELINK",
+          `Uploading file ${i + 1} of ${values.media.length}`,
+        );
+        const media: TPostShareMedia = {
+          mediaType: values.media[i].mediaType,
+          url: postShareMediaKey.url,
+          urlKey: postShareMediaKey.key,
+        };
+        if (values.media[i].mediaType === "video") {
+          const thumbnail = await uploadPostFile(
+            values.media[i].thumbnail!,
+            "POST-thumbnail",
+            `Uploading thumbnail ${i + 1}`,
+          );
+          media.thumbnailUrl = thumbnail.url;
+          media.thumbnailUrlkey = thumbnail.key;
+        }
+        formData.media.push(media);
+      }
 
-    // Media upload
-    for (let i = 0; i < values.media.length; i++) {
-      const postShareMediaKey = await uploadFileToStorage(
-        values.media[i].croppedData,
+      // People tags
+      for (const person of values.peopleTag) {
+        formData.about.peopleTag.push(person._id);
+      }
+
+      // Credit title and people tags
+      for (let i = 0; i < values.credit.length; i++) {
+        const creditPeopleTag = [];
+
+        for (let j = 0; j < values.credit[i].peopleTag.length; j++) {
+          const creditPeopleTags = values.credit[i].peopleTag[j]._id;
+          creditPeopleTag.push(creditPeopleTags);
+        }
+        const newCredit: any = {
+          creditTitle: values.credit[i].creditTitle,
+          peopleTag: creditPeopleTag,
+        };
+        formData.credit.push(newCredit);
+      }
+
+      // Share thumbnail upload
+      if (formType === "SHARELINK" && values.shareLinkThumbnail) {
+        const shareLinkThumbnailKey = await uploadPostFile(
+          values.shareLinkThumbnail,
+          "share",
+          "Uploading share thumbnail",
+        );
+
+        const shareLinkThumbnail = {
+          url: shareLinkThumbnailKey.url,
+          urlKey: shareLinkThumbnailKey.key,
+        };
+        formData.shareLinkThumbnail = shareLinkThumbnail;
+      }
+
+      setUploadStatus("Saving your post...");
+      const res = await createPostShareAction(
+        user.currentUserId,
+        formData,
         formType === "POST" ? "POST" : "SHARELINK",
-        user?.username
+        "/home",
       );
-      const media = {
-        mediaType: values.media[i].mediaType,
-        url: postShareMediaKey.url,
-        urlKey: postShareMediaKey.key,
-      };
-      formData.media.push(media);
-    }
-
-    // People tags
-    for (const person of values.peopleTag) {
-      formData.about.peopleTag.push(person._id);
-    }
-
-    // Credit title and people tags
-    for (let i = 0; i < values.credit.length; i++) {
-      const creditPeopleTag = [];
-
-      for (let j = 0; j < values.credit[i].peopleTag.length; j++) {
-        const creditPeopleTags = values.credit[i].peopleTag[j]._id;
-        creditPeopleTag.push(creditPeopleTags);
-      }
-      const newCredit: any = {
-        creditTitle: values.credit[i].creditTitle,
-        peopleTag: creditPeopleTag,
-      };
-      formData.credit.push(newCredit);
-    }
-
-    // Share thumbnail upload
-    if (formType === "SHARELINK" && values.shareLinkThumbnail) {
-      const shareLinkThumbnailKey = await uploadFileToStorage(
-        values.shareLinkThumbnail,
-        "share",
-        user?.username
-      );
-
-      const shareLinkThumbnail = {
-        url: shareLinkThumbnailKey.url,
-        urlKey: shareLinkThumbnailKey.key,
-      };
-      formData.shareLinkThumbnail = shareLinkThumbnail;
-    }
-
-    const res = await createPostShareAction(
-      user.currentUserId,
-      formData,
-      formType === "POST" ? "POST" : "SHARELINK",
-      "/home"
-    );
-    console.log("res", res);
-    if (res.status === "7400") {
-      if (formType === "POST") {
-        toast.success("Post created successfully", { duration: 4000 });
-        router.push("/home");
+      if (res?.status === "7400") {
+        if (formType === "POST") {
+          toast.success("Post created successfully", { duration: 4000 });
+          router.push("/home");
+        } else {
+          toast.success("Share created successfully", { duration: 4000 });
+          router.push("/home");
+        }
       } else {
-        toast.success("Share created successfully", { duration: 4000 });
-        router.push("/home");
+        toast.error(
+          res?.message || "Could not save your post. Please try again.",
+          { duration: 8000 },
+        );
       }
-    } else {
-      toast.error("Something went wrong", { duration: 4000 });
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Unable to upload your post. Please try again.",
+        { duration: 5000 },
+      );
     }
   }
 
@@ -317,9 +372,7 @@ const ParentCreatePostShareForm = ({
 
   return (
     <>
-      {form.formState.isSubmitting && (
-        <TransparentLoader text="Uploading Post" />
-      )}
+      {form.formState.isSubmitting && <TransparentLoader text={uploadStatus} />}
       <Form {...form}>
         <section className="flex w-full items-start justify-center gap-16">
           <form>
@@ -328,6 +381,7 @@ const ParentCreatePostShareForm = ({
               name="media"
               render={({ field }) => (
                 <MediaInput
+                  onProcessingChange={setProcessingMedia}
                   fieldChange={field.onChange}
                   values={form.getValues("media")}
                 />
@@ -352,7 +406,7 @@ const ParentCreatePostShareForm = ({
               {postForm.length - 1 === page ? (
                 <Button
                   type="submit"
-                  disabled={form.formState.isSubmitting}
+                  disabled={form.formState.isSubmitting || processingMedia}
                   onClick={form.handleSubmit(onSubmit, onInvalid)}
                   className="shad-button_primary"
                 >

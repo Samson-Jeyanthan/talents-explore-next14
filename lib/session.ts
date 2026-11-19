@@ -120,12 +120,12 @@ async function writeTokenCookies(tokens: TokenPair): Promise<void> {
   cookieStore.set(
     COOKIE_NAMES.accessToken,
     tokens.accessToken,
-    authCookieOptions
+    authCookieOptions,
   );
   cookieStore.set(
     COOKIE_NAMES.refreshToken,
     tokens.refreshToken,
-    authCookieOptions
+    authCookieOptions,
   );
 }
 
@@ -150,7 +150,7 @@ async function canWriteCookies(): Promise<boolean> {
 // with  Authorization: Bearer <access token>.  BACKEND_URL must already end with /api.
 async function doRefresh(
   refreshToken: string,
-  accessToken: string
+  accessToken: string,
 ): Promise<RefreshResult> {
   const endpoint =
     process.env.BACKEND_URL ?? process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -177,22 +177,16 @@ async function doRefresh(
       signal: AbortSignal.timeout(REFRESH_TIMEOUT_MS),
     });
 
-    console.log("--------------------------------------------------");
-    console.log("[session] refresh response", response);
-    console.log("--------------------------------------------------");
-
     // Read the body exactly once. Never log `response`: its url contains the refresh token.
     const body = (await response.json().catch(() => null)) as {
       message?: unknown;
     } | null;
 
-    console.log("[session] refresh tokens --189--session.ts--", body);
-
     if (!response.ok) {
       console.warn(
         "[session] refresh rejected",
         response.status,
-        body?.message
+        body?.message,
       );
       // The backend answers 500 {"message":"invalid_grant"} for a bad/used refresh token.
       const invalid =
@@ -202,13 +196,12 @@ async function doRefresh(
     }
 
     const tokens = getTokenPair(body);
-    console.log("[session] refresh tokens --203--session.ts--", tokens);
     return tokens ? { ok: true, ...tokens } : { ok: false, invalid: true };
   } catch (error) {
     // Network error or timeout: do not log the user out.
     console.error(
       "[session] refresh request failed:",
-      error instanceof Error ? error.name : "unknown"
+      error instanceof Error ? error.name : "unknown",
     );
     return { ok: false, invalid: false };
   }
@@ -225,7 +218,7 @@ const recentRefreshes = new Map<
 
 function refreshOnce(
   refreshToken: string,
-  accessToken: string
+  accessToken: string,
 ): Promise<RefreshResult> {
   const now = Date.now();
   for (const [key, entry] of Array.from(recentRefreshes.entries())) {
@@ -246,11 +239,11 @@ function refreshOnce(
 // Kept for existing imports. Pass accessToken when the caller cannot read cookies itself.
 export async function requestRefreshToken(
   refreshToken: string,
-  accessToken?: string
+  accessToken?: string,
 ): Promise<RefreshResult> {
   return refreshOnce(
     refreshToken,
-    accessToken ?? (await getStoredAccessToken())
+    accessToken ?? (await getStoredAccessToken()),
   );
 }
 
@@ -273,7 +266,7 @@ async function resolveAccessToken(): Promise<ResolvedToken> {
 
 export async function createSession(
   accessToken: string,
-  refreshToken: string
+  refreshToken: string,
 ): Promise<{ success: boolean }> {
   if (
     typeof accessToken !== "string" ||
@@ -362,7 +355,7 @@ export async function storeIsAbout(isAbout: boolean): Promise<void> {
   cookieStore.set(
     COOKIE_NAMES.isAbout,
     String(isAbout),
-    preferenceCookieOptions
+    preferenceCookieOptions,
   );
 }
 
