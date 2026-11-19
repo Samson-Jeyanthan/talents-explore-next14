@@ -8,11 +8,90 @@ import { getAuthHeaders } from "@/lib/session";
 import { getSession } from "./session.action";
 import { resolveViewerIdAction } from "./tokenAndHeaders.action";
 import { isRedirectError } from "next/dist/client/components/redirect";
+import { postUpdateValidation } from "@/lib/validations/postUpdate.validation";
+import { getPostType } from "@/lib/utils/postEditing";
 
 type TPostActionError = {
   status: number;
   message: string;
 };
+
+export async function updatePostAction(postId: string, payload: unknown) {
+  if (!/^[a-f\d]{24}$/i.test(postId))
+    return { status: "7404", message: "Invalid post." };
+  const parsed = postUpdateValidation.safeParse(payload);
+  if (!parsed.success)
+    return { status: "7401", message: parsed.error.issues[0].message };
+  try {
+    const viewerId = await resolveViewerIdAction();
+    const headers = await getAuthHeaders();
+    const originalResponse = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/${postId}/${viewerId}`,
+      {
+        headers,
+        cache: "no-store",
+        signal: AbortSignal.timeout(15000),
+      },
+    );
+    if (!originalResponse.ok)
+      return {
+        status: "7404",
+        message: "Unable to load this post. Please try again.",
+      };
+    const originalResult = await originalResponse.json();
+    const original =
+      originalResult?.status === "7400" ? originalResult.response : null;
+    if (!original?._id)
+      return {
+        status: "7404",
+        message: "Unable to load this post. Please try again.",
+      };
+    const authorId =
+      typeof original.author === "string"
+        ? original.author
+        : original.author?._id;
+    if (!viewerId || authorId !== viewerId)
+      return { status: "7403", message: "You can only edit your own posts." };
+    if (getPostType(original) !== parsed.data.type)
+      return { status: "7401", message: "The content type cannot be changed." };
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/te-post/${postId}`,
+      {
+        method: "PUT",
+        signal: AbortSignal.timeout(20000),
+        headers,
+        body: JSON.stringify({ ...parsed.data, userId: viewerId }),
+      },
+    );
+    const result = await response.json();
+    if (!response.ok || result?.status !== "7400") {
+      return {
+        status: "7401",
+        message:
+          typeof result?.message === "string"
+            ? result.message
+            : Array.isArray(result?.message)
+              ? result.message.join(". ")
+              : "Unable to save your changes. Please try again.",
+      };
+    }
+    revalidatePath("/home");
+    revalidatePath("/share-feed");
+    revalidatePath(`/post/${postId}`);
+    revalidatePath("/profile/[username]/[userId]", "layout");
+    revalidatePath("/category/[id]", "page");
+    revalidatePath("/explore", "layout");
+    revalidatePath("/saved-collection", "layout");
+    return { status: "7400", message: "Changes saved successfully." };
+  } catch (error) {
+    if (isRedirectError(error)) throw error;
+    return {
+      status: "7500",
+      message:
+        "Unable to save your changes. Your selected files have been kept for retry.",
+    };
+  }
+}
 
 /** Move a post/share to Recently Deleted. The backend authorizes ownership. */
 export async function deletePostAction(postId: string) {

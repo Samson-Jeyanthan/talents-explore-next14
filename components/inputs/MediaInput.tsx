@@ -367,7 +367,12 @@ const MediaInput = ({ fieldChange, values, onProcessingChange }: any) => {
             >
               <Image
                 className="relative z-[1] size-full rounded-lg object-cover"
-                src={media.thumbnailPreview || media.croppedPrev}
+                src={
+                  media.thumbnailPreview ||
+                  (media.mediaType === "video"
+                    ? "/assets/images/sample-post-img.jpg"
+                    : media.croppedPrev)
+                }
                 alt={`Image ${index}`}
                 width={500}
                 height={500}

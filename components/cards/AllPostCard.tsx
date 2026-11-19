@@ -101,6 +101,7 @@ function AllPostCard({ allPostCard, index }: Prop) {
 
       <div className="absolute right-2 top-2">
         <PostOptions
+          postType={allPostCard.website ? "SHARELINK" : "POST"}
           authorId={allPostCard.author._id}
           postId={allPostCard._id}
           isBestWork={isPinned}

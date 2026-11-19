@@ -62,7 +62,7 @@ const CreatePostAboutForm = ({
           form={form}
           inputName="description"
           placeholder={`${isPost ? "Add description to your work" : "Add description to share content"}`}
-          maxLength={1000}
+          maxLength={5000}
           className="h-80"
         />
 

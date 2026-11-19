@@ -1,5 +1,18 @@
 import * as z from "zod";
 
+export const savedPostMediaValidation = z.object({
+  mediaType: z.enum(["image", "video"]),
+  url: z.string().url(),
+  urlKey: z.string().nullish(),
+  thumbnailUrl: z.string().nullish(),
+  thumbnailUrlkey: z.string().nullish(),
+});
+
+export const savedThumbnailValidation = z.object({
+  url: z.string().url(),
+  urlKey: z.string().nullish(),
+});
+
 const optionalStringField = z.preprocess((value) => {
   if (value === "" || value === undefined) {
     return null;
@@ -21,7 +34,8 @@ export const createPostShareValidation = z.object({
   media: z.array(
     z.object({
       mediaType: z.enum(["image", "video"]),
-      croppedData: z.custom<File>(),
+      croppedData: z.custom<File>().optional(),
+      originalAsset: savedPostMediaValidation.optional(),
       croppedPrev: z.string().nullable(),
       thumbnail: z.custom<File>().optional(),
       thumbnailPreview: z.string().optional(),
@@ -76,5 +90,19 @@ export const createPostShareValidation = z.object({
   ),
   // sharelink
   website: z.string().optional(),
-  shareLinkThumbnail: z.custom<File>().optional(),
+  shareLinkThumbnail: z
+    .union([
+      z.custom<File>(
+        (value) => typeof File !== "undefined" && value instanceof File,
+      ),
+      savedThumbnailValidation,
+      z.string().url(),
+    ])
+    .nullish(),
+});
+
+// Existing mobile posts can have a short title or an empty description.
+export const editPostShareValidation = createPostShareValidation.extend({
+  title: z.string().trim().min(1, "Title is required").max(130),
+  description: z.string().max(5000),
 });

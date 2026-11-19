@@ -8,7 +8,11 @@ import { CreatePostAboutForm, CreatePostCreditForm } from "@/components/forms";
 import { TransparentLoader } from "@/components/modals";
 import { Button } from "@/components/ui/button";
 import { Form, FormField } from "@/components/ui/form";
-import { createPostShareValidation } from "@/lib/validations/post.validation";
+import {
+  createPostShareValidation,
+  editPostShareValidation,
+} from "@/lib/validations/post.validation";
+import { EditablePost, getPostEditValues } from "@/lib/utils/postEditing";
 import {
   getSkillsAction,
   getStatesAction,
@@ -16,7 +20,7 @@ import {
 } from "@/actions/utils.action";
 import { MediaInput } from "@/components/inputs";
 import { useUserContext } from "@/context/AuthProvider";
-import { createPostShareAction } from "@/actions/post.action";
+import { createPostShareAction, updatePostAction } from "@/actions/post.action";
 import { toast } from "sonner";
 import { TCredit, TPostShareMedia } from "@/types/post.types";
 import { uploadFileToStorage, UploadedFile } from "@/lib/utils/uploadFile";
@@ -29,19 +33,38 @@ interface Props {
   mainCategoryData: any;
   countryData: any;
   formType: "POST" | "SHARELINK";
+  initialPost?: EditablePost;
+  initialOptions?: { subcategories: any[]; skills: any[]; states: any[] };
 }
 
-type TShareLinkThumbnail = {
-  url: string;
-  urlKey: string;
-};
+type TShareLinkThumbnail =
+  | string
+  | {
+      url: string;
+      urlKey?: string | null;
+    };
 
 const ParentCreatePostShareForm = ({
   langData,
   mainCategoryData,
   countryData,
   formType,
+  initialPost,
+  initialOptions,
 }: Props) => {
+  const isEditing = Boolean(initialPost);
+  const validation = isEditing
+    ? editPostShareValidation
+    : createPostShareValidation;
+  const savedValues = initialPost ? getPostEditValues(initialPost) : undefined;
+  const withSavedOption = (
+    options: { _id: string; name: string }[],
+    value?: string | null,
+    label?: string,
+  ) =>
+    value && !options.some((option) => option._id === value)
+      ? [...options, { _id: value, name: label || value }]
+      : options;
   const LangOptions = (langData?.response || []).map((item: any) => ({
     _id: item._id,
     name: item.language,
@@ -81,9 +104,41 @@ const ParentCreatePostShareForm = ({
     uploadedFiles.current.set(file, result);
     return result;
   }
-  const [stateOptions, setStateOptions] = useState([]);
-  const [subCategoryOptions, setSubCategoryOptions] = useState([]);
-  const [skillOptions, setSkillOptions] = useState([]);
+  const [stateOptions, setStateOptions] = useState<
+    { _id: string; name: string }[]
+  >(
+    withSavedOption(
+      (initialOptions?.states || []).map((item) => ({
+        _id: item.state || item.name || item,
+        name: item.state || item.name || item,
+      })),
+      savedValues?.state,
+    ),
+  );
+  const [subCategoryOptions, setSubCategoryOptions] = useState<
+    { _id: string; name: string }[]
+  >(
+    withSavedOption(
+      (initialOptions?.subcategories || []).map((item) => ({
+        _id: item._id,
+        name: item.name,
+      })),
+      savedValues?.subCategory,
+      initialPost?.about?.subCategory,
+    ),
+  );
+  const [skillOptions, setSkillOptions] = useState<
+    { _id: string; name: string }[]
+  >(
+    withSavedOption(
+      (initialOptions?.skills || []).map((item) => ({
+        _id: item._id,
+        name: item.name || item.skill,
+      })),
+      savedValues?.skill,
+      initialPost?.about?.skill,
+    ),
+  );
 
   async function fetchSubcategories(mainCategory: string) {
     form.resetField("subCategory");
@@ -145,7 +200,7 @@ const ParentCreatePostShareForm = ({
   }
 
   const form = useForm<z.infer<typeof createPostShareValidation>>({
-    resolver: zodResolver(createPostShareValidation),
+    resolver: zodResolver(validation),
     defaultValues: {
       media: [],
       title: "",
@@ -170,6 +225,7 @@ const ParentCreatePostShareForm = ({
       // share form section
       website: "",
       shareLinkThumbnail: undefined,
+      ...savedValues,
     },
   });
 
@@ -193,6 +249,7 @@ const ParentCreatePostShareForm = ({
     );
 
     if (hasPageOneErrors) {
+      setPage(0);
       toast.error(
         "Please complete the required fields on page 1 before submitting.",
       );
@@ -211,8 +268,33 @@ const ParentCreatePostShareForm = ({
       return;
     }
     try {
+      let website = values.website?.trim() || "";
+      if (formType === "SHARELINK") {
+        if (!/^https?:\/\//i.test(website)) website = `https://${website}`;
+        try {
+          if (
+            !["http:", "https:"].includes(new URL(website).protocol) ||
+            !new URL(website).hostname.includes(".")
+          )
+            throw new Error();
+        } catch {
+          setPage(0);
+          form.setError("website", {
+            message: "Please enter a valid website link.",
+          });
+          return;
+        }
+        if (!values.shareLinkThumbnail) {
+          setPage(0);
+          toast.error("Please choose a thumbnail for this link.");
+          return;
+        }
+      }
       // Validate every item before starting any upload.
       for (const item of values.media) {
+        if (item.originalAsset) continue;
+        if (!item.croppedData)
+          throw new Error("Please select the media file again.");
         validatePostFile(item.croppedData);
         if (item.mediaType === "video" && !item.thumbnail)
           throw new Error(
@@ -223,8 +305,11 @@ const ParentCreatePostShareForm = ({
         type: formType,
         userId: user?.currentUserId,
         media: [] as TPostShareMedia[],
-        website: formType === "POST" ? null : values.website,
-        shareLinkThumbnail: null as TShareLinkThumbnail | null,
+        website: formType === "POST" ? null : website,
+        shareLinkThumbnail: (values.shareLinkThumbnail &&
+        !(values.shareLinkThumbnail instanceof File)
+          ? values.shareLinkThumbnail
+          : null) as TShareLinkThumbnail | null,
         about: {
           title: values.title,
           description: values.description,
@@ -251,8 +336,13 @@ const ParentCreatePostShareForm = ({
 
       // Media upload
       for (let i = 0; i < values.media.length; i++) {
+        const retained = values.media[i].originalAsset;
+        if (retained) {
+          formData.media.push(retained);
+          continue;
+        }
         const postShareMediaKey = await uploadPostFile(
-          values.media[i].croppedData,
+          values.media[i].croppedData!,
           formType === "POST" ? "POST" : "SHARELINK",
           `Uploading file ${i + 1} of ${values.media.length}`,
         );
@@ -294,7 +384,10 @@ const ParentCreatePostShareForm = ({
       }
 
       // Share thumbnail upload
-      if (formType === "SHARELINK" && values.shareLinkThumbnail) {
+      if (
+        formType === "SHARELINK" &&
+        values.shareLinkThumbnail instanceof File
+      ) {
         const shareLinkThumbnailKey = await uploadPostFile(
           values.shareLinkThumbnail,
           "share",
@@ -309,13 +402,22 @@ const ParentCreatePostShareForm = ({
       }
 
       setUploadStatus("Saving your post...");
-      const res = await createPostShareAction(
-        user.currentUserId,
-        formData,
-        formType === "POST" ? "POST" : "SHARELINK",
-        "/home",
-      );
+      if (!formData.isCreditWork) formData.credit = [];
+      const res = initialPost
+        ? await updatePostAction(initialPost._id, formData)
+        : await createPostShareAction(
+            user.currentUserId,
+            formData,
+            formType === "POST" ? "POST" : "SHARELINK",
+            "/home",
+          );
       if (res?.status === "7400") {
+        if (initialPost) {
+          toast.success("Changes saved successfully.");
+          router.push(`/post/${initialPost._id}`);
+          router.refresh();
+          return;
+        }
         if (formType === "POST") {
           toast.success("Post created successfully", { duration: 4000 });
           router.push("/home");
@@ -352,9 +454,21 @@ const ParentCreatePostShareForm = ({
       form: (
         <CreatePostAboutForm
           form={form}
-          langData={LangOptions}
-          mainCategoryOptions={mainCategoryOptions}
-          countryOptions={countryOptions}
+          langData={withSavedOption(
+            withSavedOption(
+              LangOptions,
+              savedValues?.primaryLanguage,
+              initialPost?.about?.primaryLanguage,
+            ),
+            savedValues?.secondaryLanguage,
+            initialPost?.about?.secondaryLanguage,
+          )}
+          mainCategoryOptions={withSavedOption(
+            mainCategoryOptions,
+            savedValues?.mainCategory,
+            initialPost?.about?.mainCategory,
+          )}
+          countryOptions={withSavedOption(countryOptions, savedValues?.country)}
           fetchStates={fetchStates}
           stateOptions={stateOptions}
           fetchSubcategories={fetchSubcategories}
@@ -391,7 +505,13 @@ const ParentCreatePostShareForm = ({
           <div className="flex w-full max-w-2xl flex-col gap-6">
             <header className="flex-between text-light-850">
               <h1 className="text-3xl font-semibold">
-                {formType === "POST" ? "Create Post" : "Share Content"}
+                {isEditing
+                  ? formType === "POST"
+                    ? "Edit Post"
+                    : "Edit Shared Content"
+                  : formType === "POST"
+                    ? "Create Post"
+                    : "Share Content"}
               </h1>
               <div className="flex items-center gap-2 rounded-md bg-dark-300 px-3 py-1.5">
                 Step
@@ -410,7 +530,11 @@ const ParentCreatePostShareForm = ({
                   onClick={form.handleSubmit(onSubmit, onInvalid)}
                   className="shad-button_primary"
                 >
-                  {formType === "POST" ? "Upload Post" : "Upload Share"}
+                  {isEditing
+                    ? "Save changes"
+                    : formType === "POST"
+                      ? "Upload Post"
+                      : "Upload Share"}
                 </Button>
               ) : (
                 <Button
@@ -428,6 +552,16 @@ const ParentCreatePostShareForm = ({
                   className="shad-button_secondary"
                 >
                   Back
+                </Button>
+              )}
+              {initialPost && (
+                <Button
+                  type="button"
+                  className="shad-button_secondary"
+                  disabled={form.formState.isSubmitting}
+                  onClick={() => router.push(`/post/${initialPost._id}`)}
+                >
+                  Cancel
                 </Button>
               )}
             </footer>

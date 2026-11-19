@@ -1,19 +1,8 @@
-import { getPostByIdAction } from "@/actions/post.action";
-// import { getSession } from "@/lib/session";
-import { getSession } from "@/actions/session.action";
-import { TPostProps } from "@/types/post.types";
-import NotFound from "../../[id]/not-found";
+import PostEditorPage from "@/components/forms/PostEditorPage";
 
-const PostEdit = async ({ params }: { params: { id: string } }) => {
-  const session = await getSession();
-  const userId = session || "no_user";
-  const data: TPostProps = await getPostByIdAction(params.id, userId);
-
-  if (data?.status === 400) {
-    return <NotFound />;
-  }
-
-  return <div>Edit Post</div>;
+export const dynamic = "force-dynamic";
+const PostEdit = ({ params }: { params: { id: string } }) => {
+  return <PostEditorPage id={params.id} expectedType="POST" />;
 };
 
 export default PostEdit;

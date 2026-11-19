@@ -239,7 +239,7 @@ export interface ISavedItem {
 export type TPostShareMedia = {
   mediaType: string;
   url: string;
-  urlKey: string;
+  urlKey?: string | null;
   thumbnailUrl?: string | null;
   thumbnailUrlkey?: string | null;
 };

@@ -94,6 +94,10 @@ const PostOptions = ({
         );
         setIsPinned(true);
       }
+    } else if (id === 2 && isOwnPost) {
+      router.push(
+        `/${postType === "SHARELINK" ? "share" : "post"}/edit/${postId}`,
+      );
     } else if (id === 3 && isOwnPost) {
       setDeleteError("");
       setConfirmDelete(true);
@@ -139,7 +143,9 @@ const PostOptions = ({
                           ? isPinned
                             ? "Remove Pin"
                             : "Pin on Profile"
-                          : item.name}
+                          : item.id === 2 && postType === "SHARELINK"
+                            ? "Edit Shared Content"
+                            : item.name}
                       </p>
                     </MenubarItem>
                   )}

@@ -70,6 +70,7 @@ const PostCard = ({ postFeedCard, index }: Props) => {
           </div>
 
           <PostOptions
+            postType={postFeedCard.website ? "SHARELINK" : "POST"}
             authorId={postFeedCard.author._id}
             isBestWork={postFeedCard.isBestWork}
             postId={postFeedCard._id}

@@ -11,6 +11,7 @@ import React from "react";
 import { FaLocationDot } from "react-icons/fa6";
 import { IoCalendar } from "react-icons/io5";
 import { getProfileVisibilityState } from "@/lib/utils/profilePrivacy";
+import { getPostType } from "@/lib/utils/postEditing";
 
 type Props = {
   postData: TPostProps;
@@ -38,6 +39,7 @@ const PostInfoHeader = ({ postData }: Props) => {
           <PostUtilsButton buttonFor="SHARE" className="p-3" />
           {author?._id ? (
             <PostOptions
+              postType={getPostType(postData)}
               authorId={author._id}
               postId={postData._id}
               isBestWork={postData.isBestWork}
