@@ -11,6 +11,7 @@ import {
   TextArea,
 } from "../inputs";
 import { FormField, FormMessage } from "../ui/form";
+import ProfileLocation from "../inputs/ProfileLocation";
 
 const EditPersonalInfoForm = ({
   form,
@@ -59,6 +60,8 @@ const EditPersonalInfoForm = ({
             placeholder="Doe"
           />
         </div>
+
+        <ProfileLocation form={form} />
 
         <CheckboxInput
           form={form}

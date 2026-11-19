@@ -76,6 +76,9 @@ export const educationValidation = z.object({
 //   );
 
 const baseObjectSchema = z.object({
+  location: z.string(),
+  latitude: z.number().finite().min(-90).max(90).optional(),
+  longitude: z.number().finite().min(-180).max(180).optional(),
   firstName: z.string().min(1, { message: "First name is required" }).trim(),
   lastName: z.string().min(1, { message: "Last name is required" }).trim(),
   knownLanguage: z.string().min(1, { message: "Known Language is required" }),

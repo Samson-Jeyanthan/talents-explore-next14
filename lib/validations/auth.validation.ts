@@ -1,4 +1,5 @@
 import * as z from "zod";
+import { profileLocationSchema } from "../utils/profileLocation";
 import { formatISOStringDate } from "../hooks/useDateSelector";
 
 export const SignupValidation = z.object({
@@ -61,6 +62,7 @@ export const ResetPasswordValidation = z
 
 export const CompleteProfileValidation = z
   .object({
+    ...profileLocationSchema.shape,
     firstName: z.string().min(1, { message: "First name is required" }).trim(),
     lastName: z.string().min(1, { message: "Last name is required" }).trim(),
     gender: z.string().min(1, { message: "Gender is required" }),

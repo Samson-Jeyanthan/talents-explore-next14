@@ -1,4 +1,7 @@
 export type TCurrentUserData = {
+  latitude?: number | string | null;
+  longitude?: number | string | null;
+  gpsLocation?: { coordinates?: (number | string)[] };
   _id: string;
   isTalent: boolean;
   privacy?: Record<string, any>;

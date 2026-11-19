@@ -15,6 +15,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { getProfileLocationValues, getProfileLocationUpdate } from "@/lib/utils/profileLocation";
 
 type Props = {
   langData: any;
@@ -44,6 +45,7 @@ const EditProfileForm = ({ langData, professionData, userData }: Props) => {
   const form = useForm<z.infer<typeof validationSchema>>({
     resolver: zodResolver(validationSchema),
     defaultValues: {
+      ...getProfileLocationValues(userData),
       firstName: userData?.personalInfo.firstName || "",
       lastName: userData?.personalInfo.lastName || "",
       knownLanguage: userData?.personalInfo.languageKnown || "",
@@ -67,6 +69,13 @@ const EditProfileForm = ({ langData, professionData, userData }: Props) => {
   };
 
   async function onSubmit(values: z.infer<typeof validationSchema>) {
+    let locationUpdate;
+    try {
+      locationUpdate = getProfileLocationUpdate(userData, values);
+    } catch {
+      form.setError("location", { message: "Please select a valid location." });
+      return;
+    }
     console.log(values);
     // personal information form data
     let profileImageKey: any;
@@ -91,6 +100,7 @@ const EditProfileForm = ({ langData, professionData, userData }: Props) => {
     }
 
     const personalInfo = {
+      ...locationUpdate,
       firstName: values.firstName,
       lastName: values.lastName,
       dob: values.dob,

@@ -22,6 +22,7 @@ import { useRouter } from "next/navigation";
 import { useUserContext } from "@/context/AuthProvider";
 import { TransparentLoader } from "../modals";
 import { uploadFileToStorage } from "@/lib/utils/uploadFile";
+import ProfileLocation from "../inputs/ProfileLocation";
 
 const CompleteProfileForm = ({ langData, professionData }: any) => {
   const { user, setUser } = useUserContext();
@@ -39,6 +40,7 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
   const form = useForm<z.infer<typeof CompleteProfileValidation>>({
     resolver: zodResolver(CompleteProfileValidation),
     defaultValues: {
+      location: "",
       firstName: "",
       lastName: "",
       knownLanguage: "",
@@ -86,9 +88,9 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
       coverImage: coverImageKey && coverImageKey.url,
       shortBio: values.quotes,
       professional: values.profession,
-      location: "trincomalee, srilanka",
-      latitude: 8.5668,
-      longitude: 81.2253,
+      location: values.location,
+      latitude: values.latitude,
+      longitude: values.longitude,
     };
     console.log(formData, "formData");
 
@@ -96,7 +98,7 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
 
     console.log(res, "res");
 
-    if (res.status === "7400") {
+    if (res?.status === "7400") {
       setUser({
         currentUserId: user.currentUserId,
         firstName: formData.firstName,
@@ -171,6 +173,8 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
                 {user.email}
               </div>
             </div>
+
+            <ProfileLocation form={form} />
 
             <CheckboxInput
               form={form}
