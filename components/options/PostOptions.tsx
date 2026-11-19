@@ -19,6 +19,7 @@ import { BsThreeDotsVertical } from "react-icons/bs";
 import { deletePostAction } from "@/actions/post.action";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
+import ReportDialog from "@/components/modals/ReportDialog";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -53,6 +54,7 @@ const PostOptions = ({
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
+  const [reportOpen, setReportOpen] = useState(false);
 
   const handleDelete = async () => {
     if (deleting || !isOwnPost) return;
@@ -101,6 +103,8 @@ const PostOptions = ({
     } else if (id === 3 && isOwnPost) {
       setDeleteError("");
       setConfirmDelete(true);
+    } else if (id === 5 && !isOwnPost && user?.currentUserId) {
+      setReportOpen(true);
     } else if (id === 1 || id === 4) {
       const linkToCopy = process.env.NEXT_PUBLIC_DOMAIN_URL + "/post/" + postId;
       getLinkCopied(linkToCopy);
@@ -186,6 +190,15 @@ const PostOptions = ({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <ReportDialog
+        open={reportOpen}
+        onOpenChange={setReportOpen}
+        targetType="post"
+        targetId={postId}
+        title={
+          postType === "SHARELINK" ? "Report shared content" : "Report post"
+        }
+      />
     </>
   );
 };

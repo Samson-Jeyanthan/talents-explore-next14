@@ -10,7 +10,8 @@ import {
 import { PROFILE_OPTIONS } from "@/constants";
 import { useUserContext } from "@/context/AuthProvider";
 import { getLinkCopied } from "@/lib/utils";
-import React from "react";
+import React, { useState } from "react";
+import ReportDialog from "@/components/modals/ReportDialog";
 import { BsThreeDotsVertical } from "react-icons/bs";
 
 type Prop = {
@@ -21,6 +22,7 @@ type Prop = {
 const ProfileOptions = ({ profileOwnerId, userName }: Prop) => {
   const { user } = useUserContext();
   const isOwnProfile = profileOwnerId === user?.currentUserId;
+  const [reportOpen, setReportOpen] = useState(false);
 
   const handleProfileOptionClick = (id: number) => {
     if (id === 0) {
@@ -31,36 +33,50 @@ const ProfileOptions = ({ profileOwnerId, userName }: Prop) => {
         "/" +
         profileOwnerId;
       getLinkCopied(linkToCopy);
+    } else if (id === 1 && !isOwnProfile && user?.currentUserId) {
+      setReportOpen(true);
     }
   };
 
   return (
-    <Menubar className="relative !h-10 !w-10 rounded-full border-none bg-dark-300 p-3">
-      <MenubarMenu>
-        <MenubarTrigger className="mr-2 size-full cursor-pointer rounded-lg text-lg text-light-800 hover:text-light-900">
-          <BsThreeDotsVertical />
-        </MenubarTrigger>
-        <MenubarContent className="absolute -right-5 min-w-36 gap-10 rounded-lg border border-solid border-dark-400 bg-dark-300 p-2 shadow-xl shadow-dark-100/25">
-          {PROFILE_OPTIONS.map((item, index) => (
-            <React.Fragment key={index}>
-              {isOwnProfile === item.isOwnProfile && (
-                <MenubarItem
-                  className={`${item.isRed ? "fill-custom-200 text-custom-200" : "fill-light-600 text-light-600"} w-full cursor-pointer gap-3 rounded bg-dark-300 text-base hover:bg-dark-400 hover:fill-light-900 hover:text-light-900`}
-                  onClick={() => handleProfileOptionClick(item.id)}
-                >
-                  {item.height ? (
-                    <item.icon height={item.height} width={item.height} />
-                  ) : (
-                    <item.icon />
-                  )}
-                  <p className="text-xs">{item.name}</p>
-                </MenubarItem>
-              )}
-            </React.Fragment>
-          ))}
-        </MenubarContent>
-      </MenubarMenu>
-    </Menubar>
+    <>
+      <Menubar className="relative !h-10 !w-10 rounded-full border-none bg-dark-300 p-3">
+        <MenubarMenu>
+          <MenubarTrigger
+            aria-label="Profile options"
+            className="mr-2 size-full cursor-pointer rounded-lg text-lg text-light-800 hover:text-light-900"
+          >
+            <BsThreeDotsVertical />
+          </MenubarTrigger>
+          <MenubarContent className="absolute -right-5 min-w-36 gap-10 rounded-lg border border-solid border-dark-400 bg-dark-300 p-2 shadow-xl shadow-dark-100/25">
+            {PROFILE_OPTIONS.map((item, index) => (
+              <React.Fragment key={index}>
+                {isOwnProfile === item.isOwnProfile && (
+                  <MenubarItem
+                    className={`${item.isRed ? "fill-custom-200 text-custom-200" : "fill-light-600 text-light-600"} w-full cursor-pointer gap-3 rounded bg-dark-300 text-base hover:bg-dark-400 hover:fill-light-900 hover:text-light-900`}
+                    onClick={() => handleProfileOptionClick(item.id)}
+                  >
+                    {item.height ? (
+                      <item.icon height={item.height} width={item.height} />
+                    ) : (
+                      <item.icon />
+                    )}
+                    <p className="text-xs">{item.name}</p>
+                  </MenubarItem>
+                )}
+              </React.Fragment>
+            ))}
+          </MenubarContent>
+        </MenubarMenu>
+      </Menubar>
+      <ReportDialog
+        open={reportOpen}
+        onOpenChange={setReportOpen}
+        targetType="profile"
+        targetId={profileOwnerId}
+        title="Report profile"
+      />
+    </>
   );
 };
 

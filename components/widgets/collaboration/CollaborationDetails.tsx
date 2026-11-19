@@ -41,6 +41,7 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import Image from "next/image";
+import ReportDialog from "@/components/modals/ReportDialog";
 
 type Props = {
   collaborationId: string;
@@ -69,7 +70,7 @@ function getDuration(details: any) {
 
   if (collaboration?.expectedStartDate && collaboration?.expectedEndDate) {
     return `${formatDate(collaboration.expectedStartDate)} - ${formatDate(
-      collaboration.expectedEndDate
+      collaboration.expectedEndDate,
     )}`;
   }
 
@@ -83,7 +84,7 @@ function getTimelineLabel(role: any) {
 
   if (role?.timeLineType === "BY_DATE") {
     return `${formatDate(role?.timeLine?.[0]?.startDate)} - ${formatDate(
-      role?.timeLine?.[0]?.endDate
+      role?.timeLine?.[0]?.endDate,
     )}`;
   }
 
@@ -102,6 +103,7 @@ function CollaborationDetails({
   const [details, setDetails] = useState(initialDetails);
   const [selectedRole, setSelectedRole] = useState<any>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [applyForm, setApplyForm] = useState({
     applicantName: "",
@@ -137,7 +139,7 @@ function CollaborationDetails({
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(
-        `${window.location.origin}/collaboration/${collaborationId}`
+        `${window.location.origin}/collaboration/${collaborationId}`,
       );
       toast.success("Collaboration link copied");
     } catch {
@@ -239,6 +241,15 @@ function CollaborationDetails({
                 <Copy className="mr-2 size-4" />
                 Copy Link
               </Button>
+              {!isOwner && currentUser?._id && (
+                <Button
+                  type="button"
+                  className="rounded-full bg-dark-200 text-light-900 hover:bg-dark-300"
+                  onClick={() => setReportOpen(true)}
+                >
+                  Report collaboration
+                </Button>
+              )}
               {isOwner ? (
                 <>
                   <Link href={`/collaboration/edit/${collaborationId}`}>
@@ -686,6 +697,13 @@ function CollaborationDetails({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <ReportDialog
+        open={reportOpen}
+        onOpenChange={setReportOpen}
+        targetType="collaboration"
+        targetId={collaborationId}
+        title="Report collaboration"
+      />
     </>
   );
 }
