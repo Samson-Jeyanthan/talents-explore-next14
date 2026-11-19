@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { toast } from "sonner";
+import { newPasswordValidation } from "@/lib/validations/password.validation";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -765,6 +766,12 @@ function SettingsScreen({
   const handleChangePassword = () => {
     if (!oldPassword || !newPassword || !confirmPassword) {
       toast.error("Please fill all password fields", { duration: 3000 });
+      return;
+    }
+
+    const passwordResult = newPasswordValidation.safeParse(newPassword);
+    if (!passwordResult.success) {
+      toast.error(passwordResult.error.issues[0].message, { duration: 4000 });
       return;
     }
 

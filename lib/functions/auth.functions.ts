@@ -21,6 +21,7 @@ export async function handleClearStorage() {
   localStorage.removeItem("isOTP");
   localStorage.removeItem("verifiedEmail");
   localStorage.removeItem("registerUserId");
+  localStorage.removeItem("resetpassword");
 }
 
 // signup otp function
@@ -87,8 +88,7 @@ export async function handleVerifyForgotPasswordOtp(
   { setIsOpen }: TOTPProps
 ) {
   const res = await verifyForgotPasswordAction(formData);
-  console.log(res);
-  if (res?.status === "7400") {
+  if (res?.status === "7400" && typeof res.response === "string" && res.response.trim()) {
     toast.success("Credentials Verified");
     if (setIsOpen) {
       setIsOpen((prevState: any) => ({
@@ -97,7 +97,6 @@ export async function handleVerifyForgotPasswordOtp(
         isReset: true,
       }));
     }
-    localStorage.setItem("resetpassword", "true");
     localStorage.removeItem("countdown");
     localStorage.removeItem("isOTP");
     return res?.response;

@@ -17,6 +17,7 @@ export type TOTPProps = {
   userId: string;
   isSignup?: boolean;
   setVerifiedUserId?: (verifiedUserId: string) => void;
+  setVerifiedOtp?: (otp: string) => void;
   setError?: (error: string) => void;
   setIsOpen?: React.Dispatch<React.SetStateAction<IsOpenState>>;
 };
@@ -30,7 +31,7 @@ export type TVerifyOTPProps = {
 
 export type TVerifyForgotPasswordOtpProps = {
   email: string;
-  otp: number;
+  otp: string;
 };
 
 export type ICurrentUser = {

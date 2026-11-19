@@ -21,8 +21,10 @@ import { handleClearStorage } from "@/lib/functions/auth.functions";
 
 const ResetPassword = ({
   verifiedUserId,
+  verifiedOtp,
 }: {
   verifiedUserId: string | undefined;
+  verifiedOtp: string;
 }) => {
   const router = useRouter();
   const form = useForm<z.infer<typeof ResetPasswordValidation>>({
@@ -34,17 +36,18 @@ const ResetPassword = ({
   });
 
   async function onSubmit(values: z.infer<typeof ResetPasswordValidation>) {
-    console.log(values);
     const formData = {
       userId: verifiedUserId,
+      otp: verifiedOtp,
       newPassword: values.password,
     };
     const res = await resetPasswordAction(formData);
-    if (res) {
+    if (res.status === true) {
+      await handleClearStorage();
       toast.success("Password Has Reset Successfully", { duration: 5000 });
       router.push("/sign-in");
     } else {
-      toast.error("Couldn't Reset Your Password", { duration: 5000 });
+      toast.error(res.message, { duration: 5000 });
     }
   }
 

@@ -1,6 +1,7 @@
 "use server";
 
 import axiosInstance from "@/lib/config/axiosInstance";
+import { resetPasswordRequestValidation } from "@/lib/validations/password.validation";
 import { createSession, getAuthHeaders, getRefreshToken } from "@/lib/session";
 import { clearSession, getSession, storeIsAbout } from "./session.action";
 
@@ -140,12 +141,10 @@ export async function signinAction(formData: unknown) {
 
 export async function forgotPasswordAction(email: string) {
   try {
-    console.log(email, "email");
-    const response = await axiosInstance.post(`/auth/forgotPassword/${email}`);
+    const response = await axiosInstance.post(`/auth/forgotPassword/${encodeURIComponent(email)}`);
     return response.data;
   } catch (error) {
-    console.error(error);
-    return error;
+    return { status: "ERROR", message: "Unable to send a verification code. Please try again." };
   }
 }
 
@@ -157,14 +156,15 @@ export async function verifyForgotPasswordAction(formData: unknown) {
     );
     return response.data;
   } catch (error) {
-    console.error(error);
-    return error;
+    return { status: "ERROR", message: "Unable to verify your code. Please try again." };
   }
 }
 
-// TODO: Function not working properly. Bad Request, need to check backend
-
 export async function resetPasswordAction(formData: unknown) {
+  const parsed = resetPasswordRequestValidation.safeParse(formData);
+  if (!parsed.success) {
+    return { status: false, message: "Please verify your OTP and enter a valid new password." };
+  }
   try {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/resetPassword`,
@@ -173,24 +173,21 @@ export async function resetPasswordAction(formData: unknown) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(parsed.data),
+        signal: AbortSignal.timeout(15000),
       }
     );
 
-    console.log(await response.json());
-
-    if (!response.ok) {
-      return {
-        status: false,
-      };
-    } else {
-      return {
-        status: true,
-      };
+    const result = await response.json();
+    if (response.ok && result?.status === "7400") {
+      return { status: true, message: "Password reset successfully." };
     }
-  } catch (error) {
-    console.error(error);
-    return error;
+    return {
+      status: false,
+      message: typeof result?.message === "string" ? result.message : "Unable to reset your password. Please verify your OTP and try again.",
+    };
+  } catch {
+    return { status: false, message: "Unable to reset your password. Please try again." };
   }
 }
 

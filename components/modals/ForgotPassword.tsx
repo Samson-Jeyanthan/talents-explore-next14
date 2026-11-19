@@ -30,6 +30,7 @@ const ForgotPassword = () => {
     isReset: false,
   });
   const [verifiedUserId, setVerifiedUserId] = useState<string>("");
+  const [verifiedOtp, setVerifiedOtp] = useState("");
   const [error, setError] = useState<string | null>(null);
   const form = useForm<z.infer<typeof ForgotPasswordValidation>>({
     resolver: zodResolver(ForgotPasswordValidation),
@@ -62,6 +63,8 @@ const ForgotPassword = () => {
   }, []);
 
   async function onSubmit(values: z.infer<typeof ForgotPasswordValidation>) {
+    setVerifiedUserId("");
+    setVerifiedOtp("");
     const email = values.email;
     const response = await handleForgotPassword(email, {
       userId: "",
@@ -131,13 +134,14 @@ const ForgotPassword = () => {
             isSignup={false}
             setIsOpen={setIsOpen}
             setVerifiedUserId={setVerifiedUserId}
+            setVerifiedOtp={setVerifiedOtp}
           />
         </Dialog>
       ) : null}
 
       {isOpen.isReset ? (
         <Dialog open={isOpen.isReset}>
-          <ResetPasswordModal verifiedUserId={verifiedUserId} />
+          <ResetPasswordModal verifiedUserId={verifiedUserId} verifiedOtp={verifiedOtp} />
         </Dialog>
       ) : null}
     </>

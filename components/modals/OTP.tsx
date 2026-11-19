@@ -23,7 +23,7 @@ import {
   handleVerifyForgotPasswordOtp,
 } from "@/lib/functions/auth.functions";
 
-const OTP = ({ userId, isSignup, setIsOpen, setVerifiedUserId }: TOTPProps) => {
+const OTP = ({ userId, isSignup, setIsOpen, setVerifiedUserId, setVerifiedOtp }: TOTPProps) => {
   const router = useRouter();
   const [value, setValue] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
@@ -45,21 +45,25 @@ const OTP = ({ userId, isSignup, setIsOpen, setVerifiedUserId }: TOTPProps) => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    console.log(value, userId, "otp-val-userid");
     setIsSubmitting(true);
     if (value.length === 0) {
       setError("OTP Verification Code is Required");
       setIsSubmitting(false);
-    } else if (value.length !== 6) {
+    } else if (!/^\d{6}$/.test(value)) {
       setError("OTP Verification Code must be 6 digits");
       setIsSubmitting(false);
     } else {
       setError(null);
-      if (!isSignup && verifiedEmail) {
+      if (!isSignup) {
+        if (!verifiedEmail) {
+          setError("Please request a new verification code for your email.");
+          setIsSubmitting(false);
+          return;
+        }
         // forgot password otp
         const verifyOtpEmailData = {
           email: verifiedEmail,
-          otp: parseInt(value),
+          otp: value,
         };
         const response = await handleVerifyForgotPasswordOtp(
           verifyOtpEmailData,
@@ -68,6 +72,7 @@ const OTP = ({ userId, isSignup, setIsOpen, setVerifiedUserId }: TOTPProps) => {
         // parse the verified id prop to reset password modal
         if (setVerifiedUserId && response) {
           setVerifiedUserId(response);
+          setVerifiedOtp?.(value);
         }
         if (!response) {
           setError("Invalid OTP");
