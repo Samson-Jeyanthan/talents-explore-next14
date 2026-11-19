@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import SettingsScreen from "@/components/widgets/settings/SettingsScreen";
 // import { getSession } from "@/lib/session";
 import {
@@ -6,7 +5,7 @@ import {
   getNotificationSettingsAction,
   getPrivacySettingsAction,
 } from "@/actions/settings.action";
-import { getSession } from "@/actions/session.action";
+import { getAuthHeaders } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
@@ -17,11 +16,10 @@ type Props = {
 };
 
 export default async function SettingsPage({ params }: Props) {
-  const session = await getSession();
-
-  if (!session) {
-    redirect("/sign-in");
-  }
+  // A page render cannot write rotated cookies. Resolve freshness through the
+  // refresh route before passing an access token to any settings API request.
+  const authHeaders = await getAuthHeaders();
+  const session = authHeaders.Authorization.slice("Bearer ".length);
 
   const slugPath = params?.slug?.join("/") || "";
   const isRequestRoute =
@@ -34,7 +32,7 @@ export default async function SettingsPage({ params }: Props) {
     : await getCurrentSettingsUserAction();
 
   if (!isRequestRoute && !currentUser?._id) {
-    redirect("/sign-in");
+    throw new Error("Unable to load your settings. Please try again.");
   }
 
   const shouldLoadPrivacy = slugPath === "" || slugPath.startsWith("privacy");

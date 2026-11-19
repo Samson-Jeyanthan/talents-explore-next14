@@ -88,6 +88,19 @@ export async function GET(request: NextRequest) {
   // On a network error or timeout the cookies are kept so a retry can still work.
   if (result.invalid) {
     await clearSession();
+  } else {
+    const retryPath = `/api/auth/refresh?next=${encodeURIComponent(destination)}`;
+    return new NextResponse(
+      `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Session temporarily unavailable</title></head><body style="font-family:system-ui;background:#111827;color:#f9fafb;padding:3rem;line-height:1.6"><main style="max-width:36rem;margin:auto"><h1>Unable to refresh your session right now</h1><p>Your session has been kept. Please try again in a moment.</p><a style="color:#67e8f9" href="${retryPath}">Try again</a></main></body></html>`,
+      {
+        status: 503,
+        headers: {
+          "Content-Type": "text/html; charset=utf-8",
+          "Cache-Control": "no-store",
+          "Retry-After": "5",
+        },
+      },
+    );
   }
 
   const signInUrl = new URL("/sign-in", request.url);

@@ -18,6 +18,11 @@ export default function Feed({ initialPosts }: FeedProps) {
   const [hasMore, setHasMore] = useState(initialPosts.length === PAGE_SIZE);
 
   const loaderRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    setPosts(initialPosts);
+    setPage(1);
+    setHasMore(initialPosts.length === PAGE_SIZE);
+  }, [initialPosts]);
 
   const loadMorePosts = useCallback(async () => {
     if (isLoading || !hasMore) return;
@@ -72,7 +77,7 @@ export default function Feed({ initialPosts }: FeedProps) {
         root: null,
         rootMargin: "500px",
         threshold: 0,
-      }
+      },
     );
 
     observer.observe(loader);

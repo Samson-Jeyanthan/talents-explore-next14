@@ -1,8 +1,8 @@
 "use server";
 
 import axios from "axios";
-// import { getSession } from "@/lib/session";
-import { getSession } from "./session.action";
+import { getAuthHeaders as resolveSessionHeaders } from "@/lib/session";
+import { isRedirectError } from "next/dist/client/components/redirect";
 import { getUserPersonalInfoAction } from "./auth.action";
 
 type PrivacyPayload = Record<string, any>;
@@ -66,7 +66,8 @@ export type FeedbackPayload = {
 };
 
 async function getAccessToken() {
-  return await getSession();
+  const headers = await resolveSessionHeaders();
+  return headers.Authorization.slice("Bearer ".length);
 }
 
 function getAuthHeaders(token: string) {
@@ -85,13 +86,18 @@ async function getCurrentUser() {
 
   try {
     const userRes = await getUserPersonalInfoAction(token);
+    if (userRes?.status !== "7400" || !userRes?.response?._id) {
+      throw new Error(
+        "Unable to load your settings profile. Please try again.",
+      );
+    }
     return {
       token,
       user: userRes?.response || null,
     };
   } catch (error) {
-    console.error("getCurrentUser settings failed:", error);
-    return { token: "", user: null };
+    if (isRedirectError(error)) throw error;
+    throw new Error("Unable to load your settings profile. Please try again.");
   }
 }
 
@@ -109,13 +115,14 @@ async function getRequestList(path: string) {
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/${path}`,
       {
         headers: getAuthHeaders(token),
-      }
+      },
     );
     const data = response.data;
     return data?.status === "7400" && Array.isArray(data?.response)
       ? data.response
       : [];
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error(`get ${path} failed:`, error);
     return [];
   }
@@ -138,10 +145,11 @@ async function submitRequest(path: string, payload: Record<string, string>) {
           ...getAuthHeaders(token),
           "Content-Type": "application/json",
         },
-      }
+      },
     );
     return response.data;
   } catch (error: any) {
+    if (isRedirectError(error)) throw error;
     return {
       status: "5000",
       message:
@@ -155,7 +163,7 @@ export async function getAdvertisementRequestsAction() {
 }
 
 export async function submitAdvertisementRequestAction(
-  payload: AdvertisementRequestPayload
+  payload: AdvertisementRequestPayload,
 ) {
   return submitRequest("advertisement-request", payload);
 }
@@ -165,7 +173,7 @@ export async function getPaidPromotionRequestsAction() {
 }
 
 export async function submitPaidPromotionRequestAction(
-  payload: PaidPromotionRequestPayload
+  payload: PaidPromotionRequestPayload,
 ) {
   return submitRequest("promo-request", payload);
 }
@@ -190,13 +198,14 @@ export async function getPrivacySettingsAction(accessToken?: string) {
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/privacy`,
       {
         headers: getAuthHeaders(token),
-      }
+      },
     );
 
     return response.data?.status === "7400"
       ? response.data?.response || null
       : null;
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error("getPrivacySettingsAction failed:", error);
     return null;
   }
@@ -215,11 +224,12 @@ export async function updatePrivacySettingsAction(payload: PrivacyPayload) {
       payload,
       {
         headers: getAuthHeaders(token),
-      }
+      },
     );
 
     return response.data;
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error("updatePrivacySettingsAction failed:", error);
     return false;
   }
@@ -238,11 +248,12 @@ export async function updateSocialLinksPrivacyAction(payload: any[]) {
       payload,
       {
         headers: getAuthHeaders(token),
-      }
+      },
     );
 
     return response.data;
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error("updateSocialLinksPrivacyAction failed:", error);
     return false;
   }
@@ -250,7 +261,7 @@ export async function updateSocialLinksPrivacyAction(payload: any[]) {
 
 export async function getNotificationSettingsAction(
   userId?: string,
-  accessToken?: string
+  accessToken?: string,
 ) {
   try {
     const sessionUser = userId ? null : await getCurrentUser();
@@ -265,13 +276,14 @@ export async function getNotificationSettingsAction(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/notification/settings/${currentUserId}`,
       {
         headers: getAuthHeaders(token),
-      }
+      },
     );
 
     return response.data?.status === "7400"
       ? response.data?.response || null
       : null;
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error("getNotificationSettingsAction failed:", error);
     return null;
   }
@@ -279,7 +291,7 @@ export async function getNotificationSettingsAction(
 
 export async function updateNotificationSettingsAction(
   id: string,
-  payload: NotificationPayload
+  payload: NotificationPayload,
 ) {
   try {
     const { token } = await getCurrentUser();
@@ -293,11 +305,12 @@ export async function updateNotificationSettingsAction(
       payload,
       {
         headers: getAuthHeaders(token),
-      }
+      },
     );
 
     return response.data;
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error("updateNotificationSettingsAction failed:", error);
     return false;
   }
@@ -319,11 +332,12 @@ export async function changePasswordSettingsAction(payload: {
       payload,
       {
         headers: getAuthHeaders(token),
-      }
+      },
     );
 
     return response.data;
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error("changePasswordSettingsAction failed:", error);
     return false;
   }
@@ -341,11 +355,12 @@ export async function deactivateAccountSettingsAction() {
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/deactivateAccount`,
       {
         headers: getAuthHeaders(token),
-      }
+      },
     );
 
     return response.data;
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error("deactivateAccountSettingsAction failed:", error);
     return false;
   }
@@ -363,11 +378,12 @@ export async function deleteAccountSettingsAction() {
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/deleteAccount`,
       {
         headers: getAuthHeaders(token),
-      }
+      },
     );
 
     return response.data;
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error("deleteAccountSettingsAction failed:", error);
     return false;
   }
@@ -376,7 +392,7 @@ export async function deleteAccountSettingsAction() {
 export async function getSettingsActivityFeedAction(
   feedType: "deleted-post" | "deleted-share" | "star-post" | "star-share",
   pageNo = 1,
-  pageSize = 12
+  pageSize = 12,
 ) {
   try {
     const { token, user } = await getCurrentUser();
@@ -401,7 +417,7 @@ export async function getSettingsActivityFeedAction(
           pageSize,
           viewUserId: user._id,
         },
-      }
+      },
     );
 
     return response.data?.status === "7400" &&
@@ -409,6 +425,7 @@ export async function getSettingsActivityFeedAction(
       ? response.data.response
       : [];
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error("getSettingsActivityFeedAction failed:", error);
     return [];
   }
@@ -427,11 +444,12 @@ export async function restoreDeletedPostSettingsAction(postId: string) {
       undefined,
       {
         headers: getAuthHeaders(token),
-      }
+      },
     );
 
     return response.data;
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error("restoreDeletedPostSettingsAction failed:", error);
     return false;
   }
@@ -449,11 +467,12 @@ export async function permanentlyDeletePostSettingsAction(postId: string) {
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/te-post/permantely/${postId}`,
       {
         headers: getAuthHeaders(token),
-      }
+      },
     );
 
     return response.data;
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error("permanentlyDeletePostSettingsAction failed:", error);
     return false;
   }

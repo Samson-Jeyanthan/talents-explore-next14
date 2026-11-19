@@ -4,7 +4,11 @@ const fs = require("node:fs");
 (async () => {
   const pages = await (await fetch("http://localhost:9224/json/list")).json();
   const page = pages.find(
-    (p) => p.type === "page" && p.url.startsWith("http://localhost:3000"),
+    (p) =>
+      p.type === "page" &&
+      p.url.startsWith("http://localhost:3000") &&
+      (!process.env.TE_BROWSER_PAGE_ID ||
+        p.id === process.env.TE_BROWSER_PAGE_ID),
   );
   if (!page) throw new Error("Local app browser tab not found");
   const socket = new WebSocket(page.webSocketDebuggerUrl);
@@ -17,14 +21,22 @@ const fs = require("node:fs");
   socket.onmessage = ({ data }) => {
     const result = JSON.parse(data);
     if (result.id) {
-      pending.get(result.id)?.(result);
+      const call = pending.get(result.id);
+      if (call) {
+        clearTimeout(call.timer);
+        call.resolve(result);
+      }
       pending.delete(result.id);
     }
   };
   const send = (method, params = {}) =>
-    new Promise((resolve) => {
+    new Promise((resolve, reject) => {
       const callId = ++id;
-      pending.set(callId, resolve);
+      const timer = setTimeout(() => {
+        pending.delete(callId);
+        reject(new Error("Browser check timed out"));
+      }, 20000);
+      pending.set(callId, { resolve, timer });
       socket.send(JSON.stringify({ id: callId, method, params }));
     });
   try {

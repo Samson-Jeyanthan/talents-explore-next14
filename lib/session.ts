@@ -258,8 +258,13 @@ async function resolveAccessToken(): Promise<ResolvedToken> {
   const result = await refreshSession();
   if (result.ok) return { kind: "token", accessToken: result.accessToken };
 
-  if (result.invalid) await clearSession();
-  return { kind: "signed-out" };
+  if (result.invalid) {
+    await clearSession();
+    return { kind: "signed-out" };
+  }
+  // A timeout/server outage is not a rejected session. Keep cookies and allow
+  // the caller's error boundary to offer retry instead of redirecting to login.
+  throw new Error("Your session could not be refreshed. Please try again.");
 }
 
 /* ------------------------------- exports ------------------------------- */

@@ -14,6 +14,49 @@ type TPostActionError = {
   message: string;
 };
 
+/** Move a post/share to Recently Deleted. The backend authorizes ownership. */
+export async function deletePostAction(postId: string) {
+  if (typeof postId !== "string" || !/^[a-f\d]{24}$/i.test(postId)) {
+    return { success: false, message: "Invalid post." };
+  }
+  try {
+    const headers = await getAuthHeaders();
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/te-post/${postId}`,
+      {
+        method: "DELETE",
+        headers,
+        cache: "no-store",
+      },
+    );
+    const result = await response.json();
+    if (!response.ok || result?.status !== "7400") {
+      return {
+        success: false,
+        message:
+          typeof result?.message === "string"
+            ? result.message
+            : "Unable to delete this post. Please try again.",
+      };
+    }
+    revalidatePath("/home");
+    revalidatePath("/share-feed");
+    revalidatePath("/settings/activity/deleted");
+    revalidatePath("/post/[id]", "page");
+    revalidatePath("/profile/[username]/[userId]", "layout");
+    revalidatePath("/category/[id]", "page");
+    revalidatePath("/explore", "layout");
+    revalidatePath("/saved-collection", "layout");
+    return { success: true, message: "Post moved to Recently Deleted." };
+  } catch (error) {
+    if (isRedirectError(error)) throw error;
+    return {
+      success: false,
+      message: "Unable to delete this post. Please try again.",
+    };
+  }
+}
+
 async function resolveViewerId(accessToken: string | undefined) {
   if (!accessToken) {
     return "";
