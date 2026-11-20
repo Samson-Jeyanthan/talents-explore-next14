@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 function getDurationLabel(item: any) {
-  const collaboration = item?.collaboration || {};
+  const collaboration = item?.collaboration || item || {};
 
   if (collaboration?.expectedDays) {
     return `${collaboration.expectedDays}`;
@@ -16,7 +16,7 @@ function getDurationLabel(item: any) {
     try {
       return `${format(new Date(collaboration.expectedStartDate), "dd MMM yyyy")} - ${format(
         new Date(collaboration.expectedEndDate),
-        "dd MMM yyyy"
+        "dd MMM yyyy",
       )}`;
     } catch {
       return "-";
@@ -39,13 +39,21 @@ function getDeadlineLabel(value?: string) {
 }
 
 function CollaborationCard({ collaboration }: { collaboration: any }) {
-  const collaborationInfo = collaboration?.collaboration || {};
+  const collaborationInfo = collaboration?.collaboration || collaboration || {};
   const owner = collaboration?.owner || {};
+  const professional =
+    typeof owner?.professional === "string"
+      ? owner.professional
+      : typeof owner?.professional?.professional === "string"
+        ? owner.professional.professional
+        : typeof owner?.personalInfo?.professional === "string"
+          ? owner.personalInfo.professional
+          : "Collaboration owner";
 
   return (
     <Link
       href={`/collaboration/${collaborationInfo?._id || collaborationInfo?.id || collaboration?._id || ""}`}
-      className="block rounded-[28px] border border-dark-300 bg-dark-250 p-4 transition hover:border-primary-500/40 hover:bg-dark-200"
+      className="block w-full min-w-0 rounded-[28px] border border-dark-300 bg-dark-250 p-4 transition hover:border-primary-500/40 hover:bg-dark-200"
     >
       <div className="flex items-center gap-3">
         <UserProfileImg
@@ -56,11 +64,7 @@ function CollaborationCard({ collaboration }: { collaboration: any }) {
           <p className="truncate text-sm font-semibold text-primary-500">
             {owner?.userName || "Unknown user"}
           </p>
-          <p className="truncate text-xs text-light-500">
-            {owner?.professional ||
-              owner?.personalInfo?.professional ||
-              "Collaboration owner"}
-          </p>
+          <p className="truncate text-xs text-light-500">{professional}</p>
         </div>
         <span className="shrink-0 text-xs text-light-500">
           {collaboration?.timeAgo || ""}
@@ -80,10 +84,10 @@ function CollaborationCard({ collaboration }: { collaboration: any }) {
       ) : null}
 
       <div className="pt-4">
-        <h3 className="text-lg font-semibold text-light-900">
+        <h3 className="break-words text-lg font-semibold text-light-900">
           {collaborationInfo?.title || "Untitled collaboration"}
         </h3>
-        <p className="line-clamp-3 pt-2 text-sm text-light-500">
+        <p className="line-clamp-3 break-words pt-2 text-sm text-light-500">
           {collaborationInfo?.description ||
             "No collaboration description provided yet."}
         </p>

@@ -5,6 +5,7 @@ const ts = require("typescript");
 const postcss = require("postcss");
 const tailwind = require("tailwindcss");
 const files = [
+  "components/inputs/SearchLookupSelect.tsx",
   "lib/utils/explore.ts",
   "lib/utils/ratings.ts",
   "lib/utils/feedPagination.ts",

@@ -1,9 +1,20 @@
 "use server";
 
 import axios from "axios";
-// import { getSession } from "@/lib/session";
-import { getSession } from "@/lib/session";
-import { getUserPersonalInfoAction } from "./auth.action";
+import { getAuthHeaders as resolveSessionHeaders } from "@/lib/session";
+import { jwtDecode } from "jwt-decode";
+import { isRedirectError } from "next/dist/client/components/redirect";
+import {
+  collaborationId as idValidation,
+  collaborationListValidation,
+  collaborationListItems,
+  applicantQueryValidation,
+  applyCollaborationValidation,
+  inviteResponseValidation,
+  reviewApplicantValidation,
+  bulkInviteValidation,
+  type CollaborationListResult,
+} from "@/lib/utils/collaboration";
 
 const SUCCESS_STATUS = "7400";
 
@@ -59,26 +70,12 @@ type CollaborationPeopleSearchParams = {
 };
 
 async function getCurrentUserResponse() {
-  const token = await getSession();
-
-  console.log(token, "getCurrentUserResponse token: --68--collaborat", token);
-
-  if (!token) {
-    console.log("no-token-found");
-    return { token: "", user: null };
-  }
-
-  try {
-    const response = await getUserPersonalInfoAction(token);
-    console.log(response, "--71--res-of-user-collab.action--");
-    return {
-      token,
-      user: response?.response || null,
-    };
-  } catch (error) {
-    console.error("getCurrentUserResponse failed for collaboration:", error);
-    return { token: "", user: null };
-  }
+  const headers = await resolveSessionHeaders();
+  const token = headers.Authorization.slice("Bearer ".length);
+  const userId = jwtDecode<{ sub?: string }>(token).sub;
+  if (!idValidation.safeParse(userId).success)
+    throw new Error("Unable to identify your account. Please sign in again.");
+  return { token, user: { _id: userId! } };
 }
 
 function getAuthHeaders(token: string) {
@@ -112,81 +109,100 @@ function normalizeListResponse(responseData: any) {
 }
 
 export async function getCurrentCollaborationUserAction() {
-  const { user } = await getCurrentUserResponse();
-  return user || null;
+  try {
+    const { token, user: viewer } = await getCurrentUserResponse();
+    const response = await axios.get(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/`,
+      { headers: getAuthHeaders(token), timeout: 15000 },
+    );
+    const user = response.data?.response;
+    if (
+      response.data?.status !== SUCCESS_STATUS ||
+      !idValidation.safeParse(user?._id).success ||
+      user._id !== viewer._id
+    )
+      throw new Error("Profile unavailable");
+    return {
+      _id: user._id,
+      userName: user.userName,
+      email: user.email,
+      phone: user.phone,
+      personalInfo: user.personalInfo,
+    };
+  } catch (error) {
+    if (isRedirectError(error)) throw error;
+    throw new Error(
+      "Unable to load your collaboration profile. Please try again.",
+    );
+  }
 }
 
-export async function getCollaborationListAction({
-  type,
-  pageNo = 1,
-  pageSize = 20,
-  filters = {},
-}: CollaborationListParams) {
+export async function getCollaborationListAction(
+  input: CollaborationListParams,
+): Promise<CollaborationListResult> {
+  const parsed = collaborationListValidation.safeParse(input);
+  if (!parsed.success)
+    return {
+      status: "400",
+      response: [],
+      message: "Invalid collaboration filters or page.",
+    };
+  const { type, pageNo, pageSize, filters } = parsed.data;
   try {
     const { token, user } = await getCurrentUserResponse();
-
-    if (!token || !user?._id) {
-      return {
-        status: "400",
-        message: "Unauthorized",
-        response: [],
-      };
-    }
-
     const endpoint =
       type === "ALL"
         ? "/collaboration/open"
         : type === "MY"
           ? "/collaboration/my"
           : "/collaboration";
-
-    const params = {
-      pageNo,
-      pageSize,
-      ...(type !== "ALL" && type !== "MY"
-        ? {
-            applicantStatus: type,
-            userId: user._id,
-          }
-        : {}),
-      keywords: filters.keywords || "",
-      mainCategoryId: toNullableValue(filters.mainCategoryId),
-      subCategoryId: toNullableValue(filters.subCategoryId),
-      skillId: toNullableValue(filters.skillId),
-      level: toNullableValue(filters.level),
-      gender: toNullableValue(filters.gender),
-      languageId: toNullableValue(filters.languageId),
-      ethnicId: toNullableValue(filters.ethnicId),
-      country: toNullableValue(filters.country),
-      state: toNullableValue(filters.state),
-      city: toNullableValue(filters.city),
-      resultTime: toNullableValue(filters.resultTime),
-    };
-
     const response = await axios.get(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}${endpoint}`,
       {
         headers: getAuthHeaders(token),
-        params,
+        timeout: 15000,
+        params: {
+          pageNo,
+          pageSize,
+          ...(type !== "ALL" && type !== "MY"
+            ? { applicantStatus: type, userId: user._id }
+            : {}),
+          ...Object.fromEntries(
+            Object.entries(filters).map(([key, value]) => [
+              key,
+              toNullableValue(value),
+            ]),
+          ),
+          keywords: filters.keywords || "",
+        },
       },
     );
-
-    return {
-      status: response.data?.status || "400",
-      message: response.data?.message || "",
-      response: normalizeListResponse(response.data),
-    };
+    const items =
+      response.data?.status === SUCCESS_STATUS
+        ? collaborationListItems(response.data)
+        : null;
+    return items
+      ? { status: "7400", response: items }
+      : {
+          status: "400",
+          response: [],
+          message:
+            typeof response.data?.message === "string" && response.data.message
+              ? response.data.message
+              : "Unable to load collaborations. Please try again.",
+        };
   } catch (error) {
-    console.error("getCollaborationListAction failed:", error);
+    if (isRedirectError(error)) throw error;
     return {
       status: "400",
-      message: "Failed to fetch collaboration list",
       response: [],
+      message: "Unable to load collaborations. Please try again.",
     };
   }
 }
 
 export async function getCollaborationDetailsAction(collaborationId: string) {
+  if (!idValidation.safeParse(collaborationId).success) return null;
   try {
     const { token } = await getCurrentUserResponse();
 
@@ -198,6 +214,7 @@ export async function getCollaborationDetailsAction(collaborationId: string) {
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/collaboration/${collaborationId}/details`,
       {
         headers: getAuthHeaders(token),
+        timeout: 15000,
       },
     );
 
@@ -205,12 +222,14 @@ export async function getCollaborationDetailsAction(collaborationId: string) {
       ? response.data?.response
       : null;
   } catch (error) {
-    console.error("getCollaborationDetailsAction failed:", error);
+    if (isRedirectError(error)) throw error;
     return null;
   }
 }
 
 export async function deleteCollaborationAction(collaborationId: string) {
+  if (!idValidation.safeParse(collaborationId).success)
+    return { status: "400", message: "Invalid collaboration." };
   try {
     const { token } = await getCurrentUserResponse();
 
@@ -222,12 +241,13 @@ export async function deleteCollaborationAction(collaborationId: string) {
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/collaboration/${collaborationId}`,
       {
         headers: getAuthHeaders(token),
+        timeout: 15000,
       },
     );
 
     return response.data;
   } catch (error) {
-    console.error("deleteCollaborationAction failed:", error);
+    if (isRedirectError(error)) throw error;
     return { status: "400", message: "Failed to delete collaboration" };
   }
 }
@@ -244,6 +264,15 @@ export async function applyToCollaborationRoleAction(
     resumeFileKey?: string;
   },
 ) {
+  if (!idValidation.safeParse(collaborationId).success)
+    return { status: "400", message: "Invalid collaboration." };
+  const valid = applyCollaborationValidation.safeParse(payload);
+  if (!valid.success)
+    return {
+      status: "400",
+      message: "Check the role and application details.",
+    };
+  payload = valid.data;
   try {
     const { token } = await getCurrentUserResponse();
 
@@ -256,12 +285,13 @@ export async function applyToCollaborationRoleAction(
       payload,
       {
         headers: getAuthHeaders(token),
+        timeout: 15000,
       },
     );
 
     return response.data;
   } catch (error) {
-    console.error("applyToCollaborationRoleAction failed:", error);
+    if (isRedirectError(error)) throw error;
     return { status: "400", message: "Failed to send collaboration interest" };
   }
 }
@@ -273,6 +303,12 @@ export async function respondCollaborationInviteAction(
     action: "ACCEPT" | "DECLINE";
   },
 ) {
+  if (!idValidation.safeParse(collaborationId).success)
+    return { status: "400", message: "Invalid collaboration." };
+  const valid = inviteResponseValidation.safeParse(payload);
+  if (!valid.success)
+    return { status: "400", message: "Invalid invitation response." };
+  payload = valid.data;
   try {
     const { token } = await getCurrentUserResponse();
 
@@ -285,12 +321,13 @@ export async function respondCollaborationInviteAction(
       payload,
       {
         headers: getAuthHeaders(token),
+        timeout: 15000,
       },
     );
 
     return response.data;
   } catch (error) {
-    console.error("respondCollaborationInviteAction failed:", error);
+    if (isRedirectError(error)) throw error;
     return { status: "400", message: "Failed to update invite response" };
   }
 }
@@ -298,6 +335,7 @@ export async function respondCollaborationInviteAction(
 export async function getCollaborationApplicantsStatsAction(
   collaborationId: string,
 ) {
+  if (!idValidation.safeParse(collaborationId).success) return null;
   try {
     const { token } = await getCurrentUserResponse();
 
@@ -309,6 +347,7 @@ export async function getCollaborationApplicantsStatsAction(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/collaboration/${collaborationId}/stats`,
       {
         headers: getAuthHeaders(token),
+        timeout: 15000,
       },
     );
 
@@ -316,7 +355,7 @@ export async function getCollaborationApplicantsStatsAction(
       ? response.data?.response
       : null;
   } catch (error) {
-    console.error("getCollaborationApplicantsStatsAction failed:", error);
+    if (isRedirectError(error)) throw error;
     return null;
   }
 }
@@ -325,6 +364,12 @@ export async function getCollaborationApplicantsRoleStatsAction(
   collaborationId: string,
   roleId: string,
 ) {
+  if (
+    ![collaborationId, roleId].every(
+      (value) => idValidation.safeParse(value).success,
+    )
+  )
+    return null;
   try {
     const { token } = await getCurrentUserResponse();
 
@@ -336,6 +381,7 @@ export async function getCollaborationApplicantsRoleStatsAction(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/collaboration/${collaborationId}/roles/${roleId}/stats`,
       {
         headers: getAuthHeaders(token),
+        timeout: 15000,
       },
     );
 
@@ -343,7 +389,7 @@ export async function getCollaborationApplicantsRoleStatsAction(
       ? response.data?.response
       : null;
   } catch (error) {
-    console.error("getCollaborationApplicantsRoleStatsAction failed:", error);
+    if (isRedirectError(error)) throw error;
     return null;
   }
 }
@@ -358,6 +404,21 @@ export async function getCollaborationApplicantsAction(
     filter = "ALL",
   }: CollaborationApplicantsParams = {},
 ) {
+  if (
+    !idValidation.safeParse(collaborationId).success ||
+    !applicantQueryValidation.safeParse({
+      pageNo,
+      pageSize,
+      search,
+      roleId,
+      filter,
+    }).success
+  )
+    return {
+      status: "400",
+      response: [],
+      message: "Invalid applicant filters or page.",
+    };
   try {
     const { token } = await getCurrentUserResponse();
 
@@ -373,6 +434,7 @@ export async function getCollaborationApplicantsAction(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/collaboration/${collaborationId}/applicants`,
       {
         headers: getAuthHeaders(token),
+        timeout: 15000,
         params: {
           pageNo,
           pageSize,
@@ -389,7 +451,7 @@ export async function getCollaborationApplicantsAction(
       response: normalizeListResponse(response.data),
     };
   } catch (error) {
-    console.error("getCollaborationApplicantsAction failed:", error);
+    if (isRedirectError(error)) throw error;
     return {
       status: "400",
       message: "Failed to fetch applicants",
@@ -406,6 +468,11 @@ export async function reviewCollaborationApplicantAction(
     action: string;
   },
 ) {
+  if (
+    !idValidation.safeParse(collaborationId).success ||
+    !reviewApplicantValidation.safeParse(payload).success
+  )
+    return { status: "400", message: "Invalid applicant review." };
   try {
     const { token } = await getCurrentUserResponse();
 
@@ -418,12 +485,13 @@ export async function reviewCollaborationApplicantAction(
       payload,
       {
         headers: getAuthHeaders(token),
+        timeout: 15000,
       },
     );
 
     return response.data;
   } catch (error) {
-    console.error("reviewCollaborationApplicantAction failed:", error);
+    if (isRedirectError(error)) throw error;
     return { status: "400", message: "Failed to review applicant" };
   }
 }
@@ -432,6 +500,12 @@ export async function getCollaborationApplicantDetailsAction(
   collaborationId: string,
   applicationId: string,
 ) {
+  if (
+    ![collaborationId, applicationId].every(
+      (value) => idValidation.safeParse(value).success,
+    )
+  )
+    return null;
   try {
     const { token } = await getCurrentUserResponse();
 
@@ -443,6 +517,7 @@ export async function getCollaborationApplicantDetailsAction(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/collaboration/${collaborationId}/applicants/${applicationId}`,
       {
         headers: getAuthHeaders(token),
+        timeout: 15000,
       },
     );
 
@@ -450,7 +525,7 @@ export async function getCollaborationApplicantDetailsAction(
       ? response.data?.response
       : null;
   } catch (error) {
-    console.error("getCollaborationApplicantDetailsAction failed:", error);
+    if (isRedirectError(error)) throw error;
     return null;
   }
 }
@@ -473,6 +548,38 @@ export async function searchCollaborationPeopleAction({
   city = null,
   resultTime = null,
 }: CollaborationPeopleSearchParams = {}) {
+  if (
+    !collaborationListValidation.safeParse({
+      type: "ALL",
+      pageNo,
+      pageSize,
+      filters: {
+        mainCategoryId,
+        subCategoryId,
+        skillId,
+        level,
+        gender: userGender,
+        languageId: userLanguage,
+        ethnicId: ethnic,
+        country,
+        state,
+        city,
+        resultTime,
+      },
+    }).success ||
+    typeof searchText !== "string" ||
+    (profession != null && typeof profession !== "string") ||
+    (userRating != null &&
+      (typeof userRating !== "number" ||
+        !Number.isFinite(userRating) ||
+        userRating < 0 ||
+        userRating > 5))
+  )
+    return {
+      status: "400",
+      response: [],
+      message: "Invalid people filters or page.",
+    };
   try {
     const { token, user } = await getCurrentUserResponse();
 
@@ -488,6 +595,7 @@ export async function searchCollaborationPeopleAction({
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/search`,
       {
         headers: getAuthHeaders(token),
+        timeout: 15000,
         params: {
           pageSize,
           pageNo,
@@ -517,7 +625,7 @@ export async function searchCollaborationPeopleAction({
       response: normalizeListResponse(response.data),
     };
   } catch (error) {
-    console.error("searchCollaborationPeopleAction failed:", error);
+    if (isRedirectError(error)) throw error;
     return {
       status: "400",
       message: "Failed to search people",
@@ -527,6 +635,19 @@ export async function searchCollaborationPeopleAction({
 }
 
 export async function createCollaborationAction(payload: any) {
+  if (
+    !payload ||
+    typeof payload !== "object" ||
+    !payload.collaboration ||
+    typeof payload.collaboration.title !== "string" ||
+    !payload.collaboration.title.trim() ||
+    !Array.isArray(payload.collaboratorRoles) ||
+    !payload.collaboratorRoles.length
+  )
+    return {
+      status: "400",
+      message: "Enter a collaboration title and at least one role.",
+    };
   try {
     const { token } = await getCurrentUserResponse();
 
@@ -539,12 +660,13 @@ export async function createCollaborationAction(payload: any) {
       payload,
       {
         headers: getAuthHeaders(token),
+        timeout: 15000,
       },
     );
 
     return response.data;
   } catch (error) {
-    console.error("createCollaborationAction failed:", error);
+    if (isRedirectError(error)) throw error;
     return { status: "400", message: "Failed to create collaboration" };
   }
 }
@@ -553,6 +675,28 @@ export async function updateCollaborationAction(
   collaborationId: string,
   payload: any,
 ) {
+  if (
+    !idValidation.safeParse(collaborationId).success ||
+    !payload ||
+    typeof payload !== "object" ||
+    !payload.collaboration ||
+    typeof payload.collaboration.title !== "string" ||
+    !payload.collaboration.title.trim() ||
+    (payload.deleteRoleIds &&
+      (!Array.isArray(payload.deleteRoleIds) ||
+        !payload.deleteRoleIds.every(
+          (id: unknown) => idValidation.safeParse(id).success,
+        ))) ||
+    (payload.collaboratorRolesUpdate &&
+      (!Array.isArray(payload.collaboratorRolesUpdate) ||
+        !payload.collaboratorRolesUpdate.every(
+          (role: any) => idValidation.safeParse(role?.roleId).success,
+        )))
+  )
+    return {
+      status: "400",
+      message: "Check the collaboration and role details.",
+    };
   try {
     const { token } = await getCurrentUserResponse();
 
@@ -565,12 +709,13 @@ export async function updateCollaborationAction(
       payload,
       {
         headers: getAuthHeaders(token),
+        timeout: 15000,
       },
     );
 
     return response.data;
   } catch (error) {
-    console.error("updateCollaborationAction failed:", error);
+    if (isRedirectError(error)) throw error;
     return { status: "400", message: "Failed to update collaboration" };
   }
 }
@@ -579,6 +724,14 @@ export async function invitePeopleToCollaborationAction(
   collaborationId: string,
   payload: { invites: any[] },
 ) {
+  if (
+    !idValidation.safeParse(collaborationId).success ||
+    !bulkInviteValidation.safeParse(payload).success
+  )
+    return {
+      status: "400",
+      message: "Choose valid people and roles to invite.",
+    };
   try {
     const { token } = await getCurrentUserResponse();
 
@@ -591,12 +744,13 @@ export async function invitePeopleToCollaborationAction(
       payload,
       {
         headers: getAuthHeaders(token),
+        timeout: 15000,
       },
     );
 
     return response.data;
   } catch (error) {
-    console.error("invitePeopleToCollaborationAction failed:", error);
+    if (isRedirectError(error)) throw error;
     return { status: "400", message: "Failed to send invitations" };
   }
 }
