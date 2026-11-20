@@ -2,7 +2,7 @@
 
 import axios from "axios";
 // import { getSession } from "@/lib/session";
-import { getSession } from "./session.action";
+import { getSession } from "@/lib/session";
 import { getUserPersonalInfoAction } from "./auth.action";
 
 async function getAccessToken() {
@@ -34,7 +34,7 @@ function getAuthHeaders(token: string) {
 export async function getAllNotificationsAction(
   _userId: string | undefined,
   pageNo: number,
-  pageSize: number
+  pageSize: number,
 ) {
   try {
     const token = await getAccessToken();
@@ -47,7 +47,7 @@ export async function getAllNotificationsAction(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/notification?pageNumber=${pageNo}&pageSize=${pageSize}`,
       {
         headers: getAuthHeaders(token),
-      }
+      },
     );
 
     const res = response.data;
@@ -77,7 +77,7 @@ export async function markNotificationAsReadAction(notificationId: string) {
       undefined,
       {
         headers: getAuthHeaders(token),
-      }
+      },
     );
 
     return response.data;
@@ -101,7 +101,7 @@ export async function markAllNotificationsAsReadAction() {
       undefined,
       {
         headers: getAuthHeaders(token),
-      }
+      },
     );
 
     return response.data;
@@ -124,7 +124,7 @@ export async function deleteNotificationAction(notificationId: string) {
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/notification/${userId}/${notificationId}`,
       {
         headers: getAuthHeaders(token),
-      }
+      },
     );
 
     return response.data;
@@ -147,7 +147,7 @@ export async function deleteAllNotificationsAction() {
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/notification/${userId}`,
       {
         headers: getAuthHeaders(token),
-      }
+      },
     );
 
     return response.data;

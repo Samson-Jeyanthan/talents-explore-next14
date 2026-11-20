@@ -1,8 +1,8 @@
 "use server";
 
 import SkillCard from "@/components/cards/SkillCard";
-import { getAuthHeaders } from "@/lib/session";
-import { getSession, resolveViewerIdAction } from "./session.action";
+import { getAuthHeaders , getSession } from "@/lib/session";
+import { resolveViewerIdAction } from "./session.action";
 import { IProfileSkills, ITopPost } from "@/types/profile.types";
 import { getUserPersonalInfoAction } from "./auth.action";
 import { TopPostCard } from "@/components/cards";
@@ -28,7 +28,7 @@ import { revalidatePath } from "next/cache";
 // Resolves the userId from the route params corrected version
 
 export async function resolveRouteUserId(
-  userIdOrToken?: string
+  userIdOrToken?: string,
 ): Promise<string | null> {
   if (!userIdOrToken) return null;
 
@@ -52,7 +52,7 @@ export async function resolveRouteUserId(
 
 export const userPublicInfoAction = async (
   userId: string | undefined,
-  _viewerId: string | undefined
+  _viewerId: string | undefined,
 ) => {
   try {
     const headers = await getAuthHeaders();
@@ -61,7 +61,7 @@ export const userPublicInfoAction = async (
       {
         cache: "no-store",
         headers,
-      }
+      },
     );
     const res = await response.json();
     console.log(res, "userPublicInfoAction-response");
@@ -85,7 +85,7 @@ export async function fetchUserDataAction(userId: string, viewerId: string) {
     } else {
       // If the viewer is different, fetch public info
       console.log(
-        "viewing public profile of another user -- user.action.ts --"
+        "viewing public profile of another user -- user.action.ts --",
       );
       res = await userPublicInfoAction(userId, resolvedViewerId);
     }
@@ -114,7 +114,7 @@ export async function editUserProfessionalInfoAction(formData: any) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
-      }
+      },
     );
 
     const res = await response.json();
@@ -135,7 +135,7 @@ export async function editUserProfessionalInfoAction(formData: any) {
 
 export async function userTopPostInfoAction(
   userId: string | undefined,
-  returnAsCard: boolean
+  returnAsCard: boolean,
 ) {
   try {
     const headers = await getAuthHeaders();
@@ -144,7 +144,7 @@ export async function userTopPostInfoAction(
       {
         cache: "no-store",
         headers,
-      }
+      },
     );
 
     const res = await response.json();
@@ -181,7 +181,7 @@ export async function userSkillsInfoAction(userId: string | undefined) {
       {
         cache: "no-store",
         headers,
-      }
+      },
     );
     const res = await response.json();
     console.log("skills-info", res.response[0]);
@@ -211,7 +211,7 @@ export async function getUserAwardInfoAction(userId: string | undefined) {
       {
         cache: "no-store",
         headers,
-      }
+      },
     );
     const res = await response.json();
     if (res.status === "7400") {
@@ -236,7 +236,7 @@ export async function getUserEducationInfoAction(userId: string | undefined) {
       {
         cache: "no-store",
         headers,
-      }
+      },
     );
     const res = await response.json();
     if (res.status === "7400") {
@@ -261,7 +261,7 @@ export async function getUserLanguageInfoAction(userId: string | undefined) {
       {
         cache: "no-store",
         headers,
-      }
+      },
     );
     const res = await response.json();
     if (res.status === "7400") {
@@ -298,7 +298,7 @@ export async function userPersonalInfoEditAction(formData: unknown) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
-      }
+      },
     );
 
     const res = await response.json();
@@ -344,7 +344,7 @@ export async function editUserLanguageInfoAction({
           "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
-      }
+      },
     );
 
     const res = await response.json();
@@ -381,7 +381,7 @@ export async function editUserEducationInfoAction({
           "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
-      }
+      },
     );
 
     const res = await response.json();

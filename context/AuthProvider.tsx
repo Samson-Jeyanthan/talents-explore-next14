@@ -1,8 +1,6 @@
 "use client";
 
-import { getUserPersonalInfoAction } from "@/actions/auth.action";
-import { getSession } from "@/actions/session.action";
-// import { getSession } from "@/lib/session";
+import { getCurrentSessionUserAction } from "@/actions/session.action";
 import { IContextType, ICurrentUser } from "@/types/auth.types";
 import React, {
   createContext,
@@ -53,22 +51,9 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     setIsLoading(true);
-    let token = "";
     try {
-      token = await getSession();
-    } catch (error) {
-      console.error("Error reading auth session:", error);
-      setIsLoading(false);
-      return;
-    }
-
-    if (!token) {
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const res = await getUserPersonalInfoAction(token);
+      const res = await getCurrentSessionUserAction();
+      if (!res) return;
 
       if (res.status === "7400") {
         if (res?.response?.personalInfo?.firstName) {

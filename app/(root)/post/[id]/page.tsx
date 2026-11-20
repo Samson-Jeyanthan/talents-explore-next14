@@ -13,7 +13,7 @@ import {
   Footer,
 } from "@/components/widgets";
 // import { getSession } from "@/lib/session";
-import { getSession } from "@/actions/session.action";
+import { getSession } from "@/lib/session";
 import { EmblaOptionsType } from "embla-carousel";
 import { getCurrentChatUserAction } from "@/actions/chat.action";
 import { getProfileVisibilityState } from "@/lib/utils/profilePrivacy";
@@ -23,12 +23,12 @@ export const revalidate = 1800;
 
 export async function generateMetadata(
   { params }: TPostURLProps,
-  parent: ResolvingMetadata
+  parent: ResolvingMetadata,
 ): Promise<Metadata> {
   const session = await getSession();
   const postData: TPostProps = await getPostByIdAction(
     params.id,
-    session || "no_user"
+    session || "no_user",
   );
 
   // optionally access and extend (rather than replace) parent metadata
@@ -66,7 +66,7 @@ async function Post({ params }: TPostURLProps) {
   const isOwnProfile = currentUser?._id === data?.author?._id;
   const visibility = getProfileVisibilityState(
     data?.author || data,
-    isOwnProfile
+    isOwnProfile,
   );
 
   let loop = false;

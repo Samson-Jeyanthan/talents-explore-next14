@@ -1,5 +1,5 @@
 import { searchAction } from "@/actions/search.action";
-import { getSession } from "@/actions/session.action";
+import { getSession } from "@/lib/session";
 import { ExplorePostCard } from "@/components/cards";
 // import { getSession } from "@/lib/session";
 import { ISearchParamsProps } from "@/types/utils.types";

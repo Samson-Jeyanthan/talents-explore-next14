@@ -4,7 +4,7 @@ import { SavedItemCard, SavedFolderCard } from "@/components/cards";
 import { ISavedFolder, ISavedItem } from "@/types/post.types";
 import { revalidatePath } from "next/cache";
 // import { getSession } from "@/lib/session";
-import { getSession } from "./session.action";
+import { getSession } from "@/lib/session";
 import { getUserPersonalInfoAction } from "./auth.action";
 
 type Props = {
@@ -51,7 +51,7 @@ export async function getAllSavedFoldersAction({
       {
         cache: "no-store",
         headers,
-      }
+      },
     );
     const res = await response.json();
     if (res.status === "7400") {
@@ -88,7 +88,7 @@ export async function getSavedItemsByFolderIdAction(
   userId: string | undefined,
   pageNo: number,
   pageSize: number,
-  returnAsCard: boolean
+  returnAsCard: boolean,
 ) {
   try {
     const resolvedUserId = await resolveRouteUserId(userId);
@@ -98,7 +98,7 @@ export async function getSavedItemsByFolderIdAction(
       {
         cache: "no-store",
         headers,
-      }
+      },
     );
     const res = await response.json();
     if (res.status === "7400") {
@@ -122,7 +122,7 @@ export async function getSavedItemsByFolderIdAction(
 export async function createSaveCollectionFolderAction(
   userId: string,
   collectionName: string,
-  revalidatePathURL: string
+  revalidatePathURL: string,
 ) {
   const formData = {
     userId,
@@ -139,7 +139,7 @@ export async function createSaveCollectionFolderAction(
           ...headers,
         },
         body: JSON.stringify(formData),
-      }
+      },
     );
     const res = await response.json();
     revalidatePath(revalidatePathURL);
@@ -150,7 +150,7 @@ export async function createSaveCollectionFolderAction(
 export async function editSaveCollectionFolderAction(
   collectionId: string,
   collectionName: string,
-  revalidatePathURL: string
+  revalidatePathURL: string,
 ) {
   try {
     const headers = await getAuthHeaders();
@@ -163,7 +163,7 @@ export async function editSaveCollectionFolderAction(
           ...headers,
         },
         body: JSON.stringify({ name: collectionName }),
-      }
+      },
     );
     const res = await response.json();
     revalidatePath(revalidatePathURL);
@@ -173,7 +173,7 @@ export async function editSaveCollectionFolderAction(
 
 export async function deleteSaveCollectionFolderAction(
   collectionId: string,
-  revalidatePathURL: string
+  revalidatePathURL: string,
 ) {
   try {
     const headers = await getAuthHeaders();
@@ -185,7 +185,7 @@ export async function deleteSaveCollectionFolderAction(
           "Content-Type": "application/json",
           ...headers,
         },
-      }
+      },
     );
     const res = await response.json();
     revalidatePath(revalidatePathURL);
@@ -195,7 +195,7 @@ export async function deleteSaveCollectionFolderAction(
 
 export async function addPostToSaveCollectionAction(
   collectionId: string,
-  postId: string
+  postId: string,
 ) {
   try {
     const headers = await getAuthHeaders();
@@ -207,7 +207,7 @@ export async function addPostToSaveCollectionAction(
           "Content-Type": "application/json",
           ...headers,
         },
-      }
+      },
     );
     const res = await response.json();
     return res;
@@ -216,7 +216,7 @@ export async function addPostToSaveCollectionAction(
 
 export async function removeFromSaveCollectionAction(
   collectionId: string,
-  postId: string
+  postId: string,
 ) {
   try {
     const headers = await getAuthHeaders();
@@ -228,7 +228,7 @@ export async function removeFromSaveCollectionAction(
           "Content-Type": "application/json",
           ...headers,
         },
-      }
+      },
     );
     const res = await response.json();
     return res;

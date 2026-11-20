@@ -2,8 +2,8 @@
 
 import axiosInstance from "@/lib/config/axiosInstance";
 import { resetPasswordRequestValidation } from "@/lib/validations/password.validation";
-import { createSession, getAuthHeaders, getRefreshToken } from "@/lib/session";
-import { clearSession, getSession, storeIsAbout } from "./session.action";
+import { createSession, getAuthHeaders, getRefreshToken , getSession } from "@/lib/session";
+import { clearSession, storeIsAbout } from "./session.action";
 
 export async function registerAction(formData: unknown) {
   try {
@@ -23,7 +23,7 @@ export async function otpVerificationAction(formData: unknown) {
       await storeIsAbout(false);
       const result = await createSession(
         res.response.accessToken,
-        res.response.refreshToken
+        res.response.refreshToken,
       );
       console.log(result, "result-access-token-isAbout");
       return res;
@@ -56,7 +56,7 @@ export async function completeProfileAction(formData: unknown) {
         method: "PUT",
         headers,
         body: JSON.stringify(formData),
-      }
+      },
     );
 
     const res = await response.json();
@@ -101,7 +101,7 @@ export async function signinAction(formData: unknown) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
-      }
+      },
     );
 
     const res = await response.json();
@@ -119,13 +119,13 @@ export async function signinAction(formData: unknown) {
         await storeIsAbout(true);
         await createSession(
           res.response.accessToken,
-          res.response.refreshToken
+          res.response.refreshToken,
         );
       } else {
         await storeIsAbout(false);
         await createSession(
           res.response.accessToken,
-          res.response.refreshToken
+          res.response.refreshToken,
         );
       }
 
@@ -141,10 +141,15 @@ export async function signinAction(formData: unknown) {
 
 export async function forgotPasswordAction(email: string) {
   try {
-    const response = await axiosInstance.post(`/auth/forgotPassword/${encodeURIComponent(email)}`);
+    const response = await axiosInstance.post(
+      `/auth/forgotPassword/${encodeURIComponent(email)}`,
+    );
     return response.data;
   } catch (error) {
-    return { status: "ERROR", message: "Unable to send a verification code. Please try again." };
+    return {
+      status: "ERROR",
+      message: "Unable to send a verification code. Please try again.",
+    };
   }
 }
 
@@ -152,18 +157,24 @@ export async function verifyForgotPasswordAction(formData: unknown) {
   try {
     const response = await axiosInstance.post(
       "/auth/verifyForgotPassword",
-      formData
+      formData,
     );
     return response.data;
   } catch (error) {
-    return { status: "ERROR", message: "Unable to verify your code. Please try again." };
+    return {
+      status: "ERROR",
+      message: "Unable to verify your code. Please try again.",
+    };
   }
 }
 
 export async function resetPasswordAction(formData: unknown) {
   const parsed = resetPasswordRequestValidation.safeParse(formData);
   if (!parsed.success) {
-    return { status: false, message: "Please verify your OTP and enter a valid new password." };
+    return {
+      status: false,
+      message: "Please verify your OTP and enter a valid new password.",
+    };
   }
   try {
     const response = await fetch(
@@ -175,7 +186,7 @@ export async function resetPasswordAction(formData: unknown) {
         },
         body: JSON.stringify(parsed.data),
         signal: AbortSignal.timeout(15000),
-      }
+      },
     );
 
     const result = await response.json();
@@ -184,10 +195,16 @@ export async function resetPasswordAction(formData: unknown) {
     }
     return {
       status: false,
-      message: typeof result?.message === "string" ? result.message : "Unable to reset your password. Please verify your OTP and try again.",
+      message:
+        typeof result?.message === "string"
+          ? result.message
+          : "Unable to reset your password. Please verify your OTP and try again.",
     };
   } catch {
-    return { status: false, message: "Unable to reset your password. Please try again." };
+    return {
+      status: false,
+      message: "Unable to reset your password. Please try again.",
+    };
   }
 }
 
@@ -207,7 +224,7 @@ export async function getUserPersonalInfoAction(token: string | undefined) {
             : {
                 Authorization: `Bearer ${token}`,
               },
-      }
+      },
     );
     const res = await response.json();
 
@@ -216,7 +233,7 @@ export async function getUserPersonalInfoAction(token: string | undefined) {
   } catch (error: any) {
     console.error(
       "getUserPersonalInfoAction: //",
-      error.response?.data || error.message
+      error.response?.data || error.message,
     );
     throw error;
   }
@@ -249,7 +266,7 @@ export async function logoutAction(userId: string) {
           method: "POST",
           cache: "no-store",
           headers: await getAuthHeaders(),
-        }
+        },
       );
       console.log(res, "logout-action");
     }

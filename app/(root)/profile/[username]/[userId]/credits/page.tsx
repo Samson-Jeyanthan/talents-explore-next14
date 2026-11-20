@@ -4,7 +4,7 @@ import { fetchUserDataAction } from "@/actions/user.action";
 import { getCurrentChatUserAction } from "@/actions/chat.action";
 import { getProfileVisibilityState } from "@/lib/utils/profilePrivacy";
 import { TProfileURLProps } from "@/types/utils.types";
-import { getSession } from "@/actions/session.action";
+import { getSession } from "@/lib/session";
 import { CreditIcon } from "@/public/assets/svgs";
 import { EmptyDetails } from "@/components/others";
 

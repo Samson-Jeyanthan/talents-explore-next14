@@ -24,6 +24,12 @@ export async function checkIsAbout(): Promise<boolean> {
   return session.checkIsAbout();
 }
 
+// Return profile data to browser callers, never the authentication token.
+export async function getCurrentSessionUserAction() {
+  if (!(await session.getSession())) return null;
+  return getUserPersonalInfoAction("");
+}
+
 export async function resolveViewerIdAction() {
   const accessToken = await session.getSession();
 

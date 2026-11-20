@@ -20,8 +20,6 @@ export { default as ProfileTabs } from "./profile/ProfileTabs";
 export { default as TopPosts } from "./profile/TopPosts";
 export { default as BioDetails } from "./profile/BioDetails";
 export { default as MyPhotos } from "./profile/MyPhotos";
-export { default as AwardsAndCertificates } from "./profile/AwardsAndCertificates";
-export { default as LanguageEducationDetails } from "./profile/LanguageEducationDetails";
 export { default as ProfDetailsHeader } from "./profile/ProfDetailsHeader";
 export { default as Contact } from "./profile/Contact";
 // post more details widgets

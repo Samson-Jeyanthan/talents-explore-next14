@@ -1,14 +1,9 @@
 import { TCurrentUserData, TPublicUserData } from "@/types/profile.types";
 import { TProfileURLProps } from "@/types/utils.types";
 import { fetchUserDataAction } from "@/actions/user.action";
-import {
-  AwardsAndCertificates,
-  BioDetails,
-  Contact,
-  LanguageEducationDetails,
-  MyPhotos,
-  TopPosts,
-} from "@/components/widgets";
+import { BioDetails, Contact, MyPhotos, TopPosts } from "@/components/widgets";
+import AwardsAndCertificates from "@/components/widgets/profile/AwardsAndCertificates";
+import LanguageEducationDetails from "@/components/widgets/profile/LanguageEducationDetails";
 import { addLineBreaks } from "@/lib/utils/addLinkBreaks";
 import { getProfileVisibilityState } from "@/lib/utils/profilePrivacy";
 import { getUserPersonalInfoAction } from "@/actions/auth.action";

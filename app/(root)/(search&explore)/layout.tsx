@@ -6,7 +6,6 @@ import {
   getLanguagesAction,
   getProfessionsAction,
 } from "@/actions/utils.action";
-import Image from "next/image";
 
 async function layout({ children }: { children: React.ReactNode }) {
   const langData = await getLanguagesAction();
@@ -29,7 +28,7 @@ async function layout({ children }: { children: React.ReactNode }) {
             titleClassName="font-medium"
           />
           <div className="theme-page-gradient absolute left-0 top-0 z-10 size-full" />
-          <ExploreBgCarousel slides={EXPLORE_BG_IMAGES} />
+          <div className="absolute inset-0 z-0 bg-[url('/assets/images/explore-cover.png')] bg-cover bg-center" />
         </div>
       </header>
       <section className="w-full bg-dark-200/80 p-8 backdrop-blur-[80px]">

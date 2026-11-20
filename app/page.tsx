@@ -1,4 +1,5 @@
-import { checkIsAbout, getSession } from "@/actions/session.action";
+import { checkIsAbout } from "@/actions/session.action";
+import { getSession } from "@/lib/session";
 // import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 

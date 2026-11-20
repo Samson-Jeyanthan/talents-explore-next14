@@ -4,8 +4,7 @@ import { revalidatePath } from "next/cache";
 import AllPostCard from "@/components/cards/AllPostCard";
 import { IPost } from "@/types/post.types";
 import { getUserPersonalInfoAction } from "./auth.action";
-import { getAuthHeaders } from "@/lib/session";
-import { getSession } from "./session.action";
+import { getAuthHeaders , getSession } from "@/lib/session";
 import { resolveViewerIdAction } from "./tokenAndHeaders.action";
 import { isRedirectError } from "next/dist/client/components/redirect";
 import { postUpdateValidation } from "@/lib/validations/postUpdate.validation";
@@ -404,8 +403,7 @@ export async function getAllPostsAction(
   pageSize: number,
 ): Promise<IPost[] | TPostActionError> {
   try {
-    const headers = await getAuthHeaders();
-    const viewerId = await getCurrentUserId();
+    const viewerId = await resolveViewerIdAction();
     const accessToken = await getSession();
 
     if (!viewerId) {

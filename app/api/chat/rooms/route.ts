@@ -1,6 +1,6 @@
 // import { getSession } from "@/lib/session";
 import { getUserPersonalInfoAction } from "@/actions/auth.action";
-import { getSession } from "@/actions/session.action";
+import { getSession } from "@/lib/session";
 import axios from "axios";
 import { NextRequest, NextResponse } from "next/server";
 

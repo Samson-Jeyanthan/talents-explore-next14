@@ -33,6 +33,7 @@ import {
   updateSocialLinksPrivacyAction,
 } from "@/actions/settings.action";
 import { handleClearStorage } from "@/lib/functions/auth.functions";
+import { clearSession } from "@/actions/session.action";
 import { INITIAL_USER, useUserContext } from "@/context/AuthProvider";
 import PromotionRequests from "./PromotionRequests";
 import SupportFeedback from "./SupportFeedback";

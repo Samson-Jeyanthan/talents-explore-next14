@@ -1,5 +1,5 @@
 import { getAllSavedFoldersAction } from "@/actions/save.action";
-import { getSession } from "@/actions/session.action";
+import { getSession } from "@/lib/session";
 // import { getSession } from "@/lib/session";
 import { CreateSaveFolder } from "@/components/buttons";
 import { Metadata } from "next";

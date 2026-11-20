@@ -1,5 +1,5 @@
 import { searchAction } from "@/actions/search.action";
-import { getSession } from "@/actions/session.action";
+import { getSession } from "@/lib/session";
 import { getMainCategoriesAction } from "@/actions/utils.action";
 import {
   ExploreCategories,

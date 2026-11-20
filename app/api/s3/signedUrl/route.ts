@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { refreshSession } from "@/lib/session";
-import { clearSession, getSession } from "@/actions/session.action";
+import { refreshSession , getSession } from "@/lib/session";
+import { clearSession } from "@/actions/session.action";
 
 const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 

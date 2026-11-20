@@ -1,5 +1,5 @@
 import { exploreAllTalentsAction } from "@/actions/search.action";
-import { getSession } from "@/actions/session.action";
+import { getSession } from "@/lib/session";
 // import { getSession } from "@/lib/session";
 import { ISearchParamsProps } from "@/types/utils.types";
 

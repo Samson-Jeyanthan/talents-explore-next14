@@ -87,8 +87,8 @@ test("home and shared feeds preserve refresh redirects instead of returning a ge
 
 test("post details preserve auth redirects", async () => {
   const actions = load("actions/post.action.tsx", {
-    "./session.action": { getSession: async () => "stored-token" },
     "@/lib/session": {
+      getSession: async () => "stored-token",
       getAuthHeaders: async () => {
         throw refreshRedirect;
       },

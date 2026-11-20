@@ -2,7 +2,7 @@
 
 import axios from "axios";
 // import { getSession } from "@/lib/session";
-import { getSession } from "./session.action";
+import { getSession } from "@/lib/session";
 import { getUserPersonalInfoAction } from "./auth.action";
 
 const SUCCESS_STATUS = "7400";
@@ -168,7 +168,7 @@ export async function getCollaborationListAction({
       {
         headers: getAuthHeaders(token),
         params,
-      }
+      },
     );
 
     return {
@@ -198,7 +198,7 @@ export async function getCollaborationDetailsAction(collaborationId: string) {
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/collaboration/${collaborationId}/details`,
       {
         headers: getAuthHeaders(token),
-      }
+      },
     );
 
     return response.data?.status === SUCCESS_STATUS
@@ -222,7 +222,7 @@ export async function deleteCollaborationAction(collaborationId: string) {
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/collaboration/${collaborationId}`,
       {
         headers: getAuthHeaders(token),
-      }
+      },
     );
 
     return response.data;
@@ -242,7 +242,7 @@ export async function applyToCollaborationRoleAction(
     message?: string;
     resumeFileUrl?: string;
     resumeFileKey?: string;
-  }
+  },
 ) {
   try {
     const { token } = await getCurrentUserResponse();
@@ -256,7 +256,7 @@ export async function applyToCollaborationRoleAction(
       payload,
       {
         headers: getAuthHeaders(token),
-      }
+      },
     );
 
     return response.data;
@@ -271,7 +271,7 @@ export async function respondCollaborationInviteAction(
   payload: {
     collaborationRoleId: string;
     action: "ACCEPT" | "DECLINE";
-  }
+  },
 ) {
   try {
     const { token } = await getCurrentUserResponse();
@@ -285,7 +285,7 @@ export async function respondCollaborationInviteAction(
       payload,
       {
         headers: getAuthHeaders(token),
-      }
+      },
     );
 
     return response.data;
@@ -296,7 +296,7 @@ export async function respondCollaborationInviteAction(
 }
 
 export async function getCollaborationApplicantsStatsAction(
-  collaborationId: string
+  collaborationId: string,
 ) {
   try {
     const { token } = await getCurrentUserResponse();
@@ -309,7 +309,7 @@ export async function getCollaborationApplicantsStatsAction(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/collaboration/${collaborationId}/stats`,
       {
         headers: getAuthHeaders(token),
-      }
+      },
     );
 
     return response.data?.status === SUCCESS_STATUS
@@ -323,7 +323,7 @@ export async function getCollaborationApplicantsStatsAction(
 
 export async function getCollaborationApplicantsRoleStatsAction(
   collaborationId: string,
-  roleId: string
+  roleId: string,
 ) {
   try {
     const { token } = await getCurrentUserResponse();
@@ -336,7 +336,7 @@ export async function getCollaborationApplicantsRoleStatsAction(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/collaboration/${collaborationId}/roles/${roleId}/stats`,
       {
         headers: getAuthHeaders(token),
-      }
+      },
     );
 
     return response.data?.status === SUCCESS_STATUS
@@ -356,7 +356,7 @@ export async function getCollaborationApplicantsAction(
     search = "",
     roleId = null,
     filter = "ALL",
-  }: CollaborationApplicantsParams = {}
+  }: CollaborationApplicantsParams = {},
 ) {
   try {
     const { token } = await getCurrentUserResponse();
@@ -380,7 +380,7 @@ export async function getCollaborationApplicantsAction(
           roleId,
           filter,
         },
-      }
+      },
     );
 
     return {
@@ -404,7 +404,7 @@ export async function reviewCollaborationApplicantAction(
     collaborationRoleId: string;
     applicantId: string;
     action: string;
-  }
+  },
 ) {
   try {
     const { token } = await getCurrentUserResponse();
@@ -418,7 +418,7 @@ export async function reviewCollaborationApplicantAction(
       payload,
       {
         headers: getAuthHeaders(token),
-      }
+      },
     );
 
     return response.data;
@@ -430,7 +430,7 @@ export async function reviewCollaborationApplicantAction(
 
 export async function getCollaborationApplicantDetailsAction(
   collaborationId: string,
-  applicationId: string
+  applicationId: string,
 ) {
   try {
     const { token } = await getCurrentUserResponse();
@@ -443,7 +443,7 @@ export async function getCollaborationApplicantDetailsAction(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/collaboration/${collaborationId}/applicants/${applicationId}`,
       {
         headers: getAuthHeaders(token),
-      }
+      },
     );
 
     return response.data?.status === SUCCESS_STATUS
@@ -508,7 +508,7 @@ export async function searchCollaborationPeopleAction({
           city,
           resultTime,
         },
-      }
+      },
     );
 
     return {
@@ -539,7 +539,7 @@ export async function createCollaborationAction(payload: any) {
       payload,
       {
         headers: getAuthHeaders(token),
-      }
+      },
     );
 
     return response.data;
@@ -551,7 +551,7 @@ export async function createCollaborationAction(payload: any) {
 
 export async function updateCollaborationAction(
   collaborationId: string,
-  payload: any
+  payload: any,
 ) {
   try {
     const { token } = await getCurrentUserResponse();
@@ -565,7 +565,7 @@ export async function updateCollaborationAction(
       payload,
       {
         headers: getAuthHeaders(token),
-      }
+      },
     );
 
     return response.data;
@@ -577,7 +577,7 @@ export async function updateCollaborationAction(
 
 export async function invitePeopleToCollaborationAction(
   collaborationId: string,
-  payload: { invites: any[] }
+  payload: { invites: any[] },
 ) {
   try {
     const { token } = await getCurrentUserResponse();
@@ -591,7 +591,7 @@ export async function invitePeopleToCollaborationAction(
       payload,
       {
         headers: getAuthHeaders(token),
-      }
+      },
     );
 
     return response.data;
