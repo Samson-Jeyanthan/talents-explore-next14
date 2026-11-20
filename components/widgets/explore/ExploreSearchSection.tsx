@@ -6,7 +6,6 @@ import ExploreFilterSheet from "./ExploreFilterSheet";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { formUrlQuery } from "@/lib/utils";
 
 type Props = {
   langData: any;
@@ -22,20 +21,18 @@ const ExploreSearchSection = ({ langData, professionData }: Props) => {
   const [search, setSearch] = useState(query || "");
 
   const handleSubmit = () => {
-    if (search) {
-      const newURL = formUrlQuery({
-        params: searchParams.toString(),
-        key: "q",
-        value: search,
-      });
-      router.push(newURL, { scroll: false });
-    }
+    const params = new URLSearchParams(searchParams.toString());
+    if (search.trim()) params.set("q", search.trim());
+    else params.delete("q");
+    const queryString = params.toString();
+    router.push(`${pathname}${queryString ? `?${queryString}` : ""}`, {
+      scroll: false,
+    });
   };
 
   useEffect(() => {
-    handleSubmit();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]);
+    setSearch(query || "");
+  }, [query, pathname]);
 
   return (
     <div className="z-20 flex w-full flex-col items-center gap-2">
@@ -59,15 +56,19 @@ const ExploreSearchSection = ({ langData, professionData }: Props) => {
             className="shad-explore-search-input"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                handleSubmit();
+              }
+            }}
           />
-          {search && (
-            <Button
-              className="flex-center absolute right-0 top-0 h-11 gap-1 rounded-[10px] rounded-l-none bg-dark-300 text-light-700 hover:text-light-900"
-              onClick={handleSubmit}
-            >
-              Search
-            </Button>
-          )}
+          <Button
+            className="flex-center absolute right-0 top-0 h-11 gap-1 rounded-[10px] rounded-l-none bg-dark-300 text-light-700 hover:text-light-900"
+            onClick={handleSubmit}
+          >
+            Search
+          </Button>
         </div>
         <ExploreFilterSheet
           langData={langData}

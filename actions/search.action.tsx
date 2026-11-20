@@ -2,7 +2,7 @@
 
 import AllTalentsCard from "@/components/cards/AllTalentsCard";
 // import { getSession } from "@/lib/session";
-import { getSession } from "./session.action";
+import { getAuthHeaders as resolveSessionHeaders } from "@/lib/session";
 import {
   IExploreTalentsProps,
   ISearchAllTalentsProps,
@@ -11,20 +11,14 @@ import {
 import { revalidatePath } from "next/cache";
 
 async function getAuthHeaders() {
-  const token = await getSession();
-
-  return token
-    ? {
-        Authorization: `Bearer ${token}`,
-      }
-    : undefined;
+  return resolveSessionHeaders();
 }
 
 export async function searchPeopleTag(
   userId: string | undefined,
   filter: string,
   pageNo: number,
-  pageSize: number
+  pageSize: number,
 ) {
   try {
     const headers = await getAuthHeaders();
@@ -33,7 +27,7 @@ export async function searchPeopleTag(
       {
         cache: "no-store",
         headers,
-      }
+      },
     );
     return await response.json();
   } catch (error) {
@@ -88,9 +82,9 @@ export async function searchAction({
     if (primaryLanguage) queryParams.append("primaryLanguage", primaryLanguage);
     if (secondaryLanguage)
       queryParams.append("secondaryLanguage", secondaryLanguage);
-    if (publicRating)
+    if (publicRating !== undefined && Number.isFinite(publicRating))
       queryParams.append("publicRating", publicRating.toString());
-    if (privateRating)
+    if (privateRating !== undefined && Number.isFinite(privateRating))
       queryParams.append("privateRating", privateRating.toString());
     if (keywords && keywords.length)
       queryParams.append("keywords", keywords.join(","));
@@ -112,7 +106,7 @@ export async function searchAction({
       {
         cache: "no-store",
         headers,
-      }
+      },
     );
 
     // Check if the response is okay
@@ -176,7 +170,7 @@ export async function exploreAllTalentsAction({
       {
         cache: "no-store",
         headers,
-      }
+      },
     );
 
     // Check if the response is okay

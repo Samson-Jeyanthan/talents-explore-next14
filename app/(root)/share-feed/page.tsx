@@ -3,6 +3,7 @@ import { getAllSharesAction } from "@/actions/post.action";
 import { RightSidebar } from "@/components/widgets";
 import { redirect } from "next/navigation";
 import Feed from "./feed";
+import { SHARE_PAGE_SIZE } from "@/lib/utils/categoryFeed";
 
 function FeedShell({ children }: { children: React.ReactNode }) {
   return (
@@ -16,16 +17,27 @@ function FeedShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-function FeedMessage({ message }: { message: string }) {
+function FeedMessage({
+  message,
+  retry = false,
+}: {
+  message: string;
+  retry?: boolean;
+}) {
   return (
     <div className="w-full max-w-xl rounded-[28px] border-2 border-dark-300 bg-dark-250 p-6 text-sm text-light-700">
       {message}
+      {retry && (
+        <a href="/share-feed" className="mt-3 block text-primary-500">
+          Try again
+        </a>
+      )}
     </div>
   );
 }
 
 export default async function Home() {
-  const data = await getAllSharesAction(1, 10);
+  const data = await getAllSharesAction(1, SHARE_PAGE_SIZE);
 
   if (!Array.isArray(data)) {
     if (data.status === 401) {
@@ -34,7 +46,7 @@ export default async function Home() {
 
     return (
       <FeedShell>
-        <FeedMessage message={data.message} />
+        <FeedMessage message={data.message} retry />
       </FeedShell>
     );
   }
@@ -42,7 +54,7 @@ export default async function Home() {
   if (data.length === 0) {
     return (
       <FeedShell>
-        <FeedMessage message="No posts found in your home feed yet." />
+        <FeedMessage message="No shared content found yet." />
       </FeedShell>
     );
   }

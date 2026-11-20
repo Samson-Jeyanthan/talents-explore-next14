@@ -1,4 +1,8 @@
-import { searchAction } from "@/actions/search.action";
+import { getCategoryPostsAction } from "@/actions/category.action";
+import { buildCategoryFeedQuery } from "@/lib/utils/categoryFeed";
+import { getAuthHeaders } from "@/lib/session";
+import { notFound } from "next/navigation";
+import Link from "next/link";
 import {
   getLanguagesAction,
   getProfessionsAction,
@@ -9,18 +13,29 @@ import { getNameOfCategory } from "@/lib/utils/ReactElementUtils";
 import Feed from "./feed";
 
 const TagPage = async ({ params, searchParams }: any) => {
-  const categoryData = await getNameOfCategory(params.id);
-  const langData = await getLanguagesAction();
-  const professionData = await getProfessionsAction();
-
-  const res = await searchAction({
-    searchType: "ALL",
-    pageNo: 1,
-    pageSize: 20,
-    primaryLanguage: searchParams.primaryLanguage,
-  });
-
-  console.log("res-of-category-search", res.response);
+  if (!/^[a-f\d]{24}$/i.test(params.id)) notFound();
+  await getAuthHeaders();
+  const [categoryData, langData, professionData] = await Promise.all([
+    getNameOfCategory(params.id),
+    getLanguagesAction(),
+    getProfessionsAction(),
+  ]);
+  if (!categoryData) notFound();
+  let query;
+  try {
+    query = buildCategoryFeedQuery(params.id, searchParams || {});
+  } catch {
+    return (
+      <section className="p-8 text-light-900">
+        <h1>Invalid category filters</h1>
+        <Link href={`/category/${params.id}`} className="text-primary-500">
+          Clear filters
+        </Link>
+      </section>
+    );
+  }
+  const posts = await getCategoryPostsAction(query, 1);
+  if (!Array.isArray(posts)) throw new Error(posts.message);
   return (
     <main className="flex w-full flex-col items-center justify-center">
       <header className="sticky top-14 w-full">
@@ -43,7 +58,7 @@ const TagPage = async ({ params, searchParams }: any) => {
         </div>
       </header>
       <section className="z-30 -mt-5 w-full rounded-t-[30px] bg-dark-200 p-8 backdrop-blur-[80px]">
-        <Feed initialPosts={res.response} />
+        <Feed initialPosts={posts} query={query} />
       </section>
     </main>
   );

@@ -96,7 +96,7 @@ export const getCategoryDetails = (name: string) => {
     default:
       return {
         icon: HeadPhoneFillIcon,
-        name: "General",
+        name: name || "General",
         description:
           "Explore various topics and find content across multiple interests.",
       };
@@ -108,18 +108,20 @@ export async function getNameOfCategory(categoryId: string) {
 
   if (mainCat.status === "7400") {
     const categoryData = mainCat.response.find(
-      (cat: any) => cat._id === categoryId
+      (cat: any) => cat._id === categoryId,
     );
+    if (!categoryData) return null;
     const categoryDetails = getCategoryDetails(categoryData?.name);
     return {
       ...categoryDetails,
     };
   }
+  throw new Error("Unable to load categories. Please try again.");
 }
 
 export async function getSaveCollectionFolderName(
   folderId: string,
-  userId: string | undefined
+  userId: string | undefined,
 ) {
   const res = await getAllSavedFoldersAction({
     userId,

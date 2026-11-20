@@ -10,7 +10,10 @@ import { Button } from "../ui/button";
 import { Dropdown, FormInput, StarRating } from "../inputs";
 import { Checkbox } from "../ui/checkbox";
 import { TIME_DURATION_FILTERS } from "@/constants";
-import qs from "query-string";
+import {
+  getPostFilterDefaults,
+  replacePostFilterParams,
+} from "@/lib/utils/postFilterQuery";
 
 type Props = {
   langData: any;
@@ -28,60 +31,14 @@ function PostFilterForm({ langData, onClose }: Props) {
 
   const form = useForm<z.infer<typeof postFilterValidation>>({
     resolver: zodResolver(postFilterValidation),
-    defaultValues: {
-      mainCategory: "",
-      subCategory: "",
-      skill: "",
-      level: "",
-      publicRating: 0,
-      postDescription: "",
-      primaryLanguage: "",
-      secondaryLanguage: "",
-      timeDuration: "",
-      country: "",
-      state: "",
-      creditTitle: "",
-    },
+    defaultValues: getPostFilterDefaults(searchParams.toString()),
   });
 
   async function onSubmit(values: z.infer<typeof postFilterValidation>) {
-    // Define the keys that need to be part of the URL query string
-    const queryParams: { [key: string]: string | undefined } = {
-      mainCategory: values.mainCategory,
-      subCategory: values.subCategory,
-      skill: values.skill,
-      level: values.level,
-      publicRating: values.publicRating
-        ? String(values.publicRating)
-        : undefined,
-      primaryLanguage: values.primaryLanguage,
-      secondaryLanguage: values.secondaryLanguage,
-      timeDuration: values.timeDuration,
-      country: values.country,
-      state: values.state,
-      creditTitle: values.creditTitle,
-    };
-
-    // results?search_query=vietnamese+war
-    // Filter out empty or undefined values
-    const nonEmptyQueryParams = Object.fromEntries(
-      Object.entries(queryParams).filter(
-        ([, value]) => value !== undefined && value !== ""
-      )
-    );
-
-    const newURL = qs.stringifyUrl(
-      {
-        url: window.location.pathname, // Keep the current URL path
-        query: {
-          ...qs.parse(searchParams.toString()), // Keep existing search params
-          ...nonEmptyQueryParams, // Add or update new query params
-        },
-      },
-      { skipNull: true, skipEmptyString: true } // Skip empty/null values
-    );
-
-    router.push(newURL, { scroll: false });
+    const query = replacePostFilterParams(searchParams.toString(), values);
+    router.push(`${window.location.pathname}${query ? `?${query}` : ""}`, {
+      scroll: false,
+    });
 
     onClose && onClose();
   }
@@ -218,6 +175,17 @@ function PostFilterForm({ langData, onClose }: Props) {
           />
         </div>
 
+        <Button
+          type="button"
+          className="shad-button_secondary"
+          onClick={() => {
+            const defaults = getPostFilterDefaults("");
+            form.reset(defaults);
+            onSubmit(defaults);
+          }}
+        >
+          Clear filters
+        </Button>
         <Button
           type="submit"
           disabled={form.formState.isSubmitting}
