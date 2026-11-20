@@ -3,67 +3,14 @@
 import {
   addPostRating,
   addProfileRatingAction,
-  followUserAction,
   getProfileOverallRating,
-  unFollowUserAction,
 } from "@/actions/connection.action";
 import { toast } from "sonner";
-
-export async function handleFollowUnFollow({
-  isFollowed,
-  followingId,
-  followingUserName,
-  setIsFollowed,
-  revalidatePathURL,
-}: {
-  isFollowed: number;
-  followingId: string;
-  followingUserName: string;
-  setIsFollowed?: (value: number) => void;
-  revalidatePathURL?: string;
-}) {
-  console.log("handleFollowUnFollow called with:", {
-    isFollowed,
-    followingId,
-    followingUserName,
-  });
-  if (isFollowed === 1) {
-    const res = await unFollowUserAction(followingId, revalidatePathURL || "");
-    console.log(res);
-    if (res?.status === "7400") {
-      toast.info(`You are no longer follower of ${followingUserName}`, {
-        duration: 4000,
-      });
-      setIsFollowed?.(0);
-      return true;
-    } else {
-      toast.error("Something went wrong", {
-        duration: 4000,
-      });
-      return false;
-    }
-  } else {
-    const res = await followUserAction(followingId, revalidatePathURL || "");
-    console.log(res);
-    if (res?.status === "7400") {
-      toast.success(`You are following ${followingUserName}`, {
-        duration: 4000,
-      });
-      setIsFollowed?.(1);
-      return true;
-    } else {
-      toast.error("Something went wrong", {
-        duration: 4000,
-      });
-      return false;
-    }
-  }
-}
 
 export async function fetchProfileOverallRating(
   setOverallList: (value: any) => void,
   urlId: string,
-  setIsOverallListLoading: (value: boolean) => void
+  setIsOverallListLoading: (value: boolean) => void,
 ) {
   const res = await getProfileOverallRating(urlId);
   if (res.status === "7400") {
@@ -78,7 +25,7 @@ export async function handleAddRating(
   authorId: string,
   ratingFor: "PROFILE" | "POST" | "SHARE",
   rating: number,
-  revalidatePathURL: string
+  revalidatePathURL: string,
 ) {
   let res: any = {};
 
@@ -88,7 +35,7 @@ export async function handleAddRating(
       postId,
       authorId,
       rating,
-      revalidatePathURL
+      revalidatePathURL,
     );
   } else {
     res = await addProfileRatingAction(authorId, rating, revalidatePathURL);
@@ -105,7 +52,7 @@ export async function handleAddRating(
       }`,
       {
         duration: 4000,
-      }
+      },
     );
   } else {
     toast.error("Something went wrong", { duration: 4000 });

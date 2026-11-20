@@ -3,23 +3,16 @@ import ConnectionButton from "../buttons/ConnectionButton";
 import { MotionDiv } from "../others/MotionDiv";
 import UserProfileImg from "../others/UserProfileImg";
 import { StarIcon } from "@/public/assets/svgs";
+import type { ConnectionUser } from "@/lib/utils/connections";
 
-export interface IConnectionListProp {
-  _id: string;
-  isTalent: boolean;
-  userName: string;
-  name: string;
-  isFollow: number;
-  profileImage: string;
-  professional: {
-    professional: string;
-  };
-}
+export type IConnectionListProp = ConnectionUser;
 
 interface Prop {
   connectCard: IConnectionListProp;
   index: number;
   connectionTab?: number;
+  isOwnList?: boolean;
+  onChanged?: (following: boolean) => void;
 }
 
 const variants = {
@@ -27,7 +20,13 @@ const variants = {
   visible: { opacity: 1 },
 };
 
-function ConnectionCard({ connectCard, index, connectionTab }: Prop) {
+function ConnectionCard({
+  connectCard,
+  index,
+  connectionTab,
+  isOwnList,
+  onChanged,
+}: Prop) {
   return (
     <MotionDiv
       variants={variants}
@@ -39,12 +38,12 @@ function ConnectionCard({ connectCard, index, connectionTab }: Prop) {
         duration: 0.3,
       }}
       viewport={{ amount: 0 }}
-      className="flex-between w-[95%] gap-2"
+      className="flex w-full min-w-0 items-center justify-between gap-2 rounded-xl border border-dark-400/50 bg-dark-250 p-3"
     >
-      <div className="flex items-center justify-center gap-2">
+      <div className="flex min-w-0 items-center gap-2">
         <Link
-          href={`/profile/${connectCard.userName}/${connectCard._id}`}
-          className="relative"
+          href={`/profile/${encodeURIComponent(connectCard.userName)}/${connectCard._id}`}
+          className="relative shrink-0"
         >
           <UserProfileImg
             src={connectCard.profileImage}
@@ -57,22 +56,25 @@ function ConnectionCard({ connectCard, index, connectionTab }: Prop) {
           )}
         </Link>
         <Link
-          href={`/profile/${connectCard.userName}/${connectCard._id}`}
-          className=""
+          href={`/profile/${encodeURIComponent(connectCard.userName)}/${connectCard._id}`}
+          className="min-w-0"
         >
-          <p className="text-sm text-light-900">{connectCard.userName}</p>
-          <p className="text-xs text-light-600">
-            {connectCard.professional.professional}
+          <p className="break-all text-sm text-light-900">
+            {connectCard.userName}
+          </p>
+          <p className="break-words text-xs text-light-600">
+            {connectCard.professional?.professional}
           </p>
         </Link>
       </div>
 
-      {connectCard.isTalent && (
+      {(connectCard.isTalent || (isOwnList && connectionTab === 2)) && (
         <ConnectionButton
-          isFollow={connectCard.isFollow}
+          isFollow={isOwnList && connectionTab === 2 ? 1 : connectCard.isFollow}
           userId={connectCard._id}
           userName={connectCard.userName}
           connectionTab={connectionTab}
+          onChanged={onChanged}
         />
       )}
     </MotionDiv>

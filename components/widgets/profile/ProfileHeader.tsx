@@ -13,7 +13,8 @@ import { TCurrentUserData, TPublicUserData } from "@/types/profile.types";
 import { usePathname, useRouter } from "next/navigation";
 import ChatLauncher from "../ChatLauncher";
 import { getProfileVisibilityState } from "@/lib/utils/profilePrivacy";
-import { handleFollowUnFollow } from "@/lib/functions/connect.functions";
+import ConnectionButton from "@/components/buttons/ConnectionButton";
+import { followFlag } from "@/lib/utils/connections";
 
 const ProfileHeader = ({
   userData,
@@ -38,7 +39,7 @@ const ProfileHeader = ({
     const canOpen =
       (currentTab === 0 && visibility.canViewProfileRatings) ||
       (currentTab === 1 && visibility.canViewFollowers) ||
-      currentTab === 2;
+      (currentTab === 2 && visibility.canViewFollowings);
 
     if (!canOpen) {
       return;
@@ -49,16 +50,7 @@ const ProfileHeader = ({
   };
 
   const isFollowing =
-    "isFollowing" in userData && userData.isFollowing === true ? 1 : 0;
-
-  const handleConnection = () => {
-    handleFollowUnFollow({
-      isFollowed: isFollowing,
-      followingId: userData._id,
-      followingUserName: userData.userName,
-      revalidatePathURL: pathname,
-    });
-  };
+    "isFollowing" in userData && followFlag(userData.isFollowing) ? 1 : 0;
 
   return (
     <header className="theme-profile-gradient flex w-full flex-col p-2 pt-1 backdrop-blur-lg 2xl:-mt-10 2xl:p-0">
@@ -92,12 +84,12 @@ const ProfileHeader = ({
               </Button>
             ) : (
               <>
-                <Button
-                  className={`${isFollowing === 1 ? "border border-solid border-primary-500 !bg-transparent text-primary-500" : "bg-primary-500 text-light-900"} w-36 rounded-full`}
-                  onClick={handleConnection}
-                >
-                  {isFollowing === 1 ? "Following" : "Follow"}
-                </Button>
+                <ConnectionButton
+                  userId={userData._id}
+                  userName={userData.userName}
+                  isFollow={isFollowing}
+                  className="w-36"
+                />
 
                 {visibility.canReceiveMessages ? (
                   <ChatLauncher
@@ -120,33 +112,36 @@ const ProfileHeader = ({
         <div className="flex flex-col gap-1 2xl:gap-2">
           <div className="flex-center sm:flex-start">
             {visibility.canViewProfileRatings ? (
-              <h4
+              <button
+                type="button"
                 className="connection-counting"
                 onClick={() => handleConnectionModalOpen(0)}
               >
                 {userData?.numberOfRating || 0}
                 <span className="connection-counting-text">Ratings</span>
-              </h4>
+              </button>
             ) : null}
 
             {visibility.canViewFollowers ? (
-              <h4
+              <button
+                type="button"
                 className="connection-counting"
                 onClick={() => handleConnectionModalOpen(1)}
               >
                 {userData?.followers}
                 <span className="connection-counting-text">Followers</span>
-              </h4>
+              </button>
             ) : null}
 
             {visibility.canViewFollowings ? (
-              <h4
+              <button
+                type="button"
                 className="connection-counting"
                 onClick={() => handleConnectionModalOpen(2)}
               >
                 {userData?.following}
                 <span className="connection-counting-text">Followings</span>
-              </h4>
+              </button>
             ) : null}
           </div>
 
@@ -180,7 +175,7 @@ const ProfileHeader = ({
       )}
 
       {showConnection && (
-        <Dialog open={showConnection}>
+        <Dialog open={showConnection} onOpenChange={setShowConnection}>
           <ConnectionListModal
             isTalent={true}
             currentTab={currentTab}

@@ -10,6 +10,8 @@ import ConnectionListModal from "../../modals/ConnectionListModal";
 import ChatLauncher from "../ChatLauncher";
 import { getProfileVisibilityState } from "@/lib/utils/profilePrivacy";
 import { useRouter } from "next/navigation";
+import ConnectionButton from "@/components/buttons/ConnectionButton";
+import { followFlag } from "@/lib/utils/connections";
 
 const NormalUserProfileHeader = ({
   userData,
@@ -28,7 +30,7 @@ const NormalUserProfileHeader = ({
   };
 
   const handleConnectionModalOpen = () => {
-    if (visibility.canViewFollowings && userData?.following !== 0) {
+    if (visibility.canViewFollowings) {
       setShowConnection(!showConnection);
     }
   };
@@ -67,13 +69,14 @@ const NormalUserProfileHeader = ({
             </p>
           )}
           {visibility.canViewFollowings ? (
-            <h4
+            <button
+              type="button"
               className="connection-counting mt-2 w-max bg-dark-300"
               onClick={handleConnectionModalOpen}
             >
               {userData?.following}
               <span className="connection-counting-text">Followings</span>
-            </h4>
+            </button>
           ) : null}
         </div>
       </section>
@@ -88,10 +91,12 @@ const NormalUserProfileHeader = ({
           </Button>
         ) : (
           <>
-            {userData?.isFollowing === 1 && (
-              <Button className="h-11 w-max rounded-full border border-solid border-primary-500 bg-none text-primary-500 hover:bg-primary-500 hover:text-light-900">
-                Remove from Follower
-              </Button>
+            {followFlag(userData?.isFollowing) && (
+              <ConnectionButton
+                userId={userData._id}
+                userName={userData.userName}
+                isFollow={userData.isFollowing}
+              />
             )}
             {visibility.canReceiveMessages ? (
               <ChatLauncher
@@ -108,11 +113,13 @@ const NormalUserProfileHeader = ({
         />
       </section>
       {showConnection && (
-        <Dialog open={showConnection}>
+        <Dialog open={showConnection} onOpenChange={setShowConnection}>
           <ConnectionListModal
             isTalent={false}
             onClick={() => setShowConnection(!showConnection)}
             currentTab={2}
+            canViewRatings={false}
+            canViewFollowers={false}
             canViewFollowings={visibility.canViewFollowings}
           />
         </Dialog>

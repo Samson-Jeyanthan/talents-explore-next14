@@ -1,14 +1,14 @@
 "use client";
 
 import { DialogClose, DialogContent, DialogTitle } from "../ui/dialog";
-import { MdClose } from "react-icons/md";
-import {
-  LoadFollowerList,
-  LoadFollowingList,
-  LoadProfileRatingList,
-} from "../others";
+import { X } from "lucide-react";
+import { useEffect, useState } from "react";
+import LoadFollowerList from "../others/LoadFollowerList";
+import LoadFollowingList from "../others/LoadFollowingList";
+import LoadProfileRatingList from "../others/LoadProfileRatingList";
+import { connectionTabs } from "@/lib/utils/connections";
 
-function ConnectionListModal({
+export default function ConnectionListModal({
   isTalent,
   currentTab,
   onClick,
@@ -25,86 +25,62 @@ function ConnectionListModal({
   canViewFollowers?: boolean;
   canViewFollowings?: boolean;
 }) {
-  const safeTab =
-    currentTab === 0 && !canViewRatings
-      ? canViewFollowers
-        ? 1
-        : 2
-      : currentTab === 1 && !canViewFollowers
-        ? canViewFollowings
-          ? 2
-          : canViewRatings
-            ? 0
-            : undefined
-        : currentTab === 2 && !canViewFollowings
-          ? canViewRatings
-            ? 0
-            : canViewFollowers
-              ? 1
-              : undefined
-          : currentTab;
-
+  const [selected, setSelected] = useState(currentTab ?? 0);
+  useEffect(() => {
+    setSelected(currentTab ?? 0);
+  }, [currentTab]);
+  const tabs = connectionTabs(
+    isTalent,
+    canViewRatings,
+    canViewFollowers,
+    canViewFollowings,
+  );
+  const safeTab = tabs.some((tab) => tab.id === selected)
+    ? selected
+    : tabs[0]?.id;
   return (
     <DialogContent
       className="connection-modal-content"
       aria-describedby={undefined}
     >
-      <DialogTitle className="sticky top-0 z-10 flex h-max w-full items-center justify-between rounded-2xl bg-dark-250 shadow-sm">
-        {isTalent ? (
-          <>
-            {canViewRatings ? (
-              <p
-                className={`${safeTab === 0 ? "active-connection-tab" : "text-light-600"} default-connection-tab`}
-                onClick={() => setCuurentTab && setCuurentTab(0)}
-              >
-                Ratings
-              </p>
-            ) : null}
-            {canViewFollowers ? (
-              <p
-                className={`${safeTab === 1 ? "active-connection-tab" : "text-light-600"} default-connection-tab`}
-                onClick={() => setCuurentTab && setCuurentTab(1)}
-              >
-                Followers
-              </p>
-            ) : null}
-          </>
-        ) : null}
-        {canViewFollowings ? (
-          <p
-            className={`${safeTab === 2 ? "active-connection-tab" : "text-light-600"} default-connection-tab`}
-            onClick={() => setCuurentTab && setCuurentTab(2)}
-          >
-            Following
-          </p>
-        ) : null}
-      </DialogTitle>
-
-      <div className="z-0 flex w-full flex-col items-center gap-4 overflow-y-scroll p-4">
-        {isTalent ? (
-          <>
-            {safeTab === 0 && canViewRatings ? (
-              <LoadProfileRatingList />
-            ) : safeTab === 1 && canViewFollowers ? (
-              <LoadFollowerList />
-            ) : null}
-          </>
-        ) : null}
-        {safeTab === 2 && canViewFollowings ? <LoadFollowingList /> : null}
-        {safeTab === undefined ? (
-          <div className="w-full rounded-2xl border border-dark-300 bg-dark-300/40 p-5 text-center text-sm text-light-500">
-            This list is private for your current visibility level.
-          </div>
-        ) : null}
+      <div className="relative w-full shrink-0 px-4 pt-4">
+        <DialogTitle className="pr-10 text-base font-semibold text-light-900">
+          Connections
+        </DialogTitle>
+        <DialogClose
+          aria-label="Close connection lists"
+          className="absolute right-3 top-3 rounded-full p-2 text-light-900 hover:bg-dark-300"
+          onClick={onClick}
+        >
+          <X className="size-4" />
+        </DialogClose>
+        <nav aria-label="Connection lists" className="mt-2 flex w-full">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              aria-pressed={safeTab === tab.id}
+              className={`default-connection-tab ${safeTab === tab.id ? "active-connection-tab" : "text-light-600"}`}
+              onClick={() => {
+                setSelected(tab.id);
+                setCuurentTab?.(tab.id);
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </nav>
       </div>
-      <DialogClose
-        className="absolute -right-8 -top-8 cursor-pointer rounded-full bg-dark-250 p-[6px] text-light-900 focus:outline-none"
-        onClick={onClick}
-      >
-        <MdClose className="text-2xl" />
-      </DialogClose>
+      <div className="flex min-h-0 w-full flex-1 flex-col gap-4 overflow-y-auto p-4">
+        {safeTab === 0 && <LoadProfileRatingList />}
+        {safeTab === 1 && <LoadFollowerList />}
+        {safeTab === 2 && <LoadFollowingList />}
+        {safeTab === undefined && (
+          <p className="rounded-xl border border-dark-400 p-4 text-center text-sm text-light-500">
+            This account&apos;s connection lists are private.
+          </p>
+        )}
+      </div>
     </DialogContent>
   );
 }
-
-export default ConnectionListModal;
