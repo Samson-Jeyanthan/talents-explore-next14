@@ -1,54 +1,49 @@
 import Link from "next/link";
 import UserProfileImg from "../others/UserProfileImg";
-import Image from "next/image";
-import { IExploreTalentsProps } from "@/types/utils.types";
-import { getFormattedDecimal } from "@/lib/utils";
 import { StarIcon } from "@/public/assets/svgs";
+import { displayRating } from "@/lib/utils/ratings";
+import type { IExploreTalentsProps } from "@/types/utils.types";
 
-interface Props {
+export default function AllTalentsCard({
+  allTalentsCard: item,
+}: {
   allTalentsCard: IExploreTalentsProps;
   index: number;
-}
-
-const AllTalentsCard = ({ allTalentsCard, index }: Props) => {
+}) {
+  const name = typeof item.userName === "string" ? item.userName : "user";
+  const professional =
+    typeof item.professional === "string"
+      ? item.professional
+      : typeof (item.professional as any)?.professional === "string"
+        ? (item.professional as any).professional
+        : "";
   return (
     <Link
-      href={`/profile/${allTalentsCard.userName}/${allTalentsCard._id}`}
-      className="relative z-10 flex min-w-40 items-center justify-between rounded-2xl border-2 border-dark-300 2xl:max-w-48"
+      href={`/profile/${encodeURIComponent(name)}/${item._id}`}
+      className="flex w-full min-w-0 flex-col items-center gap-2 rounded-2xl border border-dark-400/50 bg-dark-250 p-4 text-center"
     >
-      <div className="flex-center z-10 size-full flex-col gap-2 rounded-2xl bg-dark-200/60 p-3 py-7 backdrop-blur-[60px]">
-        <UserProfileImg
-          src={allTalentsCard.profileImage}
-          userName={allTalentsCard.userName}
-          className="size-16 min-h-16 min-w-16 rounded-full"
-        />
-        <p className="text-sm lowercase text-light-800">
-          @{allTalentsCard.userName}
-        </p>
-        <p className="text-xs text-light-500">{allTalentsCard.professional}</p>
-        <p className="flex-center gap-2 fill-custom-100 text-xs text-light-900">
-          <StarIcon width="16px" height="16px" />
-          {getFormattedDecimal(allTalentsCard.avgRating)}
-          <span className="text-xs text-light-500">
-            {allTalentsCard.numberOfRating === null
-              ? "0"
-              : allTalentsCard.numberOfRating}{" "}
-            Ratings
-          </span>
-        </p>
-      </div>
-      <Image
+      <UserProfileImg
         src={
-          allTalentsCard.profileImage ||
-          "/assets/images/default_profile_pic_2.png"
+          typeof item.profileImage === "string" ? item.profileImage : undefined
         }
-        width={512}
-        height={512}
-        alt="profile-pic"
-        className="absolute left-0 top-4 z-0 h-12 w-56 rounded-xl bg-dark-400 object-cover"
+        userName={name}
+        className="!size-16 !min-h-16 !min-w-16 rounded-full"
       />
+      <p className="w-full break-all text-sm text-light-900">@{name}</p>
+      {professional && (
+        <p className="break-words text-xs text-light-600">{professional}</p>
+      )}
+      <p className="flex items-center gap-1 fill-custom-100 text-sm text-light-900">
+        <StarIcon width="14px" height="14px" />
+        {displayRating(item.avgRating).toFixed(1)}
+      </p>
+      <p className="text-xs text-light-500">
+        {typeof item.numberOfRating === "number" &&
+        Number.isFinite(item.numberOfRating)
+          ? item.numberOfRating
+          : 0}{" "}
+        ratings
+      </p>
     </Link>
   );
-};
-
-export default AllTalentsCard;
+}

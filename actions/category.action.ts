@@ -27,7 +27,7 @@ export async function getCategoryPostsAction(
       pageSize: CATEGORY_PAGE_SIZE,
     });
     if (result?.status === "7400" && Array.isArray(result.response))
-      return result.response;
+      return result.response as IPost[];
     return {
       status: 500,
       message: "Unable to load category content. Please try again.",

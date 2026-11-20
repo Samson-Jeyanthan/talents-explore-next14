@@ -1,202 +1,217 @@
 "use server";
 
-import AllTalentsCard from "@/components/cards/AllTalentsCard";
-// import { getSession } from "@/lib/session";
-import { getAuthHeaders as resolveSessionHeaders } from "@/lib/session";
+import { getAuthHeaders } from "@/lib/session";
+import { resolveViewerIdAction } from "./tokenAndHeaders.action";
+import { isRedirectError } from "next/dist/client/components/redirect";
+import type { ISearchProps } from "@/types/utils.types";
 import {
-  IExploreTalentsProps,
-  ISearchAllTalentsProps,
-  ISearchProps,
-} from "@/types/utils.types";
-import { revalidatePath } from "next/cache";
+  searchValidation,
+  normalizeExploreItems,
+  optionItems,
+  type SearchResult,
+  type LookupKind,
+  type FilterOption,
+} from "@/lib/utils/explore";
 
-async function getAuthHeaders() {
-  return resolveSessionHeaders();
+async function request(path: string) {
+  try {
+    const headers = await getAuthHeaders();
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}${path}`,
+      { headers, cache: "no-store", signal: AbortSignal.timeout(15000) },
+    );
+    const data = await response.json();
+    if (response.ok && data?.status === "7400")
+      return { ...data, status: "7400" };
+    return {
+      status: response.ok ? 400 : response.status,
+      message:
+        typeof data?.message === "string"
+          ? data.message
+          : "Unable to load search results. Please try again.",
+    };
+  } catch (error) {
+    if (isRedirectError(error)) throw error;
+    return {
+      status: 500,
+      message: "Unable to reach search. Please try again.",
+    };
+  }
+}
+
+export async function searchAction(input: ISearchProps): Promise<SearchResult> {
+  const parsed = searchValidation.safeParse(input);
+  if (!parsed.success)
+    return {
+      status: 400,
+      response: [],
+      message: "Some search filters are invalid. Please check or clear them.",
+    };
+  try {
+    const viewerId = await resolveViewerIdAction();
+    if (!viewerId)
+      return {
+        status: 401,
+        response: [],
+        message: "Please sign in to search.",
+      };
+    const params = new URLSearchParams({ viewUserId: viewerId });
+    if (parsed.data.searchType === "TALENT") params.set("userId", viewerId);
+    for (const [key, value] of Object.entries(parsed.data)) {
+      if (value !== undefined && value !== "")
+        params.set(key, Array.isArray(value) ? value.join(",") : String(value));
+    }
+    const result = await request(`/search/?${params}`);
+    const items =
+      result.status === "7400" ? normalizeExploreItems(result.response) : null;
+    return items
+      ? { status: "7400", response: items }
+      : {
+          status: Number(result.status) || 500,
+          response: [],
+          message:
+            result.message ||
+            "Unable to load search results. Please try again.",
+        };
+  } catch (error) {
+    if (isRedirectError(error)) throw error;
+    return {
+      status: 500,
+      response: [],
+      message: "Unable to load search results. Please try again.",
+    };
+  }
 }
 
 export async function searchPeopleTag(
-  userId: string | undefined,
+  _userId: string | undefined,
   filter: string,
   pageNo: number,
   pageSize: number,
 ) {
+  if (
+    typeof filter !== "string" ||
+    !Number.isSafeInteger(pageNo) ||
+    pageNo < 1 ||
+    !Number.isInteger(pageSize) ||
+    pageSize < 1 ||
+    pageSize > 100
+  )
+    return { status: 400, response: [], message: "Invalid user search." };
+  if (!filter.trim()) return { status: "7400", response: [] };
   try {
-    const headers = await getAuthHeaders();
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/tagging/search?userId=${userId}&pageNo=${pageNo}&pageSize=${20}&filter=${filter}`,
-      {
-        cache: "no-store",
-        headers,
-      },
-    );
-    return await response.json();
+    const viewerId = await resolveViewerIdAction();
+    if (!viewerId)
+      return {
+        status: 401,
+        response: [],
+        message: "Please sign in to search.",
+      };
+    const params = new URLSearchParams({
+      userId: viewerId,
+      filter: filter.trim(),
+      pageNo: String(pageNo),
+      pageSize: String(pageSize),
+    });
+    const result = await request(`/user/tagging/search?${params}`);
+    const items =
+      result.status === "7400" ? normalizeExploreItems(result.response) : null;
+    return items
+      ? { status: "7400", response: items }
+      : {
+          status: Number(result.status) || 500,
+          response: [],
+          message:
+            result.message || "Unable to search users. Please try again.",
+        };
   } catch (error) {
-    console.error(error);
-    throw error;
+    if (isRedirectError(error)) throw error;
+    return {
+      status: 500,
+      response: [],
+      message: "Unable to search users. Please try again.",
+    };
   }
 }
 
-export async function searchAction({
-  searchType,
-  viewUserId,
-  pageNo,
-  pageSize,
-  searchText,
-  mainCategoryId,
-  subCategoryId,
-  skillId,
-  level,
-  primaryLanguage,
-  secondaryLanguage,
-  publicRating,
-  privateRating,
-  keywords,
-  description,
-  country,
-  state,
-  creditTitle,
-  creditPeopleTag,
-  resultTime,
-  userRating,
-  userGender,
-  ethnic,
-  userLanguage,
-}: ISearchProps) {
-  try {
-    const headers = await getAuthHeaders();
-    // Create URLSearchParams instance for building the query string
-    const queryParams = new URLSearchParams();
-
-    queryParams.append("searchType", searchType);
-    // queryParams.append("userId", userId);
-    queryParams.append("pageNo", pageNo.toString());
-    queryParams.append("pageSize", pageSize.toString());
-
-    // Optionally append query params if they are provided
-    if (viewUserId) queryParams.append("viewUserId", viewUserId);
-    if (searchText) queryParams.append("searchText", searchText);
-    if (mainCategoryId) queryParams.append("mainCategoryId", mainCategoryId);
-    if (subCategoryId) queryParams.append("subCategoryId", subCategoryId);
-    if (skillId) queryParams.append("skillId", skillId);
-    if (level) queryParams.append("level", level);
-    if (primaryLanguage) queryParams.append("primaryLanguage", primaryLanguage);
-    if (secondaryLanguage)
-      queryParams.append("secondaryLanguage", secondaryLanguage);
-    if (publicRating !== undefined && Number.isFinite(publicRating))
-      queryParams.append("publicRating", publicRating.toString());
-    if (privateRating !== undefined && Number.isFinite(privateRating))
-      queryParams.append("privateRating", privateRating.toString());
-    if (keywords && keywords.length)
-      queryParams.append("keywords", keywords.join(","));
-    if (description) queryParams.append("description", description);
-    if (country) queryParams.append("country", country);
-    if (state) queryParams.append("state", state);
-    if (creditTitle) queryParams.append("creditTitle", creditTitle);
-    if (creditPeopleTag) queryParams.append("creditPeopleTag", creditPeopleTag);
-    if (resultTime) queryParams.append("resultTime", resultTime);
-    if (userRating !== undefined)
-      queryParams.append("userRating", userRating.toString());
-    if (userGender) queryParams.append("userGender", userGender);
-    if (ethnic) queryParams.append("ethnic", ethnic);
-    if (userLanguage) queryParams.append("userLanguage", userLanguage);
-
-    // Make the API request
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/search/?${queryParams.toString()}`,
-      {
-        cache: "no-store",
-        headers,
-      },
-    );
-
-    // Check if the response is okay
-    if (!response.ok) {
-      throw new Error(`Error: ${response.statusText}`);
-    }
-
-    const res = await response.json();
-    if (res.status === "7400") {
-      return {
-        status: res.status,
-        response: res.response,
-        message: res.message,
-      };
-    } else {
-      return {
-        status: 400,
-        response: null,
-        message: "Something went wrong",
-      };
-    }
-  } catch (error) {
-    // Handle any errors
-    console.error("Search API call failed:", error);
-    throw error;
-  }
-}
-
-export async function exploreAllTalentsAction({
-  userId,
-  viewUserId,
-  pageNo,
-  pageSize,
-  searchText,
-  userRating,
-  userGender,
-  ethnic,
-  userLanguage,
-  pathForRevalidate,
-}: ISearchAllTalentsProps) {
-  try {
-    const headers = await getAuthHeaders();
-    const queryParams = new URLSearchParams();
-
-    queryParams.append("searchType", "TALENT");
-    queryParams.append("userId", userId);
-    queryParams.append("pageNo", pageNo.toString());
-    queryParams.append("pageSize", pageSize.toString());
-
-    if (viewUserId) queryParams.append("viewUserId", viewUserId);
-    if (searchText) queryParams.append("searchText", searchText);
-    if (userRating !== undefined)
-      queryParams.append("userRating", userRating.toString());
-    if (userGender) queryParams.append("userGender", userGender);
-    if (ethnic) queryParams.append("ethnic", ethnic);
-    if (userLanguage) queryParams.append("userLanguage", userLanguage);
-
-    // Make the API request
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/search/?${queryParams.toString()}`,
-      {
-        cache: "no-store",
-        headers,
-      },
-    );
-
-    // Check if the response is okay
-    if (!response.ok) {
-      throw new Error(`Error: ${response.statusText}`);
-    }
-
-    const res = await response.json();
-
-    if (res.status === "7400") {
-      const data = res.response;
-      if (pathForRevalidate) {
-        revalidatePath(pathForRevalidate);
-      }
-      return data.map((item: IExploreTalentsProps, index: number) => (
-        <AllTalentsCard key={index} allTalentsCard={item} index={index} />
-      ));
-    } else {
-      const data = {
-        status: 400,
-        message: "Could not fetch all posts data",
-      };
-      return data;
-    }
-  } catch (error) {
-    console.error("Search Talent API call failed:", error);
-    throw error;
-  }
+export async function getExploreFilterOptionsAction(
+  kind: LookupKind,
+  parent = "",
+  shared = false,
+): Promise<
+  { success: true; data: FilterOption[] } | { success: false; message: string }
+> {
+  const kinds = [
+    "categories",
+    "subcategories",
+    "skills",
+    "languages",
+    "countries",
+    "states",
+    "ethnic",
+  ];
+  if (
+    !kinds.includes(kind) ||
+    typeof parent !== "string" ||
+    typeof shared !== "boolean"
+  )
+    return { success: false, message: "Invalid filter request." };
+  if (
+    (kind === "subcategories" || kind === "skills") &&
+    !/^[a-f\d]{24}$/i.test(parent)
+  )
+    return { success: false, message: "Choose a category first." };
+  if (kind === "states" && !parent.trim())
+    return { success: false, message: "Choose a country first." };
+  const paths = {
+    categories: `/category/mainCategory${shared ? "/shared" : ""}`,
+    subcategories: `/category/subCategory/${shared ? "shared/" : ""}${parent}`,
+    skills: `/category/skill/${shared ? "shared/" : ""}${parent}`,
+    languages: "/language",
+    countries: "/country/countries",
+    states: `/country/states/${encodeURIComponent(parent)}`,
+    ethnic: "/private-info/ethnic",
+  };
+  const result = await request(paths[kind]);
+  const rows =
+    result.status === "7400"
+      ? optionItems(result.response) ?? optionItems(result.data)
+      : null;
+  if (!rows)
+    return {
+      success: false,
+      message:
+        result.message || "Unable to load filter options. Please try again.",
+    };
+  const field =
+    kind === "languages"
+      ? "language"
+      : kind === "countries"
+        ? "country"
+        : kind === "states"
+          ? "state"
+          : kind === "ethnic"
+            ? "ethnic"
+            : "name";
+  const options = rows.flatMap((row: any) => {
+    const label = typeof row?.[field] === "string" ? row[field].trim() : "";
+    const value = kind === "countries" || kind === "states" ? label : row?._id;
+    return label && typeof value === "string" ? [{ value, label }] : [];
+  });
+  if (rows.length && !options.length)
+    return {
+      success: false,
+      message: "Unable to read filter options. Please try again.",
+    };
+  const seen = new Set<string>();
+  return {
+    success: true,
+    data: options
+      .filter((option) => {
+        if (seen.has(option.value)) return false;
+        seen.add(option.value);
+        return true;
+      })
+      .sort((a, b) => a.label.localeCompare(b.label)),
+  };
 }

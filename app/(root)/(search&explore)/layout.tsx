@@ -1,41 +1,20 @@
 import React, { Suspense } from "react";
-import { ExploreSearchSection } from "@/components/widgets";
-import { Tabs } from "@/components/others";
-import { EXPLORE_TABS } from "@/constants";
-import {
-  getLanguagesAction,
-  getProfessionsAction,
-} from "@/actions/utils.action";
+import ExploreSearchSection from "@/components/widgets/explore/ExploreSearchSection";
+import ExploreTabs from "@/components/widgets/explore/ExploreTabs";
 
-async function layout({ children }: { children: React.ReactNode }) {
-  const langData = await getLanguagesAction();
-  const professionData = await getProfessionsAction();
-
+export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <main className="flex w-full flex-col items-center justify-center">
-      <header className="w-full">
-        <div className="flex-center relative h-[26rem] w-full flex-col gap-2">
-          <Suspense fallback={<div>Loading...</div>}>
-            <ExploreSearchSection
-              langData={langData}
-              professionData={professionData}
-            />
-          </Suspense>
-          <Tabs
-            tabs={EXPLORE_TABS}
-            activeTabClassName="bg-light-900 top-8 left-[44%] transform translate-x-1/2 size-2"
-            containerClassName="z-20"
-            titleClassName="font-medium"
-          />
-          <div className="theme-page-gradient absolute left-0 top-0 z-10 size-full" />
-          <div className="absolute inset-0 z-0 bg-[url('/assets/images/explore-cover.png')] bg-cover bg-center" />
-        </div>
+    <main className="flex w-full min-w-0 flex-col items-center">
+      <header className="relative flex min-h-80 w-full flex-col items-center justify-center gap-5 bg-[url('/assets/images/explore-cover.png')] bg-cover bg-center px-4 py-10 sm:px-8">
+        <div className="theme-page-gradient absolute inset-0 z-0" />
+        <Suspense fallback={<p role="status">Loading search...</p>}>
+          <ExploreSearchSection />
+          <ExploreTabs />
+        </Suspense>
       </header>
-      <section className="w-full bg-dark-200/80 p-8 backdrop-blur-[80px]">
+      <div className="w-full min-w-0 bg-dark-200/80 p-4 backdrop-blur-[80px] sm:p-8">
         {children}
-      </section>
+      </div>
     </main>
   );
 }
-
-export default layout;

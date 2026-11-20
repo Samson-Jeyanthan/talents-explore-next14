@@ -26,7 +26,7 @@ const ExploreCategories = ({ data, options }: Props) => {
             {data.map((item, index) => {
               const detail = getCategoryDetails(item.name);
               return (
-                <div className="exp-embla-slide" key={index}>
+                <div className="exp-embla-slide" key={item._id}>
                   <RenderTag
                     Icon={detail.icon}
                     name={item.name}
@@ -39,6 +39,9 @@ const ExploreCategories = ({ data, options }: Props) => {
           </div>
         </div>
       </div>
+      {!data.length && (
+        <p className="text-sm text-light-500">No categories available yet.</p>
+      )}
     </div>
   );
 };

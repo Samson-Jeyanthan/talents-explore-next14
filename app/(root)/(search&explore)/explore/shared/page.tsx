@@ -1,7 +1,12 @@
-import React from "react";
+import ExploreResultsPage from "@/components/widgets/explore/ExploreResultsPage";
+import type { ISearchParamsProps } from "@/types/utils.types";
 
-const page = () => {
-  return <div>page</div>;
-};
-
-export default page;
+export default function Page({ searchParams }: ISearchParamsProps) {
+  return (
+    <ExploreResultsPage
+      type="SHARE"
+      searchParams={searchParams}
+      path="/explore/shared"
+    />
+  );
+}

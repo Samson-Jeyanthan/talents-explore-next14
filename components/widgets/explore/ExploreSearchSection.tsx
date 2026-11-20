@@ -8,11 +8,11 @@ import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 
 type Props = {
-  langData: any;
-  professionData: any;
+  langData?: any;
+  professionData?: any;
 };
 
-const ExploreSearchSection = ({ langData, professionData }: Props) => {
+const ExploreSearchSection = (_props: Props = {}) => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -22,6 +22,8 @@ const ExploreSearchSection = ({ langData, professionData }: Props) => {
 
   const handleSubmit = () => {
     const params = new URLSearchParams(searchParams.toString());
+    params.delete("page");
+    params.delete("pageNo");
     if (search.trim()) params.set("q", search.trim());
     else params.delete("q");
     const queryString = params.toString();
@@ -48,10 +50,11 @@ const ExploreSearchSection = ({ langData, professionData }: Props) => {
         </>
       )}
 
-      <div className="flex-center w-full gap-5">
+      <div className="flex w-full max-w-2xl items-center justify-center gap-2">
         <div className="relative flex w-full max-w-lg">
           <CiSearch className="absolute left-2 top-2.5 text-2xl text-light-500/80" />
           <Input
+            aria-label="Search posts, shared content and talents"
             placeholder="Search & Explore"
             className="shad-explore-search-input"
             value={search}
@@ -70,10 +73,7 @@ const ExploreSearchSection = ({ langData, professionData }: Props) => {
             Search
           </Button>
         </div>
-        <ExploreFilterSheet
-          langData={langData}
-          professionData={professionData}
-        />
+        <ExploreFilterSheet />
       </div>
     </div>
   );

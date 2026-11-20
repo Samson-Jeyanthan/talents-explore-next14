@@ -1,6 +1,6 @@
 "use client";
 
-import { ExploreTopTalentsCard } from "@/components/cards";
+import AllTalentsCard from "@/components/cards/AllTalentsCard";
 import { IExploreTalentsProps } from "@/types/utils.types";
 import { EmblaOptionsType } from "embla-carousel";
 import useEmblaCarousel from "embla-carousel-react";
@@ -38,19 +38,16 @@ const ExploreTopTalents = ({ data, options }: Props) => {
         <div className="embla__viewport" ref={emblaRef}>
           <div className="exp-container">
             {data.map((item, index) => (
-              <div key={index} className="exp-embla-slide">
-                <ExploreTopTalentsCard
-                  profileImage={item.profileImage}
-                  userName={item.userName}
-                  professional={item.professional}
-                  avgRating={item.avgRating}
-                  _id={item._id}
-                />
+              <div key={item._id} className="exp-embla-slide w-56">
+                <AllTalentsCard allTalentsCard={item} index={index} />
               </div>
             ))}
           </div>
         </div>
       </div>
+      {!data.length && (
+        <p className="text-sm text-light-500">No top talents available yet.</p>
+      )}
     </div>
   );
 };

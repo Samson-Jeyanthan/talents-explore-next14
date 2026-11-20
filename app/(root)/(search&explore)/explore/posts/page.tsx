@@ -1,37 +1,12 @@
-import { searchAction } from "@/actions/search.action";
-import { getSession } from "@/lib/session";
-import { ExplorePostCard } from "@/components/cards";
-// import { getSession } from "@/lib/session";
-import { ISearchParamsProps } from "@/types/utils.types";
+import ExploreResultsPage from "@/components/widgets/explore/ExploreResultsPage";
+import type { ISearchParamsProps } from "@/types/utils.types";
 
-async function Posts({ searchParams }: ISearchParamsProps) {
-  const token = await getSession();
-  if (!token) {
-    return null;
-  }
-
-  const postsData = await searchAction({
-    searchType: "FEED",
-    viewUserId: token,
-    pageNo: 1,
-    pageSize: 20,
-    searchText: searchParams?.q,
-    resultTime: searchParams?.timeDuration as
-      | "one month"
-      | "six month"
-      | "one year"
-      | "two year"
-      | undefined,
-    publicRating: Number(searchParams?.publicRating),
-  });
-
+export default function Page({ searchParams }: ISearchParamsProps) {
   return (
-    <div className="grid grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-7">
-      {postsData.response.map((post: any, index: number) => (
-        <ExplorePostCard key={index} postCard={post} index={index} />
-      ))}
-    </div>
+    <ExploreResultsPage
+      type="FEED"
+      searchParams={searchParams}
+      path="/explore/posts"
+    />
   );
 }
-
-export default Posts;

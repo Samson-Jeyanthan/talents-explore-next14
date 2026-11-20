@@ -18,6 +18,7 @@ function load(file, mocks = {}, globals = {}) {
       exports: testModule.exports,
       require: (name) => mocks[name] || require(name),
       Error,
+      AbortSignal,
       URLSearchParams,
       ...globals,
     },
@@ -214,6 +215,10 @@ test("category search sends all filters and zero rating with freshly resolved au
     "actions/search.action.tsx",
     {
       "@/components/cards/AllTalentsCard": {},
+      "@/lib/utils/explore": load("lib/utils/explore.ts"),
+      "./tokenAndHeaders.action": {
+        resolveViewerIdAction: async () => "viewer",
+      },
       "next/cache": {},
       "@/lib/session": {
         getAuthHeaders: async () => ({ Authorization: "Bearer fresh-token" }),

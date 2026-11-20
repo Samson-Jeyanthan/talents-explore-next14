@@ -13,10 +13,13 @@ export const categoryFeedQueryValidation = z.object({
   primaryLanguage: id.optional(),
   secondaryLanguage: id.optional(),
   publicRating: z.number().finite().min(0).max(5).optional(),
+  privateRating: z.number().finite().min(0).max(5).optional(),
+  keywords: z.array(z.string()).optional(),
   description: z.string().optional(),
   country: z.string().optional(),
   state: z.string().optional(),
   creditTitle: z.string().optional(),
+  creditPeopleTag: z.string().optional(),
   resultTime: time.optional(),
 });
 export type CategoryFeedQuery = z.infer<typeof categoryFeedQueryValidation>;
@@ -44,9 +47,18 @@ export function buildCategoryFeedQuery(
         ? Number(rating)
         : undefined,
     description: text("postDescription"),
+    privateRating:
+      text("privateRating") !== undefined
+        ? Number(text("privateRating"))
+        : undefined,
+    keywords: text("keywords")
+      ?.split(",")
+      .map((word) => word.trim())
+      .filter(Boolean),
     country: text("country"),
     state: text("state"),
     creditTitle: text("creditTitle"),
+    creditPeopleTag: text("creditPeopleTag"),
     resultTime: text("timeDuration"),
   });
 }
