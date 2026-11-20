@@ -12,8 +12,8 @@ export default function ProfileLocation<T extends FieldValues>({ form }: { form:
     <div className="flex flex-col gap-2">
       <label htmlFor="profile-location" className="text-sm text-light-900">Location</label>
       <button id="profile-location" type="button" onClick={() => setOpen(true)}
-        aria-invalid={Boolean(error)} aria-describedby={error ? "profile-location-error" : undefined}
-        className="min-h-11 rounded-xl border border-dark-300 bg-dark-200 px-3 py-3 text-left text-sm text-light-900">
+        aria-haspopup="dialog" aria-expanded={open} aria-describedby={error ? "profile-location-error" : undefined}
+        className="min-h-11 rounded-xl border border-dark-300 bg-dark-200 p-3 text-left text-sm text-light-900">
         {location || "Search for your location"}
       </button>
       {error && <p id="profile-location-error" role="alert" className="text-sm text-red-500">Please select a valid location.</p>}
@@ -24,7 +24,7 @@ export default function ProfileLocation<T extends FieldValues>({ form }: { form:
           for (const [key, value] of Object.entries(fields)) {
             form.setValue(key as Path<T>, value as any, { shouldDirty: true });
           }
-          void form.trigger(["location", "latitude", "longitude"] as Path<T>[]);
+          form.trigger(["location", "latitude", "longitude"] as Path<T>[]);
           setOpen(false);
         }} />
     </div>

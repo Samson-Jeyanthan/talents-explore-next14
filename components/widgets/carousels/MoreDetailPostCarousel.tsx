@@ -142,7 +142,7 @@ const MoreDetailPostCarousel = ({ slides, options }: Props) => {
     };
 
     if (elem.requestFullscreen) {
-      void elem.requestFullscreen().catch(() => {});
+      elem.requestFullscreen().catch(() => {});
     } else if (elem.webkitRequestFullscreen) {
       /* Safari */
       elem.webkitRequestFullscreen();
