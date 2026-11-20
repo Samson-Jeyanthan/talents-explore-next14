@@ -1,194 +1,182 @@
 "use client";
 
 import Link from "next/link";
-import React, { useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { CornerDownRight, Heart, Trash2 } from "lucide-react";
+import { format } from "date-fns";
+import { toast } from "sonner";
 import UserProfileImg from "../others/UserProfileImg";
-import { ICommentAuthor, IComments } from "@/types/post.types";
-import { BsDot } from "react-icons/bs";
-import { getFormattedDate } from "@/lib/utils";
-import { Forward, Heart } from "lucide-react";
-import { addReplyAction, commentLikeAction } from "@/actions/comment.action";
-import { Textarea } from "../ui/textarea";
-import { Button } from "../ui/button";
-import { SendIcon } from "@/public/assets/svgs";
-import { useParams, usePathname } from "next/navigation";
+import { useUserContext } from "@/context/AuthProvider";
+import { commentLikeAction } from "@/actions/comment.action";
+import { canDeleteComment, commentLikeState } from "@/lib/utils/commentPages";
+import type { IComments } from "@/types/post.types";
 
-const CommentCardBody = ({
-  commentType,
-  commentDetails,
+export default function CommentCardBody({
+  commentDetails: comment,
   canReply,
-  handleViewReplies,
+  onReply,
   isReply,
-  isReplyOpen,
-  handleIsReplyComment,
+  repliesOpen,
+  onToggleReplies,
+  postAuthorId,
+  onDelete,
+  inlineReply,
 }: {
-  commentType: "PAGE" | "MODAL";
   commentDetails: IComments;
   canReply?: boolean;
-  handleViewReplies?: () => void;
+  onReply?: () => void;
   isReply?: boolean;
-  isReplyOpen?: boolean;
-  handleIsReplyComment?: (commentId: string, author: ICommentAuthor) => void;
-}) => {
-  const profilePath = `/profile/${commentDetails.author.userName}/${commentDetails.author._id}`;
-  const [isLiked, setIsLiked] = useState(commentDetails.isLiked);
-  const [totalLikes, setTotalLikes] = useState(commentDetails.totalLikes);
-  const textAreaRef = useRef<HTMLTextAreaElement>(null);
-  const [commentValue, setCommentValue] = useState("");
-  const [replyId, setReplyId] = useState<string | null>(null);
-  const params = useParams<{ id: string }>();
-  const pathname = usePathname();
-
-  const handleLike = async () => {
-    const res = await commentLikeAction(commentDetails._id);
-    if (res.status === "7400") {
-      setIsLiked(res.response.liked);
-      setTotalLikes(res.response.totalLikes);
-    }
-  };
-
-  const handleReply = (id: string, author: ICommentAuthor) => {
-    if (commentType === "MODAL") {
-      handleIsReplyComment?.(id, author);
-    } else {
-      console.log(id);
-      setReplyId(id);
-    }
-  };
-
-  const handleCancel = () => {
-    setReplyId(null);
-    setCommentValue("");
-  };
-
-  const handleSubmit = async () => {
-    if (commentValue) {
-      const res = await addReplyAction(
-        params.id,
-        replyId,
-        commentValue,
-        pathname
-      );
-
-      if (res.status === "7400") {
-        setCommentValue("");
-        setReplyId(null);
+  repliesOpen?: boolean;
+  onToggleReplies?: () => void;
+  postAuthorId?: string;
+  onDelete?: () => void;
+  inlineReply?: ReactNode;
+}) {
+  const { user } = useUserContext();
+  const [liked, setLiked] = useState(comment.isLiked);
+  const [likes, setLikes] = useState(comment.totalLikes);
+  const [busy, setBusy] = useState(false);
+  const inFlight = useRef(false);
+  useEffect(() => {
+    setLiked(comment.isLiked);
+    setLikes(comment.totalLikes);
+  }, [comment.isLiked, comment.totalLikes]);
+  async function like() {
+    if (inFlight.current) return;
+    inFlight.current = true;
+    setBusy(true);
+    try {
+      const result = await commentLikeAction(comment._id);
+      if (result?.status !== "7400") {
+        toast.error(result?.message || "Unable to update this like.");
+        return;
       }
+      const next = commentLikeState(result.response, user.currentUserId, {
+        liked: !liked,
+        count: Math.max(0, likes + (liked ? -1 : 1)),
+      });
+      setLiked(next.liked);
+      setLikes(next.count);
+    } catch {
+      toast.error("Unable to update this like. Please try again.");
+    } finally {
+      inFlight.current = false;
+      setBusy(false);
     }
-  };
-
+  }
+  const profile = comment.author?._id
+    ? `/profile/${comment.author.userName || "user"}/${comment.author._id}`
+    : "#";
+  const date =
+    comment.createdAt && !Number.isNaN(new Date(comment.createdAt).getTime())
+      ? format(new Date(comment.createdAt), "d MMM · hh:mm a")
+      : "";
+  const deletable =
+    Boolean(onDelete) &&
+    canDeleteComment(comment, user.currentUserId, postAuthorId);
   return (
-    <div className="flex w-full flex-col gap-2">
-      <div className="flex w-full items-start gap-2">
-        <Link href={profilePath}>
-          <UserProfileImg
-            src={commentDetails.author.profileImage}
-            userName={commentDetails.author.userName}
-            className={`${isReply ? "size-[28px] min-h-[28px] min-w-[28px] rounded-md" : "size-[40px] min-h-[40px] min-w-[40px] rounded-xl"}`}
-          />
-        </Link>
-        <div className="flex w-full flex-col gap-2">
-          <div className="flex w-full items-start justify-between gap-2">
-            <div className="flex w-full flex-col gap-1">
-              <div
-                className={`${isReply ? "text-[11px]" : "text-xs"} flex items-center gap-[2px] text-light-500`}
-              >
-                <Link href={profilePath} className="lowercase">
-                  @{commentDetails.author.userName}
-                </Link>
-                <BsDot className={`${isReply ? "text-[11px]" : "text-xs"}`} />
-                <p>{getFormattedDate(commentDetails.createdAt)}</p>
-              </div>
-              <p
-                className={`${isReply ? "text-[11px]" : "text-[13px]"} text-light-900 first-letter:capitalize`}
-              >
-                {commentDetails.comment}
-              </p>
-              {canReply && (
-                <div className="flex w-full items-center gap-5 text-light-500">
-                  {/* Reply button */}
-                  <span
-                    className={`${
-                      isReply ? "text-[11px]" : "text-xs"
-                    } flex-center w-fit cursor-pointer gap-1 text-light-500 hover:text-light-900`}
-                    onClick={() => {
-                      handleReply?.(commentDetails._id, commentDetails.author);
-                    }}
-                  >
-                    <Forward className={`${isReply ? "size-3" : "size-4"}`} />
-                    Reply
-                  </span>
-
-                  {/* View / Hide replies */}
-                  {commentDetails.totalReplies > 0 && (
-                    <span
-                      className={`${
-                        isReply ? "text-[11px]" : "text-xs"
-                      } cursor-pointer text-light-500 hover:text-light-900`}
-                      onClick={handleViewReplies}
-                    >
-                      {isReplyOpen
-                        ? "hide replies"
-                        : `${commentDetails.totalReplies} replies`}
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div
-              className={`${isReply ? "mt-5" : "mt-6"} flex flex-col items-center gap-1`}
-            >
-              {isLiked ? (
-                <Heart
-                  className={`${isReply ? "size-3" : "size-4"} cursor-pointer fill-red-500 text-red-500`}
-                  onClick={handleLike}
-                />
-              ) : (
-                <Heart
-                  className={`${isReply ? "size-3" : "size-4"} cursor-pointer text-light-500 hover:text-light-900`}
-                  onClick={handleLike}
-                />
-              )}
-              {totalLikes > 0 && (
-                <p
-                  className={`${isReply ? "text-[10px]" : "text-xs"} text-light-500`}
-                >
-                  {totalLikes}
-                </p>
-              )}
-            </div>
-          </div>
-          {commentType === "PAGE" && replyId && (
-            <Textarea
-              ref={textAreaRef}
-              placeholder={`${replyId ? "Reply" : "Add a Comment"}...`}
-              className="max-h-[120px] min-h-[40px] resize-none rounded-xl border-2 border-solid border-dark-300 bg-dark-200 leading-5 text-light-900 outline-none ring-offset-dark-300 placeholder:text-light-500 focus:outline-dark-400 focus-visible:ring-1 focus-visible:ring-dark-400 focus-visible:ring-offset-1"
-              value={commentValue}
-              onChange={(e) => setCommentValue(e.target.value)}
-            />
+    <div
+      className="flex min-w-0 gap-3"
+      data-comment-kind={isReply ? "reply" : "comment"}
+    >
+      <Link
+        href={profile}
+        aria-label={`View ${comment.author?.userName || "user"} profile`}
+      >
+        <UserProfileImg
+          userName={comment.author?.userName || "Unknown user"}
+          src={comment.author?.profileImage}
+          className={
+            isReply
+              ? "size-7 min-h-7 min-w-7 rounded-full"
+              : "size-10 min-h-10 min-w-10 rounded-full"
+          }
+        />
+      </Link>
+      <div className="min-w-0 flex-1">
+        <div className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+          <Link
+            href={profile}
+            className={`break-all font-semibold text-light-900 ${isReply ? "text-xs" : "text-sm"}`}
+          >
+            @{comment.author?.userName || "Unknown user"}
+          </Link>
+          {isReply && (
+            <span className="flex items-center gap-1 rounded-full bg-primary-500/5 px-2 py-0.5 text-[10px] font-medium text-primary-500 dark:text-red-300">
+              <CornerDownRight className="size-3" aria-hidden="true" />
+              Reply
+            </span>
           )}
-          {replyId && (
-            <div className="flex w-full items-center justify-end gap-2">
-              <p
-                className="cursor-pointer text-xs text-light-600 hover:text-light-900"
-                onClick={handleCancel}
-              >
-                Cancel
-              </p>
-              <Button
-                className="flex h-6 gap-2 rounded-full border-none bg-primary-500 fill-light-900 px-3 text-[13px] text-light-900"
-                disabled={!commentValue}
-                onClick={handleSubmit}
-              >
-                <SendIcon width="14px" height="14px" />
-              </Button>
-            </div>
+          {date && (
+            <time
+              dateTime={new Date(comment.createdAt).toISOString()}
+              className="ml-auto text-[11px] text-light-500"
+            >
+              {date}
+            </time>
+          )}
+          {deletable && (
+            <button
+              type="button"
+              aria-label={isReply ? "Delete reply" : "Delete comment"}
+              onClick={onDelete}
+              className="rounded-lg p-2 text-light-500 hover:bg-red-500/10 hover:text-red-500"
+            >
+              <Trash2 className="size-4" />
+            </button>
           )}
         </div>
+        <p
+          className={
+            isReply
+              ? "whitespace-pre-wrap break-words rounded-xl rounded-tl-sm border border-[#ECEEF7] bg-[#FBFBFE] px-3 py-2 text-[13px] leading-6 text-light-900 dark:border-dark-400 dark:bg-dark-200"
+              : "whitespace-pre-wrap break-words rounded-2xl rounded-tl-sm border border-[#ECEEF7] bg-[#F7F8FC] px-4 py-3 text-sm leading-6 text-light-900 dark:border-dark-400 dark:bg-dark-300"
+          }
+        >
+          {comment.comment}
+        </p>
+        <div className="mt-2 flex flex-wrap items-center gap-4 text-xs text-light-600">
+          {canReply && (
+            <button
+              type="button"
+              onClick={onReply}
+              aria-label={`Reply to ${comment.author?.userName || "user"}`}
+              className="py-1 font-medium text-light-900 hover:text-primary-500"
+            >
+              Reply
+            </button>
+          )}
+          <button
+            type="button"
+            disabled={busy}
+            aria-label={liked ? "Unlike comment" : "Like comment"}
+            aria-pressed={liked}
+            onClick={like}
+            className={`flex items-center gap-1.5 rounded py-1 ${liked ? "text-primary-500" : "text-light-500"}`}
+          >
+            <Heart className={`size-3.5 ${liked ? "fill-primary-500" : ""}`} />
+            <span>{likes}</span>
+            <span className="sr-only">likes</span>
+          </button>
+          {onToggleReplies && (comment.totalReplies > 0 || repliesOpen) && (
+            <button
+              type="button"
+              onClick={onToggleReplies}
+              aria-expanded={Boolean(repliesOpen)}
+              className="ml-auto py-1 font-medium text-light-900 hover:text-primary-500"
+            >
+              {repliesOpen
+                ? "Hide replies"
+                : `View replies (${comment.totalReplies})`}
+            </button>
+          )}
+        </div>
+        {inlineReply && (
+          <div className="mt-3 rounded-xl border border-dark-400 bg-dark-250 p-3">
+            {inlineReply}
+          </div>
+        )}
       </div>
     </div>
   );
-};
-
-export default CommentCardBody;
+}

@@ -1,116 +1,168 @@
 "use client";
 
-import { ICommentAuthor, IComments } from "@/types/post.types";
-import { MotionDiv } from "../others/MotionDiv";
-import CommentCardBody from "./CommentCardBody";
-import React, { useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { getRepliesOfCommentAction } from "@/actions/comment.action";
-import { toast } from "sonner";
+import { useUserContext } from "@/context/AuthProvider";
+import { useCommentPages } from "@/lib/hooks/useCommentPages";
+import { normalizeComment } from "@/lib/utils/commentPages";
+import { Button } from "@/components/ui/button";
+import type { ICommentAuthor, IComments } from "@/types/post.types";
+import type { CommentSent } from "@/components/inputs/CommentInput";
+import CommentCardBody from "./CommentCardBody";
 
-interface Prop {
+type Props = {
   commentDetails: IComments;
-  index: number;
   canReply?: boolean;
-  handleIsReplyComment: (commentId: string, author: ICommentAuthor) => void;
-  commentType: "PAGE" | "MODAL";
-}
-
-const variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1 },
+  postAuthorId?: string;
+  onReply: (id: string, author: ICommentAuthor, rootId: string) => void;
+  onDelete?: (id: string, rootId?: string) => void;
+  replyTargetId?: string;
+  inlineReply?: ReactNode;
+  newReply?: (CommentSent & { serial: number }) | null;
+  deletedReply?: { id: string; serial: number } | null;
 };
 
-const CommentCard = ({
+function Replies({
   commentDetails,
-  index,
   canReply,
-  handleIsReplyComment,
-  commentType,
-}: Prop) => {
-  const [replies, setReplies] = useState<IComments[]>([]);
-  const [isReplyOpen, setIsReplyOpen] = useState(false);
-  const [isLoadingReplies, setIsLoadingReplies] = useState(false);
-
-  const handleViewReplies = async () => {
-    if (isReplyOpen) {
-      setIsReplyOpen(false);
-      return;
-    }
-
-    try {
-      setIsLoadingReplies(true);
-
-      const res = await getRepliesOfCommentAction(
+  onReply,
+  newReply,
+  deletedReply,
+  postAuthorId,
+  onDelete,
+  replyTargetId,
+  inlineReply,
+}: Props) {
+  const { user } = useUserContext();
+  const loader = useCallback(
+    async (page: number) => {
+      const result = await getRepliesOfCommentAction(
         commentDetails._id,
-        1,
+        page,
         20,
-        "/home"
       );
-
-      console.log("replies-view-res", res);
-
-      if (res.status === "7400") {
-        setReplies(res.response || []);
-        setIsReplyOpen(true);
-      } else {
-        toast.error("Couldn't fetch replies", {
-          duration: 4000,
-        });
-      }
-    } catch (error) {
-      console.error("Error fetching replies:", error);
-
-      toast.error("Couldn't fetch replies", {
-        duration: 4000,
-      });
-    } finally {
-      setIsLoadingReplies(false);
-    }
-  };
-
+      return result?.status === "7400"
+        ? {
+            items: result.response
+              .map((value: unknown) =>
+                normalizeComment(value, user.currentUserId),
+              )
+              .filter(Boolean),
+          }
+        : { message: result?.message };
+    },
+    [commentDetails._id, user.currentUserId],
+  );
+  const pages = useCommentPages(loader);
+  const { prepend, refresh } = pages;
+  const handledDeletion = useRef(deletedReply?.serial);
+  useEffect(() => {
+    if (!newReply) return;
+    if (newReply.comment) prepend(newReply.comment);
+    else refresh();
+  }, [newReply, prepend, refresh]);
+  useEffect(() => {
+    if (!deletedReply || deletedReply.serial === handledDeletion.current)
+      return;
+    handledDeletion.current = deletedReply.serial;
+    refresh();
+  }, [deletedReply, refresh]);
   return (
-    <MotionDiv
-      variants={variants}
-      initial="hidden"
-      animate="visible"
-      transition={{
-        delay: index * 0.15,
-        ease: "easeInOut",
-        duration: 0.3,
-      }}
-      viewport={{ amount: 0 }}
-      className="flex items-start gap-2 p-2 pl-0"
+    <section
+      aria-label={`Replies to ${commentDetails.author.userName}`}
+      className="ml-4 rounded-2xl border-l-2 border-primary-500/20 bg-dark-300/35 p-3 dark:border-primary-500/50 sm:ml-10 sm:p-4"
     >
-      <div className="flex w-full flex-col gap-2">
-        <CommentCardBody
-          commentDetails={commentDetails}
-          canReply={canReply}
-          handleViewReplies={handleViewReplies}
-          handleIsReplyComment={handleIsReplyComment}
-          commentType={commentType}
-        />
-
-        {isReplyOpen && (
-          <div className="ml-12 mt-3 flex w-auto flex-col gap-3">
-            {isLoadingReplies ? (
-              <p className="text-xs text-light-500">Loading replies...</p>
-            ) : (
-              replies.map((reply) => (
-                <CommentCardBody
-                  key={reply._id}
-                  isReply
-                  commentDetails={reply}
-                  canReply={canReply}
-                  handleIsReplyComment={handleIsReplyComment}
-                  commentType={commentType}
-                />
-              ))
-            )}
-          </div>
+      <h3 className="mb-4 flex flex-wrap items-center gap-2 text-xs font-semibold text-light-700">
+        Replies to @{commentDetails.author.userName}
+        <span className="rounded-full bg-dark-250 px-2 py-0.5 text-[10px] font-normal text-light-500">
+          {pages.items.length} loaded
+        </span>
+      </h3>
+      <div className="flex flex-col gap-4">
+        {pages.items.map((item) => (
+          <CommentCardBody
+            key={item._id}
+            commentDetails={item}
+            canReply={canReply}
+            isReply
+            postAuthorId={postAuthorId}
+            onDelete={
+              onDelete
+                ? () => onDelete(item._id, commentDetails._id)
+                : undefined
+            }
+            inlineReply={replyTargetId === item._id ? inlineReply : undefined}
+            onReply={() => onReply(item._id, item.author, commentDetails._id)}
+          />
+        ))}
+        {pages.loading && (
+          <p role="status" className="text-xs text-light-500">
+            Loading replies...
+          </p>
+        )}
+        {pages.error && (
+          <p role="alert" className="text-sm text-red-500">
+            {pages.error}
+          </p>
+        )}
+        {!pages.loading && !pages.error && !pages.items.length && (
+          <p className="text-xs text-light-500">No replies yet.</p>
+        )}
+        {!pages.loading && pages.hasMore && (
+          <Button
+            type="button"
+            className="shad-button_secondary"
+            onClick={pages.load}
+          >
+            {pages.error ? "Try again" : "View more replies"}
+          </Button>
         )}
       </div>
-    </MotionDiv>
+    </section>
   );
-};
+}
 
-export default CommentCard;
+export default function CommentCard(props: Props) {
+  const {
+    commentDetails,
+    canReply,
+    onReply,
+    newReply,
+    postAuthorId,
+    onDelete,
+    replyTargetId,
+    inlineReply,
+  } = props;
+  const [open, setOpen] = useState(Boolean(newReply));
+  useEffect(() => {
+    if (newReply) setOpen(true);
+  }, [newReply]);
+  return (
+    <article
+      aria-label={`Comment by ${commentDetails.author.userName}`}
+      className="flex flex-col gap-4 rounded-2xl border border-dark-400/50 bg-dark-250 p-3 shadow-sm sm:p-4"
+    >
+      <CommentCardBody
+        commentDetails={commentDetails}
+        canReply={canReply}
+        postAuthorId={postAuthorId}
+        onDelete={onDelete ? () => onDelete(commentDetails._id) : undefined}
+        inlineReply={
+          replyTargetId === commentDetails._id ? inlineReply : undefined
+        }
+        onReply={() =>
+          onReply(commentDetails._id, commentDetails.author, commentDetails._id)
+        }
+        repliesOpen={open}
+        onToggleReplies={() => setOpen((current) => !current)}
+      />
+      {open && <Replies {...props} />}
+    </article>
+  );
+}

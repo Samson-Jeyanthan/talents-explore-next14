@@ -1,6 +1,7 @@
 "use client";
 
-import { PostUtilsButton } from "../buttons";
+import { useState } from "react";
+import { X } from "lucide-react";
 import {
   Dialog,
   DialogTrigger,
@@ -8,79 +9,26 @@ import {
   DialogTitle,
   DialogClose,
 } from "../ui/dialog";
-import { useEffect, useState } from "react";
-import { MdClose } from "react-icons/md";
-import { toast } from "sonner";
-import { CommentInput } from "../inputs";
-import { CommentCard } from "../cards";
-import { getCommentsAction } from "@/actions/comment.action";
-import { ICommentAuthor, IComments } from "@/types/post.types";
+import { PostUtilsButton } from "../buttons";
+import CommentThread from "@/components/widgets/postMoreDetails/CommentThread";
 
-const CommentModal = ({
+export default function CommentModal({
   postId,
   numberOfComments,
   buttonClassName,
   canComment = true,
+  postAuthorId,
 }: {
   postId: string;
   numberOfComments: number;
   buttonClassName?: string;
   canComment?: boolean;
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [data, setData] = useState<IComments[]>([]);
-  // const [replies, setReplies] = useState<IComments[]>([]);
-  // const [isReplyOpen, setIsReplyOpen] = useState(false);
-  const [replyCommentId, setReplyCommentId] = useState<{
-    commentId: string | null;
-    author: ICommentAuthor | undefined;
-  }>({
-    commentId: null,
-    author: undefined,
-  });
-
-  async function fetchCommentData() {
-    try {
-      const res = await getCommentsAction(postId, 1);
-      if (res?.status === 200) {
-        console.log(res?.response);
-        setData(res?.response);
-      } else {
-        toast.error("Couldn't fetch comments ", { duration: 4000 });
-        return false;
-      }
-    } catch (error) {
-      console.error("Error fetching comments:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    if (isOpen) {
-      setIsLoading(true);
-      fetchCommentData();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
-
-  const handleOnClose = () => {
-    setReplyCommentId({ commentId: null, author: undefined });
-    setIsOpen(false);
-  };
-
-  const handleIsReplyComment = async (
-    commentId: string,
-    author: ICommentAuthor
-  ) => {
-    console.log(commentId);
-    setReplyCommentId({ commentId, author });
-  };
-
+  postAuthorId?: string;
+}) {
+  const [open, setOpen] = useState(false);
   return (
-    <Dialog open={isOpen}>
-      <DialogTrigger onClick={() => setIsOpen(true)}>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger aria-label="View comments">
         <PostUtilsButton
           buttonFor="COMMENT"
           className={buttonClassName}
@@ -88,60 +36,32 @@ const CommentModal = ({
         />
       </DialogTrigger>
       <DialogContent
-        className="connection-modal-content !rounded-2xl"
+        className="flex h-[85dvh] max-h-[85dvh] w-[calc(100vw-2rem)] max-w-xl flex-col gap-4 overflow-hidden rounded-2xl border border-dark-400 bg-dark-250 p-4 text-light-900"
         aria-describedby={undefined}
       >
-        <DialogTitle className="sticky top-0 w-full rounded-t-2xl border-b border-solid border-light-500/40 bg-dark-250 p-2 py-3 text-center text-xl font-medium text-light-850">
-          {data.length} Comments
-        </DialogTitle>
-        <div className="flex w-full flex-col gap-3 overflow-y-scroll p-3 pb-16">
-          {isLoading ? (
-            "loading"
-          ) : (
-            <>
-              {data?.map((item, index) => (
-                <CommentCard
-                  key={index}
-                  commentDetails={item}
-                  index={index}
-                  canReply={canComment}
-                  handleIsReplyComment={handleIsReplyComment}
-                  commentType="MODAL"
-                  // isReplyOpen={isReplyOpen}
-                  // setIsReplyOpen={setIsReplyOpen}
-                />
-              ))}
-            </>
-          )}
+        <div className="flex items-center justify-between">
+          <DialogTitle className="text-xl font-semibold">Comments</DialogTitle>
+          <DialogClose asChild>
+            <button
+              type="button"
+              aria-label="Close comments"
+              className="rounded-full p-2 hover:bg-dark-300"
+            >
+              <X className="size-5" />
+            </button>
+          </DialogClose>
         </div>
-
-        <div className="flex-center fixed bottom-0 w-full gap-3 rounded-b-2xl pb-2">
-          {canComment ? (
-            <CommentInput
-              postId={postId}
-              commentType="MODAL"
-              author={replyCommentId.author}
-              replyCommentId={replyCommentId.commentId}
-              setReplyCommentId={setReplyCommentId}
-              setData={setData}
-              // setIsReplyOpen={setIsReplyOpen}
-            />
-          ) : (
-            <div className="border-t border-dark-300 bg-dark-250 px-4 py-3 text-sm text-light-500">
-              Comments are private for your current visibility level.
-            </div>
-          )}
-        </div>
-
-        <DialogClose
-          className="absolute -right-12 -top-8 cursor-pointer rounded-full bg-dark-250 p-[7px] text-light-900 focus:outline-none"
-          onClick={handleOnClose}
-        >
-          <MdClose className="text-2xl" />
-        </DialogClose>
+        {open && (
+          <CommentThread
+            key={postId}
+            postId={postId}
+            numberOfComments={numberOfComments}
+            canComment={canComment}
+            postAuthorId={postAuthorId}
+            commentType="MODAL"
+          />
+        )}
       </DialogContent>
     </Dialog>
   );
-};
-
-export default CommentModal;
+}

@@ -1,4 +1,7 @@
+"use client";
+
 import { IPost } from "@/types/post.types";
+import { useUserContext } from "@/context/AuthProvider";
 import { MotionDiv } from "../others/MotionDiv";
 import UserProfileImg from "../others/UserProfileImg";
 import Link from "next/link";
@@ -24,7 +27,11 @@ const variants = {
 const PostCard = ({ postFeedCard, index }: Props) => {
   const postLink = `/post/${postFeedCard._id}`;
   const userProfile = `/profile/${postFeedCard.author.userName}/${postFeedCard.author._id}`;
-  const visibility = getProfileVisibilityState(postFeedCard.author, false);
+  const { user } = useUserContext();
+  const visibility = getProfileVisibilityState(
+    postFeedCard.author,
+    user.currentUserId === postFeedCard.author._id,
+  );
   return (
     <MotionDiv
       variants={variants}
@@ -96,6 +103,8 @@ const PostCard = ({ postFeedCard, index }: Props) => {
           <CommentModal
             postId={postFeedCard._id}
             numberOfComments={postFeedCard.totalComments}
+            canComment={visibility.canCommentOnPosts}
+            postAuthorId={postFeedCard.author._id}
           />
           <SharePostButton
             postId={postFeedCard._id}

@@ -90,6 +90,7 @@ async function Post({ params }: TPostURLProps) {
                   numberOfComments={data?.totalComments}
                   params={params}
                   canComment={visibility.canCommentOnPosts}
+                  postAuthorId={data?.author?._id}
                 />
               </div>
               <TagsAndOtherInfo postData={data} />

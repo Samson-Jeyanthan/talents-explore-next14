@@ -1,142 +1,176 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+import { Forward, X } from "lucide-react";
 import UserProfileImg from "../others/UserProfileImg";
 import { useUserContext } from "@/context/AuthProvider";
-import React, { useEffect, useRef, useState } from "react";
 import { Button } from "../ui/button";
-import { SendIcon } from "@/public/assets/svgs";
 import { Textarea } from "../ui/textarea";
+import { SendIcon } from "@/public/assets/svgs";
 import { EmojisOptions } from "../options";
-import { Forward, XIcon } from "lucide-react";
-import { ICommentAuthor } from "@/types/post.types";
 import { addCommentAction, addReplyAction } from "@/actions/comment.action";
+import { normalizeComment } from "@/lib/utils/commentPages";
+import type { IComments, ICommentAuthor } from "@/types/post.types";
 
+export type CommentSent = {
+  comment: IComments | null;
+  parentId: string | null;
+};
 type Props = {
   postId: string;
+  commentType: "MODAL" | "PAGE" | "INLINE";
   author?: ICommentAuthor;
-  commentType: "MODAL" | "PAGE";
   replyCommentId?: string | null;
-  setReplyCommentId?: React.Dispatch<
-    React.SetStateAction<{
-      commentId: string | null;
-      author: ICommentAuthor | undefined;
-    }>
-  >;
-  setData?: React.Dispatch<React.SetStateAction<any[]>>;
-  // setIsReplyOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  replyRootId?: string;
+  onCancelReply?: () => void;
+  onSent: (event: CommentSent) => void;
 };
 
-const CommentInput = ({
+export default function CommentInput({
   postId,
-  author,
   commentType,
+  author,
   replyCommentId,
-  setReplyCommentId,
-  setData,
-  // setIsReplyOpen,
-}: Props) => {
+  replyRootId,
+  onCancelReply,
+  onSent,
+}: Props) {
   const { user } = useUserContext();
-  const [commentValue, setCommentValue] = useState("");
-  const textAreaRef = useRef<HTMLTextAreaElement>(null); // Reference to the textarea
-
+  const pathname = usePathname();
+  const [value, setValue] = useState("");
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
+  const inFlight = useRef(false);
+  const textarea = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {
-    if (textAreaRef.current) {
-      // Reset height to auto to get the correct scrollHeight
-      textAreaRef.current.style.height = "40px";
-
-      // Set height based on scrollHeight
-      textAreaRef.current.style.height = `${textAreaRef.current.scrollHeight}px`;
+    if (textarea.current) {
+      textarea.current.style.height = "40px";
+      textarea.current.style.height = `${textarea.current.scrollHeight}px`;
     }
-  }, [commentValue]);
+  }, [value]);
+  useEffect(() => {
+    if (replyCommentId) textarea.current?.focus();
+  }, [replyCommentId]);
 
-  const handleEmojiClick = (emoji: string) => {
-    setCommentValue((prev) => prev + emoji);
-  };
-
-  const handleSubmit = async (commentType: "REPLY" | "COMMENT") => {
-    if (commentValue) {
-      if (commentType === "REPLY") {
-        const res = await addReplyAction(
-          postId,
-          replyCommentId,
-          commentValue,
-          "/home"
+  async function submit() {
+    const text = value.trim();
+    if (inFlight.current || !text) return;
+    inFlight.current = true;
+    setSending(true);
+    setError("");
+    try {
+      const res = replyCommentId
+        ? await addReplyAction(
+            postId,
+            replyCommentId,
+            text,
+            pathname,
+            replyRootId,
+          )
+        : await addCommentAction(postId, text, pathname);
+      if (res?.status !== "7400") {
+        setError(
+          res?.message ||
+            "Unable to send. Your text has been kept; please try again.",
         );
-        if (res.status === "7400") {
-          setData && setData((prev) => [res.response, ...prev]);
-          setReplyCommentId?.({ commentId: null, author: undefined });
-          setCommentValue("");
-        }
-      } else {
-        const res = await addCommentAction(postId, commentValue, "/home");
-        if (res.status === "7400") {
-          setData && setData((prev) => [res.response, ...prev]);
-          // setIsReplyOpen && setIsReplyOpen(false);
-          setCommentValue("");
-        }
+        return;
       }
+      const created = normalizeComment(
+        res.response && {
+          ...res.response,
+          comment: res.response.comment ?? text,
+          createdAt: res.response.createdAt || new Date().toISOString(),
+          author:
+            res.response.author && typeof res.response.author === "object"
+              ? res.response.author
+              : {
+                  _id: user.currentUserId,
+                  userName: user.username,
+                  firstName: user.firstName,
+                  lastName: user.lastName,
+                  profileImage: user.imageUrl,
+                },
+        },
+      );
+      setValue("");
+      onSent({
+        comment: created,
+        parentId: replyCommentId ? replyRootId || replyCommentId : null,
+      });
+      onCancelReply?.();
+    } catch {
+      setError("Unable to send. Your text has been kept; please try again.");
+    } finally {
+      inFlight.current = false;
+      setSending(false);
     }
-    setCommentValue("");
-  };
-
+  }
   return (
     <div
-      className={`${commentType === "MODAL" ? "rounded-b-2xl bg-dark-250" : ""} flex w-full flex-col`}
+      className={`flex w-full flex-col gap-2 ${commentType === "MODAL" ? "bg-dark-250 p-3" : "border-b border-dark-300 pb-4"}`}
     >
       {replyCommentId && (
-        <div className="flex w-full items-center justify-between gap-2 border-t border-solid border-dark-300 px-4 py-2">
-          <p className="flex gap-2 text-start text-[13px] text-light-500">
-            Replying to{" "}
-            <span className="font-medium lowercase text-light-900">
-              @{author?.userName}
-            </span>
-          </p>
-          <span
-            className="cursor-pointer text-light-500"
-            onClick={() =>
-              setReplyCommentId?.({ commentId: null, author: undefined })
-            }
+        <div className="flex items-center justify-between gap-2 text-xs text-light-700">
+          <p>Replying to @{author?.userName || "user"}</p>
+          <button
+            type="button"
+            disabled={sending}
+            aria-label="Cancel reply"
+            onClick={onCancelReply}
+            className="rounded p-2 text-light-700"
           >
-            <XIcon width="14px" height="14px" />
-          </span>
+            <X className="size-4" />
+          </button>
         </div>
       )}
-      <div
-        className={`${commentType === "MODAL" ? "items-end rounded-b-3xl border-t border-solid px-4 pb-1 pt-3" : "items-start border-b pb-4"} flex h-auto w-full gap-3 border-dark-300`}
-      >
-        <UserProfileImg
-          userName={user.username}
-          src={user.imageUrl}
-          className="!size-[34px] !min-h-[34px] !min-w-[34px] rounded-lg"
-        />
-        <EmojisOptions onClick={handleEmojiClick} />
-        <div
-          className={`${commentType === "MODAL" ? "items-end" : "flex-col items-end "} flex w-full gap-3`}
-        >
-          <Textarea
-            ref={textAreaRef}
-            placeholder={`${replyCommentId ? "Reply" : "Add a Comment"}...`}
-            className="max-h-[120px] min-h-[40px] resize-none rounded-xl border-2 border-solid border-dark-300 bg-dark-200 leading-5 text-light-900 outline-none ring-offset-dark-300 placeholder:text-light-500 focus:outline-dark-400 focus-visible:ring-1 focus-visible:ring-dark-400 focus-visible:ring-offset-1"
-            value={commentValue}
-            onChange={(e) => setCommentValue(e.target.value)}
+      <div className="flex items-end gap-2">
+        {commentType !== "INLINE" && (
+          <UserProfileImg
+            userName={user.username}
+            src={user.imageUrl}
+            className="!size-[34px] !min-h-[34px] !min-w-[34px] rounded-lg"
           />
-          {commentValue && (
-            <Button
-              className="flex h-8 gap-2 rounded-full border-none bg-primary-500 fill-light-900 px-3 text-[13px] text-light-900"
-              onClick={() => handleSubmit(replyCommentId ? "REPLY" : "COMMENT")}
-            >
-              {commentType === "PAGE" && <>Add</>}
-              {replyCommentId ? (
-                <Forward width="16px" height="16px" />
-              ) : (
-                <SendIcon width="16px" height="16px" />
-              )}
-            </Button>
-          )}
+        )}
+        <div className="min-w-0 flex-1">
+          <Textarea
+            ref={textarea}
+            aria-label={replyCommentId ? "Reply" : "Comment"}
+            disabled={sending}
+            placeholder={
+              replyCommentId ? "Write a reply..." : "Add a comment..."
+            }
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            className="max-h-[120px] min-h-10 resize-none rounded-xl border border-dark-400 bg-dark-200 text-light-900 placeholder:text-light-500"
+          />
         </div>
+        {!sending && commentType !== "INLINE" && (
+          <EmojisOptions
+            onClick={(emoji: string) => setValue((current) => current + emoji)}
+          />
+        )}
+        <Button
+          type="button"
+          aria-label={replyCommentId ? "Send reply" : "Send comment"}
+          disabled={sending || !value.trim()}
+          onClick={submit}
+          className="shad-button_primary shrink-0 rounded-full px-3"
+        >
+          {sending ? (
+            "Sending..."
+          ) : replyCommentId ? (
+            <Forward className="size-4" />
+          ) : (
+            <SendIcon width="16px" height="16px" />
+          )}
+        </Button>
       </div>
+      {error && (
+        <p role="alert" className="text-sm text-red-500">
+          {error}
+        </p>
+      )}
     </div>
   );
-};
-
-export default CommentInput;
+}
