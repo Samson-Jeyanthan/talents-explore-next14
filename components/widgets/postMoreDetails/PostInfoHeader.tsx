@@ -1,4 +1,4 @@
-import { PostUtilsButton } from "@/components/buttons";
+import SharePostButton from "@/components/buttons/SharePostButton";
 import { StarRating } from "@/components/inputs";
 import { SaveCollectionModal } from "@/components/modals";
 import { PostOptions } from "@/components/options";
@@ -36,7 +36,11 @@ const PostInfoHeader = ({ postData }: Props) => {
         </h1>
         <div className="flex gap-3">
           <SaveCollectionModal postId={postData._id} />
-          <PostUtilsButton buttonFor="SHARE" className="p-3" />
+          <SharePostButton
+            postId={postData._id}
+            title={about.title}
+            className="p-3"
+          />
           {author?._id ? (
             <PostOptions
               postType={getPostType(postData)}

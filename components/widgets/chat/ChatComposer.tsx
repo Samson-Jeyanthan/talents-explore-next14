@@ -14,6 +14,11 @@ import {
   uploadChatAttachment,
 } from "@/lib/utils/chatMedia";
 import { UploadedFile, uploadFileToStorage } from "@/lib/utils/uploadFile";
+import {
+  removeShareParams,
+  sharedPostDraft,
+  SharedPost,
+} from "@/lib/utils/postSharing";
 
 type Props = {
   roomId: string;
@@ -22,6 +27,7 @@ type Props = {
     payload: ChatMessageInput,
   ) => Promise<{ success: boolean; message?: string }>;
   onTyping: (typing: boolean) => void;
+  sharedPost?: SharedPost;
 };
 
 export default function ChatComposer({
@@ -29,6 +35,7 @@ export default function ChatComposer({
   userName,
   onSend,
   onTyping,
+  sharedPost,
 }: Props) {
   const [message, setMessage] = useState("");
   const [attachment, setAttachment] = useState<ChatAttachment | null>(null);
@@ -41,6 +48,20 @@ export default function ChatComposer({
   const inFlight = useRef(false);
   const selecting = useRef(false);
   const uploads = useRef(new WeakMap<File, UploadedFile>());
+  const shareConsumed = useRef(false);
+  useEffect(() => {
+    if (!sharedPost || shareConsumed.current) return;
+    shareConsumed.current = true;
+    setMessage(
+      (current) =>
+        current || sharedPostDraft(window.location.origin, sharedPost),
+    );
+    window.history.replaceState(
+      window.history.state,
+      "",
+      removeShareParams(window.location.href),
+    );
+  }, [sharedPost]);
   useEffect(() => {
     mounted.current = true;
     return () => {

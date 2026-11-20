@@ -6,6 +6,7 @@ import { formatDistanceToNowStrict } from "date-fns";
 import { Inbox, MessageSquare, Search, Users } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState, useTransition } from "react";
+import { postShareParams, SharedPost } from "@/lib/utils/postSharing";
 
 type TabKey = "chat" | "request" | "group";
 
@@ -20,6 +21,7 @@ type Props = {
   initialRequests: any[];
   initialGroups: any[];
   initialUnreadCount: ChatUnreadCount;
+  sharedPost?: SharedPost;
 };
 
 type ChatRoomsApiResult = {
@@ -87,6 +89,7 @@ function ChatDashboard({
   initialRequests,
   initialGroups,
   initialUnreadCount,
+  sharedPost,
 }: Props) {
   const [activeTab, setActiveTab] = useState<TabKey>("chat");
   const [searchKey, setSearchKey] = useState("");
@@ -268,6 +271,27 @@ function ChatDashboard({
 
   return (
     <div className="flex w-full max-w-6xl flex-col gap-5 px-4 py-6 text-light-900 sm:px-6">
+      {sharedPost && (
+        <section
+          aria-label="Share post in chat"
+          className="rounded-2xl border border-dark-400 bg-dark-250 p-4"
+        >
+          <h2 className="font-semibold">Choose a conversation</h2>
+          <p className="mt-1 break-words text-sm text-light-700">
+            {sharedPost.title}
+          </p>
+          <p className="mt-2 text-xs text-light-500">
+            The post link will open as an editable message. Review it before
+            sending.
+          </p>
+          <Link
+            href="/chat"
+            className="mt-3 inline-block text-sm text-primary-500"
+          >
+            Cancel sharing
+          </Link>
+        </section>
+      )}
       <div className="rounded-[28px] border border-dark-300 bg-dark-250 p-4 sm:p-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -358,7 +382,7 @@ function ChatDashboard({
               null;
             const avatarUserId =
               member?.userId || room?.collaboration?._id || room?._id;
-            const href = `/chat/${room.roomId}?type=${activeTab}`;
+            const href = `/chat/${room.roomId}?type=${activeTab}${sharedPost ? `&${postShareParams(sharedPost)}` : ""}`;
             const accentClass = isGroupTab
               ? isUnread
                 ? "bg-[#22c55e]"

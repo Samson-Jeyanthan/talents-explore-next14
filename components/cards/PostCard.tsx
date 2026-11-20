@@ -5,7 +5,7 @@ import Link from "next/link";
 import { StarIcon } from "@/public/assets/svgs";
 import { getFormattedDecimal } from "@/lib/utils";
 import { PostOptions } from "../options";
-import { PostUtilsButton } from "../buttons";
+import SharePostButton from "@/components/buttons/SharePostButton";
 import { PostFeedCarousel } from "../widgets";
 import { StarRating } from "../inputs";
 import { CommentModal, SaveCollectionModal } from "../modals";
@@ -97,7 +97,11 @@ const PostCard = ({ postFeedCard, index }: Props) => {
             postId={postFeedCard._id}
             numberOfComments={postFeedCard.totalComments}
           />
-          <PostUtilsButton buttonFor="SHARE" size="19px" />
+          <SharePostButton
+            postId={postFeedCard._id}
+            title={postFeedCard.about.title}
+            size="19px"
+          />
           <SaveCollectionModal
             postId={postFeedCard._id}
             buttonClassName="!bg-transparent p-0"

@@ -4,10 +4,15 @@ import {
   getGroupChatRoomsAction,
 } from "@/actions/chat.action";
 import ChatDashboard from "@/components/widgets/chat/ChatDashboard";
+import { readSharedPost } from "@/lib/utils/postSharing";
 
 export const dynamic = "force-dynamic";
 
-export default async function ChatPage() {
+export default async function ChatPage({
+  searchParams = {},
+}: {
+  searchParams?: Record<string, string | string[] | undefined>;
+}) {
   const [initialChats, initialRequests, initialGroups, unreadCount] =
     await Promise.all([
       getChatRoomsAction("chat", 1, 10),
@@ -22,6 +27,7 @@ export default async function ChatPage() {
       initialRequests={initialRequests}
       initialGroups={initialGroups}
       initialUnreadCount={unreadCount}
+      sharedPost={readSharedPost(searchParams)}
     />
   );
 }

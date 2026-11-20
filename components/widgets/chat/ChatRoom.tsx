@@ -31,6 +31,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { io, type Socket } from "socket.io-client";
 import { toast } from "sonner";
+import type { SharedPost } from "@/lib/utils/postSharing";
 
 type CurrentUser = {
   _id: string;
@@ -47,6 +48,7 @@ type Props = {
   initialChatInfo: any;
   initialGroupChatDetails: any;
   currentUser: CurrentUser | null;
+  sharedPost?: SharedPost;
 };
 
 const RECENT_CHATS_KEY = "te-web-recent-chats";
@@ -115,6 +117,7 @@ function ChatRoom({
   initialChatInfo,
   initialGroupChatDetails,
   currentUser,
+  sharedPost,
 }: Props) {
   const router = useRouter();
   const { user } = useUserContext();
@@ -630,6 +633,7 @@ function ChatRoom({
             <ChatComposer
               key={roomId}
               roomId={roomId}
+              sharedPost={sharedPost}
               userName={activeUserName}
               onTyping={emitTyping}
               onSend={handleSendMessage}
