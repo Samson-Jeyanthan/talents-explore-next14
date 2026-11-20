@@ -9,13 +9,14 @@ const CreateSaveFolder = () => {
 
   return (
     <>
-      <div
+      <button
+        type="button"
         onClick={() => setIsOpen(true)}
         className="flex cursor-pointer items-center gap-2 text-sm font-normal text-custom-100"
       >
         <FaPlus />
         Create new folder
-      </div>
+      </button>
 
       <CRUDSaveFolderModal
         isFor="CREATE"

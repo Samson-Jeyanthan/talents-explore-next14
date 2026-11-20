@@ -1,38 +1,48 @@
-import { getAllSavedFoldersAction } from "@/actions/save.action";
-import { getSession } from "@/lib/session";
-// import { getSession } from "@/lib/session";
+import { getSavedFoldersAction } from "@/actions/save.action";
 import { CreateSaveFolder } from "@/components/buttons";
-import { Metadata } from "next";
+import SavedFolderCard from "@/components/cards/SavedFolderCard";
+import RetrySavedCollection from "@/components/widgets/savedCollections/RetrySavedCollection";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Saved Collection | Talents Explore",
-  description: "Saved Collection | Talents Explore",
+  title: "Saved Collections | Talents Explore",
 };
-
-const SavedCollection = async () => {
-  const session = await getSession();
-  const data = await getAllSavedFoldersAction({
-    userId: session,
-    postId: 0,
-    returnAsCard: true,
-  });
-  if (data.status === 400) return null;
-
+export default async function SavedCollection() {
+  const result = await getSavedFoldersAction();
   return (
-    <section className="mt-4 flex w-full min-w-0 flex-col gap-8 p-4 sm:p-8 sm:px-10 2xl:max-w-[1600px]">
-      <h1 className="flex flex-col gap-1 text-2xl font-semibold text-light-900 md:flex-row md:items-center md:justify-between md:text-3xl">
-        Saved Collection
+    <section className="mt-4 flex w-full min-w-0 flex-col gap-6 p-4 sm:p-8 sm:px-10 2xl:max-w-[1600px]">
+      <header className="flex flex-wrap items-center justify-between gap-4">
+        <h1 className="text-2xl font-semibold text-light-900">
+          Saved collections
+        </h1>
         <CreateSaveFolder />
-      </h1>
-      {data?.length === 0 ? (
-        <p>No folders have been create {data?.length}</p>
+      </header>
+      {!result.success ? (
+        <div
+          role="alert"
+          className="rounded-2xl border border-dark-400 bg-dark-250 p-4 text-sm text-light-700"
+        >
+          <p>{result.message}</p>
+          <RetrySavedCollection />
+        </div>
+      ) : !result.data.length ? (
+        <p className="text-sm text-light-500">
+          No collections yet. Create one to organize saved posts.
+        </p>
       ) : (
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-6 lg:grid-cols-3 xl:grid-cols-4 3xl:grid-cols-5">
-          {data}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {result.data
+            .slice()
+            .reverse()
+            .map((folder, index) => (
+              <SavedFolderCard
+                key={folder._id}
+                folderCard={folder}
+                index={index}
+              />
+            ))}
         </div>
       )}
     </section>
   );
-};
-
-export default SavedCollection;
+}

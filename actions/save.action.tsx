@@ -1,236 +1,242 @@
 "use server";
 
-import { SavedItemCard, SavedFolderCard } from "@/components/cards";
-import { ISavedFolder, ISavedItem } from "@/types/post.types";
+import SavedItemCard from "@/components/cards/SavedItemCard";
+import SavedFolderCard from "@/components/cards/SavedFolderCard";
+import type { ISavedFolder, ISavedItem } from "@/types/post.types";
 import { revalidatePath } from "next/cache";
-// import { getSession } from "@/lib/session";
-import { getSession } from "@/lib/session";
-import { getUserPersonalInfoAction } from "./auth.action";
+import { getAuthHeaders } from "@/lib/session";
+import { resolveViewerIdAction } from "./tokenAndHeaders.action";
+import { isRedirectError } from "next/dist/client/components/redirect";
+import {
+  isCollectionId,
+  collectionName,
+  normalizeSavedFolders,
+} from "@/lib/utils/savedCollections";
 
-type Props = {
-  userId: string | undefined;
-  postId: string | number | undefined;
-  returnAsCard: boolean;
-};
-
-async function resolveRouteUserId(userOrToken: string | undefined) {
-  const sessionToken = await getSession();
-
-  if (userOrToken && sessionToken && userOrToken === sessionToken) {
-    try {
-      const userRes = await getUserPersonalInfoAction(sessionToken);
-      return userRes?.response?._id || userOrToken;
-    } catch {
-      return userOrToken;
-    }
-  }
-
-  return userOrToken || "";
-}
-
-async function getAuthHeaders() {
-  const accessToken = await getSession();
-
-  return accessToken
-    ? {
-        Authorization: `Bearer ${accessToken}`,
-      }
-    : undefined;
-}
-
-export async function getAllSavedFoldersAction({
-  userId,
-  postId,
-  returnAsCard,
-}: Props) {
+type ReadResult<T> =
+  | { success: true; data: T }
+  | { success: false; message: string };
+async function request(path: string, method = "GET", body?: object) {
   try {
-    const resolvedUserId = await resolveRouteUserId(userId);
     const headers = await getAuthHeaders();
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/collection/${resolvedUserId}/${postId}`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}${path}`,
       {
-        cache: "no-store",
+        method,
         headers,
+        cache: "no-store",
+        signal: AbortSignal.timeout(15000),
+        ...(body ? { body: JSON.stringify(body) } : {}),
       },
     );
-    const res = await response.json();
-    if (res.status === "7400") {
-      const data = res.response;
-      if (returnAsCard) {
-        const reversedList = data?.slice().reverse();
-        return reversedList.map((item: ISavedFolder, index: number) => (
-          <SavedFolderCard
-            key={item._id}
-            folderCard={item}
-            userId={resolvedUserId}
-            index={index}
-          />
-        ));
-      } else {
-        const result = {
-          status: 200,
-          response: data,
-        };
-        return result;
-      }
-    } else {
-      const data = {
-        resStatus: 400,
-        message: "Could not fetch all saved folders data",
-      };
-      return data;
-    }
-  } catch {}
+    const result = await response.json();
+    if (response.ok && result?.status === "7400")
+      return { ...result, status: "7400" };
+    return {
+      status: response.ok ? result?.status || 400 : response.status,
+      message:
+        typeof result?.message === "string"
+          ? result.message
+          : "Unable to update saved collections. Please try again.",
+    };
+  } catch (error) {
+    if (isRedirectError(error)) throw error;
+    return {
+      status: 500,
+      message: "Unable to reach saved collections. Please try again.",
+    };
+  }
+}
+function invalidate(folderId?: string, path?: string) {
+  revalidatePath("/saved-collection");
+  if (folderId) revalidatePath(`/saved-collection/${folderId}`);
+  if (path && path !== "/saved-collection") revalidatePath(path);
 }
 
+export async function getSavedFoldersAction(
+  postId: string | number = 0,
+): Promise<ReadResult<ISavedFolder[]>> {
+  if (postId !== 0 && postId !== 1 && !isCollectionId(postId))
+    return { success: false, message: "Invalid post." };
+  try {
+    const viewerId = await resolveViewerIdAction();
+    if (!viewerId)
+      return {
+        success: false,
+        message: "Unable to identify your account. Please sign in again.",
+      };
+    const result = await request(`/collection/${viewerId}/${postId}`);
+    const folders =
+      result.status === "7400" ? normalizeSavedFolders(result.response) : null;
+    return folders
+      ? { success: true, data: folders }
+      : {
+          success: false,
+          message:
+            result.message ||
+            "Unable to load saved collections. Please try again.",
+        };
+  } catch (error) {
+    if (isRedirectError(error)) throw error;
+    return {
+      success: false,
+      message: "Unable to load saved collections. Please try again.",
+    };
+  }
+}
+
+export async function getSavedItemsAction(
+  folderId: string | undefined,
+  pageNo = 1,
+  pageSize = 20,
+): Promise<ReadResult<ISavedItem[]>> {
+  if (
+    !isCollectionId(folderId) ||
+    !Number.isSafeInteger(pageNo) ||
+    pageNo < 1 ||
+    !Number.isInteger(pageSize) ||
+    pageSize < 1 ||
+    pageSize > 100
+  )
+    return { success: false, message: "Invalid collection request." };
+  try {
+    const viewerId = await resolveViewerIdAction();
+    if (!viewerId)
+      return {
+        success: false,
+        message: "Unable to identify your account. Please sign in again.",
+      };
+    const result = await request(
+      `/feeds/collection/${folderId}?userId=${viewerId}&viewUserId=${viewerId}&pageNo=${pageNo}&pageSize=${pageSize}`,
+    );
+    if (
+      result.status === "7400" &&
+      Array.isArray(result.response) &&
+      result.response.every((item: any) => item && isCollectionId(item._id))
+    )
+      return { success: true, data: result.response };
+    return {
+      success: false,
+      message:
+        result.message || "Unable to load this collection. Please try again.",
+    };
+  } catch (error) {
+    if (isRedirectError(error)) throw error;
+    return {
+      success: false,
+      message: "Unable to load this collection. Please try again.",
+    };
+  }
+}
+
+// Compatibility for existing server-rendered callers. User identity comes from the session.
+export async function getAllSavedFoldersAction({
+  postId,
+  returnAsCard,
+}: {
+  userId?: string;
+  postId?: string | number;
+  returnAsCard: boolean;
+}): Promise<any> {
+  const result = await getSavedFoldersAction(postId ?? 0);
+  if (!result.success)
+    return { status: 500, message: result.message, response: [] };
+  return returnAsCard
+    ? [...result.data]
+        .reverse()
+        .map((folder, index) => (
+          <SavedFolderCard key={folder._id} folderCard={folder} index={index} />
+        ))
+    : { status: 200, response: result.data };
+}
 export async function getSavedItemsByFolderIdAction(
-  collectionId: string | undefined,
-  userId: string | undefined,
+  folderId: string | undefined,
+  _userId: string | undefined,
   pageNo: number,
   pageSize: number,
   returnAsCard: boolean,
-) {
-  try {
-    const resolvedUserId = await resolveRouteUserId(userId);
-    const headers = await getAuthHeaders();
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/collection/${collectionId}?userId=${resolvedUserId}&viewUserId=${resolvedUserId}&pageNo=${pageNo}&pageSize=${pageSize}`,
-      {
-        cache: "no-store",
-        headers,
-      },
-    );
-    const res = await response.json();
-    if (res.status === "7400") {
-      const data = res.response;
-      if (returnAsCard) {
-        return data.map((item: ISavedItem, index: number) => (
-          <SavedItemCard key={index} itemCard={item} index={index} />
-        ));
-      } else {
-        return data;
-      }
-    } else {
-      const data = {
-        status: 400,
-      };
-      return data;
-    }
-  } catch {}
+): Promise<any> {
+  const result = await getSavedItemsAction(folderId, pageNo, pageSize);
+  if (!result.success) return { status: 500, message: result.message };
+  return returnAsCard
+    ? result.data.map((item, index) => (
+        <SavedItemCard key={item._id} itemCard={item} index={index} />
+      ))
+    : result.data;
 }
-
 export async function createSaveCollectionFolderAction(
-  userId: string,
-  collectionName: string,
-  revalidatePathURL: string,
+  _userId: string,
+  name: string,
+  path = "/saved-collection",
 ) {
-  const formData = {
-    userId,
-    collectionName,
-  };
+  const trimmed = collectionName(name);
+  if (!trimmed) return { status: 400, message: "Enter a collection name." };
   try {
-    const headers = await getAuthHeaders();
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/collection`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...headers,
-        },
-        body: JSON.stringify(formData),
-      },
-    );
-    const res = await response.json();
-    revalidatePath(revalidatePathURL);
-    return res;
-  } catch {}
+    const viewerId = await resolveViewerIdAction();
+    if (!viewerId) return { status: 401, message: "Please sign in again." };
+    const result = await request("/collection", "POST", {
+      userId: viewerId,
+      collectionName: trimmed,
+    });
+    if (result.status === "7400") invalidate(undefined, path);
+    return result;
+  } catch (error) {
+    if (isRedirectError(error)) throw error;
+    return {
+      status: 500,
+      message: "Unable to create the collection. Please try again.",
+    };
+  }
 }
-
 export async function editSaveCollectionFolderAction(
-  collectionId: string,
-  collectionName: string,
-  revalidatePathURL: string,
+  folderId: string,
+  name: string,
+  path = "/saved-collection",
 ) {
-  try {
-    const headers = await getAuthHeaders();
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/collection/${collectionId}/${collectionName}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          ...headers,
-        },
-        body: JSON.stringify({ name: collectionName }),
-      },
-    );
-    const res = await response.json();
-    revalidatePath(revalidatePathURL);
-    return res;
-  } catch {}
+  const trimmed = collectionName(name);
+  if (!isCollectionId(folderId) || !trimmed)
+    return { status: 400, message: "Enter a valid collection name." };
+  const result = await request(
+    `/collection/${folderId}/${encodeURIComponent(trimmed)}`,
+    "PUT",
+    { name: trimmed },
+  );
+  if (result.status === "7400") invalidate(folderId, path);
+  return result;
 }
-
 export async function deleteSaveCollectionFolderAction(
-  collectionId: string,
-  revalidatePathURL: string,
+  folderId: string,
+  path = "/saved-collection",
 ) {
-  try {
-    const headers = await getAuthHeaders();
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/collection/${collectionId}`,
-      {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          ...headers,
-        },
-      },
-    );
-    const res = await response.json();
-    revalidatePath(revalidatePathURL);
-    return res;
-  } catch {}
+  if (!isCollectionId(folderId))
+    return { status: 400, message: "Invalid collection." };
+  const result = await request(`/collection/${folderId}`, "DELETE");
+  if (result.status === "7400") invalidate(folderId, path);
+  return result;
 }
-
 export async function addPostToSaveCollectionAction(
-  collectionId: string,
+  folderId: string,
   postId: string,
 ) {
-  try {
-    const headers = await getAuthHeaders();
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/collection/post/${collectionId}/${postId}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...headers,
-        },
-      },
-    );
-    const res = await response.json();
-    return res;
-  } catch {}
+  if (!isCollectionId(folderId) || !isCollectionId(postId))
+    return { status: 400, message: "Invalid collection or post." };
+  const result = await request(
+    `/collection/post/${folderId}/${postId}`,
+    "POST",
+  );
+  if (result.status === "7400") invalidate(folderId);
+  return result;
 }
-
 export async function removeFromSaveCollectionAction(
-  collectionId: string,
+  folderId: string,
   postId: string,
 ) {
-  try {
-    const headers = await getAuthHeaders();
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/collection/post/${collectionId}/${postId}`,
-      {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          ...headers,
-        },
-      },
-    );
-    const res = await response.json();
-    return res;
-  } catch {}
+  if (!isCollectionId(folderId) || !isCollectionId(postId))
+    return { status: 400, message: "Invalid collection or post." };
+  const result = await request(
+    `/collection/post/${folderId}/${postId}`,
+    "DELETE",
+  );
+  if (result.status === "7400") invalidate(folderId);
+  return result;
 }

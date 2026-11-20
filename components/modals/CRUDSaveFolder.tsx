@@ -11,101 +11,138 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Input } from "../ui/input";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
-  handleCreateSaveCollection,
-  handleDeleteSaveCollection,
-  handleEditSaveCollection,
-} from "@/lib/functions/post.functions";
-import { useUserContext } from "@/context/AuthProvider";
+  createSaveCollectionFolderAction,
+  deleteSaveCollectionFolderAction,
+  editSaveCollectionFolderAction,
+} from "@/actions/save.action";
 
-type Props = {
-  isFor: "CREATE" | "EDIT" | "DELETE";
-  isOpen: boolean;
-  folderId: string;
-  folderName: string;
-  onClick: () => void;
-};
-
-const CRUDSaveFolder = ({
+export default function CRUDSaveFolder({
   isFor,
   isOpen,
   folderId,
   folderName,
   onClick,
-}: Props) => {
-  const { user } = useUserContext();
+}: {
+  isFor: "CREATE" | "EDIT" | "DELETE";
+  isOpen: boolean;
+  folderId: string;
+  folderName: string;
+  onClick: () => void;
+}) {
+  const router = useRouter();
   const [value, setValue] = useState(folderName || "");
-
-  const handleSubmit = () => {
-    if (isFor === "CREATE") {
-      handleCreateSaveCollection(
-        user.currentUserId,
-        value,
-        "/saved-collection"
-      );
-    } else if (isFor === "EDIT") {
-      handleEditSaveCollection(folderId, value, "/saved-collection");
-    } else if (isFor === "DELETE") {
-      handleDeleteSaveCollection(folderId);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const inFlight = useRef(false);
+  useEffect(() => {
+    if (isOpen) {
+      setValue(isFor === "CREATE" ? "" : folderName);
+      setError("");
     }
-    setValue("");
-    onClick();
-  };
-
+  }, [isOpen, folderName, isFor]);
+  async function submit() {
+    if (inFlight.current || (isFor !== "DELETE" && !value.trim())) return;
+    inFlight.current = true;
+    setBusy(true);
+    setError("");
+    try {
+      const result =
+        isFor === "CREATE"
+          ? await createSaveCollectionFolderAction("", value)
+          : isFor === "EDIT"
+            ? await editSaveCollectionFolderAction(folderId, value)
+            : await deleteSaveCollectionFolderAction(folderId);
+      if (result?.status !== "7400") {
+        setError(
+          result?.message ||
+            "Unable to update the collection. Please try again.",
+        );
+        return;
+      }
+      toast.success(
+        isFor === "DELETE"
+          ? "Collection deleted"
+          : isFor === "EDIT"
+            ? "Collection renamed"
+            : "Collection created",
+      );
+      setValue("");
+      onClick();
+      router.refresh();
+    } catch {
+      setError("Unable to update the collection. Please try again.");
+    } finally {
+      inFlight.current = false;
+      setBusy(false);
+    }
+  }
   return (
-    <AlertDialog open={isOpen}>
-      <AlertDialogContent className="max-w-[26rem] rounded-2xl border-none bg-dark-250 p-4 text-light-900">
-        <AlertDialogHeader className="flex flex-col gap-2">
-          <AlertDialogTitle className="capitalize">
-            {isFor === "EDIT"
-              ? "Rename This"
-              : isFor === "DELETE"
-                ? `Delete ${folderName}`
-                : "Create New"}{" "}
-            Folder
+    <AlertDialog
+      open={isOpen}
+      onOpenChange={(next) => {
+        if (!next && !inFlight.current) onClick();
+      }}
+    >
+      <AlertDialogContent className="max-w-[calc(100vw-2rem)] rounded-2xl border-dark-400 bg-dark-250 p-4 text-light-900 sm:max-w-md">
+        <AlertDialogHeader>
+          <AlertDialogTitle>
+            {isFor === "CREATE"
+              ? "Create collection"
+              : isFor === "EDIT"
+                ? "Rename collection"
+                : "Delete collection?"}
           </AlertDialogTitle>
           <AlertDialogDescription>
-            {isFor === "EDIT" || isFor === "CREATE" ? (
-              <Input
-                type="text"
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                placeholder="Add Folder Name"
-                className="shad-auth_form_input border border-solid border-dark-300"
-              />
-            ) : (
-              <>
-                You will permanently delete this folder. Are you sure you want
-                to delete this folder?
-              </>
-            )}
+            {isFor === "DELETE"
+              ? `Delete "${folderName}"? The saved posts themselves will remain available.`
+              : "Choose a name for your collection."}
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter className="mt-4 flex gap-2">
-          <AlertDialogCancel
-            onClick={onClick}
-            className="rounded-full border-none bg-none text-light-900 hover:bg-dark-400"
-          >
+        {isFor !== "DELETE" && (
+          <Input
+            aria-label="Collection name"
+            disabled={busy}
+            value={value}
+            onChange={(event) => setValue(event.target.value)}
+            className="shad-form-input"
+          />
+        )}
+        {error && (
+          <p role="alert" className="text-sm text-red-500">
+            {error}
+          </p>
+        )}
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={busy} className="shad-button_secondary">
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction
             disabled={
-              value === "" || (value === folderName && isFor === "EDIT")
+              busy ||
+              (isFor !== "DELETE" &&
+                (!value.trim() ||
+                  (isFor === "EDIT" && value.trim() === folderName.trim())))
             }
-            onClick={handleSubmit}
-            className="shad-btn_primary-200 border-none"
+            onClick={(event) => {
+              event.preventDefault();
+              return submit();
+            }}
+            className="shad-button_primary"
           >
-            {isFor === "CREATE"
-              ? "Create"
-              : isFor === "EDIT"
-                ? "Continue"
-                : "Delete"}
+            {busy
+              ? "Saving..."
+              : isFor === "DELETE"
+                ? "Delete"
+                : isFor === "EDIT"
+                  ? "Save name"
+                  : "Create"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
   );
-};
-
-export default CRUDSaveFolder;
+}

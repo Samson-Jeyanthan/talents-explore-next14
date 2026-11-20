@@ -31,21 +31,26 @@ const SavedItemCard = ({ itemCard, index }: Props) => {
       className="relative z-0 mb-6 max-h-[400px] min-h-[180px] max-w-full break-inside-avoid rounded-[20px] p-0 sm:max-w-[300px]"
     >
       <Link href={`/post/${itemCard._id}`}>
-        {itemCard.media[0].mediaType === "image" ? (
+        {itemCard.media?.[0]?.mediaType === "image" &&
+        itemCard.media[0]?.url ? (
           <Image
             src={itemCard.media[0]?.url || ""}
             width={1024}
             height={1024}
             className="max-h-[400px] min-h-[180px] w-full rounded-[20px] object-cover"
-            alt={itemCard.about.title}
+            alt={itemCard.about?.title || "Saved post"}
           />
         ) : (
           <Image
-            src={"/assets/images/default-save-folder.png"}
+            src={
+              itemCard.media?.[0]?.thumbnailUrl ||
+              itemCard.shareLinkThumbnail ||
+              "/assets/images/default-save-folder.png"
+            }
             width={1024}
             height={1024}
             className="max-h-[400px] min-h-[180px] w-full rounded-[20px] object-cover"
-            alt={itemCard.about.title}
+            alt={itemCard.about?.title || "Saved post"}
           />
         )}
       </Link>
@@ -53,15 +58,19 @@ const SavedItemCard = ({ itemCard, index }: Props) => {
       <div className="flex-between absolute bottom-0 z-20 h-12 w-full gap-2 rounded-b-[20px] bg-dark-200/40 px-2 text-light-700 backdrop-blur-[80px]">
         <div className="flex items-center gap-2">
           <UserProfileImg
-            src={itemCard.author.profileImage}
-            userName={itemCard.author.userName}
+            src={itemCard.author?.profileImage}
+            userName={itemCard.author?.userName || "Unknown user"}
             className="!size-7 !min-h-7 !min-w-7 rounded-full"
           />
-          <p className="text-xs lowercase">@{itemCard.author.userName}</p>
+          <p className="text-xs lowercase">
+            @{itemCard.author?.userName || "Unknown user"}
+          </p>
         </div>
         <span className="flex w-max items-center gap-1 rounded-xl bg-none fill-custom-100 px-2 text-xs text-light-700">
           <StarIcon width="13px" height="13px" />
-          {getFormattedDecimal(itemCard.postRating)}
+          {getFormattedDecimal(
+            typeof itemCard.postRating === "number" ? itemCard.postRating : 0,
+          )}
         </span>
       </div>
     </MotionDiv>
