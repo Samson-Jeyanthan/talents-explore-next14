@@ -4,10 +4,13 @@ import {
   createCollaborationAction,
   updateCollaborationAction,
 } from "@/actions/collaboration.action";
+import LookupSelect from "@/components/inputs/SearchLookupSelect";
+import { uploadFileToStorage } from "@/lib/utils/uploadFile";
 import {
-  getSkillsAction,
-  getSubCategoriesAction,
-} from "@/actions/utils.action";
+  collaborationSelection,
+  collaborationRoleError,
+  collaborationStepError,
+} from "@/lib/utils/collaboration-editor";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -27,7 +30,14 @@ import { GENDER_VALUES, LEVEL_VALUES } from "@/constants";
 import { ArrowLeft, ArrowRight, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  useRef,
+  useId,
+  type ComponentProps,
+} from "react";
 import { toast } from "sonner";
 
 type Props = {
@@ -35,13 +45,6 @@ type Props = {
   collaborationId?: string;
   currentUser: any;
   initialDetails?: any;
-  lookupData: {
-    mainCategories: any[];
-    languages: any[];
-    countries: any[];
-    ethnicities: any[];
-    professions: any[];
-  };
 };
 
 const payments = [
@@ -54,6 +57,30 @@ const payments = [
 const paymentTypes = ["PER_HOUR", "PER_DAY", "PER_WEEK", "PER_MONTH"];
 const timelineTypes = ["DATE_SETS", "BY_DATE", "BY_DAYS"];
 const modes = ["ONLINE", "MEETUP", "HYBRID"];
+
+function FormInput(props: ComponentProps<typeof Input>) {
+  const id = useId();
+  return (
+    <div className="grid min-w-0 gap-1">
+      <label htmlFor={id} className="text-sm font-medium text-light-700">
+        {props.placeholder}
+      </label>
+      <Input {...props} id={id} />
+    </div>
+  );
+}
+
+function FormTextarea(props: ComponentProps<typeof Textarea>) {
+  const id = useId();
+  return (
+    <div className="grid min-w-0 gap-1">
+      <label htmlFor={id} className="text-sm font-medium text-light-700">
+        {props.placeholder}
+      </label>
+      <Textarea {...props} id={id} />
+    </div>
+  );
+}
 
 function toLocal(value?: string) {
   if (!value) return "";
@@ -92,54 +119,6 @@ function toIsoFromDateAndTime(date?: string, time?: string) {
   if (!date || !time) return null;
   const parsed = new Date(`${date}T${time}`);
   return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
-}
-
-function readFirst(item: any, keys: string[]) {
-  for (const key of keys) {
-    const value = item?.[key];
-    if (value !== undefined && value !== null && value !== "") {
-      return String(value);
-    }
-  }
-
-  return "";
-}
-
-function mapLookup(items: any[], valueKeys: string[], labelKeys: string[]) {
-  return (items || [])
-    .map((item: any) => {
-      const value = readFirst(item, valueKeys);
-      const label = readFirst(item, labelKeys);
-
-      if (!value || !label) {
-        return null;
-      }
-
-      return { value, label };
-    })
-    .filter(Boolean) as { value: string; label: string }[];
-}
-
-async function uploadFile(file: File, prefix: string, userName: string) {
-  const ext = file.name.split(".").pop();
-  const fileName = `${prefix}-${userName || "user"}-${Date.now()}.${ext}`;
-  const response = await fetch("/api/s3/signedUrl", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ fileName, contentType: file.type }),
-  });
-  if (!response.ok) throw new Error("Unable to prepare the file upload.");
-
-  const result = await response.json();
-  const signedUrl = result?.url;
-  const key = result?.key;
-  if (!signedUrl || !key)
-    throw new Error("The upload service returned an invalid response.");
-
-  const uploadResponse = await fetch(signedUrl, { method: "PUT", body: file });
-  if (!uploadResponse.ok) throw new Error("Unable to upload the file.");
-
-  return { url: String(signedUrl).split("?")[0], key };
 }
 
 function emptyRole() {
@@ -213,15 +192,15 @@ function normalize(details?: any) {
       deleteRoleIds: [] as string[],
     };
   }
-  const c = details?.collaboration || {};
+  const c = details?.collaboration || details || {};
   const a = c?.targetedAudience || {};
   const ages = String(a?.ageRange || "13-60").split("-");
   return {
     title: c?.title || "",
     description: c?.description || "",
     location: c?.location || "",
-    longitude: c?.gpsLocation?.coordinates?.[0] || c?.longitude || 0,
-    latitude: c?.gpsLocation?.coordinates?.[1] || c?.latitude || 0,
+    longitude: c?.gpsLocation?.coordinates?.[0] ?? c?.longitude ?? 0,
+    latitude: c?.gpsLocation?.coordinates?.[1] ?? c?.latitude ?? 0,
     deadlineToApply: toLocal(c?.deadlineToApply),
     expectedStartDate: toLocal(c?.expectedStartDate),
     expectedEndDate: toLocal(c?.expectedEndDate),
@@ -231,7 +210,8 @@ function normalize(details?: any) {
       url: c?.poster?.url || "",
       urlKey: c?.poster?.urlKey || "",
       thumbnailUrl: c?.poster?.thumbnailUrl || "",
-      thumbnailUrlKey: c?.poster?.thumbnailUrlKey || "",
+      thumbnailUrlKey:
+        c?.poster?.thumbnailUrlKey || c?.poster?.thumbnailUrlkey || "",
     },
     productionInfo: {
       title: c?.productionInfo?.title || "",
@@ -243,37 +223,37 @@ function normalize(details?: any) {
     },
     links: Array.isArray(c?.links) ? c.links.join(", ") : "",
     targetedAudience: {
-      professional: a?.professional || "",
-      ethnic: a?.ethnic || "",
-      language: a?.language || "",
+      professional: collaborationSelection(a?.professional),
+      ethnic: collaborationSelection(a?.ethnic),
+      language: collaborationSelection(a?.language),
       ageMin: Number(ages[0] || 13),
       ageMax: Number(ages[1] || 60),
-      gender: a?.gender || "",
+      gender: collaborationSelection(a?.gender),
       publicRating: Number(a?.publicRating || 0),
       location: a?.location || "",
-      longitude: a?.gpsLocation?.coordinates?.[0] || a?.longitude || 0,
-      latitude: a?.gpsLocation?.coordinates?.[1] || a?.latitude || 0,
+      longitude: a?.gpsLocation?.coordinates?.[0] ?? a?.longitude ?? 0,
+      latitude: a?.gpsLocation?.coordinates?.[1] ?? a?.latitude ?? 0,
     },
     roles: Array.isArray(details?.roles)
       ? details.roles.map((r: any) => ({
-          roleId: r?._id || "",
+          roleId: collaborationSelection(r?._id ?? r?.roleId ?? r?.id),
           name: r?.name || "",
           subtitle: r?.subtitle || "",
           description: r?.description || "",
-          ethnic: r?.ethnic || "",
-          gender: r?.gender || "",
-          languageSeeking: r?.languageSeeking || "",
+          ethnic: collaborationSelection(r?.ethnic),
+          gender: collaborationSelection(r?.gender),
+          languageSeeking: collaborationSelection(r?.languageSeeking),
           paymentDetails: {
-            payment: r?.paymentDetails?.payment || "",
-            currency: r?.paymentDetails?.currency || "",
-            amount: r?.paymentDetails?.amount || "",
-            type: r?.paymentDetails?.type || "",
+            payment: collaborationSelection(r?.paymentDetails?.payment),
+            currency: collaborationSelection(r?.paymentDetails?.currency),
+            amount: r?.paymentDetails?.amount ?? "",
+            type: collaborationSelection(r?.paymentDetails?.type),
           },
           skills: (r?.skills || []).map((s: any) => ({
-            mainCategoryId: s?.mainCategoryId || "",
-            subCategoryId: s?.subCategoryId || "",
-            skillId: s?.skillId || null,
-            level: s?.level || null,
+            mainCategoryId: collaborationSelection(s?.mainCategoryId),
+            subCategoryId: collaborationSelection(s?.subCategoryId),
+            skillId: collaborationSelection(s?.skillId),
+            level: collaborationSelection(s?.level),
           })),
           timeLineType: r?.timeLineType || "BY_DATE",
           timeLine: (r?.timeLine || []).map((t: any) => ({
@@ -285,10 +265,10 @@ function normalize(details?: any) {
             expectedDays: t?.expectedDays || "",
             title: t?.title || "",
             description: t?.description || "",
-            mode: t?.mode || "",
+            mode: collaborationSelection(t?.mode),
             location: t?.location || "",
-            longitude: t?.gpsLocation?.coordinates?.[0] || t?.longitude || 0,
-            latitude: t?.gpsLocation?.coordinates?.[1] || t?.latitude || 0,
+            longitude: t?.gpsLocation?.coordinates?.[0] ?? t?.longitude ?? 0,
+            latitude: t?.gpsLocation?.coordinates?.[1] ?? t?.latitude ?? 0,
           })),
         }))
       : [],
@@ -301,7 +281,6 @@ export default function CollaborationEditor({
   collaborationId,
   currentUser,
   initialDetails,
-  lookupData,
 }: Props) {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState(() => normalize(initialDetails));
@@ -310,9 +289,18 @@ export default function CollaborationEditor({
   const [open, setOpen] = useState(false);
   const [roleIndex, setRoleIndex] = useState(-1);
   const [draft, setDraft] = useState<any>(emptyRole());
-  const [subCats, setSubCats] = useState<Record<number, any[]>>({});
-  const [skills, setSkills] = useState<Record<number, any[]>>({});
-  const [pending, startTransition] = useTransition();
+  const [pending, setPending] = useState(false);
+  const saving = useRef(false);
+  const uploadedPoster = useRef<{ file: File; poster: any } | null>(null);
+  useEffect(() => {
+    if (!posterFile) {
+      setPosterPreview("");
+      return;
+    }
+    const url = URL.createObjectURL(posterFile);
+    setPosterPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [posterFile]);
   const [locationPicker, setLocationPicker] = useState<{
     field: "project" | "target" | "timeline";
     label: string;
@@ -321,35 +309,10 @@ export default function CollaborationEditor({
 
   const options = useMemo(
     () => ({
-      main: mapLookup(
-        lookupData.mainCategories || [],
-        ["_id", "id"],
-        ["name", "mainCategory", "title"]
-      ),
-      language: mapLookup(
-        lookupData.languages || [],
-        ["_id", "id"],
-        ["language", "name", "title"]
-      ),
-      country: mapLookup(
-        lookupData.countries || [],
-        ["name", "country", "_id", "id"],
-        ["name", "country", "title"]
-      ),
-      ethnic: mapLookup(
-        lookupData.ethnicities || [],
-        ["_id", "id"],
-        ["ethnic", "ethnicity", "name"]
-      ),
-      professional: mapLookup(
-        lookupData.professions || [],
-        ["_id", "id"],
-        ["professional", "profession", "name"]
-      ),
       gender: GENDER_VALUES.map((i) => ({ value: i.id, label: i.name })),
       level: LEVEL_VALUES.map((i) => ({ value: i._id, label: i.name })),
     }),
-    [lookupData]
+    [],
   );
 
   const setValue = (key: string, value: any) =>
@@ -357,7 +320,7 @@ export default function CollaborationEditor({
   const setNested = (
     section: "productionInfo" | "contactInfo" | "targetedAudience",
     key: string,
-    value: any
+    value: any,
   ) =>
     setForm((prev: any) => ({
       ...prev,
@@ -368,15 +331,20 @@ export default function CollaborationEditor({
     value: string,
     placeholder: string,
     data: { value: string; label: string }[],
-    onChange: (v: string) => void
+    onChange: (v: string) => void,
   ) => (
     <div className="grid gap-1">
+      <span className="text-sm font-medium text-light-700">{placeholder}</span>
       <select
         value={value || ""}
+        aria-label={placeholder}
         onChange={(event) => onChange(event.target.value)}
         className="h-11 rounded-2xl border border-dark-300 bg-dark-200 px-3 text-sm text-light-900 outline-none"
       >
         <option value="">{placeholder}</option>
+        {value && !data.some((item) => item.value === value) ? (
+          <option value={value}>Current selection</option>
+        ) : null}
         {data.map((option) => (
           <option key={`${placeholder}-${option.value}`} value={option.value}>
             {option.label}
@@ -394,61 +362,15 @@ export default function CollaborationEditor({
   const openRole = (index = -1) => {
     setRoleIndex(index);
     setDraft(
-      index >= 0 ? JSON.parse(JSON.stringify(form.roles[index])) : emptyRole()
+      index >= 0 ? JSON.parse(JSON.stringify(form.roles[index])) : emptyRole(),
     );
     setOpen(true);
   };
 
-  useEffect(() => {
-    if (!open) return;
-
-    let cancelled = false;
-
-    async function preloadRoleOptions() {
-      const nextSubCats: Record<number, any[]> = {};
-      const nextSkills: Record<number, any[]> = {};
-
-      for (let index = 0; index < (draft.skills || []).length; index += 1) {
-        const skill = draft.skills[index];
-
-        if (skill?.mainCategoryId) {
-          const subCategoryRes = await getSubCategoriesAction(
-            skill.mainCategoryId
-          );
-          if (!cancelled) {
-            nextSubCats[index] = subCategoryRes?.response || [];
-          }
-        }
-
-        if (skill?.subCategoryId) {
-          const skillRes = await getSkillsAction(skill.subCategoryId);
-          if (!cancelled) {
-            nextSkills[index] = skillRes?.response || [];
-          }
-        }
-      }
-
-      if (!cancelled) {
-        setSubCats(nextSubCats);
-        setSkills(nextSkills);
-      }
-    }
-
-    preloadRoleOptions();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [draft.skills, open]);
-
   const saveRole = () => {
-    if (
-      !draft.name ||
-      !draft.description ||
-      !(draft.skills || []).length ||
-      !(draft.timeLine || []).length
-    ) {
-      toast.error("Please complete the role, skills, and timeline.");
+    const error = collaborationRoleError(draft);
+    if (error) {
+      toast.error(error);
       return;
     }
     setForm((prev: any) => {
@@ -460,166 +382,180 @@ export default function CollaborationEditor({
     setOpen(false);
   };
 
-  const submit = () =>
-    startTransition(async () => {
-      try {
-        if (
-          !form.title ||
-          !form.description ||
-          !form.location ||
-          !form.deadlineToApply
-        ) {
-          toast.error("Please complete the basic collaboration details.");
+  const changeStep = (next: number) => {
+    if (next > step) {
+      for (let index = 0; index < next; index++) {
+        const error = collaborationStepError(form, index);
+        if (error) {
+          setStep(index);
+          toast.error(error);
           return;
         }
+      }
+    }
+    setStep(next);
+  };
 
-        if (
-          !form.expectedDays &&
-          (!form.expectedStartDate || !form.expectedEndDate)
-        ) {
-          toast.error(
-            "Add either expected days or both expected start and end dates."
-          );
-          return;
-        }
-
-        if (!form.roles.length) {
-          toast.error("Please add at least one role.");
-          return;
-        }
-
-        let poster = form.poster;
-        if (posterFile) {
-          const uploaded = await uploadFile(
+  const submit = async () => {
+    if (saving.current) return;
+    for (let index = 0; index < 3; index++) {
+      const error = collaborationStepError(form, index);
+      if (error) {
+        setStep(index);
+        toast.error(error);
+        return;
+      }
+    }
+    saving.current = true;
+    setPending(true);
+    let completed = false;
+    try {
+      let poster = form.poster;
+      if (posterFile) {
+        if (uploadedPoster.current?.file === posterFile) {
+          poster = uploadedPoster.current.poster;
+        } else {
+          const uploaded = await uploadFileToStorage(
             posterFile,
             "collaboration-poster",
-            currentUser?.userName || "user"
+            currentUser?.userName || "user",
           );
           poster = {
-            ...poster,
             mediaType: "image",
             url: uploaded.url,
             urlKey: uploaded.key,
+            thumbnailUrl: "",
+            thumbnailUrlKey: "",
           };
+          uploadedPoster.current = { file: posterFile, poster };
         }
-        const collaboration = {
-          title: form.title,
-          description: form.description,
-          poster,
-          location: form.location,
-          longitude: Number(form.longitude || 0),
-          latitude: Number(form.latitude || 0),
-          deadlineToApply: toIso(form.deadlineToApply),
-          expectedStartDate: toIso(form.expectedStartDate),
-          expectedEndDate: toIso(form.expectedEndDate),
-          expectedDays: form.expectedDays || "",
-          productionInfo: form.productionInfo,
-          contactInfo: form.contactInfo,
-          links: form.links
-            ? form.links
-                .split(",")
-                .map((i: string) => i.trim())
-                .filter(Boolean)
-            : [],
-          targetedAudience: {
-            professional: form.targetedAudience.professional || null,
-            ethnic: form.targetedAudience.ethnic || null,
-            language: form.targetedAudience.language || null,
-            ageRange: `${form.targetedAudience.ageMin}-${form.targetedAudience.ageMax}`,
-            gender: form.targetedAudience.gender || null,
-            publicRating: Number(form.targetedAudience.publicRating || 0),
-            location: form.targetedAudience.location || "",
-            longitude: Number(form.targetedAudience.longitude || 0),
-            latitude: Number(form.targetedAudience.latitude || 0),
-          },
-        };
-        const roles = form.roles.map((r: any) => ({
-          name: r.name,
-          subtitle: r.subtitle || "",
-          description: r.description,
-          skills: r.skills.map((s: any) => ({
-            mainCategoryId: s.mainCategoryId || null,
-            subCategoryId: s.subCategoryId || null,
-            skillId: s.skillId || null,
-            level: s.level || null,
-          })),
-          ethnic: r.ethnic || null,
-          gender: r.gender || null,
-          languageSeeking: r.languageSeeking || null,
-          paymentDetails: {
-            payment: r.paymentDetails.payment,
-            amount: r.paymentDetails.amount || null,
-            type: r.paymentDetails.type || null,
-            currency: r.paymentDetails.currency || null,
-          },
-          timeLineType: r.timeLineType,
-          timeLine: r.timeLine.map((t: any) => ({
-            date:
-              r.timeLineType === "DATE_SETS"
-                ? toIso(t.date ? `${t.date}T00:00` : "")
-                : null,
-            startTime:
-              r.timeLineType === "DATE_SETS"
-                ? toIsoFromDateAndTime(t.date, t.startTime)
-                : null,
-            endTime:
-              r.timeLineType === "DATE_SETS"
-                ? toIsoFromDateAndTime(t.date, t.endTime)
-                : null,
-            startDate: r.timeLineType === "BY_DATE" ? toIso(t.startDate) : null,
-            endDate: r.timeLineType === "BY_DATE" ? toIso(t.endDate) : null,
-            expectedDays:
-              r.timeLineType === "BY_DAYS" ? t.expectedDays || "" : "",
-            title: t.title || "",
-            description: t.description || "",
-            mode: t.mode,
-            location: t.location,
-            longitude: Number(t.longitude || 0),
-            latitude: Number(t.latitude || 0),
-          })),
-        }));
-        const res =
-          mode === "edit" && collaborationId
-            ? await updateCollaborationAction(collaborationId, {
-                collaboration,
-                collaboratorRolesCreate: roles.filter(
-                  (_r: any, i: number) => !form.roles[i].roleId
-                ),
-                collaboratorRolesUpdate: roles
-                  .map((r: any, i: number) =>
-                    form.roles[i].roleId
-                      ? { roleId: form.roles[i].roleId, data: r }
-                      : null
-                  )
-                  .filter(Boolean),
-                deleteRoleIds: form.deleteRoleIds,
-              })
-            : await createCollaborationAction({
-                collaboration,
-                collaboratorRoles: roles,
-              });
-        if (res?.status === "7400") {
-          const id =
-            collaborationId ||
-            res?.response?.collaboration?.id ||
-            res?.response?.collaboration?._id;
-          if (mode === "edit") {
-            window.location.assign(
-              id ? `/collaboration/${id}` : "/collaboration"
-            );
-            return;
-          }
+      }
+      const collaboration = {
+        title: form.title.trim(),
+        description: form.description.trim(),
+        poster,
+        location: form.location,
+        longitude: Number(form.longitude || 0),
+        latitude: Number(form.latitude || 0),
+        deadlineToApply: toIso(form.deadlineToApply),
+        expectedStartDate: toIso(form.expectedStartDate),
+        expectedEndDate: toIso(form.expectedEndDate),
+        expectedDays: form.expectedDays || "",
+        productionInfo: form.productionInfo,
+        contactInfo: form.contactInfo,
+        links: form.links
+          ? form.links
+              .split(",")
+              .map((i: string) => i.trim())
+              .filter(Boolean)
+          : [],
+        targetedAudience: {
+          professional: form.targetedAudience.professional || null,
+          ethnic: form.targetedAudience.ethnic || null,
+          language: form.targetedAudience.language || null,
+          ageRange: `${form.targetedAudience.ageMin}-${form.targetedAudience.ageMax}`,
+          gender: form.targetedAudience.gender || null,
+          publicRating: Number(form.targetedAudience.publicRating || 0),
+          location: form.targetedAudience.location || "",
+          longitude: Number(form.targetedAudience.longitude || 0),
+          latitude: Number(form.targetedAudience.latitude || 0),
+        },
+      };
+      const roles = form.roles.map((r: any) => ({
+        name: r.name.trim(),
+        subtitle: r.subtitle || "",
+        description: r.description,
+        skills: r.skills.map((s: any) => ({
+          mainCategoryId: s.mainCategoryId || null,
+          subCategoryId: s.subCategoryId || null,
+          skillId: s.skillId || null,
+          level: s.level || null,
+        })),
+        ethnic: r.ethnic || null,
+        gender: r.gender || null,
+        languageSeeking: r.languageSeeking || null,
+        paymentDetails: {
+          payment: r.paymentDetails.payment,
+          amount:
+            r.paymentDetails.amount === "" ? null : r.paymentDetails.amount,
+          type: r.paymentDetails.type || null,
+          currency: r.paymentDetails.currency || null,
+        },
+        timeLineType: r.timeLineType,
+        timeLine: r.timeLine.map((t: any) => ({
+          date:
+            r.timeLineType === "DATE_SETS"
+              ? toIso(t.date ? `${t.date}T00:00` : "")
+              : null,
+          startTime:
+            r.timeLineType === "DATE_SETS"
+              ? toIsoFromDateAndTime(t.date, t.startTime)
+              : null,
+          endTime:
+            r.timeLineType === "DATE_SETS"
+              ? toIsoFromDateAndTime(t.date, t.endTime)
+              : null,
+          startDate: r.timeLineType === "BY_DATE" ? toIso(t.startDate) : null,
+          endDate: r.timeLineType === "BY_DATE" ? toIso(t.endDate) : null,
+          expectedDays:
+            r.timeLineType === "BY_DAYS" ? t.expectedDays || "" : "",
+          title: t.title || "",
+          description: t.description || "",
+          mode: t.mode,
+          location: t.location,
+          longitude: Number(t.longitude || 0),
+          latitude: Number(t.latitude || 0),
+        })),
+      }));
+      const res =
+        mode === "edit" && collaborationId
+          ? await updateCollaborationAction(collaborationId, {
+              collaboration,
+              collaboratorRolesCreate: roles.filter(
+                (_r: any, i: number) => !form.roles[i].roleId,
+              ),
+              collaboratorRolesUpdate: roles
+                .map((r: any, i: number) =>
+                  form.roles[i].roleId
+                    ? { roleId: form.roles[i].roleId, data: r }
+                    : null,
+                )
+                .filter(Boolean),
+              deleteRoleIds: form.deleteRoleIds,
+            })
+          : await createCollaborationAction({
+              collaboration,
+              collaboratorRoles: roles,
+            });
+      if (res?.status === "7400") {
+        completed = true;
+        const id =
+          collaborationId ||
+          res?.response?.collaboration?.id ||
+          res?.response?.collaboration?._id;
+        if (mode === "edit") {
           window.location.assign(
-            id ? `/collaboration/success/${id}` : "/collaboration"
+            id ? `/collaboration/${id}` : "/collaboration",
           );
           return;
         }
-        toast.error(res?.message || "Failed to save collaboration");
-      } catch (e) {
-        console.error(e);
-        toast.error("Failed to save collaboration");
+        window.location.assign(
+          id ? `/collaboration/success/${id}` : "/collaboration",
+        );
+        return;
       }
-    });
+      toast.error(res?.message || "Failed to save collaboration");
+    } catch {
+      toast.error(
+        "Unable to save collaboration. Your changes are still here; please try again.",
+      );
+    } finally {
+      if (!completed) {
+        saving.current = false;
+        setPending(false);
+      }
+    }
+  };
 
   return (
     <>
@@ -657,7 +593,8 @@ export default function CollaborationEditor({
                 key={s}
                 type="button"
                 className={`rounded-full px-4 py-2 text-sm ${step === i ? "bg-primary-500 text-light-900" : "bg-dark-200 text-light-500"}`}
-                onClick={() => setStep(i)}
+                disabled={pending}
+                onClick={() => changeStep(i)}
               >
                 Step {s}
               </button>
@@ -665,7 +602,11 @@ export default function CollaborationEditor({
           </div>
         </div>
 
-        <div className="rounded-[32px] border border-dark-300 bg-dark-250 p-5 sm:p-6">
+        <fieldset
+          disabled={pending}
+          aria-busy={pending}
+          className="min-w-0 rounded-[32px] border border-dark-300 bg-dark-250 p-5 sm:p-6"
+        >
           {step === 0 ? (
             <div className="grid gap-4">
               <label className="flex min-h-[220px] cursor-pointer items-center justify-center rounded-[28px] border border-dashed border-dark-300 bg-dark-200">
@@ -684,22 +625,40 @@ export default function CollaborationEditor({
                 )}
                 <input
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  aria-label="Upload collaboration poster"
                   className="hidden"
                   onChange={(e) => {
                     const file = e.target.files?.[0] || null;
+                    e.target.value = "";
+                    if (!file) return;
+                    if (
+                      ![
+                        "image/jpeg",
+                        "image/png",
+                        "image/webp",
+                        "image/gif",
+                      ].includes(file.type) ||
+                      !file.size ||
+                      file.size > 20 * 1024 * 1024
+                    ) {
+                      toast.error(
+                        "Choose a JPG, PNG, WebP, or GIF image up to 20 MB.",
+                      );
+                      return;
+                    }
+                    uploadedPoster.current = null;
                     setPosterFile(file);
-                    if (file) setPosterPreview(URL.createObjectURL(file));
                   }}
                 />
               </label>
-              <Input
+              <FormInput
                 value={form.title}
                 onChange={(e) => setValue("title", e.target.value)}
-                placeholder='Title eg- "Looking for a guitarist..."'
+                placeholder="Collaboration title"
                 className="h-11 rounded-2xl border-dark-300 bg-dark-200 text-light-900 placeholder:text-light-500"
               />
-              <Textarea
+              <FormTextarea
                 value={form.description}
                 onChange={(e) => setValue("description", e.target.value)}
                 placeholder="Description"
@@ -757,7 +716,7 @@ export default function CollaborationEditor({
                   />
                 </div>
               </div>
-              <Input
+              <FormInput
                 value={form.expectedDays}
                 onChange={(e) => setValue("expectedDays", e.target.value)}
                 placeholder="Or expected days / weeks / months"
@@ -843,7 +802,7 @@ export default function CollaborationEditor({
           {step === 2 ? (
             <div className="grid gap-4">
               <div className="grid gap-4 md:grid-cols-2">
-                <Input
+                <FormInput
                   value={form.productionInfo.title}
                   onChange={(e) =>
                     setNested("productionInfo", "title", e.target.value)
@@ -851,7 +810,7 @@ export default function CollaborationEditor({
                   placeholder="Production Title / Company"
                   className="h-11 rounded-2xl border-dark-300 bg-dark-200 text-light-900 placeholder:text-light-500"
                 />
-                <Input
+                <FormInput
                   value={form.productionInfo.type}
                   onChange={(e) =>
                     setNested("productionInfo", "type", e.target.value)
@@ -859,7 +818,7 @@ export default function CollaborationEditor({
                   placeholder="Production Type"
                   className="h-11 rounded-2xl border-dark-300 bg-dark-200 text-light-900 placeholder:text-light-500"
                 />
-                <Input
+                <FormInput
                   value={form.contactInfo.email}
                   onChange={(e) =>
                     setNested("contactInfo", "email", e.target.value)
@@ -867,7 +826,7 @@ export default function CollaborationEditor({
                   placeholder="Email Address"
                   className="h-11 rounded-2xl border-dark-300 bg-dark-200 text-light-900 placeholder:text-light-500"
                 />
-                <Input
+                <FormInput
                   value={form.contactInfo.phone}
                   onChange={(e) =>
                     setNested("contactInfo", "phone", e.target.value)
@@ -876,7 +835,7 @@ export default function CollaborationEditor({
                   className="h-11 rounded-2xl border-dark-300 bg-dark-200 text-light-900 placeholder:text-light-500"
                 />
               </div>
-              <Input
+              <FormInput
                 value={form.links}
                 onChange={(e) => setValue("links", e.target.value)}
                 placeholder="Comma separated relevant links"
@@ -887,57 +846,63 @@ export default function CollaborationEditor({
                   Customize Targeted Talents
                 </h3>
                 <div className="mt-4 grid gap-4 md:grid-cols-2">
-                  {selectComp(
-                    form.targetedAudience.professional,
-                    "Profession",
-                    options.professional,
-                    (v) => setNested("targetedAudience", "professional", v)
-                  )}
-                  {selectComp(
-                    form.targetedAudience.ethnic,
-                    "Ethnicity",
-                    options.ethnic,
-                    (v) => setNested("targetedAudience", "ethnic", v)
-                  )}
+                  <LookupSelect
+                    label="Profession (optional)"
+                    kind="professions"
+                    value={form.targetedAudience.professional}
+                    onChange={(value) =>
+                      setNested("targetedAudience", "professional", value)
+                    }
+                  />
+                  <LookupSelect
+                    label="Ethnicity (optional)"
+                    kind="ethnic"
+                    value={form.targetedAudience.ethnic}
+                    onChange={(value) =>
+                      setNested("targetedAudience", "ethnic", value)
+                    }
+                  />
                   {selectComp(
                     form.targetedAudience.gender,
                     "Gender",
                     options.gender,
-                    (v) => setNested("targetedAudience", "gender", v)
+                    (v) => setNested("targetedAudience", "gender", v),
                   )}
-                  {selectComp(
-                    form.targetedAudience.language,
-                    "Language",
-                    options.language,
-                    (v) => setNested("targetedAudience", "language", v)
-                  )}
-                  <Input
+                  <LookupSelect
+                    label="Language (optional)"
+                    kind="languages"
+                    value={form.targetedAudience.language}
+                    onChange={(value) =>
+                      setNested("targetedAudience", "language", value)
+                    }
+                  />
+                  <FormInput
                     type="number"
                     value={String(form.targetedAudience.ageMin)}
                     onChange={(e) =>
                       setNested(
                         "targetedAudience",
                         "ageMin",
-                        Number(e.target.value || 0)
+                        Number(e.target.value || 0),
                       )
                     }
                     placeholder="Age min"
                     className="h-11 rounded-2xl border-dark-300 bg-dark-200 text-light-900"
                   />
-                  <Input
+                  <FormInput
                     type="number"
                     value={String(form.targetedAudience.ageMax)}
                     onChange={(e) =>
                       setNested(
                         "targetedAudience",
                         "ageMax",
-                        Number(e.target.value || 0)
+                        Number(e.target.value || 0),
                       )
                     }
                     placeholder="Age max"
                     className="h-11 rounded-2xl border-dark-300 bg-dark-200 text-light-900"
                   />
-                  <Input
+                  <FormInput
                     type="number"
                     min="0"
                     max="5"
@@ -947,7 +912,7 @@ export default function CollaborationEditor({
                       setNested(
                         "targetedAudience",
                         "publicRating",
-                        Number(e.target.value || 0)
+                        Number(e.target.value || 0),
                       )
                     }
                     placeholder="Minimum public rating"
@@ -987,7 +952,7 @@ export default function CollaborationEditor({
               <Button
                 type="button"
                 className="rounded-full bg-primary-500 text-light-900"
-                onClick={() => setStep((s) => Math.min(2, s + 1))}
+                onClick={() => changeStep(Math.min(2, step + 1))}
               >
                 Next
                 <ArrowRight className="ml-2 size-4" />
@@ -1009,7 +974,7 @@ export default function CollaborationEditor({
               </Button>
             )}
           </div>
-        </div>
+        </fieldset>
       </section>
 
       <Dialog open={open} onOpenChange={setOpen}>
@@ -1024,7 +989,7 @@ export default function CollaborationEditor({
           </DialogHeader>
           <div className="grid gap-4">
             <div className="grid gap-4 md:grid-cols-2">
-              <Input
+              <FormInput
                 value={draft.name}
                 onChange={(e) =>
                   setDraft((p: any) => ({ ...p, name: e.target.value }))
@@ -1032,7 +997,7 @@ export default function CollaborationEditor({
                 placeholder="Role Name"
                 className="h-11 rounded-2xl border-dark-300 bg-dark-250 text-light-900 placeholder:text-light-500"
               />
-              <Input
+              <FormInput
                 value={draft.subtitle}
                 onChange={(e) =>
                   setDraft((p: any) => ({ ...p, subtitle: e.target.value }))
@@ -1041,7 +1006,7 @@ export default function CollaborationEditor({
                 className="h-11 rounded-2xl border-dark-300 bg-dark-250 text-light-900 placeholder:text-light-500"
               />
             </div>
-            <Textarea
+            <FormTextarea
               value={draft.description}
               onChange={(e) =>
                 setDraft((p: any) => ({ ...p, description: e.target.value }))
@@ -1050,18 +1015,28 @@ export default function CollaborationEditor({
               className="min-h-[180px] rounded-2xl border-dark-300 bg-dark-250 text-light-900 placeholder:text-light-500"
             />
             <div className="grid gap-4 md:grid-cols-3">
-              {selectComp(draft.ethnic, "Ethnicity", options.ethnic, (v) =>
-                setDraft((p: any) => ({ ...p, ethnic: v }))
-              )}
+              <LookupSelect
+                label="Ethnicity (optional)"
+                kind="ethnic"
+                value={draft.ethnic}
+                onChange={(value) =>
+                  setDraft((previous: any) => ({ ...previous, ethnic: value }))
+                }
+              />
               {selectComp(draft.gender, "Gender", options.gender, (v) =>
-                setDraft((p: any) => ({ ...p, gender: v }))
+                setDraft((p: any) => ({ ...p, gender: v })),
               )}
-              {selectComp(
-                draft.languageSeeking,
-                "Language",
-                options.language,
-                (v) => setDraft((p: any) => ({ ...p, languageSeeking: v }))
-              )}
+              <LookupSelect
+                label="Language (optional)"
+                kind="languages"
+                value={draft.languageSeeking}
+                onChange={(value) =>
+                  setDraft((previous: any) => ({
+                    ...previous,
+                    languageSeeking: value,
+                  }))
+                }
+              />
             </div>
             <div className="grid gap-4 md:grid-cols-4">
               {selectComp(
@@ -1072,23 +1047,25 @@ export default function CollaborationEditor({
                   setDraft((p: any) => ({
                     ...p,
                     paymentDetails: { ...p.paymentDetails, payment: v },
-                  }))
+                  })),
               )}
-              <Input
-                value={draft.paymentDetails.currency}
-                onChange={(e) =>
+              {selectComp(
+                draft.paymentDetails.currency,
+                "Currency (optional)",
+                ["GBP", "USD", "INR", "EUR"].map((value) => ({
+                  value,
+                  label: value,
+                })),
+                (value) =>
                   setDraft((p: any) => ({
                     ...p,
                     paymentDetails: {
                       ...p.paymentDetails,
-                      currency: e.target.value,
+                      currency: value,
                     },
-                  }))
-                }
-                placeholder="Currency"
-                className="h-11 rounded-2xl border-dark-300 bg-dark-250 text-light-900 placeholder:text-light-500"
-              />
-              <Input
+                  })),
+              )}
+              <FormInput
                 value={draft.paymentDetails.amount}
                 onChange={(e) =>
                   setDraft((p: any) => ({
@@ -1110,7 +1087,7 @@ export default function CollaborationEditor({
                   setDraft((p: any) => ({
                     ...p,
                     paymentDetails: { ...p.paymentDetails, type: v },
-                  }))
+                  })),
               )}
             </div>
             <div className="rounded-[24px] border border-dark-300 bg-dark-250 p-4">
@@ -1146,78 +1123,89 @@ export default function CollaborationEditor({
                     key={`skill-${index}`}
                     className="grid gap-3 rounded-[20px] border border-dark-300 bg-dark-200 p-4 md:grid-cols-2 xl:grid-cols-4"
                   >
-                    {selectComp(
-                      skill.mainCategoryId,
-                      "Main Category",
-                      options.main,
-                      async (v) => {
-                        const res = await getSubCategoriesAction(v);
-                        setSubCats((p) => ({
-                          ...p,
-                          [index]: res?.response || [],
-                        }));
-                        setSkills((p) => ({ ...p, [index]: [] }));
-                        setDraft((p: any) => {
-                          const skills = [...p.skills];
-                          skills[index] = {
-                            ...skills[index],
-                            mainCategoryId: v,
-                            subCategoryId: "",
-                            skillId: null,
-                            level: null,
-                          };
-                          return { ...p, skills };
-                        });
+                    <LookupSelect
+                      label="Main Category"
+                      kind="categories"
+                      value={skill.mainCategoryId}
+                      onChange={(value) =>
+                        setDraft((previous: any) => ({
+                          ...previous,
+                          skills: previous.skills.map((item: any, i: number) =>
+                            i === index
+                              ? {
+                                  ...item,
+                                  mainCategoryId: value,
+                                  subCategoryId: "",
+                                  skillId: "",
+                                  level: "",
+                                }
+                              : item,
+                          ),
+                        }))
                       }
-                    )}
-                    {selectComp(
-                      skill.subCategoryId,
-                      "Sub Category",
-                      (subCats[index] || []).map((i: any) => ({
-                        value: String(i?._id || ""),
-                        label: String(i?.name || i?.subCategory || ""),
-                      })),
-                      async (v) => {
-                        const res = await getSkillsAction(v);
-                        const nextOptions = res?.response || [];
-                        setSkills((p) => ({ ...p, [index]: nextOptions }));
-                        setDraft((p: any) => {
-                          const skills = [...p.skills];
-                          skills[index] = {
-                            ...skills[index],
-                            subCategoryId: v,
-                            skillId: null,
-                            level: null,
-                          };
-                          return { ...p, skills };
-                        });
+                    />
+                    <LookupSelect
+                      label="Sub Category"
+                      kind="subcategories"
+                      parent={skill.mainCategoryId}
+                      value={skill.subCategoryId}
+                      onChange={(value) =>
+                        setDraft((previous: any) => ({
+                          ...previous,
+                          skills: previous.skills.map((item: any, i: number) =>
+                            i === index
+                              ? {
+                                  ...item,
+                                  subCategoryId: value,
+                                  skillId: "",
+                                  level: "",
+                                }
+                              : item,
+                          ),
+                        }))
                       }
+                    />
+                    <LookupSelect
+                      label="Skill (optional)"
+                      kind="skills"
+                      parent={skill.subCategoryId}
+                      value={skill.skillId || ""}
+                      onChange={(value) =>
+                        setDraft((previous: any) => ({
+                          ...previous,
+                          skills: previous.skills.map((item: any, i: number) =>
+                            i === index ? { ...item, skillId: value } : item,
+                          ),
+                        }))
+                      }
+                    />
+                    {selectComp(
+                      skill.level,
+                      "Level (optional)",
+                      options.level,
+                      (value) =>
+                        setDraft((previous: any) => ({
+                          ...previous,
+                          skills: previous.skills.map((item: any, i: number) =>
+                            i === index ? { ...item, level: value } : item,
+                          ),
+                        })),
                     )}
-                    {(skills[index] || []).length > 0
-                      ? selectComp(
-                          skill.skillId,
-                          "Skill",
-                          (skills[index] || []).map((i: any) => ({
-                            value: String(i?._id || ""),
-                            label: String(i?.name || i?.skill || ""),
-                          })),
-                          (v) =>
-                            setDraft((p: any) => {
-                              const skills = [...p.skills];
-                              skills[index] = { ...skills[index], skillId: v };
-                              return { ...p, skills };
-                            })
-                        )
-                      : null}
-                    {(skills[index] || []).length > 0
-                      ? selectComp(skill.level, "Level", options.level, (v) =>
-                          setDraft((p: any) => {
-                            const skills = [...p.skills];
-                            skills[index] = { ...skills[index], level: v };
-                            return { ...p, skills };
-                          })
-                        )
-                      : null}
+                    <Button
+                      type="button"
+                      aria-label={`Remove skill ${index + 1}`}
+                      disabled={draft.skills.length <= 1}
+                      onClick={() =>
+                        setDraft((previous: any) => ({
+                          ...previous,
+                          skills: previous.skills.filter(
+                            (_item: any, i: number) => i !== index,
+                          ),
+                        }))
+                      }
+                    >
+                      Remove skill
+                    </Button>
                   </div>
                 ))}
               </div>
@@ -1229,8 +1217,7 @@ export default function CollaborationEditor({
                     Timeline
                   </h3>
                   <p className="text-xs text-light-500">
-                    Match the mobile flow by choosing one timeline style, then
-                    add the related dates and location.
+                    Choose a timeline style, then add dates, mode, and location.
                   </p>
                 </div>
                 {selectComp(
@@ -1262,7 +1249,7 @@ export default function CollaborationEditor({
                               latitude: 0,
                             },
                           ],
-                    }))
+                    })),
                 )}
               </div>
               <div className="mt-4 grid gap-3">
@@ -1386,7 +1373,7 @@ export default function CollaborationEditor({
                         <p className="text-xs font-medium uppercase tracking-[0.12em] text-light-500">
                           Expected duration
                         </p>
-                        <Input
+                        <FormInput
                           value={t.expectedDays}
                           onChange={(e) =>
                             setDraft((p: any) => {
@@ -1412,7 +1399,7 @@ export default function CollaborationEditor({
                           const timeLine = [...p.timeLine];
                           timeLine[index] = { ...timeLine[index], mode: v };
                           return { ...p, timeLine };
-                        })
+                        }),
                     )}
                     <div className="grid gap-2">
                       <button
@@ -1438,7 +1425,7 @@ export default function CollaborationEditor({
                             ...p,
                             timeLine: p.timeLine.filter(
                               (_item: any, itemIndex: number) =>
-                                itemIndex !== index
+                                itemIndex !== index,
                             ),
                           }))
                         }

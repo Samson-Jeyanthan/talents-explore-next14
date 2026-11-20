@@ -149,6 +149,7 @@ export async function getExploreFilterOptionsAction(
     "countries",
     "states",
     "ethnic",
+    "professions",
   ];
   if (
     !kinds.includes(kind) ||
@@ -171,6 +172,7 @@ export async function getExploreFilterOptionsAction(
     countries: "/country/countries",
     states: `/country/states/${encodeURIComponent(parent)}`,
     ethnic: "/private-info/ethnic",
+    professions: "/private-info/professional",
   };
   const result = await request(paths[kind]);
   const rows =
@@ -192,7 +194,9 @@ export async function getExploreFilterOptionsAction(
           ? "state"
           : kind === "ethnic"
             ? "ethnic"
-            : "name";
+            : kind === "professions"
+              ? "professional"
+              : "name";
   const options = rows.flatMap((row: any) => {
     const label = typeof row?.[field] === "string" ? row[field].trim() : "";
     const value = kind === "countries" || kind === "states" ? label : row?._id;

@@ -195,5 +195,6 @@ export type LookupKind =
   | "languages"
   | "countries"
   | "states"
-  | "ethnic";
+  | "ethnic"
+  | "professions";
 export type FilterOption = { value: string; label: string };

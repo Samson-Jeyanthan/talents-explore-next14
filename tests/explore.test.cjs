@@ -298,6 +298,17 @@ test("ethnicity uses ethnicity data, languages use language IDs, countries and s
   );
   assert.equal(new URL(h.calls[3].url).pathname, "/country/states/Sri%20Lanka");
 });
+test("profession options use professional ids and labels", async () => {
+  const h = api([
+    { status: "7400", response: [{ _id: id, professional: "Director" }] },
+  ]);
+  const result = await h.actions.getExploreFilterOptionsAction("professions");
+  assert.equal(result.success, true);
+  assert.equal(result.data[0].value, id);
+  assert.equal(result.data[0].label, "Director");
+  assert.equal(new URL(h.calls[0].url).pathname, "/private-info/professional");
+});
+
 test("invalid lookup kinds and missing dependent selections never reach backend", async () => {
   const h = api();
   for (const [kind, parent] of [
