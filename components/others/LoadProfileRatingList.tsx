@@ -1,118 +1,118 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { useInView } from "react-intersection-observer";
-import RatingCard, { IRatingListProp } from "../cards/RatingCard";
-import { getProfileRatingList } from "@/actions/connection.action";
+import RatingCard from "../cards/RatingCard";
 import RadialBar from "./RadialBar";
-import { fetchProfileOverallRating } from "@/lib/functions/connect.functions";
 import HorzBar from "./HorzBar";
-import { toast } from "sonner";
+import { Button } from "../ui/button";
+import { useProfileRatings } from "@/lib/hooks/useProfileRatings";
+import { ratingBreakdown } from "@/lib/utils/ratings";
 
-function LoadProfileRatingList() {
+export default function LoadProfileRatingList() {
   const params = useParams();
-  const { ref, inView } = useInView();
-  const [data, setData] = useState<IRatingListProp[]>([]);
-  const [isEnd, setIsEnd] = useState(false);
-  const [page, setPage] = useState(1);
-
-  const urlId: any = params.userId;
-
-  const [isOverallListLoading, setIsOverallListLoading] = useState(true);
-  const [overallList, setOverallList] = useState({
-    avgRating: null,
-    numberOfRating: 0,
-    oneStar: 0,
-    twoStar: 0,
-    threeStar: 0,
-    fourStar: 0,
-    fiveStar: 0,
-  });
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!isEnd && inView) {
-        try {
-          const res = await getProfileRatingList(urlId, page, 10);
-
-          if (res.status === "7400") {
-            setData((prevData) => [...prevData, ...res.response]);
-            if (res.response.length === 0) {
-              setIsEnd(true);
-            } else {
-              setPage((prevPage) => prevPage + 1);
-            }
-          } else {
-            toast.error("Could not fetch rating list", { duration: 4000 });
-            setIsEnd(true);
-          }
-        } catch (error) {
-          console.log("Error fetching rating list:", error);
-          setIsEnd(true);
-        }
-      }
-    };
-
-    fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inView, isEnd, page]);
-
-  useEffect(() => {
-    fetchProfileOverallRating(setOverallList, urlId, setIsOverallListLoading);
-  }, [urlId]);
-
-  const overallRatingForHorzBar = [
-    {
-      no: 5,
-      value: overallList?.fiveStar,
-      percentage: (overallList?.fiveStar / overallList?.numberOfRating) * 100,
-    },
-    {
-      no: 4,
-      value: overallList?.fourStar,
-      percentage: (overallList?.fourStar / overallList?.numberOfRating) * 100,
-    },
-    {
-      no: 3,
-      value: overallList?.threeStar,
-      percentage: (overallList?.threeStar / overallList?.numberOfRating) * 100,
-    },
-    {
-      no: 2,
-      value: overallList?.twoStar,
-      percentage: (overallList?.twoStar / overallList?.numberOfRating) * 100,
-    },
-    {
-      no: 1,
-      value: overallList?.oneStar,
-      percentage: (overallList?.oneStar / overallList?.numberOfRating) * 100,
-    },
-  ];
-
+  const data = useProfileRatings(
+    typeof params.userId === "string" ? params.userId : undefined,
+  );
   return (
-    <>
-      {!isOverallListLoading && (
-        <RadialBar
-          avgRating={
-            overallList?.avgRating === null
-              ? 0
-              : Number(
-                  (Math.round(overallList?.avgRating * 10) / 10).toFixed(1)
-                )
-          }
-          peopleCount={overallList?.numberOfRating || 0}
-        />
+    <section
+      className="flex w-full min-w-0 flex-col gap-4"
+      aria-label="Profile ratings"
+    >
+      <Button
+        type="button"
+        variant="ghost"
+        disabled={data.loading || data.summaryLoading}
+        onClick={data.refresh}
+        className="h-8 self-end px-2 text-xs text-light-600"
+      >
+        Refresh ratings
+      </Button>
+      {data.restricted ? (
+        <p
+          role="status"
+          className="rounded-xl border border-dark-400 p-4 text-sm text-light-700"
+        >
+          This account&apos;s privacy settings do not allow you to view these
+          ratings.
+        </p>
+      ) : (
+        <>
+          {data.summaryLoading && (
+            <p role="status" className="text-center text-sm text-light-500">
+              Loading rating summary...
+            </p>
+          )}
+          {data.summary && (
+            <div className="flex w-full flex-col items-center gap-3">
+              <RadialBar
+                avgRating={Math.round(data.summary.avgRating * 10) / 10}
+                peopleCount={data.summary.numberOfRating}
+              />
+              <HorzBar ratingCounts={ratingBreakdown(data.summary)} />
+            </div>
+          )}
+          {data.summaryError && (
+            <div
+              role="alert"
+              className="rounded-xl border border-dark-400 p-4 text-sm text-light-700"
+            >
+              <p>{data.summaryError}</p>
+              <Button
+                type="button"
+                disabled={data.summaryLoading}
+                onClick={data.loadSummary}
+                className="shad-button_secondary mt-3"
+              >
+                Retry summary
+              </Button>
+            </div>
+          )}
+          {data.items.map((item, index) => (
+            <RatingCard key={item._id} ratingCard={item} index={index} />
+          ))}
+          {data.loading && (
+            <p
+              role="status"
+              className="py-4 text-center text-sm text-light-500"
+            >
+              Loading ratings...
+            </p>
+          )}
+          {data.error && (
+            <div
+              role="alert"
+              className="rounded-xl border border-dark-400 p-4 text-sm text-light-700"
+            >
+              <p>{data.error}</p>
+              <Button
+                type="button"
+                disabled={data.loading}
+                onClick={data.load}
+                className="shad-button_secondary mt-3"
+              >
+                Retry ratings
+              </Button>
+            </div>
+          )}
+          {!data.loading &&
+            !data.error &&
+            data.page > 0 &&
+            !data.items.length && (
+              <p className="py-6 text-center text-sm text-light-500">
+                No ratings yet.
+              </p>
+            )}
+          {data.hasMore && !data.error && !data.loading && (
+            <Button
+              type="button"
+              onClick={data.load}
+              className="shad-button_secondary self-center"
+            >
+              Load more ratings
+            </Button>
+          )}
+        </>
       )}
-      {!isOverallListLoading && (
-        <HorzBar ratingCounts={overallRatingForHorzBar} />
-      )}
-      {data.map((item, index) => (
-        <RatingCard key={item._id} ratingCard={item} index={index} />
-      ))}
-      {!isEnd && <div ref={ref}>loading...</div>}
-    </>
+    </section>
   );
 }
-
-export default LoadProfileRatingList;

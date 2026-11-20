@@ -1,84 +1,113 @@
 "use client";
 
 import { useUserContext } from "@/context/AuthProvider";
-import { handleAddRating } from "@/lib/functions/connect.functions";
 import { StarIcon } from "@/public/assets/svgs";
-import { useState } from "react";
-import { toast } from "sonner";
+import { useEffect, useId, useState } from "react";
+import { useRating, type RatingMode } from "@/lib/hooks/useRating";
+import { useRouter } from "next/navigation";
 
 type Props = {
   prevRatingValue: number;
-  ratingFor: "PROFILE" | "POST" | "SHARE" | "FILTER" | "UPLOAD";
+  ratingFor: RatingMode;
   authorId: string;
   postId?: string;
   revalidatePath: string;
   onChange?: (val: number) => void;
 };
-
-const StarRating = ({
+export default function StarRating({
   prevRatingValue,
   ratingFor,
   authorId,
   postId,
   revalidatePath,
   onChange,
-}: Props) => {
+}: Props) {
   const { user } = useUserContext();
-  const [rating, setRating] = useState(prevRatingValue);
-  const [hover, setHover] = useState(0); // Store the hovered rating
-
-  const handleStarSubmit = (val: number) => {
-    if (ratingFor === "FILTER" || ratingFor === "UPLOAD") {
-      setRating(val);
-      onChange && onChange(val);
-    } else {
-      setRating(val);
-      if (prevRatingValue === val)
-        return toast.info("You have already rated", { duration: 4000 });
-
-      handleAddRating(
-        user.currentUserId,
-        postId,
-        authorId,
-        ratingFor,
-        val,
-        revalidatePath
-      );
-    }
-  };
-
+  const router = useRouter();
+  const name = useId();
+  const [hover, setHover] = useState(0);
+  const state = useRating({
+    initial: prevRatingValue,
+    mode: ratingFor,
+    authorId,
+    postId,
+    viewerId: user?.currentUserId,
+    path: revalidatePath,
+    onChange,
+  });
+  useEffect(() => {
+    setHover(0);
+  }, [authorId, postId, ratingFor]);
+  async function choose(value: number) {
+    setHover(0);
+    if ((await state.submit(value)) && !state.local) router.refresh();
+  }
+  const label =
+    ratingFor === "FILTER"
+      ? "Minimum public rating"
+      : ratingFor === "UPLOAD"
+        ? "Your rating for this upload"
+        : ratingFor === "PROFILE"
+          ? "Your profile rating"
+          : "Your post rating";
   return (
-    <div className="flex items-center gap-2">
-      {[...Array(5)].map((star, i) => {
-        const ratingValue = i + 1;
-        return (
-          <div
-            key={i}
-            onMouseEnter={() => setHover(ratingValue)}
-            onMouseLeave={() => setHover(0)}
-            onClick={() => handleStarSubmit(ratingValue)} // Set rating on click
-            className="cursor-pointer"
+    <div className="flex min-w-0 flex-col gap-1" aria-busy={state.pending}>
+      <fieldset
+        disabled={state.pending}
+        className="flex items-center gap-0.5"
+        onMouseLeave={() => setHover(0)}
+      >
+        <legend className="sr-only">{label}</legend>
+        {[1, 2, 3, 4, 5].map((value) => (
+          <label
+            key={value}
+            className="relative cursor-pointer"
+            onMouseEnter={() => {
+              if (!state.pending) setHover(value);
+            }}
           >
             <input
               type="radio"
-              name="rating"
-              value={rating}
-              // onClick={() => handleStarSubmit(ratingValue)}
-              className="hidden"
+              name={name}
+              value={value}
+              checked={state.rating === value}
+              aria-label={`${value} ${value === 1 ? "star" : "stars"}`}
+              onChange={() => choose(value)}
+              className="peer sr-only"
             />
             <span
-              className={`${
-                ratingValue <= rating ? "fill-custom-100" : "fill-light-500"
-              } ${ratingValue <= hover && "fill-custom-100"}
-              `}
+              className={`flex size-6 items-center justify-center rounded peer-focus-visible:ring-2 peer-focus-visible:ring-primary-500 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-dark-250 ${state.pending ? "cursor-wait opacity-60" : ""} ${value <= (hover || state.rating) ? "fill-custom-100" : "fill-light-500"}`}
             >
-              <StarIcon width="16px" />
+              <StarIcon width="18px" height="18px" />
             </span>
-          </div>
-        );
-      })}
+          </label>
+        ))}
+        {state.local && state.rating > 0 && (
+          <button
+            type="button"
+            onClick={() => choose(0)}
+            className="ml-1 rounded px-1 text-xs text-light-600 underline focus-visible:outline-primary-500"
+            aria-label="Clear rating"
+          >
+            Clear
+          </button>
+        )}
+      </fieldset>
+      {state.pending && (
+        <p role="status" className="text-xs text-light-500">
+          Saving rating...
+        </p>
+      )}
+      {state.message && (
+        <p role="status" className="max-w-48 text-xs text-light-600">
+          {state.message}
+        </p>
+      )}
+      {state.error && (
+        <p role="alert" className="max-w-48 text-xs text-primary-500">
+          {state.error} Select a star to retry.
+        </p>
+      )}
     </div>
   );
-};
-
-export default StarRating;
+}

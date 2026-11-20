@@ -53,6 +53,7 @@ function api(responses = [], authError) {
     "actions/connection.action.tsx",
     {
       "@/lib/utils/connections": utils,
+      "@/lib/utils/ratings": load("lib/utils/ratings.ts"),
       "@/lib/session": {
         getAuthHeaders: async () => {
           if (authError) throw authError;

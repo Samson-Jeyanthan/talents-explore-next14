@@ -43,6 +43,8 @@ export function canViewByVisibility(
   const permissionKeys: Record<string, string[]> = {
     followers: ["canViewFollowers", "canSeeFollowers"],
     followings: ["canViewFollowing", "canViewFollowings", "canSeeFollowing"],
+    profileRating: ["canViewProfileRatings", "canViewRatings"],
+    postRating: ["canRatePosts", "canRatePost"],
   };
   for (const name of permissionKeys[key] || []) {
     const permission = userData?.permissions?.[name];
@@ -105,6 +107,11 @@ export function getProfileVisibilityState(
       "profileRating",
       isOwnProfile,
     ),
+    canRateProfile:
+      isOwnProfile ||
+      (userData?.permissions?.canRateProfile != null
+        ? followFlag(userData.permissions.canRateProfile)
+        : canViewByVisibility(userData, "profileRating", isOwnProfile)),
     canRatePosts: canViewByVisibility(userData, "postRating", isOwnProfile),
     canCommentOnPosts: canViewByVisibility(
       userData,

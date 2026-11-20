@@ -1,4 +1,5 @@
 import { StarIcon } from "@/public/assets/svgs";
+import { displayRating } from "@/lib/utils/ratings";
 
 interface RadialBarProps {
   avgRating: number;
@@ -6,6 +7,7 @@ interface RadialBarProps {
 }
 
 const RadialBar = ({ avgRating, peopleCount }: RadialBarProps) => {
+  avgRating = displayRating(avgRating);
   const percentage = (avgRating / 5) * 100;
   const dashArray = Math.PI * 100; // Assuming the circle has a radius of 50
   const dashOffset = dashArray - (dashArray * percentage) / 100;
@@ -37,7 +39,10 @@ const RadialBar = ({ avgRating, peopleCount }: RadialBarProps) => {
       <span className="absolute top-1/3 text-lg text-light-900">
         {avgRating === 0 ? "N/A" : avgRating}
       </span>
-      <p className="mt-px text-xs text-light-600">{peopleCount} Ratings</p>
+      <p className="mt-px text-xs text-light-600">
+        {Number.isFinite(peopleCount) && peopleCount! >= 0 ? peopleCount : 0}{" "}
+        Ratings
+      </p>
     </div>
   );
 };
@@ -45,6 +50,7 @@ const RadialBar = ({ avgRating, peopleCount }: RadialBarProps) => {
 export default RadialBar;
 
 export const UserRatingRadialBar = ({ avgRating }: RadialBarProps) => {
+  avgRating = displayRating(avgRating);
   const percentage = (avgRating / 5) * 100;
   let dashArray = 0;
   if (avgRating < 5 && avgRating > 4.5) {

@@ -80,7 +80,7 @@ async function Post({ params }: TPostURLProps) {
         <div className="relative mt-4 h-auto w-[95%] items-center justify-center lg:w-[90%]">
           <BlurredMedia postData={data} />
           <div className="z-10 flex w-full flex-col gap-6 rounded-[28px] border-2 border-solid border-dark-300 bg-dark-200/50 p-5 backdrop-blur-[80px]">
-            <PostInfoHeader postData={data} />
+            <PostInfoHeader postData={data} viewerId={currentUser?._id} />
 
             <div className="flex items-start justify-between gap-8">
               <div className="flex flex-col gap-6">

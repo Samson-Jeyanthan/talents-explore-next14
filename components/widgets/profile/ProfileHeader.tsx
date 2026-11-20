@@ -152,7 +152,7 @@ const ProfileHeader = ({
           )}
         </div>
 
-        {user.currentUserId && visibility.canViewProfileRatings ? (
+        {user.currentUserId && visibility.canRateProfile ? (
           <div className="flex items-center gap-2 pr-3 text-sm text-light-500">
             <p>Rate {isOwnProfile ? "your" : "this"} profile</p>
             <StarRating

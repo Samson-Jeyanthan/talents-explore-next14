@@ -13,6 +13,8 @@ import { PostFeedCarousel } from "../widgets";
 import { StarRating } from "../inputs";
 import { CommentModal, SaveCollectionModal } from "../modals";
 import { getProfileVisibilityState } from "@/lib/utils/profilePrivacy";
+import { getPostType } from "@/lib/utils/postEditing";
+import { usePathname } from "next/navigation";
 
 interface Props {
   postFeedCard: IPost;
@@ -25,6 +27,7 @@ const variants = {
 };
 
 const PostCard = ({ postFeedCard, index }: Props) => {
+  const pathname = usePathname();
   const postLink = `/post/${postFeedCard._id}`;
   const userProfile = `/profile/${postFeedCard.author.userName}/${postFeedCard.author._id}`;
   const { user } = useUserContext();
@@ -121,9 +124,11 @@ const PostCard = ({ postFeedCard, index }: Props) => {
           <StarRating
             postId={postFeedCard._id}
             prevRatingValue={postFeedCard.yourRating}
-            ratingFor="POST"
+            ratingFor={
+              getPostType(postFeedCard) === "SHARELINK" ? "SHARE" : "POST"
+            }
             authorId={postFeedCard.author._id}
-            revalidatePath={"/home"}
+            revalidatePath={pathname}
           />
         ) : (
           <p className="text-xs text-light-500">Ratings private</p>

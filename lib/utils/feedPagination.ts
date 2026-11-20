@@ -12,6 +12,7 @@ export class FeedPagination<T extends { _id: string }> {
   constructor(
     initialItems: T[],
     private pageSize: number,
+    private initialPage = 1,
   ) {
     this.reset(initialItems);
   }
@@ -29,9 +30,9 @@ export class FeedPagination<T extends { _id: string }> {
   reset(items: T[]) {
     this.version++;
     this.items = this.unique(items);
-    this.page = 1;
+    this.page = this.initialPage;
     this.busy = false;
-    this.more = items.length >= this.pageSize;
+    this.more = this.initialPage === 0 || items.length >= this.pageSize;
     this.error = "";
   }
 

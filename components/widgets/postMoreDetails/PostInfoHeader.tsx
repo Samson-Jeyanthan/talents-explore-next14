@@ -15,11 +15,15 @@ import { getPostType } from "@/lib/utils/postEditing";
 
 type Props = {
   postData: TPostProps;
+  viewerId?: string;
 };
 
-const PostInfoHeader = ({ postData }: Props) => {
+const PostInfoHeader = ({ postData, viewerId }: Props) => {
   const author = postData?.author || {};
-  const visibility = getProfileVisibilityState(author, false);
+  const visibility = getProfileVisibilityState(
+    author,
+    !!viewerId && viewerId === author._id,
+  );
   const profileLink = author?._id
     ? `/profile/${author?.userName}/${author?._id}`
     : "#";
@@ -125,7 +129,9 @@ const PostInfoHeader = ({ postData }: Props) => {
             <p>Rate this post</p>
             <StarRating
               prevRatingValue={postData?.yourRating}
-              ratingFor="POST"
+              ratingFor={
+                getPostType(postData) === "SHARELINK" ? "SHARE" : "POST"
+              }
               postId={postData?._id}
               authorId={author?._id}
               revalidatePath={`/post/${postData?._id}`}

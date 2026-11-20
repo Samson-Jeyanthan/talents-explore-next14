@@ -38,7 +38,7 @@ const RatingDetails = ({ postData }: Props) => {
   return (
     <div className="flex flex-col gap-2">
       <h2 className="text-sm font-medium text-light-900">Ratings</h2>
-      <div className="flex items-center justify-start gap-4">
+      <div className="flex w-full flex-wrap items-center justify-start gap-4">
         <HorzBar ratingCounts={ratingCounts} />
         <RadialBar
           avgRating={

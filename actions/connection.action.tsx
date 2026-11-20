@@ -5,12 +5,25 @@ import { getAuthHeaders } from "@/lib/session";
 import { resolveViewerIdAction } from "./tokenAndHeaders.action";
 import { isRedirectError } from "next/dist/client/components/redirect";
 import {
+  validRating,
+  normalizeRatingSummary,
+  normalizeRatingUsers,
+  type RatingResult,
+  type RatingUser,
+  type RatingSummary,
+} from "@/lib/utils/ratings";
+import {
   connectionId,
   normalizeConnections,
   type ConnectionResult,
 } from "@/lib/utils/connections";
 
-async function connectionRequest(path: string, method = "GET", body?: object) {
+async function connectionRequest(
+  path: string,
+  method = "GET",
+  body?: object,
+  resource = "connections",
+) {
   try {
     const headers = await getAuthHeaders();
     const response = await fetch(
@@ -29,7 +42,7 @@ async function connectionRequest(path: string, method = "GET", body?: object) {
     const message =
       typeof result?.message === "string"
         ? result.message
-        : "Unable to update connections. Please try again.";
+        : `Unable to update ${resource}. Please try again.`;
     return {
       status: response.ok ? 400 : response.status,
       message,
@@ -41,7 +54,7 @@ async function connectionRequest(path: string, method = "GET", body?: object) {
     if (isRedirectError(error)) throw error;
     return {
       status: 500,
-      message: "Unable to reach connections. Please try again.",
+      message: `Unable to reach ${resource}. Please try again.`,
     };
   }
 }
@@ -146,76 +159,119 @@ export async function getProfileRatingList(
   userId: string | undefined,
   pageNo: number,
   pageSize: number,
-) {
-  try {
-    const headers = await getAuthHeaders();
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/rating/list?userId=${userId}&pageNo=${pageNo}&pageSize=${pageSize}`,
-      {
-        cache: "no-store",
-        headers,
-      },
-    );
+): Promise<RatingResult<RatingUser[]>> {
+  if (
+    !connectionId(userId) ||
+    !Number.isSafeInteger(pageNo) ||
+    pageNo < 1 ||
+    !Number.isInteger(pageSize) ||
+    pageSize < 1 ||
+    pageSize > 100
+  )
+    return { status: 400, message: "Invalid rating list request." };
+  const result = await connectionRequest(
+    `/user/rating/list?userId=${userId}&pageNo=${pageNo}&pageSize=${pageSize}`,
+    "GET",
+    undefined,
+    "ratings",
+  );
+  if (result.status !== "7400") return result;
+  const rows = normalizeRatingUsers(result.response);
+  return rows
+    ? { status: "7400", response: rows }
+    : { status: 500, message: "Unable to load ratings. Please try again." };
+}
 
-    console.log("response", response);
+export async function getProfileOverallRating(
+  userId: string | undefined,
+): Promise<RatingResult<RatingSummary>> {
+  if (!connectionId(userId))
+    return { status: 400, message: "Invalid profile." };
+  const result = await connectionRequest(
+    `/user/rating/splitup/${userId}`,
+    "GET",
+    undefined,
+    "ratings",
+  );
+  if (result.status !== "7400") return result;
+  const summary = normalizeRatingSummary(result.response);
+  return summary
+    ? { status: "7400", response: summary }
+    : {
+        status: 500,
+        message: "Unable to load the rating summary. Please try again.",
+      };
+}
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch ratings: ${response.status}`);
-    }
-
-    const res = await response.json();
-    console.log("res", res);
-    return res;
-  } catch (error) {
-    console.error("getProfileRatingList error:", error);
-    throw error;
+function invalidateRating(path: string, postId?: string) {
+  revalidatePath("/profile/[username]/[userId]", "layout");
+  if (postId) {
+    revalidatePath(`/post/${postId}`);
+    revalidatePath("/home");
+    revalidatePath("/share-feed");
+  }
+  if (
+    typeof path === "string" &&
+    path.startsWith("/") &&
+    !path.startsWith("//") &&
+    !path.includes("\\")
+  ) {
+    const clean = path.split(/[?#]/)[0];
+    if (
+      clean &&
+      clean !== "/home" &&
+      clean !== "/share-feed" &&
+      clean !== `/post/${postId}`
+    )
+      revalidatePath(clean);
   }
 }
 
-export async function getProfileOverallRating(userId: string | undefined) {
-  try {
-    const headers = await getAuthHeaders();
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/rating/splitup/${userId}`,
-      {
-        cache: "no-store",
-        headers,
-      },
-    );
-    const res = await response.json();
-    return res;
-  } catch {}
-}
-
 export async function addPostRating(
-  userId: string | undefined,
+  _userId: string | undefined,
   postId: string | undefined,
-  postOwnerId: string,
+  _postOwnerId: string,
   rating: number,
   revalidatePathURL: string,
 ) {
-  const formData = {
-    userId,
-    postId,
-    postOwnerId,
-    rating,
-  };
-
+  if (!connectionId(postId) || !validRating(rating))
+    return { status: 400, message: "Choose a rating from 1 to 5 stars." };
   try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/te-post/rating`,
-      {
-        method: "POST",
-        headers: await getAuthHeaders(),
-        body: JSON.stringify(formData),
-      },
+    const viewerId = await resolveViewerIdAction();
+    if (!viewerId) return { status: 401, message: "Please sign in again." };
+    const post = await connectionRequest(
+      `/feeds/${postId}/${encodeURIComponent(viewerId)}`,
+      "GET",
+      undefined,
+      "ratings",
     );
-    const res = await response.json();
-    if (res.status === "7400") {
-      revalidatePath(revalidatePathURL);
-    }
-    return res;
-  } catch {}
+    if (post.status !== "7400") return post;
+    const ownerId = post.response?.author?._id;
+    if (!connectionId(ownerId) || post.response?._id !== postId)
+      return {
+        status: 500,
+        message: "Unable to verify this post. Please try again.",
+      };
+    if (
+      post.response?.permissions?.canRatePosts === false ||
+      post.response?.permissions?.canRatePost === false
+    )
+      return { status: 403, message: "Ratings are restricted for this post." };
+    const result = await connectionRequest(
+      "/te-post/rating",
+      "POST",
+      { userId: viewerId, postId, postOwnerId: ownerId, rating },
+      "ratings",
+    );
+    if (result.status === "7400") invalidateRating(revalidatePathURL, postId);
+    return result;
+  } catch (error) {
+    if (isRedirectError(error)) throw error;
+    return {
+      status: 500,
+      message: "Unable to save your rating. Please try again.",
+    };
+  }
 }
 
 export async function addProfileRatingAction(
@@ -223,24 +279,14 @@ export async function addProfileRatingAction(
   rating: number,
   revalidatePathURL: string,
 ) {
-  try {
-    const formData = {
-      ratingUserId,
-      rating,
-    };
-
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/rating`,
-      {
-        method: "POST",
-        headers: await getAuthHeaders(),
-        body: JSON.stringify(formData),
-      },
-    );
-    const res = await response.json();
-    if (res.status === "7400") {
-      revalidatePath(revalidatePathURL);
-    }
-    return res;
-  } catch {}
+  if (!connectionId(ratingUserId) || !validRating(rating))
+    return { status: 400, message: "Choose a rating from 1 to 5 stars." };
+  const result = await connectionRequest(
+    "/user/rating",
+    "POST",
+    { ratingUserId, rating },
+    "ratings",
+  );
+  if (result.status === "7400") invalidateRating(revalidatePathURL);
+  return result;
 }
