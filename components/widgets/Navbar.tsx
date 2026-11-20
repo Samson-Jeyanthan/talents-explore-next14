@@ -8,7 +8,7 @@ import { getChatUnreadCountAction } from "@/actions/chat.action";
 
 const Navbar = async ({ userId }: { userId: string }) => {
   const [notificationRes, chatUnreadCount] = await Promise.all([
-    getAllNotificationsAction(userId, 1, 10),
+    getAllNotificationsAction(userId, 1, 20),
     getChatUnreadCountAction(),
   ]);
 

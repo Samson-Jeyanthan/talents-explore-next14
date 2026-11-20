@@ -1,158 +1,108 @@
 "use server";
 
-import axios from "axios";
-// import { getSession } from "@/lib/session";
-import { getSession } from "@/lib/session";
-import { getUserPersonalInfoAction } from "./auth.action";
+import { getAuthHeaders } from "@/lib/session";
+import { resolveViewerIdAction } from "./tokenAndHeaders.action";
+import { isRedirectError } from "next/dist/client/components/redirect";
+import {
+  isNotificationId,
+  normalizeNotifications,
+  type NotificationPage,
+} from "@/lib/utils/notifications";
 
-async function getAccessToken() {
-  return await getSession();
-}
-
-async function resolveCurrentUserId() {
-  const token = await getAccessToken();
-
-  if (!token) {
-    return "";
-  }
-
+async function request(path: string, method = "GET") {
   try {
-    const userRes = await getUserPersonalInfoAction(token);
-    return userRes?.response?._id || "";
+    const headers = await getAuthHeaders();
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}${path}`,
+      {
+        headers,
+        method,
+        cache: "no-store",
+        signal: AbortSignal.timeout(15000),
+      },
+    );
+    const data = await response.json();
+    if (response.ok && data?.status === "7400")
+      return { ...data, status: "7400" };
+    return {
+      status: response.ok ? data?.status || 400 : response.status,
+      message:
+        typeof data?.message === "string"
+          ? data.message
+          : "Unable to update notifications. Please try again.",
+    };
   } catch (error) {
-    console.error("resolveCurrentUserId failed:", error);
-    return "";
+    if (isRedirectError(error)) throw error;
+    return {
+      status: 500,
+      message: "Unable to reach notifications. Please try again.",
+    };
   }
-}
-
-function getAuthHeaders(token: string) {
-  return {
-    Authorization: `Bearer ${token}`,
-  };
 }
 
 export async function getAllNotificationsAction(
   _userId: string | undefined,
   pageNo: number,
   pageSize: number,
+): Promise<NotificationPage> {
+  if (
+    !Number.isSafeInteger(pageNo) ||
+    pageNo < 1 ||
+    !Number.isInteger(pageSize) ||
+    pageSize < 1 ||
+    pageSize > 100
+  )
+    return { success: false, message: "Invalid notification page." };
+  const result = await request(
+    `/notification?pageNumber=${pageNo}&pageSize=${pageSize}`,
+  );
+  const items =
+    result.status === "7400" ? normalizeNotifications(result.response) : null;
+  return items
+    ? {
+        success: true,
+        data: items,
+        hasMore: result.response.length >= pageSize,
+      }
+    : {
+        success: false,
+        message:
+          result.message || "Unable to load notifications. Please try again.",
+      };
+}
+
+async function mutate(
+  method: string,
+  read: boolean,
+  notificationId: string | null,
 ) {
+  if (notificationId !== null && !isNotificationId(notificationId))
+    return { status: 400, message: "Invalid notification." };
   try {
-    const token = await getAccessToken();
-
-    if (!token) {
-      return [];
-    }
-
-    const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/notification?pageNumber=${pageNo}&pageSize=${pageSize}`,
-      {
-        headers: getAuthHeaders(token),
-      },
+    const viewerId = await resolveViewerIdAction();
+    if (!viewerId) return { status: 401, message: "Please sign in again." };
+    return await request(
+      `/notification/${read ? "markAsRead/" : ""}${viewerId}${notificationId ? `/${notificationId}` : ""}`,
+      method,
     );
-
-    const res = response.data;
-
-    if (res.status === "7400") {
-      return Array.isArray(res.response) ? res.response : [];
-    }
-
-    return [];
   } catch (error) {
-    // console.error("getAllNotificationsAction failed:", error);
-    return [];
+    if (isRedirectError(error)) throw error;
+    return {
+      status: 500,
+      message: "Unable to update notifications. Please try again.",
+    };
   }
 }
 
 export async function markNotificationAsReadAction(notificationId: string) {
-  try {
-    const token = await getAccessToken();
-    const userId = await resolveCurrentUserId();
-
-    if (!token || !userId) {
-      return false;
-    }
-
-    const response = await axios.put(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/notification/markAsRead/${userId}/${notificationId}`,
-      undefined,
-      {
-        headers: getAuthHeaders(token),
-      },
-    );
-
-    return response.data;
-  } catch (error) {
-    console.error("markNotificationAsReadAction failed:", error);
-    return false;
-  }
+  return mutate("PUT", true, notificationId);
 }
-
 export async function markAllNotificationsAsReadAction() {
-  try {
-    const token = await getAccessToken();
-    const userId = await resolveCurrentUserId();
-
-    if (!token || !userId) {
-      return false;
-    }
-
-    const response = await axios.put(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/notification/markAsRead/${userId}`,
-      undefined,
-      {
-        headers: getAuthHeaders(token),
-      },
-    );
-
-    return response.data;
-  } catch (error) {
-    console.error("markAllNotificationsAsReadAction failed:", error);
-    return false;
-  }
+  return mutate("PUT", true, null);
 }
-
 export async function deleteNotificationAction(notificationId: string) {
-  try {
-    const token = await getAccessToken();
-    const userId = await resolveCurrentUserId();
-
-    if (!token || !userId) {
-      return false;
-    }
-
-    const response = await axios.delete(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/notification/${userId}/${notificationId}`,
-      {
-        headers: getAuthHeaders(token),
-      },
-    );
-
-    return response.data;
-  } catch (error) {
-    console.error("deleteNotificationAction failed:", error);
-    return false;
-  }
+  return mutate("DELETE", false, notificationId);
 }
-
 export async function deleteAllNotificationsAction() {
-  try {
-    const token = await getAccessToken();
-    const userId = await resolveCurrentUserId();
-
-    if (!token || !userId) {
-      return false;
-    }
-
-    const response = await axios.delete(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/notification/${userId}`,
-      {
-        headers: getAuthHeaders(token),
-      },
-    );
-
-    return response.data;
-  } catch (error) {
-    console.error("deleteAllNotificationsAction failed:", error);
-    return false;
-  }
+  return mutate("DELETE", false, null);
 }

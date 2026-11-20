@@ -14,13 +14,15 @@ export default function Comments({
   postAuthorId?: string;
 }) {
   return (
-    <CommentThread
-      key={params.id}
-      postId={params.id}
-      numberOfComments={numberOfComments}
-      canComment={canComment}
-      postAuthorId={postAuthorId}
-      commentType="PAGE"
-    />
+    <div id="comments" className="scroll-mt-20">
+      <CommentThread
+        key={params.id}
+        postId={params.id}
+        numberOfComments={numberOfComments}
+        canComment={canComment}
+        postAuthorId={postAuthorId}
+        commentType="PAGE"
+      />
+    </div>
   );
 }
