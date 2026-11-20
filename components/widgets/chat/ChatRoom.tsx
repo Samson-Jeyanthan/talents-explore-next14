@@ -22,7 +22,10 @@ import { Button } from "@/components/ui/button";
 import { useUserContext } from "@/context/AuthProvider";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { ArrowLeft, MoreVertical, Send, Trash2 } from "lucide-react";
+import { ArrowLeft, MoreVertical, Trash2 } from "lucide-react";
+import ChatComposer from "./ChatComposer";
+import ChatMessageMedia from "./ChatMessageMedia";
+import type { ChatMessageInput } from "@/lib/validations/chat.validation";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
@@ -52,7 +55,7 @@ const RECENT_GROUPS_KEY = "te-web-recent-groups";
 function persistRecentRoom(
   key: string,
   room: Record<string, any>,
-  roomLimit = 25
+  roomLimit = 25,
 ) {
   if (typeof window === "undefined") {
     return;
@@ -63,7 +66,8 @@ function persistRecentRoom(
     const parsed = stored ? JSON.parse(stored) : [];
     const current = Array.isArray(parsed) ? parsed : [];
     const filtered = current.filter(
-      (item: any) => (item?._id || item?.roomId) !== (room?._id || room?.roomId)
+      (item: any) =>
+        (item?._id || item?.roomId) !== (room?._id || room?.roomId),
     );
     const next = [room, ...filtered].slice(0, roomLimit);
     window.localStorage.setItem(key, JSON.stringify(next));
@@ -117,7 +121,6 @@ function ChatRoom({
   const [messages, setMessages] = useState<any[]>(initialMessages || []);
   const [members, setMembers] = useState<any[]>(initialMembers || []);
   const [chatInfo, setChatInfo] = useState<any>(initialChatInfo || null);
-  const [message, setMessage] = useState("");
   const [typing, setTyping] = useState<any>(null);
   const [isLoadingOlder, setIsLoadingOlder] = useState(false);
   const [deleteMessageId, setDeleteMessageId] = useState<string | null>(null);
@@ -126,16 +129,18 @@ function ChatRoom({
   const [isPending, startTransition] = useTransition();
   const listRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<Socket | null>(null);
+  const activeRoom = useRef(roomId);
+  activeRoom.current = roomId;
 
   const activeUserId = currentUser?._id || user.currentUserId;
   const activeUserName = currentUser?.userName || user.username;
   const sender = useMemo(
     () => members.find((member) => member?.userId !== activeUserId),
-    [members, activeUserId]
+    [members, activeUserId],
   );
   const selfMember = useMemo(
     () => members.find((member) => member?.userId === activeUserId),
-    [members, activeUserId]
+    [members, activeUserId],
   );
 
   const isRequestInviteSent =
@@ -170,6 +175,13 @@ function ChatRoom({
     }
 
     const latestMessage = [...messages].reverse().find((item) => !item?.type);
+    const lastMessageLabel =
+      latestMessage?.content ||
+      (latestMessage?.media
+        ? latestMessage.mediaType === "video"
+          ? "Video"
+          : "Image"
+        : "Open conversation");
     const roomPayload =
       initialType === "group"
         ? {
@@ -177,7 +189,7 @@ function ChatRoom({
             roomId,
             title: initialGroupChatDetails?.title || "Group chat",
             collaboration: initialGroupChatDetails || null,
-            lastMessage: latestMessage?.content || "Open conversation",
+            lastMessage: lastMessageLabel,
             updatedAt: latestMessage?.createdAt || new Date().toISOString(),
             unread: 0,
           }
@@ -195,14 +207,14 @@ function ChatRoom({
                 ]
               : [],
             info: chatInfo || null,
-            lastMessage: latestMessage?.content || "Open conversation",
+            lastMessage: lastMessageLabel,
             updatedAt: latestMessage?.createdAt || new Date().toISOString(),
             unread: 0,
           };
 
     persistRecentRoom(
       initialType === "group" ? RECENT_GROUPS_KEY : RECENT_CHATS_KEY,
-      roomPayload
+      roomPayload,
     );
   }, [
     roomId,
@@ -315,76 +327,101 @@ function ChatRoom({
     setChatInfo(memberRes?.info || null);
   };
 
-  const handleSendMessage = () => {
-    const trimmed = message.trim();
+  const handleSendMessage = async (payload: ChatMessageInput) => {
+    const res = await sendChatMessageAction({
+      ...payload,
+      roomId,
+      colorCode: selfMember?.colorCode || null,
+    });
+    if (!res || res.status !== "7400")
+      return {
+        success: false,
+        message:
+          res?.message || "Unable to send your message. Please try again.",
+      };
+    if (activeRoom.current !== roomId) return { success: true };
 
-    if (!trimmed) {
-      return;
+    const result = res.response?.message || res.response?.data || res.response;
+    if (result && typeof result === "object" && result._id) {
+      const saved = {
+        ...payload,
+        userId: activeUserId,
+        userName: activeUserName,
+        createdAt: new Date().toISOString(),
+        ...result,
+      };
+      setMessages((prev) =>
+        prev.some((item) => item?._id === saved._id)
+          ? prev.map((item) =>
+              item?._id === saved._id ? { ...item, ...saved } : item,
+            )
+          : [...prev, saved],
+      );
     }
 
-    setMessage("");
-    emitTyping(false);
-
-    startTransition(async () => {
-      const res = await sendChatMessageAction({
-        roomId,
-        content: trimmed,
-        colorCode: selfMember?.colorCode || null,
-      });
-
-      if (!res || res.status !== "7400") {
-        toast.error("Couldn't send message", { duration: 4000 });
-        setMessage(trimmed);
-        return;
-      }
-
+    // The backend has acknowledged the send. A failed list refresh must not
+    // turn it into a retryable send failure and produce a duplicate message.
+    try {
       const latest = await getChatMessagesAction({
         roomId,
         id: messages[messages.length - 1]?._id || null,
         direction: "down",
         pageSize: 10,
       });
-
-      if (Array.isArray(latest) && latest.length > 0) {
+      if (
+        activeRoom.current === roomId &&
+        Array.isArray(latest) &&
+        latest.length
+      ) {
         setMessages((prev) => {
           const ids = new Set(prev.map((item) => item?._id));
-          const next = latest.filter((item) => !ids.has(item?._id));
-          return next.length > 0 ? [...prev, ...next] : prev;
+          return [...prev, ...latest.filter((item) => !ids.has(item?._id))];
         });
       }
+      if (
+        (!result || typeof result !== "object" || !result._id) &&
+        !latest.length
+      )
+        router.refresh();
+    } catch {
+      /* Sending succeeded; realtime updates or refresh can reload it. */
+    }
 
-      persistRecentRoom(
-        initialType === "group" ? RECENT_GROUPS_KEY : RECENT_CHATS_KEY,
-        initialType === "group"
-          ? {
-              _id: initialGroupChatDetails?._id || roomId,
-              roomId,
-              title: initialGroupChatDetails?.title || "Group chat",
-              collaboration: initialGroupChatDetails || null,
-              lastMessage: trimmed,
-              updatedAt: new Date().toISOString(),
-              unread: 0,
-            }
-          : {
-              _id: chatInfo?._id || roomId,
-              roomId,
-              member: sender
-                ? [
-                    {
-                      userId: sender.userId,
-                      userName: sender.userName,
-                      userProfilePicture: sender.userProfilePicture,
-                      professional: sender.professional,
-                    },
-                  ]
-                : [],
-              info: chatInfo || null,
-              lastMessage: trimmed,
-              updatedAt: new Date().toISOString(),
-              unread: 0,
-            }
-      );
-    });
+    if (activeRoom.current !== roomId) return { success: true };
+    const lastMessage =
+      payload.content || (payload.mediaType === "video" ? "Video" : "Image");
+    persistRecentRoom(
+      initialType === "group" ? RECENT_GROUPS_KEY : RECENT_CHATS_KEY,
+      initialType === "group"
+        ? {
+            _id: initialGroupChatDetails?._id || roomId,
+            roomId,
+            title: initialGroupChatDetails?.title || "Group chat",
+            collaboration: initialGroupChatDetails || null,
+            lastMessage,
+            updatedAt: new Date().toISOString(),
+            unread: 0,
+          }
+        : {
+            _id: chatInfo?._id || roomId,
+            roomId,
+            member: sender
+              ? [
+                  {
+                    userId: sender.userId,
+                    userName: sender.userName,
+                    userProfilePicture: sender.userProfilePicture,
+                    professional: sender.professional,
+                  },
+                ]
+              : [],
+            info: chatInfo || null,
+            lastMessage,
+            updatedAt: new Date().toISOString(),
+            unread: 0,
+          },
+    );
+    return { success: true };
   };
 
   const handleDeleteMessage = () => {
@@ -401,7 +438,7 @@ function ChatRoom({
       }
 
       setMessages((prev) =>
-        prev.filter((item) => item?._id !== deleteMessageId)
+        prev.filter((item) => item?._id !== deleteMessageId),
       );
       setDeleteMessageId(null);
     });
@@ -545,7 +582,7 @@ function ChatRoom({
                     key={item?._id || index}
                     className={cn(
                       "flex",
-                      isOwn ? "justify-end" : "justify-start"
+                      isOwn ? "justify-end" : "justify-start",
                     )}
                   >
                     <div
@@ -553,29 +590,15 @@ function ChatRoom({
                         "max-w-[85%] rounded-[22px] px-4 py-3 shadow-sm",
                         isOwn
                           ? "bg-light-900 text-dark-200"
-                          : "bg-dark-250 text-light-900"
+                          : "bg-dark-250 text-light-900",
                       )}
                     >
                       {item?.media ? (
-                        <a
-                          href={item.media}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="mb-2 block overflow-hidden rounded-[16px] border border-dark-300"
-                        >
-                          {item?.mediaType === "image" ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              src={item.media}
-                              alt="Chat media"
-                              className="max-h-80 w-full object-cover"
-                            />
-                          ) : (
-                            <div className="px-4 py-10 text-center text-xs text-light-500">
-                              Open attached {item?.mediaType || "media"}
-                            </div>
-                          )}
-                        </a>
+                        <ChatMessageMedia
+                          media={item.media}
+                          mediaType={item.mediaType}
+                          videoThumbnail={item.videoThumbnail}
+                        />
                       ) : null}
 
                       {item?.content ? (
@@ -604,30 +627,13 @@ function ChatRoom({
           </div>
 
           {!isRequestInviteSent && !isRequestAccept ? (
-            <div className="border-t border-dark-300 bg-dark-250 p-4">
-              <div className="flex items-end gap-3">
-                <textarea
-                  value={message}
-                  onChange={(event) => {
-                    setMessage(event.target.value);
-                    emitTyping(Boolean(event.target.value.trim()));
-                  }}
-                  onBlur={() => emitTyping(false)}
-                  placeholder="Type a message"
-                  rows={1}
-                  className="min-h-12 flex-1 resize-none rounded-[22px] border border-dark-300 bg-dark-200 px-4 py-3 text-sm text-light-900 outline-none placeholder:text-light-500 focus:border-primary-500"
-                />
-                <Button
-                  type="button"
-                  disabled={isPending || !message.trim()}
-                  className="rounded-full bg-primary-500 px-4 text-light-900"
-                  onClick={handleSendMessage}
-                >
-                  <Send className="mr-2 size-4" />
-                  Send
-                </Button>
-              </div>
-            </div>
+            <ChatComposer
+              key={roomId}
+              roomId={roomId}
+              userName={activeUserName}
+              onTyping={emitTyping}
+              onSend={handleSendMessage}
+            />
           ) : null}
 
           {isRequestInviteSent ? (

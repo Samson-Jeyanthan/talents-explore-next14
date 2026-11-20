@@ -3,7 +3,12 @@
 import axios from "axios";
 // import { getSession } from "@/lib/session";
 import { getUserPersonalInfoAction } from "./auth.action";
-import { getSession } from "./session.action";
+import { getAuthHeaders as resolveSessionHeaders } from "@/lib/session";
+import {
+  chatMessageValidation,
+  ChatMessageInput,
+} from "@/lib/validations/chat.validation";
+import { isRedirectError } from "next/dist/client/components/redirect";
 
 const SUCCESS_STATUS = "7400";
 
@@ -27,18 +32,11 @@ type ChatMessagesParams = {
   pageSize?: number;
 };
 
-type SendChatMessagePayload = {
-  roomId: string;
-  content?: string | null;
-  colorCode?: string | null;
-  mediaType?: "image" | "video" | "link" | "gif" | null;
-  media?: string | null;
-  url?: string | null;
-  videoThumbnail?: string | null;
-};
+type SendChatMessagePayload = ChatMessageInput;
 
 async function getAccessToken() {
-  return await getSession();
+  const headers = await resolveSessionHeaders();
+  return headers.Authorization.slice("Bearer ".length);
 }
 
 function getAuthHeaders(token: string) {
@@ -152,6 +150,7 @@ async function getCurrentUserResponse() {
       user: response?.response || null,
     };
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error("getCurrentUserResponse failed:", error);
     return { token: "", user: null };
   }
@@ -189,7 +188,7 @@ export async function getChatUnreadCountAction(): Promise<ChatUnreadCount> {
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/chat/unreadTabCount/${user._id}`,
       {
         headers: getAuthHeaders(token),
-      }
+      },
     );
 
     if (response.data?.status === SUCCESS_STATUS) {
@@ -202,6 +201,7 @@ export async function getChatUnreadCountAction(): Promise<ChatUnreadCount> {
 
     return { oneToOne: 0, group: 0, request: 0 };
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error("getChatUnreadCountAction failed:", error);
     return { oneToOne: 0, group: 0, request: 0 };
   }
@@ -210,7 +210,7 @@ export async function getChatUnreadCountAction(): Promise<ChatUnreadCount> {
 export async function getChatRoomsAction(
   type: "chat" | "request" = "chat",
   pageNumber = 1,
-  pageSize = 10
+  pageSize = 10,
 ) {
   try {
     const { token, user } = await getCurrentUserResponse();
@@ -229,7 +229,7 @@ export async function getChatRoomsAction(
           pageNo: pageNumber,
           pageSize,
         },
-      }
+      },
     );
 
     const normalizedRooms = normalizeChatRoomResponse(response.data);
@@ -244,9 +244,10 @@ export async function getChatRoomsAction(
     console.error("getChatRoomsAction unexpected response:", response.data);
     return [];
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     const axiosError = error as any;
     const normalizedRooms = normalizeChatRoomResponse(
-      axiosError?.response?.data
+      axiosError?.response?.data,
     );
 
     if (normalizedRooms.length > 0) {
@@ -276,7 +277,7 @@ export async function getGroupChatRoomsAction(pageNumber = 1, pageSize = 10) {
           pageNo: pageNumber,
           pageSize,
         },
-      }
+      },
     );
 
     const normalizedRooms = normalizeChatRoomResponse(response.data);
@@ -290,13 +291,14 @@ export async function getGroupChatRoomsAction(pageNumber = 1, pageSize = 10) {
 
     console.error(
       "getGroupChatRoomsAction unexpected response:",
-      response.data
+      response.data,
     );
     return [];
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     const axiosError = error as any;
     const normalizedRooms = normalizeChatRoomResponse(
-      axiosError?.response?.data
+      axiosError?.response?.data,
     );
 
     if (normalizedRooms.length > 0) {
@@ -324,13 +326,14 @@ export async function createOneToOneChatAction(userIdB: string) {
       },
       {
         headers: getAuthHeaders(token),
-      }
+      },
     );
 
     return response.data?.status === SUCCESS_STATUS
       ? response.data?.response
       : null;
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error("createOneToOneChatAction failed:", error);
     return null;
   }
@@ -348,7 +351,7 @@ export async function getChatMembersAction(roomId: string) {
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/chat/members/${roomId}/${user._id}`,
       {
         headers: getAuthHeaders(token),
-      }
+      },
     );
 
     if (response.data?.status === SUCCESS_STATUS) {
@@ -362,6 +365,7 @@ export async function getChatMembersAction(roomId: string) {
 
     return { list: [], info: null };
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error("getChatMembersAction failed:", error);
     return { list: [], info: null };
   }
@@ -379,13 +383,14 @@ export async function getGroupChatRoomDetailsAction(roomId: string) {
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/chat/groupChatRoomDetails/${roomId}`,
       {
         headers: getAuthHeaders(token),
-      }
+      },
     );
 
     return response.data?.status === SUCCESS_STATUS
       ? response.data?.response || null
       : null;
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error("getGroupChatRoomDetailsAction failed:", error);
     return null;
   }
@@ -415,7 +420,7 @@ export async function getChatMessagesAction({
           id,
           userId: user._id,
         },
-      }
+      },
     );
 
     const messages = normalizeChatMessagesResponse(response.data);
@@ -425,17 +430,25 @@ export async function getChatMessagesAction({
 
     return [];
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error("getChatMessagesAction failed:", error);
     return normalizeChatMessagesResponse((error as any)?.response?.data);
   }
 }
 
 export async function sendChatMessageAction(payload: SendChatMessagePayload) {
+  const parsed = chatMessageValidation.safeParse(payload);
+  if (!parsed.success)
+    return { status: "ERROR", message: parsed.error.issues[0].message };
+  payload = parsed.data;
   try {
     const { token, user } = await getCurrentUserResponse();
 
     if (!token || !user?._id || !payload.roomId) {
-      return false;
+      return {
+        status: "ERROR",
+        message: "Unable to identify your chat session. Please try again.",
+      };
     }
 
     const response = await axios.post(
@@ -454,13 +467,33 @@ export async function sendChatMessageAction(payload: SendChatMessagePayload) {
       },
       {
         headers: getAuthHeaders(token),
-      }
+        timeout: 15000,
+      },
     );
 
-    return response.data;
-  } catch (error) {
-    console.error("sendChatMessageAction failed:", error);
-    return false;
+    if (
+      response.status >= 200 &&
+      response.status < 300 &&
+      response.data?.status === SUCCESS_STATUS
+    )
+      return response.data;
+    return {
+      status: "ERROR",
+      message:
+        typeof response.data?.message === "string"
+          ? response.data.message
+          : "Unable to send your message. Please try again.",
+    };
+  } catch (error: any) {
+    if (isRedirectError(error)) throw error;
+    const message = error?.response?.data?.message;
+    return {
+      status: "ERROR",
+      message:
+        typeof message === "string"
+          ? message
+          : "Unable to send your message. Please try again.",
+    };
   }
 }
 
@@ -480,11 +513,12 @@ export async function deleteChatMessageAction(roomId: string, chatId: string) {
       },
       {
         headers: getAuthHeaders(token),
-      }
+      },
     );
 
     return response.data;
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error("deleteChatMessageAction failed:", error);
     return false;
   }
@@ -504,11 +538,12 @@ export async function deleteConversationAction(roomId: string) {
       {},
       {
         headers: getAuthHeaders(token),
-      }
+      },
     );
 
     return response.data;
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error("deleteConversationAction failed:", error);
     return false;
   }
@@ -528,11 +563,12 @@ export async function acceptChatRequestAction(requestId: string) {
       {},
       {
         headers: getAuthHeaders(token),
-      }
+      },
     );
 
     return response.data;
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error("acceptChatRequestAction failed:", error);
     return false;
   }

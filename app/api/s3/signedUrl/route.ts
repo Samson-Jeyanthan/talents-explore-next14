@@ -13,6 +13,7 @@ async function requestSignedUrl(payload: unknown, accessToken: string) {
     },
     body: JSON.stringify(payload),
     cache: "no-store",
+    signal: AbortSignal.timeout(15000),
   });
 }
 
@@ -20,7 +21,7 @@ export async function POST(request: NextRequest) {
   if (!backendUrl) {
     return NextResponse.json(
       { message: "Backend URL is not configured." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
   } catch {
     return NextResponse.json(
       { message: "Invalid upload request." },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest) {
   ) {
     return NextResponse.json(
       { message: "A file name and content type are required." },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -49,7 +50,7 @@ export async function POST(request: NextRequest) {
     await clearSession();
     return NextResponse.json(
       { message: "Your session has expired." },
-      { status: 401 }
+      { status: 401 },
     );
   }
 
@@ -60,7 +61,7 @@ export async function POST(request: NextRequest) {
       await clearSession();
       return NextResponse.json(
         { message: "Your session has expired." },
-        { status: 401 }
+        { status: 401 },
       );
     }
     upstream = await requestSignedUrl(payload, refreshed.accessToken);

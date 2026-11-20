@@ -6,14 +6,14 @@ const ts = require("typescript");
 const { webcrypto } = require("node:crypto");
 
 function load(file, globals = {}) {
-  const module = { exports: {} };
+  const testModule = { exports: {} };
   vm.runInNewContext(
     ts.transpileModule(fs.readFileSync(file, "utf8"), {
       compilerOptions: { module: ts.ModuleKind.CommonJS },
     }).outputText,
     {
-      module,
-      exports: module.exports,
+      module: testModule,
+      exports: testModule.exports,
       require,
       Error,
       File,
@@ -23,10 +23,11 @@ function load(file, globals = {}) {
       setTimeout,
       clearTimeout,
       crypto: webcrypto,
+      AbortSignal,
       ...globals,
     },
   );
-  return module.exports;
+  return testModule.exports;
 }
 
 const media = load("lib/utils/postMedia.ts");
@@ -51,7 +52,11 @@ function videoHarness(duration, decodeError = false) {
     duration,
     videoWidth: 1920,
     videoHeight: 1080,
+    get src() {
+      return this._src;
+    },
     set src(value) {
+      this._src = value;
       queueMicrotask(() => {
         if (decodeError) {
           this.onerror?.();
@@ -61,7 +66,11 @@ function videoHarness(duration, decodeError = false) {
         this.onloadeddata?.();
       });
     },
+    get currentTime() {
+      return this._currentTime || 0;
+    },
     set currentTime(value) {
+      this._currentTime = value;
       queueMicrotask(() => this.onseeked?.());
     },
     removeAttribute() {
@@ -128,9 +137,11 @@ test("upload sends original video bytes directly to signed storage and reports p
     open(method, url) {
       calls.push([method, url]);
     }
+
     setRequestHeader(name, value) {
       calls.push([name, value]);
     }
+
     send(file) {
       sent.push(file);
       this.upload.onprogress({ lengthComputable: true, loaded: 5, total: 10 });

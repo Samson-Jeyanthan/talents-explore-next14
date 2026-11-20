@@ -26,8 +26,11 @@ export function validatePostDuration(seconds: number) {
 }
 
 /** Decode the real file before upload; picker metadata alone is not trusted. */
-export async function createPostVideoThumbnail(file: File): Promise<File> {
-  validatePostFile(file);
+export async function createVideoThumbnail(
+  file: File,
+  checks = { file: validatePostFile, duration: validatePostDuration },
+): Promise<File> {
+  checks.file(file);
   const url = URL.createObjectURL(file);
   const video = document.createElement("video");
   video.muted = true;
@@ -56,7 +59,7 @@ export async function createPostVideoThumbnail(file: File): Promise<File> {
         if (captured) return;
         captured = true;
         try {
-          validatePostDuration(video.duration);
+          checks.duration(video.duration);
           if (!video.videoWidth || !video.videoHeight)
             throw new Error("Unable to preview this video.");
           const canvas = document.createElement("canvas");
@@ -96,7 +99,7 @@ export async function createPostVideoThumbnail(file: File): Promise<File> {
       };
       video.onloadedmetadata = () => {
         try {
-          validatePostDuration(video.duration);
+          checks.duration(video.duration);
         } catch (error) {
           fail(error as Error);
         }
@@ -119,4 +122,8 @@ export async function createPostVideoThumbnail(file: File): Promise<File> {
     video.load();
     URL.revokeObjectURL(url);
   }
+}
+
+export function createPostVideoThumbnail(file: File): Promise<File> {
+  return createVideoThumbnail(file);
 }

@@ -19,13 +19,18 @@ export async function uploadFileToStorage(
       fileName,
       contentType: file.type || "application/octet-stream",
     }),
+    signal: AbortSignal.timeout(60000),
+  }).catch(() => {
+    throw new Error(
+      "Unable to prepare the attachment upload. Please try again.",
+    );
   });
 
   if (!signedUrlResponse.ok) {
     throw new Error("Unable to prepare the attachment upload.");
   }
 
-  const signedUrlData = await signedUrlResponse.json();
+  const signedUrlData = await signedUrlResponse.json().catch(() => null);
   const signedUrl = signedUrlData?.url;
   const key = signedUrlData?.key;
   if (typeof signedUrl !== "string" || typeof key !== "string") {
