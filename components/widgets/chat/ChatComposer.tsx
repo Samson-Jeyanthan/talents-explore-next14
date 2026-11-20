@@ -225,7 +225,7 @@ export default function ChatComposer({
             attachment ? "Add a caption (optional)" : "Type a message"
           }
           rows={1}
-          className="min-h-12 flex-1 resize-none rounded-[22px] border border-dark-300 bg-dark-200 px-4 py-3 text-sm text-light-900 outline-none placeholder:text-light-500 focus:border-primary-500"
+          className="min-h-12 min-w-0 flex-1 resize-none rounded-[22px] border border-dark-300 bg-dark-200 px-4 py-3 text-sm text-light-900 outline-none placeholder:text-light-500 focus:border-primary-500"
         />
         <Button
           type="submit"

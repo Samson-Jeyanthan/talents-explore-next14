@@ -34,10 +34,10 @@ const LangEducationForm = ({ form, LangOptions }: any) => {
   const [selectedLangId, setSelectedLangId] = useState("");
   const [selectedLevel, setSelectedLevel] = useState("");
   const [addedLang, setAddedLang] = useState<LanguageSet[]>(
-    form.getValues("languageKnown") || []
+    form.getValues("languageKnown") || [],
   );
   const [addedEdu, setAddedEdu] = useState<EducationSet[]>(
-    form.getValues("education") || []
+    form.getValues("education") || [],
   );
   const [eduErr, setEduErr] = useState("");
   const { years, presentAddedYears } = useDateSelector({});
@@ -56,7 +56,7 @@ const LangEducationForm = ({ form, LangOptions }: any) => {
 
   // Hide languages that were already added
   const availableOptions = (LangOptions as LangOption[]).filter(
-    (opt) => !addedLang.some((item) => item.languageId === opt._id)
+    (opt) => !addedLang.some((item) => item.languageId === opt._id),
   );
 
   const syncForm = (next: LanguageSet[]) => {
@@ -69,7 +69,7 @@ const LangEducationForm = ({ form, LangOptions }: any) => {
     if (!selectedLangId || !selectedLevel) return;
 
     const option = (LangOptions as LangOption[]).find(
-      (o) => o._id === selectedLangId
+      (o) => o._id === selectedLangId,
     );
     if (!option) return;
 
@@ -135,7 +135,7 @@ const LangEducationForm = ({ form, LangOptions }: any) => {
 
   return (
     <form className="flex min-h-[90%] flex-col gap-5">
-      <h3 className="mt-4 border-b border-dark-400 pb-2 text-lg font-semibold text-white">
+      <h3 className="mt-4 border-b border-dark-400 pb-2 text-lg font-semibold text-light-900">
         Language Details
       </h3>
       <div className="flex justify-between gap-6">
@@ -180,7 +180,7 @@ const LangEducationForm = ({ form, LangOptions }: any) => {
               </p>
 
               <span
-                className="cursor-pointer text-lg text-white"
+                className="cursor-pointer text-lg text-light-900"
                 onClick={() => handleLangRemove(item.languageId)}
               >
                 <MdDelete />
@@ -190,7 +190,7 @@ const LangEducationForm = ({ form, LangOptions }: any) => {
         </div>
       </div>
 
-      <h3 className="border-b border-dark-400 pb-2 text-lg font-semibold text-white">
+      <h3 className="border-b border-dark-400 pb-2 text-lg font-semibold text-light-900">
         Education Details
       </h3>
       <div className="flex justify-between gap-6">
@@ -278,7 +278,7 @@ const LangEducationForm = ({ form, LangOptions }: any) => {
               <button
                 type="button"
                 aria-label={`Remove ${item.course}`}
-                className="cursor-pointer text-lg text-white"
+                className="cursor-pointer text-lg text-light-900"
                 onClick={() => handleEduRemove(index)}
               >
                 <MdDelete />

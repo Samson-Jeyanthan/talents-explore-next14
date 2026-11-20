@@ -48,7 +48,14 @@ const LeftSidebar = () => {
             alt="TE-Logo"
             width={200}
             height={30}
-            className="h-auto w-4/6 object-contain max-lg:hidden 2xl:w-[70%]"
+            className="hidden h-auto w-4/6 object-contain dark:block max-lg:!hidden 2xl:w-[70%]"
+          />
+          <Image
+            src="/assets/images/te-logo-expanded-dark.png"
+            alt="TE-Logo"
+            width={200}
+            height={60}
+            className="h-auto w-4/6 object-contain dark:hidden max-lg:hidden 2xl:w-[70%]"
           />
           <ul className="flex w-full flex-col gap-2 p-3 2xl:gap-3">
             {SIDEBAR_ITEMS.map((item, index) => {

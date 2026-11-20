@@ -97,7 +97,7 @@ const NormalUserProfileHeader = ({
               <ChatLauncher
                 userId={userData?._id}
                 iconOnly
-                className="shad-button_secondary w-max rounded-full fill-white"
+                className="shad-button_secondary w-max rounded-full fill-light-900"
               />
             ) : null}
           </>

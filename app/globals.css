@@ -31,7 +31,7 @@ body {
   }
 
   .camera-button {
-    @apply bg-dark-100 absolute bottom-2 right-2 p-2 flex-center rounded-lg cursor-pointer;
+    @apply bg-black absolute bottom-2 right-2 p-2 flex-center rounded-lg cursor-pointer;
   }
 
   .font-css-poppins {
@@ -252,13 +252,13 @@ body {
 }
 
 .auth-or {
-  color: #e6e6e6;
+  color: rgb(var(--ink-heading));
   overflow: visible;
   text-align: center;
   height: 0.5rem;
   width: 100%;
   margin: 1rem 0;
-  border-top: 1px solid #e6e6e6;
+  border-top: 1px solid rgb(var(--surface-border));
 
   &:after {
     content: "OR";
@@ -266,14 +266,14 @@ body {
     padding: 0 1rem;
     position: relative;
     top: -0.8rem;
-    background: #11131b;
+    background: rgb(var(--canvas));
   }
 }
 
 .test-drawer {
   position: absolute;
-  background-color: #11131b;
-  color: #e6e6e6;
+  background-color: rgb(var(--canvas));
+  color: rgb(var(--ink-heading));
   transition: transform 1s cubic-bezier(0.32, 0.72, 0, 1);
   transform: scale(1) translate(0, 0); /* Initial state, scaled down and centered */
 }

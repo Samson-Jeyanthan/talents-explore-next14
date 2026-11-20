@@ -66,7 +66,7 @@ const CertificateInput = ({ fieldChange, values }: any) => {
         )}
         {values && (
           <span
-            className="absolute right-3 top-3 cursor-pointer text-white"
+            className="absolute right-3 top-3 cursor-pointer text-light-900"
             onClick={handleInputDelete}
           >
             <X size={16} />

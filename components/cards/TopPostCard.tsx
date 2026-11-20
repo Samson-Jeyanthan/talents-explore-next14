@@ -45,9 +45,9 @@ const TopPostCard = ({ userTopPostCard, index }: Prop) => {
           className="size-full rounded-xl bg-dark-400 object-cover"
         />
 
-        <div className="absolute bottom-0 right-0 flex h-1/2 w-full items-end rounded-xl bg-gradient-to-b from-[rgb(17,19,27,0.0)] to-[rgba(17,19,27)] p-2">
+        <div className="theme-on-media absolute bottom-0 right-0 flex h-1/2 w-full items-end rounded-xl bg-gradient-to-b from-transparent to-black/90 p-2">
           <div className="flex-start w-full gap-2">
-            <div className="flex-center gap-2 rounded-full bg-dark-200 fill-custom-100 p-3 py-2 text-sm text-light-900">
+            <div className="flex-center gap-2 rounded-full bg-black/70 fill-custom-100 p-3 py-2 text-sm text-white">
               <StarIcon width="16px" height="16px" />
               {Math.floor(postRatingValue) === 0
                 ? "N/A"

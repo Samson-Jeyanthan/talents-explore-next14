@@ -146,7 +146,7 @@ function RequestCard({ item, feature }: { item: any; feature: Feature }) {
       {!isAdvertisement ? <div className="mb-4 h-1 rounded-full bg-[#B4235A]" /> : null}
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className={`truncate text-base font-semibold ${isAdvertisement ? "text-light-900" : "text-[#E66B9D]"}`}>{heading}</p>
+          <p className={`truncate text-base font-semibold ${isAdvertisement ? "text-light-900" : "text-promotion"}`}>{heading}</p>
           <p className="truncate pt-1 text-sm text-light-500">{subheading || "-"}</p>
         </div>
         {isAdvertisement ? (
@@ -185,7 +185,7 @@ function RequestCard({ item, feature }: { item: any; feature: Feature }) {
       ) : null}
 
       {!isAdvertisement ? (
-        <p className="mt-4 rounded-2xl bg-[#B4235A]/10 px-3 py-2 text-xs leading-5 text-[#E66B9D]">Your application has been received. Our support team will reach you personally.</p>
+        <p className="mt-4 rounded-2xl bg-[#B4235A]/10 px-3 py-2 text-xs leading-5 text-promotion">Your application has been received. Our support team will reach you personally.</p>
       ) : null}
       <p className="pt-4 text-xs text-light-500">Submitted on {requestDate}</p>
     </article>
@@ -306,7 +306,7 @@ function SubmitButton({ loading, label, accent }: { loading: boolean; label: str
     <Button
       type="submit"
       disabled={loading}
-      className={`mt-1 w-full rounded-2xl py-6 text-base font-semibold text-light-900 ${
+      className={`mt-1 w-full rounded-2xl py-6 text-base font-semibold text-white ${
         accent === "advertisement" ? "bg-primary-500 hover:bg-primary-500/90" : "bg-[#B4235A] hover:bg-[#B4235A]/90"
       }`}
     >
@@ -336,11 +336,11 @@ function RequestFormShell({
       </Link>
       <div className={`rounded-[32px] border bg-dark-250 p-5 sm:p-7 ${isAdvertisement ? "border-dark-300" : "border-[#B4235A]/30"}`}>
         <div className="mb-7 flex items-start gap-4">
-          <div className={`rounded-2xl p-3 ${isAdvertisement ? "bg-primary-500/15 text-primary-500" : "bg-[#B4235A]/15 text-[#E66B9D]"}`}>
+          <div className={`rounded-2xl p-3 ${isAdvertisement ? "bg-primary-500/15 text-primary-500" : "bg-[#B4235A]/15 text-promotion"}`}>
             {isAdvertisement ? <Megaphone size={23} /> : <BadgeDollarSign size={23} />}
           </div>
           <div>
-            <h1 className={`text-2xl font-semibold ${isAdvertisement ? "text-light-900" : "text-[#E66B9D]"}`}>{title}</h1>
+            <h1 className={`text-2xl font-semibold ${isAdvertisement ? "text-light-900" : "text-promotion"}`}>{title}</h1>
             <p className="pt-1 text-sm leading-6 text-light-500">{description}</p>
           </div>
         </div>
@@ -376,11 +376,11 @@ function RequestList({ feature }: { feature: Feature }) {
         <div className={`rounded-[32px] border bg-dark-250 p-5 sm:p-6 ${isAdvertisement ? "border-dark-300" : "border-[#B4235A]/30"}`}>
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-4">
-              <div className={`rounded-2xl p-3 ${isAdvertisement ? "bg-primary-500/15 text-primary-500" : "bg-[#B4235A]/15 text-[#E66B9D]"}`}>
+              <div className={`rounded-2xl p-3 ${isAdvertisement ? "bg-primary-500/15 text-primary-500" : "bg-[#B4235A]/15 text-promotion"}`}>
                 {isAdvertisement ? <Megaphone size={24} /> : <BadgeDollarSign size={24} />}
               </div>
               <div>
-                <h1 className={`text-2xl font-semibold sm:text-3xl ${isAdvertisement ? "text-light-900" : "text-[#E66B9D]"}`}>{featureName}</h1>
+                <h1 className={`text-2xl font-semibold sm:text-3xl ${isAdvertisement ? "text-light-900" : "text-promotion"}`}>{featureName}</h1>
                 <p className="pt-1 text-sm leading-6 text-light-500">
                   {isAdvertisement
                     ? "Request an advertisement placement and keep track of your submitted requests."
@@ -388,7 +388,7 @@ function RequestList({ feature }: { feature: Feature }) {
                 </p>
               </div>
             </div>
-            <Button asChild className={`rounded-2xl px-5 py-6 text-light-900 ${isAdvertisement ? "bg-primary-500 hover:bg-primary-500/90" : "bg-[#B4235A] hover:bg-[#B4235A]/90"}`}>
+            <Button asChild className={`rounded-2xl px-5 py-6 text-white ${isAdvertisement ? "bg-primary-500 hover:bg-primary-500/90" : "bg-[#B4235A] hover:bg-[#B4235A]/90"}`}>
               <Link href={formHref}>{isAdvertisement ? "Request Advertisement" : "Request Paid Promotion"}</Link>
             </Button>
           </div>

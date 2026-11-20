@@ -1,0 +1,105 @@
+/* Light palette follows mobile LIGHTTHEME: #FAFAFA, white, #0A1938, #49454F. */
+:root {
+  color-scheme: light;
+  --canvas: 250 250 250;
+  --surface: 255 255 255;
+  --surface-deep: 240 240 243;
+  --surface-muted: 245 245 245;
+  --surface-border: 199 199 199;
+  --ink-muted: 105 101 111;
+  --ink-secondary: 94 90 100;
+  --ink-body: 73 69 79;
+  --ink-heading: 10 25 56;
+  --ink-strong: 10 25 56;
+  --warning-ink: 146 96 0;
+  --promotion-ink: 180 35 90;
+  --background: 0 0% 98%;
+  --foreground: 220 70% 13%;
+  --border: 0 0% 78%;
+  --input: 0 0% 62%;
+  --ring: 353 70% 46%;
+  --primary: 353 70% 46%;
+  --primary-foreground: 0 0% 100%;
+  --muted: 0 0% 96%;
+  --muted-foreground: 264 5% 42%;
+  --accent: 0 0% 94%;
+  --accent-foreground: 220 70% 13%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 220 70% 13%;
+  --card: 0 0% 100%;
+  --card-foreground: 220 70% 13%;
+  --destructive: 0 74% 40%;
+  --destructive-foreground: 0 0% 100%;
+}
+
+:root.dark {
+  color-scheme: dark;
+  --canvas: 17 19 27;
+  --surface: 21 24 35;
+  --surface-deep: 0 0 0;
+  --surface-muted: 27 30 45;
+  --surface-border: 35 39 54;
+  --ink-muted: 127 127 140;
+  --ink-secondary: 143 143 143;
+  --ink-body: 199 199 199;
+  --ink-heading: 230 230 230;
+  --ink-strong: 255 255 255;
+  --warning-ink: 255 177 0;
+  --promotion-ink: 230 107 157;
+  --background: 228 23% 9%;
+  --foreground: 0 0% 100%;
+  --border: 227 21% 17%;
+  --input: 227 21% 17%;
+  --muted: 230 25% 14%;
+  --muted-foreground: 240 5% 55%;
+  --accent: 227 21% 17%;
+  --accent-foreground: 0 0% 100%;
+  --popover: 227 25% 11%;
+  --popover-foreground: 0 0% 100%;
+  --card: 227 25% 11%;
+  --card-foreground: 0 0% 100%;
+  --destructive: 0 72% 60%;
+}
+
+body {
+  background-color: rgb(var(--canvas));
+  color: rgb(var(--ink-strong));
+}
+::selection {
+  background: #c92437;
+  color: white;
+}
+/* Solid brand controls retain white labels and icons in either appearance. */
+.bg-primary-500,
+.hover\:bg-primary-500:hover,
+.shad-button_primary,
+.shad-btn_primary-200,
+.shad-button_primary_round,
+.theme-on-media {
+  --ink-strong: 255 255 255;
+  --ink-heading: 230 230 230;
+  --ink-body: 230 230 230;
+  --ink-secondary: 199 199 199;
+  --ink-muted: 199 199 199;
+  color: white;
+}
+.theme-page-gradient {
+  background-image: linear-gradient(
+    to bottom,
+    rgb(var(--canvas) / 0),
+    rgb(var(--canvas))
+  );
+}
+.theme-profile-gradient {
+  background-image: linear-gradient(
+    to bottom,
+    rgb(var(--canvas) / 0.45),
+    rgb(var(--canvas))
+  );
+}
+:root .text-custom-100 {
+  color: rgb(var(--warning-ink));
+}
+:root .\!text-custom-100 {
+  color: rgb(var(--warning-ink)) !important;
+}

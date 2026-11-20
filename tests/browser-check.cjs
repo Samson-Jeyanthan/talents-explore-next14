@@ -6,7 +6,9 @@ const fs = require("node:fs");
   const page = pages.find(
     (p) =>
       p.type === "page" &&
-      p.url.startsWith("http://localhost:3000") &&
+      p.url.startsWith(
+        process.env.TE_BROWSER_ORIGIN || "http://localhost:3000",
+      ) &&
       (!process.env.TE_BROWSER_PAGE_ID ||
         p.id === process.env.TE_BROWSER_PAGE_ID),
   );
@@ -40,6 +42,31 @@ const fs = require("node:fs");
       socket.send(JSON.stringify({ id: callId, method, params }));
     });
   try {
+    const viewportWidth = Number(process.env.TE_BROWSER_VIEWPORT_WIDTH);
+    if (Number.isInteger(viewportWidth) && viewportWidth >= 320) {
+      await send("Emulation.setDeviceMetricsOverride", {
+        width: viewportWidth,
+        height: 900,
+        deviceScaleFactor: 1,
+        mobile: false,
+      });
+    }
+    if (
+      ["light", "dark", "reset"].includes(process.env.TE_BROWSER_COLOR_SCHEME)
+    ) {
+      await send("Page.bringToFront");
+      await send("Emulation.setEmulatedMedia", {
+        features:
+          process.env.TE_BROWSER_COLOR_SCHEME === "reset"
+            ? []
+            : [
+                {
+                  name: "prefers-color-scheme",
+                  value: process.env.TE_BROWSER_COLOR_SCHEME,
+                },
+              ],
+      });
+    }
     if (process.env.TE_BROWSER_EXPRESSION) {
       const result = await send("Runtime.evaluate", {
         expression: process.env.TE_BROWSER_EXPRESSION,

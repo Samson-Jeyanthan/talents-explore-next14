@@ -42,7 +42,14 @@ const Welcome = () => {
           alt="onboardingImg"
           width={512}
           height={512}
-          className="h-auto w-[70%] object-contain"
+          className="hidden h-auto w-[70%] object-contain dark:block"
+        />
+        <Image
+          src="/assets/images/te-logo-expanded-dark.png"
+          alt="Talents Explore"
+          width={512}
+          height={160}
+          className="h-auto w-[70%] object-contain dark:hidden"
         />
         <p className="text-base text-light-900">
           Discover, connect, and grow your talent with our vibrant community

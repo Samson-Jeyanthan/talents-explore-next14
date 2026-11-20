@@ -40,10 +40,10 @@ const CompleteForm = ({ form }: any) => {
           height={320}
           alt="complete-form-img"
         />
-        <h1 className="text-2xl font-semibold text-white">
+        <h1 className="text-2xl font-semibold text-light-900">
           You&apos;re Almost Done!
         </h1>
-        <p className="text-white">
+        <p className="text-light-900">
           Confirm your details and create your talent profile to join the
           Talents Explore Community.
         </p>
@@ -64,7 +64,7 @@ const CompleteForm = ({ form }: any) => {
               </p>
             </div>
             <span className="flex-center size-8 min-w-8 rounded-full border border-red-600">
-              <CheckIcon className="size-4 text-sm text-white" />
+              <CheckIcon className="size-4 text-sm text-light-900" />
             </span>
           </div>
         ))}

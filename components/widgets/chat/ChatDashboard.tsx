@@ -108,7 +108,7 @@ function ChatDashboard({
       {
         method: "GET",
         cache: "no-store",
-      }
+      },
     );
 
     const data = (await response.json()) as ChatRoomsApiResult;
@@ -142,7 +142,10 @@ function ChatDashboard({
 
       if (Array.isArray(latestChats)) {
         setChatRooms((prev) => mergeRoomsByKey(latestChats, prev));
-        setHasMore((prev) => ({ ...prev, chat: latestChats.length >= PAGE_SIZE }));
+        setHasMore((prev) => ({
+          ...prev,
+          chat: latestChats.length >= PAGE_SIZE,
+        }));
       }
 
       if (Array.isArray(latestRequests)) {
@@ -155,7 +158,10 @@ function ChatDashboard({
 
       if (Array.isArray(latestGroups)) {
         setGroupRooms((prev) => mergeRoomsByKey(latestGroups, prev));
-        setHasMore((prev) => ({ ...prev, group: latestGroups.length >= PAGE_SIZE }));
+        setHasMore((prev) => ({
+          ...prev,
+          group: latestGroups.length >= PAGE_SIZE,
+        }));
       }
 
       setPages({ chat: 1, request: 1, group: 1 });
@@ -223,8 +229,7 @@ function ChatDashboard({
   const handleLoadMore = () => {
     startTransition(async () => {
       const nextPage = pages[activeTab] + 1;
-      const nextRooms =
-        await fetchRooms(activeTab, nextPage);
+      const nextRooms = await fetchRooms(activeTab, nextPage);
 
       if (!Array.isArray(nextRooms) || nextRooms.length === 0) {
         setHasMore((prev) => ({ ...prev, [activeTab]: false }));
@@ -337,7 +342,10 @@ function ChatDashboard({
             const isGroupTab = activeTab === "group";
             const isRequestTab = activeTab === "request";
             const title =
-              member?.userName || room?.collaboration?.title || room?.title || "Chat";
+              member?.userName ||
+              room?.collaboration?.title ||
+              room?.title ||
+              "Chat";
             const subtitle =
               room?.lastMessage ||
               (activeTab === "request"
@@ -348,7 +356,8 @@ function ChatDashboard({
               room?.collaboration?.poster?.thumbnailUrl ||
               room?.collaboration?.poster?.url ||
               null;
-            const avatarUserId = member?.userId || room?.collaboration?._id || room?._id;
+            const avatarUserId =
+              member?.userId || room?.collaboration?._id || room?._id;
             const href = `/chat/${room.roomId}?type=${activeTab}`;
             const accentClass = isGroupTab
               ? isUnread
@@ -373,17 +382,17 @@ function ChatDashboard({
                   ? "border-primary-500/40 bg-[rgba(234,49,72,0.08)]"
                   : "border-dark-300 bg-dark-200 hover:border-primary-500/50 hover:bg-dark-300";
             const typePillClass = isGroupTab
-              ? "bg-[rgba(34,197,94,0.12)] text-[#4ade80]"
+              ? "bg-[rgba(34,197,94,0.12)] text-green-700 dark:text-[#4ade80]"
               : isRequestTab
-                ? "bg-[rgba(245,158,11,0.12)] text-[#fbbf24]"
-                : "bg-[rgba(234,49,72,0.12)] text-[#ff7a8f]";
+                ? "bg-[rgba(245,158,11,0.12)] text-amber-800 dark:text-[#fbbf24]"
+                : "bg-[rgba(234,49,72,0.12)] text-red-700 dark:text-[#ff7a8f]";
             const timeClass = isGroupTab
               ? isUnread
-                ? "text-[#4ade80]"
+                ? "text-green-700 dark:text-[#4ade80]"
                 : "text-light-500"
               : isRequestTab
                 ? isUnread
-                  ? "text-[#fbbf24]"
+                  ? "text-amber-800 dark:text-[#fbbf24]"
                   : "text-light-500"
                 : isUnread
                   ? "text-primary-500"
@@ -440,7 +449,9 @@ function ChatDashboard({
                         </span>
                       ) : null}
                       {isUnread ? (
-                        <span className={`flex min-h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-semibold text-light-900 ${accentClass}`}>
+                        <span
+                          className={`flex min-h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-semibold text-light-900 ${accentClass}`}
+                        >
                           {unreadValue}
                         </span>
                       ) : null}
@@ -470,17 +481,22 @@ function ChatDashboard({
                     ? "No message requests found."
                     : activeTab === "group"
                       ? "No group chats found."
-                    : "No chat history found."}
+                      : "No chat history found."}
               </p>
               <p className="pt-3 text-xs text-light-500/80">
-                Debug: tab=`{activeTab}` visible=`{activeData.length}` raw=`{activeRawCount}`
+                Debug: tab=`{activeTab}` visible=`{activeData.length}` raw=`
+                {activeRawCount}`
               </p>
               {debugState?.[activeTab] ? (
                 <p className="pt-2 text-xs text-light-500/70">
-                  API: status=`{String(debugState[activeTab]?.status ?? "null")}` type=`
+                  API: status=`{String(debugState[activeTab]?.status ?? "null")}
+                  ` type=`
                   {debugState[activeTab]?.responseType || "unknown"}` count=`
                   {String(debugState[activeTab]?.normalizedCount ?? 0)}` msg=`
-                  {debugState[activeTab]?.message || debugState[activeTab]?.reason || "-"}`
+                  {debugState[activeTab]?.message ||
+                    debugState[activeTab]?.reason ||
+                    "-"}
+                  `
                 </p>
               ) : null}
             </div>

@@ -53,7 +53,7 @@ const TagPage = async ({ params, searchParams }: any) => {
             langData={langData}
             professionData={professionData}
           />
-          <div className="absolute left-0 top-0 z-10 size-full bg-gradient-to-b from-[rgb(17,19,27,0.0)] to-[rgba(0,0,0)]" />
+          <div className="theme-page-gradient absolute left-0 top-0 z-10 size-full" />
           <ExploreBgCarousel slides={EXPLORE_BG_IMAGES} />
         </div>
       </header>

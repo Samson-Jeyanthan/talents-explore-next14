@@ -61,7 +61,7 @@ const ProfileHeader = ({
   };
 
   return (
-    <header className="flex w-full flex-col bg-gradient-to-b from-[rgb(17,19,27,0.45)] to-[rgba(17,19,27)] p-2 pt-1 backdrop-blur-lg 2xl:-mt-10 2xl:p-0">
+    <header className="theme-profile-gradient flex w-full flex-col p-2 pt-1 backdrop-blur-lg 2xl:-mt-10 2xl:p-0">
       <section className="flex items-start justify-between p-2 2xl:p-3">
         <div className="flex-start gap-5">
           <Image
@@ -103,7 +103,7 @@ const ProfileHeader = ({
                   <ChatLauncher
                     userId={userData?._id}
                     iconOnly
-                    className="shad-button_secondary rounded-full fill-white !px-3"
+                    className="shad-button_secondary rounded-full fill-light-900 !px-3"
                   />
                 ) : null}
               </>

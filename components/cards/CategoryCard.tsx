@@ -32,7 +32,7 @@ const CategoryCard = ({ _id, categoryCard, index, onClose }: Props) => {
         height={1024}
         className="size-full rounded-2xl object-cover"
       />
-      <div className="flex-center absolute left-0 top-0 z-10 size-full rounded-2xl bg-gradient-to-b from-[rgb(17,19,27,0.0)] to-[rgba(17,19,27)]">
+      <div className="theme-on-media flex-center absolute left-0 top-0 z-10 size-full rounded-2xl bg-gradient-to-b from-transparent to-black/90">
         <h2 className="w-[90%] text-center text-[22px] font-medium text-light-800">
           {categoryCard.name}
         </h2>

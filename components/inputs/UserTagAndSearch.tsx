@@ -84,7 +84,9 @@ function UserTagAndSearch({
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div
+      className={`flex min-w-0 flex-col gap-2 ${isTag ? "" : "w-full max-w-[22rem]"}`}
+    >
       <div className="flex w-full gap-2">
         {isTag && (
           <div className="flex w-full flex-wrap gap-1">
@@ -113,9 +115,7 @@ function UserTagAndSearch({
         )}
       </div>
 
-      <div
-        className={`${isTag ? "w-full" : "w-[22rem]"} relative flex flex-col gap-1`}
-      >
+      <div className="relative flex w-full min-w-0 flex-col gap-1">
         {!isTag && (
           <CiSearch className="absolute left-2 top-2 text-2xl text-light-500/80" />
         )}

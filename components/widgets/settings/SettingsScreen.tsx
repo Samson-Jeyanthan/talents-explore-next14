@@ -37,6 +37,7 @@ import { handleClearStorage } from "@/lib/functions/auth.functions";
 import { INITIAL_USER, useUserContext } from "@/context/AuthProvider";
 import PromotionRequests from "./PromotionRequests";
 import SupportFeedback from "./SupportFeedback";
+import AppearanceSettings from "@/components/options/AppearanceSettings";
 
 type Props = {
   slugPath: string;
@@ -76,6 +77,7 @@ type NotificationState = {
 
 const SETTINGS_LINKS = [
   { href: "/settings", label: "Settings Home" },
+  { href: "/settings/appearance", label: "Appearance" },
   { href: "/settings/account-centre", label: "Account Centre" },
   { href: "/settings/notifications", label: "Notifications" },
   { href: "/settings/privacy", label: "Profile Privacy" },
@@ -383,7 +385,7 @@ function CardList({
               ) : null}
             </Link>
           )
-        ) : null
+        ) : null,
       )}
     </div>
   );
@@ -637,7 +639,7 @@ function SettingsScreen({
 }: Props) {
   const { setUser } = useUserContext();
   const [notification, setNotification] = useState<NotificationState>(
-    normalizeNotification(initialNotification)
+    normalizeNotification(initialNotification),
   );
   const [privacy, setPrivacy] = useState(normalizePrivacy(initialPrivacy));
   const [oldPassword, setOldPassword] = useState("");
@@ -679,7 +681,7 @@ function SettingsScreen({
 
   const socialLinkMap = useMemo(
     () => getSocialLinkMap(currentUser),
-    [currentUser]
+    [currentUser],
   );
 
   const runSignedOutRedirect = async () => {
@@ -824,7 +826,7 @@ function SettingsScreen({
         confirmAction === "delete"
           ? "Your account has been deleted permanently"
           : "Your account has been deactivated successfully",
-        { duration: 3000 }
+        { duration: 3000 },
       );
 
       setConfirmAction("");
@@ -925,6 +927,12 @@ function SettingsScreen({
       currentPath={slugPath}
     >
       <div className="grid gap-4">
+        <SectionBlock title="Appearance">
+          <AppearanceSettings />
+          <p className="mt-3 text-xs text-light-500">
+            Your choice is saved in this browser.
+          </p>
+        </SectionBlock>
         <CardList
           items={[
             {
@@ -1104,10 +1112,10 @@ function SettingsScreen({
                   onClick={() =>
                     updateNotification({
                       quiteModeStartTime: formatTimeValue(
-                        notification.quiteModeStartTime
+                        notification.quiteModeStartTime,
                       ),
                       quiteModeEndTime: formatTimeValue(
-                        notification.quiteModeEndTime
+                        notification.quiteModeEndTime,
                       ),
                     })
                   }
@@ -1296,7 +1304,7 @@ function SettingsScreen({
               onToggle={() =>
                 updateSocialPrivacy(
                   "facebook",
-                  socialLinkMap.facebook?.show !== true
+                  socialLinkMap.facebook?.show !== true,
                 )
               }
             />
@@ -1307,7 +1315,7 @@ function SettingsScreen({
               onToggle={() =>
                 updateSocialPrivacy(
                   "instagram",
-                  socialLinkMap.instagram?.show !== true
+                  socialLinkMap.instagram?.show !== true,
                 )
               }
             />
@@ -1318,7 +1326,7 @@ function SettingsScreen({
               onToggle={() =>
                 updateSocialPrivacy(
                   "linkedin",
-                  socialLinkMap.linkedin?.show !== true
+                  socialLinkMap.linkedin?.show !== true,
                 )
               }
             />
@@ -1577,6 +1585,16 @@ function SettingsScreen({
 
   if (slugPath === "") {
     content = rootContent;
+  } else if (slugPath === "appearance") {
+    content = (
+      <PageShell
+        title="Appearance"
+        description="Choose light, dark, or your device appearance. Your choice is saved in this browser."
+        currentPath={slugPath}
+      >
+        <AppearanceSettings />
+      </PageShell>
+    );
   } else if (slugPath === "privacy") {
     content = privacyHomeContent;
   } else if (slugPath === "notifications") {

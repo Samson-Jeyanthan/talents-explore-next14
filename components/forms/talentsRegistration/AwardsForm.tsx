@@ -25,7 +25,7 @@ const INITIAL_VALUES: AwardSet = {
 const AwardsForm = ({ form }: any) => {
   const [award, setAward] = useState(INITIAL_VALUES);
   const [addedAward, setAddedAward] = useState<AwardSet[]>(
-    form.getValues("awardsOrCertificate") || []
+    form.getValues("awardsOrCertificate") || [],
   );
   const { years } = useDateSelector({});
 
@@ -159,7 +159,7 @@ const AwardsForm = ({ form }: any) => {
               <button
                 type="button"
                 aria-label={`Remove ${item.name}`}
-                className="absolute right-3 top-3 cursor-pointer text-lg text-white"
+                className="absolute right-3 top-3 cursor-pointer text-lg text-light-900"
                 onClick={() => handleRemove(index)}
               >
                 <MdDelete />

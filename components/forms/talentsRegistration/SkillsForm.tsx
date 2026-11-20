@@ -28,10 +28,10 @@ const EMPTY_ROW: SkillRow = { skillId: "", skill: "", level: "" };
 
 const SkillsForm = ({ form, isTalentRegister, page }: any) => {
   const [mainCategoryOptions, setMainCategoryOption] = useState<SelectOption[]>(
-    []
+    [],
   );
   const [subCategoryOptions, setSubCategoryOptions] = useState<SelectOption[]>(
-    []
+    [],
   );
   const [skillOptions, setSkillOptions] = useState<SelectOption[]>([]);
   const [skills, setSkills] = useState({
@@ -47,7 +47,7 @@ const SkillsForm = ({ form, isTalentRegister, page }: any) => {
     hashTags: [],
   });
   const [addedSkills, setAddedSkills] = useState<SkillSet[]>(
-    form.getValues("skillSets") || []
+    form.getValues("skillSets") || [],
   );
 
   const mapOptions = (res: any) =>
@@ -109,11 +109,11 @@ const SkillsForm = ({ form, isTalentRegister, page }: any) => {
   async function autoAddSkillsLevel(
     index: number,
     field: keyof SkillRow,
-    value: string
+    value: string,
   ) {
     setSkills((prev) => {
       const nextRows = prev.skillsHave.map((row, i) =>
-        i === index ? { ...row, [field]: value } : row
+        i === index ? { ...row, [field]: value } : row,
       );
 
       const isLast = index === nextRows.length - 1;
@@ -308,7 +308,7 @@ const SkillsForm = ({ form, isTalentRegister, page }: any) => {
               <p className="mt-2 text-sm text-light-500">{set.description}</p>
 
               <span
-                className="absolute right-2 top-2 cursor-pointer text-lg text-white"
+                className="absolute right-2 top-2 cursor-pointer text-lg text-light-900"
                 onClick={() => removeAddedSkills(index)}
               >
                 <MdDelete />

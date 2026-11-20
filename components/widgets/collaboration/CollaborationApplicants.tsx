@@ -37,35 +37,35 @@ const FILTER_CARDS = [
     key: "INVITED",
     label: "Invitees",
     bgClass: "bg-[rgba(49,114,223,0.1)]",
-    textClass: "text-[#7fb0ff]",
+    textClass: "text-blue-700 dark:text-[#7fb0ff]",
     countKey: "totalInvites",
   },
   {
     key: "SHORTLISTED",
     label: "Shortlisted",
     bgClass: "bg-[rgba(224,156,46,0.1)]",
-    textClass: "text-[#f6bf64]",
+    textClass: "text-amber-800 dark:text-[#f6bf64]",
     countKey: "totalShortlisted",
   },
   {
     key: "FINALIZED",
     label: "Finalized",
     bgClass: "bg-[rgba(62,128,66,0.1)]",
-    textClass: "text-[#7bd480]",
+    textClass: "text-green-700 dark:text-[#7bd480]",
     countKey: "totalFinalized",
   },
   {
     key: "REJECTED",
     label: "Rejected",
     bgClass: "bg-[rgba(194,23,23,0.1)]",
-    textClass: "text-[#ff8787]",
+    textClass: "text-red-700 dark:text-[#ff8787]",
     countKey: "totalRejected",
   },
   {
     key: "ROLE",
     label: "Roles",
     bgClass: "bg-[rgba(120,100,233,0.1)]",
-    textClass: "text-[#a895ff]",
+    textClass: "text-violet-700 dark:text-[#a895ff]",
     countKey: "totalRoles",
   },
 ];
@@ -94,7 +94,7 @@ function CollaborationApplicants({
   const [applicants, setApplicants] = useState(initialApplicants || []);
   const [pageNo, setPageNo] = useState(1);
   const [hasMore, setHasMore] = useState(
-    (initialApplicants || []).length >= PAGE_SIZE
+    (initialApplicants || []).length >= PAGE_SIZE,
   );
   const [isPending, startTransition] = useTransition();
 
@@ -108,7 +108,7 @@ function CollaborationApplicants({
     filter: string,
     nextPage = 1,
     append = false,
-    searchValue = search
+    searchValue = search,
   ) => {
     startTransition(async () => {
       const response = await getCollaborationApplicantsAction(collaborationId, {
@@ -138,11 +138,11 @@ function CollaborationApplicants({
                 (item) =>
                   !prev.some(
                     (prevItem) =>
-                      prevItem?.applicationId === item?.applicationId
-                  )
+                      prevItem?.applicationId === item?.applicationId,
+                  ),
               ),
             ]
-          : nextApplicants
+          : nextApplicants,
       );
       setPageNo(nextPage);
       setHasMore(nextApplicants.length >= PAGE_SIZE);
@@ -169,7 +169,7 @@ function CollaborationApplicants({
           collaborationRoleId: item?.roleId,
           applicantId: item?.applicant?.id || item?.applicant?._id,
           action,
-        }
+        },
       );
 
       if (response?.status === "7400") {
@@ -469,7 +469,7 @@ function CollaborationApplicants({
                 ) : null}
               </div>
             </div>
-          )
+          ),
         )}
 
         {activeItems.length === 0 ? (
