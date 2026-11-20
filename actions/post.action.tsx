@@ -4,9 +4,8 @@ import { revalidatePath } from "next/cache";
 import AllPostCard from "@/components/cards/AllPostCard";
 import { IPost } from "@/types/post.types";
 import { getUserPersonalInfoAction } from "./auth.action";
-import { getAuthHeaders } from "@/lib/session";
-import { getSession } from "./session.action";
-import { resolveViewerIdAction } from "./tokenAndHeaders.action";
+import { getAuthHeaders, getCurrentUserId } from "@/lib/session";
+import { getSession, resolveViewerIdAction } from "./session.action";
 
 type TPostActionError = {
   status: number;
@@ -278,7 +277,8 @@ export async function getAllPostsAction(
   pageSize: number
 ): Promise<IPost[] | TPostActionError> {
   try {
-    const viewerId = await resolveViewerIdAction();
+    const headers = await getAuthHeaders();
+    const viewerId = await getCurrentUserId();
     const accessToken = await getSession();
 
     console.log(
@@ -298,9 +298,7 @@ export async function getAllPostsAction(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/home?viewUserId=${viewerId}&userId=${viewerId}&pageNo=${pageNo}&pageSize=${pageSize}`,
       {
         cache: "no-store",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+        headers,
       }
     );
 

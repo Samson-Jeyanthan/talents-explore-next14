@@ -1,24 +1,13 @@
 "use server";
 
 import AllTalentsCard from "@/components/cards/AllTalentsCard";
-// import { getSession } from "@/lib/session";
-import { getSession } from "./session.action";
 import {
   IExploreTalentsProps,
   ISearchAllTalentsProps,
   ISearchProps,
 } from "@/types/utils.types";
 import { revalidatePath } from "next/cache";
-
-async function getAuthHeaders() {
-  const token = await getSession();
-
-  return token
-    ? {
-        Authorization: `Bearer ${token}`,
-      }
-    : undefined;
-}
+import { getAuthHeaders } from "@/lib/session";
 
 export async function searchPeopleTag(
   userId: string | undefined,

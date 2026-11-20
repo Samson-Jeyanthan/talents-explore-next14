@@ -28,7 +28,7 @@ import { Form } from "../ui/form";
 import { getSubCategoriesAction } from "@/actions/utils.action";
 import { AiOutlineLogout } from "react-icons/ai";
 import { INITIAL_USER, useUserContext } from "@/context/AuthProvider";
-import { deleteToken, logoutAction } from "@/actions/auth.action";
+import { logoutAction } from "@/actions/auth.action";
 import { handleClearStorage } from "@/lib/functions/auth.functions";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -86,7 +86,6 @@ const ParentTalentRegisterForm = ({ langData, mainCategoryData }: Props) => {
 
   const handleLogoutClick = async () => {
     await logoutAction(user.currentUserId);
-    await deleteToken();
     await handleClearStorage();
     setUser(INITIAL_USER);
     window.location.assign("/sign-in");

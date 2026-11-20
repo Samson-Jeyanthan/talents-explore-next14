@@ -1,31 +1,25 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import React, { useState } from "react";
+import { usePathname } from "next/navigation";
 import { SIDEBAR_ITEMS } from "@/constants";
 import Image from "next/image";
 import Link from "next/link";
 import { AiOutlineLogout } from "react-icons/ai";
 import { Button } from "../ui/button";
 import { INITIAL_USER, useUserContext } from "@/context/AuthProvider";
-import { deleteToken, logoutAction } from "@/actions/auth.action";
+import { logoutAction } from "@/actions/auth.action";
 import { handleClearStorage } from "@/lib/functions/auth.functions";
 import { CategoriesSelectionModal, UploadDrawer } from "../modals";
 
 const LeftSidebar = () => {
   const { user, setUser } = useUserContext();
   const pathname = usePathname();
-  const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
 
-  useEffect(() => {
-    router.prefetch("/settings");
-  }, [router]);
-
   const handleLogoutClick = async () => {
     await logoutAction(user.currentUserId);
-    await deleteToken();
     await handleClearStorage();
     setUser(INITIAL_USER);
     window.location.assign("/sign-in");

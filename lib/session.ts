@@ -1,9 +1,4 @@
-// Server-only session helpers. This file is intentionally NOT "use server": every export of a
-// "use server" file becomes a public endpoint any browser script can call, which would let it read
-// the httpOnly tokens through getRefreshToken()/getSession(). Client-callable actions live in
-// session-actions.ts instead.
-// import "server-only";
-"use server";
+import "server-only";
 
 import { jwtDecode } from "jwt-decode";
 import { cookies, headers } from "next/headers";
@@ -177,16 +172,10 @@ async function doRefresh(
       signal: AbortSignal.timeout(REFRESH_TIMEOUT_MS),
     });
 
-    console.log("--------------------------------------------------");
-    console.log("[session] refresh response", response);
-    console.log("--------------------------------------------------");
-
     // Read the body exactly once. Never log `response`: its url contains the refresh token.
     const body = (await response.json().catch(() => null)) as {
       message?: unknown;
     } | null;
-
-    console.log("[session] refresh tokens --189--session.ts--", body);
 
     if (!response.ok) {
       console.warn(
@@ -202,7 +191,7 @@ async function doRefresh(
     }
 
     const tokens = getTokenPair(body);
-    console.log("[session] refresh tokens --203--session.ts--", tokens);
+
     return tokens ? { ok: true, ...tokens } : { ok: false, invalid: true };
   } catch (error) {
     // Network error or timeout: do not log the user out.
@@ -241,17 +230,6 @@ function refreshOnce(
     if (!result.ok) recentRefreshes.delete(refreshToken);
   });
   return promise;
-}
-
-// Kept for existing imports. Pass accessToken when the caller cannot read cookies itself.
-export async function requestRefreshToken(
-  refreshToken: string,
-  accessToken?: string
-): Promise<RefreshResult> {
-  return refreshOnce(
-    refreshToken,
-    accessToken ?? (await getStoredAccessToken())
-  );
 }
 
 // Returns a usable access token, refreshing when it is safe to write cookies.
@@ -331,6 +309,7 @@ export async function clearSession(): Promise<{ success: boolean }> {
     const cookieStore = await cookies();
     cookieStore.delete(COOKIE_NAMES.accessToken);
     cookieStore.delete(COOKIE_NAMES.refreshToken);
+    cookieStore.delete(COOKIE_NAMES.isAbout);
     return { success: true };
   } catch {
     console.error("[session] Unable to clear tokens");

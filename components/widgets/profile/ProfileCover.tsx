@@ -5,20 +5,11 @@ type Props = {
   avgRating?: number;
   coverPhoto: string | null;
   isTalent: boolean;
-  isLoggedIn: boolean;
 };
 
-const ProfileCover = ({
-  avgRating,
-  coverPhoto,
-  isTalent,
-  isLoggedIn,
-}: Props) => {
+const ProfileCover = ({ avgRating, coverPhoto, isTalent }: Props) => {
   return (
-    <div
-      className={`${isTalent ? `sticky ${isLoggedIn ? "top-8 2xl:top-8" : "top-16 z-0 xl:top-16 2xl:top-16"}` : ""} w-full rounded-2xl`}
-    >
-      <p className="text-light-900">{isLoggedIn}</p>
+    <div className="sticky top-20 z-0 w-full rounded-2xl">
       {isTalent ? (
         <div className="flex-center absolute top-8 gap-3 rounded-r-lg bg-dark-200 fill-custom-100 px-5 py-3 text-light-900">
           <StarIcon width="18px" height="18px" />
