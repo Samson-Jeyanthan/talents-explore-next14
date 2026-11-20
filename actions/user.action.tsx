@@ -2,10 +2,9 @@
 
 import SkillCard from "@/components/cards/SkillCard";
 import { getAuthHeaders } from "@/lib/session";
-import { getSession } from "./session.action";
+import { getSession, resolveViewerIdAction } from "./session.action";
 import { IProfileSkills, ITopPost } from "@/types/profile.types";
 import { getUserPersonalInfoAction } from "./auth.action";
-import { resolveViewerIdAction } from "./tokenAndHeaders.action";
 import { TopPostCard } from "@/components/cards";
 import { revalidatePath } from "next/cache";
 
@@ -125,7 +124,7 @@ export async function editUserProfessionalInfoAction(formData: any) {
     if (res.status === "7400") {
       return { success: true, data: res };
     }
-    
+
     console.error("Update talent profile failed:", response.status, res);
     return { success: false, status: response.status, error: res };
   } catch (error) {

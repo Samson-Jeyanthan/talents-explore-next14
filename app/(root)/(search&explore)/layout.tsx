@@ -1,11 +1,12 @@
 import React, { Suspense } from "react";
-import { ExploreBgCarousel, ExploreSearchSection } from "@/components/widgets";
+import { ExploreSearchSection } from "@/components/widgets";
 import { Tabs } from "@/components/others";
-import { EXPLORE_BG_IMAGES, EXPLORE_TABS } from "@/constants";
+import { EXPLORE_TABS } from "@/constants";
 import {
   getLanguagesAction,
   getProfessionsAction,
 } from "@/actions/utils.action";
+import Image from "next/image";
 
 async function layout({ children }: { children: React.ReactNode }) {
   const langData = await getLanguagesAction();
@@ -13,8 +14,8 @@ async function layout({ children }: { children: React.ReactNode }) {
 
   return (
     <main className="flex w-full flex-col items-center justify-center">
-      <header className="sticky top-14 w-full">
-        <div className="flex-center relative -mt-10 h-[26rem] w-full flex-col gap-2">
+      <header className="w-full">
+        <div className="flex-center relative h-[26rem] w-full flex-col gap-2">
           <Suspense fallback={<div>Loading...</div>}>
             <ExploreSearchSection
               langData={langData}
@@ -31,7 +32,7 @@ async function layout({ children }: { children: React.ReactNode }) {
           <ExploreBgCarousel slides={EXPLORE_BG_IMAGES} />
         </div>
       </header>
-      <section className="z-30 -mt-4 w-full rounded-t-[30px] bg-dark-200/80 p-8 backdrop-blur-[80px]">
+      <section className="w-full bg-dark-200/80 p-8 backdrop-blur-[80px]">
         {children}
       </section>
     </main>

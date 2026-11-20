@@ -42,6 +42,7 @@ const PostFeedCarousel = ({ slides, options, length }: Props) => {
                     key={index}
                     videoUrl={item.url}
                     thumbnailUrl={item.thumbnailUrl}
+                    isControl={true}
                   />
                 ) : (
                   <Image

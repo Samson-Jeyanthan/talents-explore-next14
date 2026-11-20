@@ -61,22 +61,18 @@ async function layout({
   }
 
   const isTalent = userData?.isTalent;
-  const isLoggedIn = !currentUser?._id;
   const visibility = getProfileVisibilityState(userData, isOwnProfile);
 
   return (
-    <main
-      className={`${isLoggedIn && "pt-6"} container-wrapper mt-3 flex-col gap-6 pb-6`}
-    >
+    <main className="container-wrapper -mt-4 flex-col gap-6 pb-6">
       <ProfileCover
         coverPhoto={userData?.personalInfo?.coverImage}
         isTalent={isTalent}
         avgRating={userData?.avgRating}
-        isLoggedIn={isLoggedIn}
       />
 
       <section
-        className={`${isTalent ? "z-10 -mt-12" : "-mt-4"} flex-center w-full flex-col`}
+        className={`${isTalent ? "z-10" : "-mt-4"} flex-center w-full flex-col`}
       >
         {isTalent ? (
           <ProfileHeader userData={userData} isOwnProfile={isOwnProfile} />

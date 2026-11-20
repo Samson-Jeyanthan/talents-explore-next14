@@ -36,6 +36,7 @@ export { default as LinkIcon } from "./LinkIcon";
 export { default as AtomicIcon } from "./AtomicIcon";
 export { default as UserIcon } from "./UserIcon";
 export { default as ShareFeedIcon } from "./ShareFeedIcon";
+export { default as CreditIcon } from "./CreditIcon";
 // social media icon
 export { default as InstagramIcon } from "./InstagramIcon";
 export { default as FacebookIcon } from "./FaceBookIcon";

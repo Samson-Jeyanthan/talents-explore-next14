@@ -30,7 +30,7 @@ const AwardEditForm = ({ isEdit, form, onSubmit }: any) => {
       />
       <FormInput
         form={form}
-        inputName="course"
+        inputName="name"
         placeholder="Name"
         inputType="text"
         formLabel="Award / Certificate Name"
@@ -44,8 +44,8 @@ const AwardEditForm = ({ isEdit, form, onSubmit }: any) => {
       />
       <Dropdown
         form={form}
-        value={form.getValues("from")}
-        inputName="from"
+        value={form.getValues("year")}
+        inputName="year"
         placeholder="Year"
         formLabel="From"
         options={YEARS}

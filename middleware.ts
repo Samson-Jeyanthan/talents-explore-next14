@@ -61,7 +61,9 @@ export function middleware(request: NextRequest) {
 
   // An expired access token is fine as long as a refresh token exists.
   // The refresh itself happens at API-call time, not here.
-  const hasSession = Boolean(accessToken || refreshToken);
+  const hasSession = Boolean(
+    refreshToken || (accessToken && !isExpired(accessToken))
+  );
 
   if (isProtected && !hasSession) {
     const signInUrl = new URL("/sign-in", request.url);

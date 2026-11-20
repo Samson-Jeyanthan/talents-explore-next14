@@ -1,4 +1,3 @@
-// import { getSession } from "@/lib/session";
 import { getUserCreditPostsAction } from "@/actions/post.action";
 import AlertNote from "@/components/others/AlertNote";
 import { fetchUserDataAction } from "@/actions/user.action";
@@ -6,6 +5,8 @@ import { getCurrentChatUserAction } from "@/actions/chat.action";
 import { getProfileVisibilityState } from "@/lib/utils/profilePrivacy";
 import { TProfileURLProps } from "@/types/utils.types";
 import { getSession } from "@/actions/session.action";
+import { CreditIcon } from "@/public/assets/svgs";
+import { EmptyDetails } from "@/components/others";
 
 async function Credits({ params }: TProfileURLProps) {
   const userData = await fetchUserDataAction(params.userId, params.username);
@@ -34,7 +35,19 @@ async function Credits({ params }: TProfileURLProps) {
   }
 
   return (
-    <section className="my-8 flex min-h-80 flex-col gap-4">{data}</section>
+    <section className="my-8 flex min-h-80 flex-col gap-4">
+      {data.length > 0 ? (
+        data
+      ) : (
+        <div className="flex w-full justify-center pt-8">
+          <EmptyDetails
+            Icon={CreditIcon}
+            text="No Posts Available"
+            size="56px"
+          />
+        </div>
+      )}
+    </section>
   );
 }
 

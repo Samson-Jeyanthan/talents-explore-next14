@@ -59,8 +59,8 @@ const ForgotPassword = () => {
         isFP: true,
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isOpen]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
 
   async function onSubmit(values: z.infer<typeof ForgotPasswordValidation>) {
     setVerifiedUserId("");

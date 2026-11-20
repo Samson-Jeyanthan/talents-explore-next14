@@ -404,7 +404,8 @@ export async function getAllPostsAction(
   pageSize: number,
 ): Promise<IPost[] | TPostActionError> {
   try {
-    const viewerId = await resolveViewerIdAction();
+    const headers = await getAuthHeaders();
+    const viewerId = await getCurrentUserId();
     const accessToken = await getSession();
 
     if (!viewerId) {

@@ -32,7 +32,6 @@ import {
   updatePrivacySettingsAction,
   updateSocialLinksPrivacyAction,
 } from "@/actions/settings.action";
-import { deleteToken } from "@/actions/auth.action";
 import { handleClearStorage } from "@/lib/functions/auth.functions";
 import { INITIAL_USER, useUserContext } from "@/context/AuthProvider";
 import PromotionRequests from "./PromotionRequests";
@@ -685,7 +684,7 @@ function SettingsScreen({
   );
 
   const runSignedOutRedirect = async () => {
-    await deleteToken();
+    await clearSession();
     await handleClearStorage();
     setUser(INITIAL_USER);
     window.location.assign("/sign-in");

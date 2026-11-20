@@ -32,6 +32,7 @@ const CategoriesSelection = ({ onClose, isOpen }: Props) => {
       fetchData();
     }
   }, [isOpen]);
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="flex !h-[80vh] !max-h-[80vh] !w-[70vw] !max-w-[70vw] flex-col items-center justify-start gap-8 rounded-[2rem] border border-dark-300 bg-dark-100/90">

@@ -29,7 +29,7 @@ const UploadDrawer = ({ open, setOpen }: Props) => {
 
   return (
     <Drawer open={open} onOpenChange={setOpen}>
-      <DrawerContent className="flex-start h-[45%] gap-2 border-none bg-dark-200">
+      <DrawerContent className="flex-start h-1/2 gap-2 border-none bg-dark-200">
         <DrawerHeader className="flex w-full flex-col items-center gap-2">
           <DrawerTitle className="text-center text-2xl font-semibold text-light-900">
             Choose a method to start.

@@ -8,6 +8,8 @@
 // from session.ts should import them from here instead. Server code can keep importing session.ts.
 
 import * as session from "@/lib/session";
+import { getUserPersonalInfoAction } from "./auth.action";
+import { jwtDecode } from "jwt-decode";
 
 export async function clearSession(): Promise<{ success: boolean }> {
   return session.clearSession();
@@ -22,9 +24,17 @@ export async function checkIsAbout(): Promise<boolean> {
   return session.checkIsAbout();
 }
 
-// Used by the client-side AuthProvider. Returns the ACCESS token only (never the refresh token),
-// refreshing it first when it is stale. This makes the access token readable by scripts running in
-// the browser, so keep it only if the client really needs the token itself.
-export async function getSession(): Promise<string> {
-  return session.getSession();
+export async function resolveViewerIdAction() {
+  const accessToken = await session.getSession();
+
+  if (await session.isAccessTokenExpired()) {
+    const userRes = await getUserPersonalInfoAction("");
+    return userRes?.response?._id || "";
+  }
+
+  try {
+    return String(jwtDecode<{ sub?: string }>(accessToken).sub || "");
+  } catch {
+    return "";
+  }
 }

@@ -4,6 +4,7 @@ import { getFormattedDecimal } from "@/lib/utils";
 import { MotionDiv } from "../others/MotionDiv";
 import { StarIcon } from "@/public/assets/svgs";
 import Image from "next/image";
+import VideoCard from "../video/VideoCard";
 
 interface Props {
   postCard: any;
@@ -16,6 +17,7 @@ const variants = {
 };
 
 const ExplorePostCard = ({ postCard, index }: Props) => {
+  console.log("video-thumbnail", postCard?.media[0]);
   return (
     <MotionDiv
       variants={variants}
@@ -39,12 +41,10 @@ const ExplorePostCard = ({ postCard, index }: Props) => {
             alt={postCard?.about?.title}
           />
         ) : (
-          <Image
-            src={"/assets/images/sample-post-img.jpg"}
-            width={1024}
-            height={1024}
-            className="size-full rounded-[20px] object-cover"
-            alt={postCard?.about?.title}
+          <VideoCard
+            videoUrl={postCard.media[0]?.url || ""}
+            thumbnailUrl={postCard?.media[0]?.thumbnailUrl}
+            className="!h-72 max-h-full rounded-[20px] object-cover"
           />
         )}
       </Link>

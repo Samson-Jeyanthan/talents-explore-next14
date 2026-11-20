@@ -1,9 +1,4 @@
-// Server-only session helpers. This file is intentionally NOT "use server": every export of a
-// "use server" file becomes a public endpoint any browser script can call, which would let it read
-// the httpOnly tokens through getRefreshToken()/getSession(). Client-callable actions live in
-// session-actions.ts instead.
-// import "server-only";
-"use server";
+import "server-only";
 
 import { jwtDecode } from "jwt-decode";
 import { cookies, headers } from "next/headers";
@@ -329,6 +324,7 @@ export async function clearSession(): Promise<{ success: boolean }> {
     const cookieStore = await cookies();
     cookieStore.delete(COOKIE_NAMES.accessToken);
     cookieStore.delete(COOKIE_NAMES.refreshToken);
+    cookieStore.delete(COOKIE_NAMES.isAbout);
     return { success: true };
   } catch {
     console.error("[session] Unable to clear tokens");
