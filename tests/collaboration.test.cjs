@@ -27,6 +27,10 @@ function load(file, mocks = {}, globals = {}) {
   return testModule.exports;
 }
 const utils = load("lib/utils/collaboration.ts");
+const workflow = load("lib/utils/collaboration-workflow.ts", {
+  "./collaboration": utils,
+  "./collaboration-editor": load("lib/utils/collaboration-editor.ts"),
+});
 const item = (key = id) => ({
   collaboration: { _id: key, title: "Project" },
   owner: { _id: viewer, userName: "artist" },
@@ -62,6 +66,7 @@ function api(responses = [], authError) {
     "actions/collaboration.action.tsx",
     {
       "@/lib/utils/collaboration": utils,
+      "@/lib/utils/collaboration-workflow": workflow,
       "@/lib/session": {
         getAuthHeaders: async () => {
           authCalls++;
@@ -216,6 +221,9 @@ const validCalls = (actions) => [
     actions.applyToCollaborationRoleAction(id, {
       collaborationRoleId: role,
       applicantEmail: "artist@example.test",
+      applicantName: "Artist",
+      resumeFileUrl: "https://example.test/resume.pdf",
+      resumeFileKey: "resume.pdf",
     }),
   () =>
     actions.respondCollaborationInviteAction(id, {
@@ -322,6 +330,9 @@ test("valid application and invitation payloads retain mobile endpoints and HTTP
       await h.actions.applyToCollaborationRoleAction(id, {
         collaborationRoleId: role,
         applicantEmail: "artist@example.test",
+        applicantName: "Artist",
+        resumeFileUrl: "https://example.test/resume.pdf",
+        resumeFileKey: "resume.pdf",
         message: " Hello ",
       })
     ).status,
@@ -343,6 +354,32 @@ test("valid application and invitation payloads retain mobile endpoints and HTTP
     `/collaboration/${id}/invite/respond`,
   );
   assert.equal(h.logs.length, 0);
+});
+
+test("applicant and invitation people reads reject malformed successful responses", async () => {
+  const h = api([
+    ok({}),
+    ok([{}]),
+    ok({ list: [{ applicationId: id }] }),
+    ok([{ id: viewer }]),
+  ]);
+  assert.equal(
+    (await h.actions.getCollaborationApplicantsAction(id)).status,
+    "400",
+  );
+  assert.equal(
+    (await h.actions.searchCollaborationPeopleAction()).status,
+    "400",
+  );
+  assert.equal(
+    (await h.actions.getCollaborationApplicantsAction(id)).response[0]
+      .applicationId,
+    id,
+  );
+  assert.equal(
+    (await h.actions.searchCollaborationPeopleAction()).response[0].id,
+    viewer,
+  );
 });
 
 test("dashboard keeps each tab lazy and preserves an initial failed list as an error", () => {

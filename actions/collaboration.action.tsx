@@ -15,6 +15,7 @@ import {
   bulkInviteValidation,
   type CollaborationListResult,
 } from "@/lib/utils/collaboration";
+import { workflowRows } from "@/lib/utils/collaboration-workflow";
 
 const SUCCESS_STATUS = "7400";
 
@@ -90,22 +91,6 @@ function toNullableValue(value: unknown) {
   }
 
   return value;
-}
-
-function normalizeListResponse(responseData: any) {
-  if (Array.isArray(responseData?.response)) {
-    return responseData.response;
-  }
-
-  if (Array.isArray(responseData?.response?.list)) {
-    return responseData.response.list;
-  }
-
-  if (Array.isArray(responseData?.data)) {
-    return responseData.data;
-  }
-
-  return [];
 }
 
 export async function getCurrentCollaborationUserAction() {
@@ -256,12 +241,12 @@ export async function applyToCollaborationRoleAction(
   collaborationId: string,
   payload: {
     collaborationRoleId: string;
-    applicantName?: string;
-    applicantEmail?: string;
+    applicantName: string;
+    applicantEmail: string;
     applicantPhone?: string;
     message?: string;
-    resumeFileUrl?: string;
-    resumeFileKey?: string;
+    resumeFileUrl: string;
+    resumeFileKey: string;
   },
 ) {
   if (!idValidation.safeParse(collaborationId).success)
@@ -445,11 +430,20 @@ export async function getCollaborationApplicantsAction(
       },
     );
 
-    return {
-      status: response.data?.status || "400",
-      message: response.data?.message || "",
-      response: normalizeListResponse(response.data),
-    };
+    const rows = workflowRows(response.data, "applicants");
+    return response.data?.status === SUCCESS_STATUS && rows
+      ? {
+          status: SUCCESS_STATUS,
+          response: rows,
+          message: response.data?.message || "",
+        }
+      : {
+          status: "400",
+          response: [],
+          message:
+            response.data?.message ||
+            "Unable to load applicants. Please try again.",
+        };
   } catch (error) {
     if (isRedirectError(error)) throw error;
     return {
@@ -619,11 +613,20 @@ export async function searchCollaborationPeopleAction({
       },
     );
 
-    return {
-      status: response.data?.status || "400",
-      message: response.data?.message || "",
-      response: normalizeListResponse(response.data),
-    };
+    const rows = workflowRows(response.data, "people");
+    return response.data?.status === SUCCESS_STATUS && rows
+      ? {
+          status: SUCCESS_STATUS,
+          response: rows,
+          message: response.data?.message || "",
+        }
+      : {
+          status: "400",
+          response: [],
+          message:
+            response.data?.message ||
+            "Unable to load people. Please try again.",
+        };
   } catch (error) {
     if (isRedirectError(error)) throw error;
     return {

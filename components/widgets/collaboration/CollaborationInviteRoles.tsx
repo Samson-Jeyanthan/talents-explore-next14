@@ -14,7 +14,7 @@ export default function CollaborationInviteRoles({
   const [selected, setSelected] = useState<string[]>([]);
   const normalizedRoles = useMemo(
     () => (roles || []).map((role) => ({ ...role, id: role?.id || role?._id })),
-    [roles]
+    [roles],
   );
 
   return (
@@ -24,7 +24,8 @@ export default function CollaborationInviteRoles({
           Invite Friends or People to Collaborate
         </h1>
         <p className="pt-2 text-sm text-light-500">
-          Select the roles you want to invite people for, then move to people selection.
+          Select the roles you want to invite people for, then move to people
+          selection.
         </p>
       </div>
 
@@ -39,9 +40,12 @@ export default function CollaborationInviteRoles({
             <button
               key={role.id}
               type="button"
+              aria-pressed={isActive}
               onClick={() =>
                 setSelected((prev) =>
-                  prev.includes(role.id) ? prev.filter((item) => item !== role.id) : [...prev, role.id]
+                  prev.includes(role.id)
+                    ? prev.filter((item) => item !== role.id)
+                    : [...prev, role.id],
                 )
               }
               className={`flex items-center gap-4 rounded-[28px] border p-4 text-left transition ${
@@ -54,12 +58,18 @@ export default function CollaborationInviteRoles({
                 <Users className="size-5" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-base font-semibold text-light-900">{role?.name || "Role"}</p>
-                <p className="pt-1 text-sm text-light-500">{role?.subtitle || ""}</p>
+                <p className="text-base font-semibold text-light-900">
+                  {role?.name || "Role"}
+                </p>
+                <p className="pt-1 text-sm text-light-500">
+                  {role?.subtitle || ""}
+                </p>
               </div>
               <div
                 className={`size-5 rounded-md border ${
-                  isActive ? "border-primary-500 bg-primary-500" : "border-dark-300"
+                  isActive
+                    ? "border-primary-500 bg-primary-500"
+                    : "border-dark-300"
                 }`}
               />
             </button>
@@ -67,6 +77,12 @@ export default function CollaborationInviteRoles({
         })}
       </div>
 
+      {!normalizedRoles.length ? (
+        <p className="text-sm text-light-600">
+          No roles are available for invitations. Add a role to this
+          collaboration first.
+        </p>
+      ) : null}
       <div className="flex justify-end">
         <Button
           type="button"
@@ -74,7 +90,9 @@ export default function CollaborationInviteRoles({
           className="rounded-full bg-primary-500 text-light-900"
           onClick={() => {
             if (selected.length === 0) return;
-            window.location.assign(`/collaboration/${collaborationId}/invite/people?roles=${selected.join(",")}`);
+            window.location.assign(
+              `/collaboration/${collaborationId}/invite/people?roles=${selected.join(",")}`,
+            );
           }}
         >
           Next

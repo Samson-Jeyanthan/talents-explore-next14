@@ -1,36 +1,37 @@
 import {
   getCollaborationApplicantsAction,
   getCollaborationApplicantsRoleStatsAction,
-  getCollaborationDetailsAction,
 } from "@/actions/collaboration.action";
 import CollaborationApplicantsByRole from "@/components/widgets/collaboration/CollaborationApplicantsByRole";
-
+import { loadOwnedCollaboration } from "@/lib/collaboration-management";
+import { collaborationSelection } from "@/lib/utils/collaboration-editor";
+import { notFound } from "next/navigation";
 export const dynamic = "force-dynamic";
-
-export default async function CollaborationApplicantsByRolePage({
+export default async function Page({
   params,
 }: {
   params: { id: string; roleId: string };
 }) {
-  const [details, stats, applicants] = await Promise.all([
-    getCollaborationDetailsAction(params.id),
+  const { details } = await loadOwnedCollaboration(params.id);
+  const role = details.roles?.find(
+    (role: any) => collaborationSelection(role) === params.roleId,
+  );
+  if (!role) notFound();
+  const [stats, result] = await Promise.all([
     getCollaborationApplicantsRoleStatsAction(params.id, params.roleId),
     getCollaborationApplicantsAction(params.id, {
       roleId: params.roleId,
       filter: "ALL",
-      pageNo: 1,
-      pageSize: 20,
     }),
   ]);
-
   return (
     <CollaborationApplicantsByRole
+      key={params.id + params.roleId}
       collaborationId={params.id}
       roleId={params.roleId}
-      role={Array.isArray(details?.roles) ? details.roles.find((item: any) => item?._id === params.roleId) : null}
+      role={role}
       initialStats={stats}
-      initialApplicants={applicants?.response || []}
+      initialResult={result}
     />
   );
 }
-

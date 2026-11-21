@@ -94,14 +94,15 @@ export const bulkInviteValidation = z.object({
 });
 export const applyCollaborationValidation = z.object({
   collaborationRoleId: collaborationId,
-  applicantName: z.string().trim().optional(),
-  applicantEmail: z
-    .union([z.string().trim().email(), z.literal("")])
-    .optional(),
+  applicantName: z.string().trim().min(1),
+  applicantEmail: z.string().trim().email(),
   applicantPhone: z.string().trim().optional(),
   message: z.string().trim().optional(),
-  resumeFileUrl: z.union([z.string().url(), z.literal("")]).optional(),
-  resumeFileKey: z.string().optional(),
+  resumeFileUrl: z
+    .string()
+    .url()
+    .refine((value) => /^https?:\/\//i.test(value)),
+  resumeFileKey: z.string().trim().min(1),
 });
 export function collaborationKey(item: any): string | undefined {
   const key = item?.collaboration?._id || item?.collaboration?.id || item?._id;

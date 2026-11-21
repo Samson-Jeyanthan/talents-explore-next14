@@ -1,47 +1,37 @@
-import {
-  getCurrentCollaborationUserAction,
-} from "@/actions/collaboration.action";
-import {
-  getCountriesAction,
-  getEthnicAction,
-  getLanguagesAction,
-  getMainCategoriesAction,
-  getProfessionsAction,
-} from "@/actions/utils.action";
 import CollaborationInvitePeople from "@/components/widgets/collaboration/CollaborationInvitePeople";
-
+import { loadOwnedCollaboration } from "@/lib/collaboration-management";
+import { collaborationSelection } from "@/lib/utils/collaboration-editor";
+import { validRoleIds } from "@/lib/utils/collaboration-workflow";
+import { redirect } from "next/navigation";
 export const dynamic = "force-dynamic";
-
-export default async function CollaborationInvitePeoplePage({
+export default async function Page({
   params,
   searchParams,
 }: {
   params: { id: string };
   searchParams: { roles?: string };
 }) {
-  const [currentUser, mainCategories, languages, countries, ethnicities, professions] =
-    await Promise.all([
-      getCurrentCollaborationUserAction(),
-      getMainCategoriesAction(),
-      getLanguagesAction(),
-      getCountriesAction(),
-      getEthnicAction(),
-      getProfessionsAction(),
-    ]);
-
+  const { details, currentUser } = await loadOwnedCollaboration(params.id);
+  const requested =
+    typeof searchParams.roles === "string" ? searchParams.roles.split(",") : [];
+  const roles = validRoleIds(requested);
+  if (
+    !roles.length ||
+    roles.length !== new Set(requested).size ||
+    roles.some(
+      (id) =>
+        !details.roles?.some(
+          (role: any) => collaborationSelection(role) === id,
+        ),
+    )
+  )
+    redirect(`/collaboration/${params.id}/invite`);
   return (
     <CollaborationInvitePeople
+      key={params.id + roles.join(",")}
       collaborationId={params.id}
       currentUser={currentUser}
-      selectedRoleIds={(searchParams.roles || "").split(",").filter(Boolean)}
-      lookupData={{
-        mainCategories: mainCategories?.response || [],
-        languages: languages?.response || [],
-        countries: countries?.response || [],
-        ethnicities: ethnicities?.response || [],
-        professions: professions?.response || [],
-      }}
+      selectedRoleIds={roles}
     />
   );
 }
-

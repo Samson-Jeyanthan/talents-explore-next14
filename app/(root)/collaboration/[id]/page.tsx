@@ -18,10 +18,10 @@ export default async function CollaborationDetailsPage({
 
   return (
     <CollaborationDetails
+      key={params.id}
       collaborationId={params.id}
       currentUser={currentUser}
       initialDetails={collaborationDetails}
     />
   );
 }
-

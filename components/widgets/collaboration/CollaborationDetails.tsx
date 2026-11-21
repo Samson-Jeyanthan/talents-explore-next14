@@ -1,23 +1,12 @@
 "use client";
 
 import {
-  applyToCollaborationRoleAction,
   deleteCollaborationAction,
   getCollaborationDetailsAction,
   respondCollaborationInviteAction,
 } from "@/actions/collaboration.action";
 import UserProfileImg from "@/components/others/UserProfileImg";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,7 +27,11 @@ import {
   MessageSquare,
 } from "lucide-react";
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useState } from "react";
+import { useCollaborationWrite } from "@/lib/hooks/useCollaborationWorkflow";
+import { collaborationSelection } from "@/lib/utils/collaboration-editor";
+import { applicantStatusLabel } from "@/lib/utils/collaboration-workflow";
+import CollaborationApplicationDialog from "./CollaborationApplicationDialog";
 import { toast } from "sonner";
 import Image from "next/image";
 import ReportDialog from "@/components/modals/ReportDialog";
@@ -104,37 +97,42 @@ function CollaborationDetails({
   const [selectedRole, setSelectedRole] = useState<any>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
-  const [isPending, startTransition] = useTransition();
-  const [applyForm, setApplyForm] = useState({
-    applicantName: "",
-    applicantEmail: "",
-    applicantPhone: "",
-    message: "",
-  });
-
+  const write = useCollaborationWrite(collaborationId);
+  const isPending = write.pending;
+  const [refreshError, setRefreshError] = useState("");
   const collaboration = details?.collaboration || {};
   const owner = details?.owner || {};
   const roles = Array.isArray(details?.roles) ? details.roles : [];
   const isOwner = Boolean(currentUser?._id && currentUser?._id === owner?._id);
 
   const reloadDetails = async () => {
-    const nextDetails = await getCollaborationDetailsAction(collaborationId);
-    setDetails(nextDetails);
+    try {
+      const next = await getCollaborationDetailsAction(collaborationId);
+      if (!next?.collaboration) throw new Error();
+      setDetails(next);
+      setRefreshError("");
+    } catch {
+      setRefreshError(
+        "Unable to refresh collaboration details. Your saved action was retained. Please retry loading.",
+      );
+    }
   };
-
-  const handleDelete = () => {
-    startTransition(async () => {
-      const response = await deleteCollaborationAction(collaborationId);
-
-      if (response?.status === "7400") {
-        toast.success("Successfully deleted the collaboration");
+  const updateRole = (id: string, patch: any) =>
+    setDetails((previous: any) => ({
+      ...previous,
+      roles: (previous?.roles || []).map((role: any) =>
+        collaborationSelection(role) === id
+          ? { ...role, myApplicant: { ...role.myApplicant, ...patch } }
+          : role,
+      ),
+    }));
+  const handleDelete = () =>
+    write.run(
+      () => deleteCollaborationAction(collaborationId),
+      () => {
         window.location.assign("/collaboration");
-        return;
-      }
-
-      toast.error(response?.message || "Failed to delete collaboration");
-    });
-  };
+      },
+    );
 
   const handleCopyLink = async () => {
     try {
@@ -147,59 +145,31 @@ function CollaborationDetails({
     }
   };
 
-  const handleInviteResponse = (role: any, action: "ACCEPT" | "DECLINE") => {
-    startTransition(async () => {
-      const response = await respondCollaborationInviteAction(collaborationId, {
-        collaborationRoleId: role?._id,
-        action,
-      });
-
-      if (response?.status === "7400") {
-        toast.success(response?.message || "Invite response updated");
-        await reloadDetails();
-        return;
-      }
-
-      toast.error(response?.message || "Failed to update invite response");
-    });
-  };
-
-  const handleApply = () => {
-    if (!selectedRole?._id) {
-      return;
-    }
-
-    startTransition(async () => {
-      const response = await applyToCollaborationRoleAction(collaborationId, {
-        collaborationRoleId: selectedRole._id,
-        applicantName: applyForm.applicantName,
-        applicantEmail: applyForm.applicantEmail,
-        applicantPhone: applyForm.applicantPhone,
-        message: applyForm.message,
-      });
-
-      if (response?.status === "7400") {
-        toast.success(response?.message || "Interest sent successfully");
-        setSelectedRole(null);
-        setApplyForm({
-          applicantName: "",
-          applicantEmail: "",
-          applicantPhone: "",
-          message: "",
+  const handleInviteResponse = (role: any, action: "ACCEPT" | "DECLINE") =>
+    write.run(
+      () =>
+        respondCollaborationInviteAction(collaborationId, {
+          collaborationRoleId: collaborationSelection(role),
+          action,
+        }),
+      async () => {
+        updateRole(collaborationSelection(role), {
+          applicantType: "INVITED",
+          applicantStatus: action === "ACCEPT" ? "ACCEPTED" : "DECLINED",
         });
+        toast.success("Invitation response saved");
         await reloadDetails();
-        return;
-      }
-
-      toast.error(response?.message || "Failed to send interest");
-    });
-  };
+      },
+    );
 
   if (!details) {
     return (
       <section className="flex w-full max-w-6xl justify-center px-4 py-10 sm:px-6">
         <div className="w-full rounded-[32px] border border-dark-300 bg-dark-250 px-4 py-12 text-center text-sm text-light-500">
-          No details found for this collaboration.
+          Unable to load collaboration details. Please try again.
+          <Button type="button" onClick={reloadDetails}>
+            Try again
+          </Button>
         </div>
       </section>
     );
@@ -208,6 +178,15 @@ function CollaborationDetails({
   return (
     <>
       <section className="flex w-full max-w-6xl flex-col gap-5 px-4 py-6 sm:px-6">
+        {write.error ? <p role="alert">{write.error}</p> : null}
+        {refreshError ? (
+          <div role="alert">
+            {refreshError}
+            <Button type="button" onClick={reloadDetails}>
+              Retry loading
+            </Button>
+          </div>
+        ) : null}
         <div className="rounded-[32px] border border-dark-300 bg-dark-250 p-5 sm:p-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="flex items-center gap-3">
@@ -387,7 +366,7 @@ function CollaborationDetails({
           <div className="mt-5 grid gap-4">
             {roles.map((role: any) => {
               const myApplicant = role?.myApplicant;
-              const canApply = !myApplicant && !isOwner;
+              const canApply = !!currentUser?._id && !myApplicant && !isOwner;
               const isInvitePending =
                 myApplicant?.applicantType === "INVITED" &&
                 myApplicant?.applicantStatus === "APPLIED";
@@ -495,6 +474,14 @@ function CollaborationDetails({
                   ) : null}
 
                   <div className="flex flex-wrap items-center justify-end gap-2 pt-5">
+                    {myApplicant && !isAppliedPending ? (
+                      <span
+                        role="status"
+                        className="rounded-full border border-dark-300 px-3 py-1 text-sm text-light-700"
+                      >
+                        {applicantStatusLabel(myApplicant)}
+                      </span>
+                    ) : null}
                     {isOwner ? (
                       <>
                         <Link
@@ -545,19 +532,8 @@ function CollaborationDetails({
                       <Button
                         type="button"
                         className="rounded-full bg-primary-500 text-light-900"
-                        onClick={() => {
-                          setSelectedRole(role);
-                          setApplyForm({
-                            applicantName: currentUser?.personalInfo?.firstName
-                              ? `${currentUser.personalInfo.firstName} ${
-                                  currentUser?.personalInfo?.lastName || ""
-                                }`.trim()
-                              : "",
-                            applicantEmail: currentUser?.email || "",
-                            applicantPhone: currentUser?.phone || "",
-                            message: "",
-                          });
-                        }}
+                        disabled={isPending}
+                        onClick={() => setSelectedRole(role)}
                       >
                         Apply
                       </Button>
@@ -593,88 +569,20 @@ function CollaborationDetails({
         </div>
       </section>
 
-      <Dialog
-        open={Boolean(selectedRole)}
-        onOpenChange={(open) => !open && setSelectedRole(null)}
-      >
-        <DialogContent className="max-w-2xl rounded-[28px] border-dark-300 bg-dark-200 text-light-900">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-semibold text-light-900">
-              Send interest
-            </DialogTitle>
-            <DialogDescription className="text-light-500">
-              {selectedRole?.name
-                ? `You are showing interest for ${selectedRole.name}.`
-                : "Share why you are a strong fit for this role."}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="grid gap-3">
-            <Input
-              value={applyForm.applicantName}
-              onChange={(event) =>
-                setApplyForm((prev) => ({
-                  ...prev,
-                  applicantName: event.target.value,
-                }))
-              }
-              placeholder="Full name"
-              className="h-11 rounded-2xl border-dark-300 bg-dark-250 text-light-900 placeholder:text-light-500"
-            />
-            <Input
-              value={applyForm.applicantEmail}
-              onChange={(event) =>
-                setApplyForm((prev) => ({
-                  ...prev,
-                  applicantEmail: event.target.value,
-                }))
-              }
-              placeholder="Contact email"
-              className="h-11 rounded-2xl border-dark-300 bg-dark-250 text-light-900 placeholder:text-light-500"
-            />
-            <Input
-              value={applyForm.applicantPhone}
-              onChange={(event) =>
-                setApplyForm((prev) => ({
-                  ...prev,
-                  applicantPhone: event.target.value,
-                }))
-              }
-              placeholder="Contact number"
-              className="h-11 rounded-2xl border-dark-300 bg-dark-250 text-light-900 placeholder:text-light-500"
-            />
-            <Textarea
-              value={applyForm.message}
-              onChange={(event) =>
-                setApplyForm((prev) => ({
-                  ...prev,
-                  message: event.target.value,
-                }))
-              }
-              placeholder="Why should they collaborate with you?"
-              className="min-h-[180px] rounded-2xl border-dark-300 bg-dark-250 text-light-900 placeholder:text-light-500"
-            />
-          </div>
-
-          <DialogFooter className="gap-2">
-            <Button
-              type="button"
-              className="rounded-full bg-dark-250 text-light-900 hover:bg-dark-300"
-              onClick={() => setSelectedRole(null)}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              disabled={isPending}
-              className="rounded-full bg-primary-500 text-light-900"
-              onClick={handleApply}
-            >
-              {isPending ? "Sending..." : "Send"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <CollaborationApplicationDialog
+        collaborationId={collaborationId}
+        role={selectedRole}
+        currentUser={currentUser}
+        onClose={() => setSelectedRole(null)}
+        onApplied={async (id) => {
+          updateRole(id, {
+            applicantType: "APPLIED",
+            applicantStatus: "APPLIED",
+          });
+          toast.success("Application sent");
+          await reloadDetails();
+        }}
+      />
 
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent className="border-dark-300 bg-dark-200 text-light-900">

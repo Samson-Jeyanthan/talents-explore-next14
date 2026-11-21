@@ -9,8 +9,15 @@ import { Button } from "@/components/ui/button";
 import { FileText, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useTransition } from "react";
-import { toast } from "sonner";
+import { useState } from "react";
+import { useCollaborationWrite } from "@/lib/hooks/useCollaborationWorkflow";
+import {
+  applicantIdentity,
+  applicantStatusLabel,
+  reviewStatuses,
+} from "@/lib/utils/collaboration-workflow";
+import { collaborationSelection } from "@/lib/utils/collaboration-editor";
+import CollaborationReviewButtons from "./CollaborationReviewButtons";
 
 export default function CollaborationApplicantDetails({
   collaborationId,
@@ -22,36 +29,48 @@ export default function CollaborationApplicantDetails({
   initialApplication: any;
 }) {
   const [application, setApplication] = useState(initialApplication);
-  const [pending, startTransition] = useTransition();
-
+  const write = useCollaborationWrite(collaborationId + applicationId);
+  const [refreshError, setRefreshError] = useState("");
   const reload = async () => {
-    const next = await getCollaborationApplicantDetailsAction(
-      collaborationId,
-      applicationId
-    );
-    setApplication(next);
+    try {
+      const next = await getCollaborationApplicantDetailsAction(
+        collaborationId,
+        applicationId,
+      );
+      if (!next) throw new Error();
+      setApplication(next);
+      setRefreshError("");
+    } catch {
+      setRefreshError(
+        "Unable to refresh applicant details. Your saved changes have been retained.",
+      );
+    }
   };
-
   const review = (action: string) =>
-    startTransition(async () => {
-      const res = await reviewCollaborationApplicantAction(collaborationId, {
-        collaborationRoleId: application?.roleId,
-        applicantId: application?.applicantId,
-        action,
-      });
-      if (res?.status === "7400") {
-        toast.success(res?.message || "Applicant updated");
+    write.run(
+      () =>
+        reviewCollaborationApplicantAction(collaborationId, {
+          collaborationRoleId: collaborationSelection(application?.roleId),
+          applicantId: applicantIdentity(application),
+          action,
+        }),
+      async () => {
+        setApplication((previous: any) => ({
+          ...previous,
+          applicantStatus: reviewStatuses[action],
+        }));
         await reload();
-        return;
-      }
-      toast.error(res?.message || "Failed to update applicant");
-    });
+      },
+    );
 
   if (!application) {
     return (
       <section className="flex w-full max-w-5xl justify-center px-4 py-10 sm:px-6">
         <div className="w-full rounded-[32px] border border-dark-300 bg-dark-250 px-4 py-12 text-center text-sm text-light-500">
-          No details found for this applicant.
+          Unable to load applicant details.
+          <Button type="button" onClick={reload}>
+            Try again
+          </Button>
         </div>
       </section>
     );
@@ -59,6 +78,24 @@ export default function CollaborationApplicantDetails({
 
   return (
     <section className="flex w-full max-w-5xl flex-col gap-5 px-4 py-6 sm:px-6">
+      <Link
+        href={`/collaboration/${collaborationId}/applicants`}
+        className="text-sm text-primary-500 underline"
+      >
+        Back to applicants
+      </Link>
+      <p role="status" className="text-sm text-light-700">
+        {applicantStatusLabel(application)}
+      </p>
+      {write.error ? <p role="alert">{write.error}</p> : null}
+      {refreshError ? (
+        <div role="alert">
+          {refreshError}
+          <Button type="button" disabled={write.pending} onClick={reload}>
+            Retry loading
+          </Button>
+        </div>
+      ) : null}
       <div className="rounded-[32px] border border-dark-300 bg-dark-250 p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex items-center gap-3">
@@ -72,7 +109,9 @@ export default function CollaborationApplicantDetails({
                 {application?.applicant?.userName || "Applicant"}
               </p>
               <p className="text-sm text-light-500">
-                {application?.applicant?.professional || ""}
+                {typeof application?.applicant?.professional === "string"
+                  ? application.applicant.professional
+                  : application?.applicant?.professional?.professional || ""}
               </p>
             </div>
           </div>
@@ -98,47 +137,11 @@ export default function CollaborationApplicantDetails({
         </div>
 
         <div className="flex flex-wrap gap-2 pt-5">
-          {application?.applicantStatus === "ACCEPTED" ? (
-            <Button
-              type="button"
-              disabled={pending}
-              className="rounded-full bg-primary-500 text-light-900"
-              onClick={() => review("SHORTLIST")}
-            >
-              Add to Shortlist
-            </Button>
-          ) : null}
-          {application?.applicantStatus === "SHORTLISTED" ? (
-            <>
-              <Button
-                type="button"
-                disabled={pending}
-                className="rounded-full bg-primary-500 text-light-900"
-                onClick={() => review("FINALIZED")}
-              >
-                Add to Finalist
-              </Button>
-              <Button
-                type="button"
-                disabled={pending}
-                className="rounded-full bg-dark-200 text-custom-100 hover:bg-dark-300"
-                onClick={() => review("ACCEPT")}
-              >
-                Remove from Shortlist
-              </Button>
-            </>
-          ) : null}
-          {application?.applicantType === "APPLIED" &&
-          application?.applicantStatus === "APPLIED" ? (
-            <Button
-              type="button"
-              disabled={pending}
-              className="rounded-full bg-dark-200 text-custom-100 hover:bg-dark-300"
-              onClick={() => review("ACCEPT")}
-            >
-              Accept Request
-            </Button>
-          ) : null}
+          <CollaborationReviewButtons
+            application={application}
+            pending={write.pending}
+            onReview={review}
+          />
           {application?.applicant?.userName && application?.applicantId ? (
             <Link
               href={`/profile/${application.applicant.userName}/${application.applicantId}`}
@@ -154,7 +157,18 @@ export default function CollaborationApplicantDetails({
         </div>
       </div>
 
-      {application?.resumeFileUrl ? (
+      {["applicantName", "applicantEmail", "applicantPhone"].some(
+        (key) => application?.[key],
+      ) ? (
+        <div className="grid gap-2 rounded-3xl border border-dark-300 bg-dark-250 p-5 text-sm text-light-700">
+          <h2 className="font-semibold">Contact details</h2>
+          <p>{application.applicantName}</p>
+          <p>{application.applicantEmail}</p>
+          <p>{application.applicantPhone}</p>
+        </div>
+      ) : null}
+      {typeof application?.resumeFileUrl === "string" &&
+      /^https?:\/\//i.test(application.resumeFileUrl) ? (
         <div className="rounded-[28px] border border-dark-300 bg-dark-250 p-5">
           <div className="flex items-center gap-3">
             <div className="flex size-14 items-center justify-center rounded-2xl bg-custom-100 text-light-900">

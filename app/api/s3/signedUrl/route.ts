@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { refreshSession , getSession } from "@/lib/session";
+import { refreshSession, getSession } from "@/lib/session";
 import { clearSession } from "@/actions/session.action";
 
 const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -36,6 +36,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (
+    !payload ||
     typeof payload.fileName !== "string" ||
     typeof payload.contentType !== "string"
   ) {
@@ -47,7 +48,6 @@ export async function POST(request: NextRequest) {
 
   const accessToken = await getSession();
   if (!accessToken) {
-    await clearSession();
     return NextResponse.json(
       { message: "Your session has expired." },
       { status: 401 },
@@ -58,6 +58,14 @@ export async function POST(request: NextRequest) {
   if (upstream.status === 401) {
     const refreshed = await refreshSession();
     if (!refreshed.ok) {
+      if (!refreshed.invalid)
+        return NextResponse.json(
+          {
+            message:
+              "Upload service is temporarily unavailable. Please try again.",
+          },
+          { status: 503 },
+        );
       await clearSession();
       return NextResponse.json(
         { message: "Your session has expired." },
