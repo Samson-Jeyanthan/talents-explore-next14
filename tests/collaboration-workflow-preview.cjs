@@ -9,6 +9,7 @@ const fs = require("node:fs"),
     "lib/utils/collaboration.ts",
     "lib/utils/collaboration-editor.ts",
     "lib/utils/collaboration-workflow.ts",
+    "lib/utils/collaboration-schedule.ts",
     "lib/hooks/useCollaborationWorkflow.ts",
     "components/inputs/SearchLookupSelect.tsx",
     ...[
@@ -18,6 +19,9 @@ const fs = require("node:fs"),
       "CollaborationInvitePeople",
       "CollaborationPeopleFilters",
       "CollaborationApplicantDetails",
+      "CollaborationSchedulePage",
+      "CollaborationTimeline",
+      "CollaborationRoleRequirements",
     ].map((name) => `components/widgets/collaboration/${name}.tsx`),
   ];
   const sources = Object.fromEntries(
@@ -81,8 +85,11 @@ const mocks={react:React,zod:Zod,'react/jsx-runtime':{jsx:(type,props,key)=>h(ty
 '@/actions/collaboration.action':actions,'@/actions/search.action':{getExploreFilterOptionsAction:async kind=>({success:true,data:kind==='categories'?[{value:id,label:'Arts'}]:kind==='subcategories'?[{value:role,label:'Acting'}]:[]})},
 '@/lib/utils/uploadFile':{uploadFileToStorage:async file=>{uploads.push(file.name);await wait(100);return {url:'https://example.test/cv.pdf',key:'cv.pdf'};}}};
 const cache={};function load(name,from=''){if(mocks[name])return mocks[name];if(name==='lucide-react')return new Proxy({},{get:(_,key)=>key==='__esModule'?false:props=>h('svg',{...props,width:'1em',height:'1em'})});let base=name.startsWith('@/')?name.slice(2):name;if(name.startsWith('.')){const parts=from.split('/');parts.pop();for(const part of name.split('/')){if(part==='..')parts.pop();else if(part!=='.')parts.push(part);}base=parts.join('/');}const file=[base,base+'.ts',base+'.tsx'].find(file=>sources[file]);if(!file)throw Error('Unknown module '+name);if(cache[file])return cache[file].exports;const module={exports:{}};cache[file]=module;new Function('require','module','exports',sources[file])(name=>load(name,file),module,module.exports);return module.exports;}
+const Schedule=load('components/widgets/collaboration/CollaborationSchedulePage.tsx').default;
+const scheduleRole={_id:role,name:'Lead actor',subtitle:'Feature film',description:'A full role description.\nBring your experience and creativity.',gender:'female',languageSeeking:{language:'Tamil'},ethnicName:'Any ethnicity',paymentDetails:{payment:'PAID',amount:0,currency:'USD',type:'PER_DAY'},skills:[{mainCategoryName:'Arts',subCategoryName:'Acting',skillName:'Voice',level:'advanced'}],timeLineType:'DATE_SETS',timeLine:[{date:'2026-12-01T18:30:00Z',startTime:'2026-12-02T03:30:00Z',endTime:'2026-12-02T05:30:00Z',title:'Rehearsal',description:'Bring the script and costume notes.',location:'Colombo rehearsal studio',longitude:79.8612,latitude:6.9271,mode:'MEETUP'},{date:'2026-12-03',startTime:'10:00',endTime:'11:00',title:'Online briefing',description:'Discuss the shooting schedule.',mode:{label:'Online',value:'ONLINE'},location:'Video call'}]};
 const Application=load('components/widgets/collaboration/CollaborationApplicationDialog.tsx').default,List=load('components/widgets/collaboration/CollaborationApplicantList.tsx').default,Invites=load('components/widgets/collaboration/CollaborationInvitePeople.tsx').default,Details=load('components/widgets/collaboration/CollaborationApplicantDetails.tsx').default;
-function App(){const [tab,setTab]=React.useState('applicants'),[open,setOpen]=React.useState(false),[status,setStatus]=React.useState('');return h('main',{className:'mx-auto max-w-6xl'},h('nav',{className:'flex flex-wrap gap-2 p-3'},...['applicants','application','invitations','details'].map(name=>h(Button,{key:name,onClick:()=>{setTab(name);if(name==='application')setOpen(true);}},name)),h(Button,{id:'fail',onClick:()=>failNext=true},'Fail next request'),h(Button,{onClick:()=>document.documentElement.classList.toggle('dark')},'Toggle theme')),h('p',{role:'status',className:'px-4 text-light-700'},status),
+function App(){const [tab,setTab]=React.useState('schedule'),[open,setOpen]=React.useState(false),[status,setStatus]=React.useState('');return h('main',{className:'mx-auto max-w-6xl'},h('nav',{className:'flex flex-wrap gap-2 p-3'},...['schedule','applicants','application','invitations','details'].map(name=>h(Button,{key:name,onClick:()=>{setTab(name);if(name==='application')setOpen(true);}},name)),h(Button,{id:'fail',onClick:()=>failNext=true},'Fail next request'),h(Button,{onClick:()=>document.documentElement.classList.toggle('dark')},'Toggle theme')),h('p',{role:'status',className:'px-4 text-light-700'},status),
+tab==='schedule'?h(Schedule,{collaborationId:id,role:scheduleRole,chatRoomId:id}):null,
 tab==='applicants'?h(List,{collaborationId:id,collaborationDetails:{roles:[{_id:role,name:'Actor'}]},initialStats:stats(),initialResult:{status:'7400',response:rows.slice(0,20)}}):null,
 tab==='application'?h(Application,{collaborationId:id,role:open?{_id:role,name:'Actor'}:null,currentUser:{userName:'artist',email:'artist@example.test',personalInfo:{firstName:'Artist'}},onClose:()=>setOpen(false),onApplied:async()=>setStatus('Application sent')}):null,
 tab==='invitations'?h(Invites,{collaborationId:id,currentUser:{_id:id},selectedRoleIds:[role]}):null,

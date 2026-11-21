@@ -1,3 +1,5 @@
+import ChatAccessNotice from "@/components/widgets/chat/ChatAccessNotice";
+import { groupMemberAllowed } from "@/lib/utils/collaboration-schedule";
 import {
   getChatMembersAction,
   getChatMessagesAction,
@@ -21,17 +23,46 @@ type Props = {
 export default async function ChatRoomPage({ params, searchParams }: Props) {
   const type = searchParams?.type || "chat";
 
-  const [currentUser, messages, membersRes, groupChatDetails] =
-    await Promise.all([
+  if (type === "group") {
+    const [currentUser, members] = await Promise.all([
       getCurrentChatUserAction(),
+      getChatMembersAction(params.roomId),
+    ]);
+    if (members.status !== "7400") return <ChatAccessNotice />;
+    if (!groupMemberAllowed(currentUser, members.list))
+      return <ChatAccessNotice denied />;
+    const [messages, group] = await Promise.all([
       getChatMessagesAction({
         roomId: params.roomId,
         direction: "down",
         pageSize: 10,
       }),
-      getChatMembersAction(params.roomId),
-      type === "group" ? getGroupChatRoomDetailsAction(params.roomId) : null,
+      getGroupChatRoomDetailsAction(params.roomId),
     ]);
+    return (
+      <ChatRoom
+        key={params.roomId}
+        roomId={params.roomId}
+        initialType="group"
+        initialMessages={messages}
+        initialMembers={members.list}
+        initialChatInfo={members.info}
+        initialGroupChatDetails={group}
+        currentUser={currentUser}
+        sharedPost={readSharedPost(searchParams || {})}
+      />
+    );
+  }
+
+  const [currentUser, messages, membersRes] = await Promise.all([
+    getCurrentChatUserAction(),
+    getChatMessagesAction({
+      roomId: params.roomId,
+      direction: "down",
+      pageSize: 10,
+    }),
+    getChatMembersAction(params.roomId),
+  ]);
 
   return (
     <ChatRoom
@@ -40,7 +71,7 @@ export default async function ChatRoomPage({ params, searchParams }: Props) {
       initialMessages={messages}
       initialMembers={membersRes?.list || []}
       initialChatInfo={membersRes?.info || null}
-      initialGroupChatDetails={groupChatDetails}
+      initialGroupChatDetails={null}
       currentUser={currentUser}
       sharedPost={readSharedPost(searchParams || {})}
     />

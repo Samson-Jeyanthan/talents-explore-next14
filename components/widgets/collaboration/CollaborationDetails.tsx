@@ -32,6 +32,14 @@ import { useCollaborationWrite } from "@/lib/hooks/useCollaborationWorkflow";
 import { collaborationSelection } from "@/lib/utils/collaboration-editor";
 import { applicantStatusLabel } from "@/lib/utils/collaboration-workflow";
 import CollaborationApplicationDialog from "./CollaborationApplicationDialog";
+import CollaborationRoleRequirements from "./CollaborationRoleRequirements";
+import CollaborationTimeline from "./CollaborationTimeline";
+import {
+  canUseCollaborationChat,
+  timelineItems,
+  detailText,
+  lookupLabel,
+} from "@/lib/utils/collaboration-schedule";
 import { toast } from "sonner";
 import Image from "next/image";
 import ReportDialog from "@/components/modals/ReportDialog";
@@ -70,24 +78,6 @@ function getDuration(details: any) {
   return "-";
 }
 
-function getTimelineLabel(role: any) {
-  if (role?.timeLineType === "BY_DAYS") {
-    return role?.timeLine?.[0]?.expectedDays || "-";
-  }
-
-  if (role?.timeLineType === "BY_DATE") {
-    return `${formatDate(role?.timeLine?.[0]?.startDate)} - ${formatDate(
-      role?.timeLine?.[0]?.endDate,
-    )}`;
-  }
-
-  if (role?.timeLineType === "DATE_SETS") {
-    return "Multiple scheduled dates";
-  }
-
-  return "-";
-}
-
 function CollaborationDetails({
   collaborationId,
   currentUser,
@@ -103,7 +93,11 @@ function CollaborationDetails({
   const collaboration = details?.collaboration || {};
   const owner = details?.owner || {};
   const roles = Array.isArray(details?.roles) ? details.roles : [];
-  const isOwner = Boolean(currentUser?._id && currentUser?._id === owner?._id);
+  const isOwner =
+    !!collaborationSelection(currentUser) &&
+    collaborationSelection(currentUser) === collaborationSelection(owner);
+  const canChat = canUseCollaborationChat(currentUser, details);
+  const roomId = collaborationSelection(collaboration.roomId);
 
   const reloadDetails = async () => {
     try {
@@ -204,9 +198,10 @@ function CollaborationDetails({
                   {owner?.userName || "Unknown user"}
                 </p>
                 <p className="text-sm text-light-500">
-                  {owner?.professional ||
-                    owner?.personalInfo?.professional ||
-                    "Collaboration owner"}
+                  {lookupLabel(
+                    owner?.professional || owner?.personalInfo?.professional,
+                    ["professional"],
+                  )}
                 </p>
               </div>
             </div>
@@ -351,8 +346,8 @@ function CollaborationDetails({
                 open.
               </p>
             </div>
-            {collaboration?.roomId ? (
-              <Link href={`/chat/${collaboration.roomId}?type=group`}>
+            {canChat && roomId ? (
+              <Link href={`/chat/${roomId}?type=group`}>
                 <Button
                   type="button"
                   className="rounded-full bg-dark-200 text-light-900 hover:bg-dark-300"
@@ -383,96 +378,23 @@ function CollaborationDetails({
                   key={role?._id || role?.roleId || role?.name}
                   className="rounded-[28px] border border-dark-300 bg-dark-200 p-4"
                 >
-                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                    <div>
-                      <h3 className="text-lg font-semibold text-primary-500">
-                        {role?.name || "Role"}
-                      </h3>
-                      <p className="pt-1 text-sm text-light-500">
-                        {role?.subtitle || ""}
-                      </p>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2">
-                      {role?.paymentDetails?.amount ? (
-                        <span className="rounded-full border border-dark-300 bg-dark-250 px-3 py-1 text-xs text-light-900">
-                          {role.paymentDetails.amount}{" "}
-                          {role.paymentDetails.currency || ""}
-                        </span>
-                      ) : null}
-                      {role?.paymentDetails?.type ? (
-                        <span className="rounded-full border border-dark-300 bg-dark-250 px-3 py-1 text-xs text-light-500">
-                          {role.paymentDetails.type}
-                        </span>
-                      ) : null}
-                      {role?.paymentDetails?.payment ? (
-                        <span className="rounded-full border border-dark-300 bg-dark-250 px-3 py-1 text-xs text-light-500">
-                          {role.paymentDetails.payment}
-                        </span>
-                      ) : null}
-                    </div>
-                  </div>
-
-                  <div className="grid gap-3 pt-4 sm:grid-cols-2 xl:grid-cols-4">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.16em] text-light-500">
-                        Gender
-                      </p>
-                      <p className="pt-1 text-sm text-light-900">
-                        {role?.gender || "-"}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.16em] text-light-500">
-                        Language
-                      </p>
-                      <p className="pt-1 text-sm text-light-900">
-                        {role?.languageSeekingName || "-"}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.16em] text-light-500">
-                        Ethnicity
-                      </p>
-                      <p className="pt-1 text-sm text-light-900">
-                        {role?.ethnicName || "-"}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.16em] text-light-500">
-                        Timeline
-                      </p>
-                      <p className="pt-1 text-sm text-light-900">
-                        {getTimelineLabel(role)}
-                      </p>
-                    </div>
-                  </div>
-
-                  <p className="pt-4 text-sm text-light-500">
-                    {role?.description || "No role description provided yet."}
+                  <h3 className="text-lg font-semibold text-primary-500">
+                    {detailText(role?.name, "Role")}
+                  </h3>
+                  <p className="mt-1 text-sm text-light-600">
+                    {detailText(role?.subtitle, "")}
                   </p>
-
-                  {Array.isArray(role?.skills) && role.skills.length > 0 ? (
-                    <div className="flex flex-wrap gap-2 pt-4">
-                      {role.skills.map((skill: any, index: number) => (
-                        <span
-                          key={`${role?._id}-skill-${index}`}
-                          className="rounded-2xl border border-dark-300 bg-dark-250 px-3 py-2 text-xs text-light-500"
-                        >
-                          <span className="font-semibold text-light-900">
-                            {skill?.mainCategoryName || "Skill"}
-                          </span>
-                          <span className="text-light-500">
-                            {" "}
-                            {skill?.subCategoryName || ""}{" "}
-                            {skill?.skillName ? `- ${skill.skillName}` : ""}{" "}
-                            {skill?.level ? `- ${skill.level}` : ""}
-                          </span>
-                        </span>
-                      ))}
+                  <div className="mt-4">
+                    <CollaborationRoleRequirements role={role} />
+                  </div>
+                  <details className="mt-4 rounded-2xl border border-dark-300 p-4">
+                    <summary className="cursor-pointer text-sm font-medium text-light-900">
+                      Dates, mode, and locations ({timelineItems(role).length})
+                    </summary>
+                    <div className="mt-4">
+                      <CollaborationTimeline role={role} />
                     </div>
-                  ) : null}
-
+                  </details>
                   <div className="flex flex-wrap items-center justify-end gap-2 pt-5">
                     {myApplicant && !isAppliedPending ? (
                       <span
@@ -485,7 +407,7 @@ function CollaborationDetails({
                     {isOwner ? (
                       <>
                         <Link
-                          href={`/collaboration/${collaborationId}/roles/${role?._id}/applicants`}
+                          href={`/collaboration/${collaborationId}/roles/${collaborationSelection(role)}/applicants`}
                         >
                           <Button
                             type="button"
@@ -494,19 +416,17 @@ function CollaborationDetails({
                             Applicants
                           </Button>
                         </Link>
-                        <Link
-                          href={`/collaboration/${collaborationId}/roles/${role?._id}/schedule`}
-                        >
-                          <Button
-                            type="button"
-                            className="rounded-full bg-dark-250 text-light-900 hover:bg-dark-300"
-                          >
-                            Schedule
-                          </Button>
-                        </Link>
                       </>
                     ) : null}
 
+                    {collaborationSelection(role) ? (
+                      <Link
+                        href={`/collaboration/${collaborationId}/roles/${collaborationSelection(role)}/schedule`}
+                        className="rounded-full border border-dark-300 px-4 py-2 text-sm text-light-900"
+                      >
+                        View schedule
+                      </Link>
+                    ) : null}
                     {isInvitePending ? (
                       <>
                         <Button
@@ -545,7 +465,7 @@ function CollaborationDetails({
                       </span>
                     ) : null}
 
-                    {hasChatAccess && collaboration?.roomId ? (
+                    {canChat && hasChatAccess && roomId ? (
                       <Link href={`/chat/${collaboration.roomId}?type=group`}>
                         <Button
                           type="button"

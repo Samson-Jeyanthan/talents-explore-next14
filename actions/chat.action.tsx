@@ -344,18 +344,23 @@ export async function getChatMembersAction(roomId: string) {
     const { token, user } = await getCurrentUserResponse();
 
     if (!token || !user?._id || !roomId) {
-      return { list: [], info: null };
+      return { status: "400", list: [], info: null };
     }
 
     const response = await axios.get(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/chat/members/${roomId}/${user._id}`,
       {
         headers: getAuthHeaders(token),
+        timeout: 15000,
       },
     );
 
-    if (response.data?.status === SUCCESS_STATUS) {
+    if (
+      response.data?.status === SUCCESS_STATUS &&
+      Array.isArray(response.data?.response?.list)
+    ) {
       return {
+        status: SUCCESS_STATUS,
         list: Array.isArray(response.data?.response?.list)
           ? response.data.response.list
           : [],
@@ -363,11 +368,11 @@ export async function getChatMembersAction(roomId: string) {
       };
     }
 
-    return { list: [], info: null };
+    return { status: "400", list: [], info: null };
   } catch (error) {
     if (isRedirectError(error)) throw error;
-    console.error("getChatMembersAction failed:", error);
-    return { list: [], info: null };
+
+    return { status: "400", list: [], info: null };
   }
 }
 
@@ -383,6 +388,7 @@ export async function getGroupChatRoomDetailsAction(roomId: string) {
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/chat/groupChatRoomDetails/${roomId}`,
       {
         headers: getAuthHeaders(token),
+        timeout: 15000,
       },
     );
 
@@ -391,7 +397,7 @@ export async function getGroupChatRoomDetailsAction(roomId: string) {
       : null;
   } catch (error) {
     if (isRedirectError(error)) throw error;
-    console.error("getGroupChatRoomDetailsAction failed:", error);
+
     return null;
   }
 }
