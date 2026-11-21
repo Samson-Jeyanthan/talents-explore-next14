@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useRef, useEffect } from "react";
 import {
   DialogContent,
   DialogHeader,
@@ -28,6 +28,16 @@ const CropImg = ({
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
+  const busy = useRef(false);
+  const active = useRef(true);
+  useEffect(() => {
+    active.current = true;
+    return () => {
+      active.current = false;
+    };
+  }, []);
 
   const zoomOut = () => {
     const decrease = zoom - 0.5;
@@ -48,14 +58,23 @@ const CropImg = ({
     (croppedArea: any, croppedAreaPixels: any) => {
       setCroppedAreaPixels(croppedAreaPixels);
     },
-    []
+    [],
   );
 
   // function for cropping the pixels of selected image's area
   const getCroppedImage = useCallback(
     async (show: string) => {
+      if (busy.current || !croppedAreaPixels) return;
+      busy.current = true;
+      setPending(true);
+      setError("");
       try {
-        const img = await getCroppedImg(media, croppedAreaPixels);
+        const img: any = await getCroppedImg(media, croppedAreaPixels);
+        if (!img?.croppedData) throw new Error("Unable to crop this image.");
+        if (!active.current) {
+          URL.revokeObjectURL(img.croppedPrev);
+          return;
+        }
 
         if (show) {
           setZoom(1);
@@ -66,16 +85,28 @@ const CropImg = ({
           return img;
         }
       } catch (error) {
-        console.log(error);
+        if (active.current)
+          setError(
+            "Unable to crop this image. Try adjusting the crop or choose another image.",
+          );
+      } finally {
+        busy.current = false;
+        if (active.current) setPending(false);
       }
     },
-    [croppedAreaPixels, handleCropComplete, media]
+    [croppedAreaPixels, handleCropComplete, media],
   );
 
   return (
     <DialogContent
       className="gap-0 rounded-2xl border-none bg-dark-250 p-0"
       aria-describedby={undefined}
+      onEscapeKeyDown={(event) => {
+        if (busy.current) event.preventDefault();
+      }}
+      onInteractOutside={(event) => {
+        if (busy.current) event.preventDefault();
+      }}
     >
       <DialogHeader className="flex w-full flex-row items-center justify-between p-2 px-4">
         <DialogTitle className="font-medium text-light-900">
@@ -84,7 +115,10 @@ const CropImg = ({
           {modalFor === "post" && "Adjust & Crop Photo for Post"}
         </DialogTitle>
         <div className="flex-center relative pb-2">
-          <DialogClose className="flex-center text-[1.5rem] text-light-900">
+          <DialogClose
+            disabled={pending}
+            className="flex-center text-[1.5rem] text-light-900"
+          >
             <IoMdClose />
           </DialogClose>
         </div>
@@ -163,7 +197,7 @@ const CropImg = ({
           max={10}
           step={0.1}
           value={[zoom]}
-          onValueChange={(e: any) => setZoom(e)}
+          onValueChange={(value) => setZoom(value[0])}
           className="h-1 bg-dark-400"
         />
         <div
@@ -201,11 +235,21 @@ const CropImg = ({
       </div>
 
       <footer className="flex w-full justify-end p-4">
+        {error ? (
+          <p
+            role="alert"
+            className="mr-3 text-sm text-red-700 dark:text-red-300"
+          >
+            {error}
+          </p>
+        ) : null}
         <Button
+          type="button"
+          disabled={pending || !croppedAreaPixels}
           onClick={() => getCroppedImage("show")}
           className="shad-btn_primary-200"
         >
-          Done
+          {pending ? "Cropping..." : "Done"}
         </Button>
       </footer>
     </DialogContent>

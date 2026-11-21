@@ -20,7 +20,7 @@ const EditPersonalInfoForm = ({
   professionOptions,
 }: any) => {
   return (
-    <form className="mt-4 flex w-full flex-col gap-5">
+    <div className="mt-4 flex w-full flex-col gap-5">
       <div className="flex w-full flex-col gap-6">
         <FormField
           control={form.control}
@@ -114,7 +114,7 @@ const EditPersonalInfoForm = ({
           maxLength={120}
         />
       </div>
-    </form>
+    </div>
   );
 };
 

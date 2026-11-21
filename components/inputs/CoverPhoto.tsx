@@ -1,33 +1,60 @@
 "use client";
 
-import { useRef, ChangeEvent, useState } from "react";
+import { useRef, ChangeEvent, useState, useEffect } from "react";
 import { Dialog } from "../ui/dialog";
 import { CropImgModal, PhotoActionModal, ErrorAlert } from "../modals";
 import { CameraIcon } from "@/public/assets/svgs";
-import { defaultMediaState, useMediaSelection } from "@/lib/hooks/useMedia";
+import { useMediaSelection } from "@/lib/hooks/useMedia";
 import Image from "next/image";
+import { profileImageError } from "@/lib/utils/profile-editor";
 import { TCoverProfilePhotoProps } from "@/types/utils.types";
 import { MdEdit } from "react-icons/md";
 
 const CoverPhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
   const photoRef = useRef<HTMLInputElement>(null);
-  const { handleMediaInput, media, resetMedia, error, setError, setMedia } =
+  const { handleMediaInput, media, resetMedia, error, setError } =
     useMediaSelection(true);
   const [isOpen, setIsOpen] = useState(false);
   const [isActionOpen, setIsActionOpen] = useState(false);
   const [prevMedia, setPrevMedia] = useState(mediaUrl || null);
-  const [finalCropImage, setFinalCropImage] = useState(null);
+  const [finalCropImage, setFinalCropImage] = useState<string | null>(null);
+  useEffect(
+    () => () => {
+      if (finalCropImage) URL.revokeObjectURL(finalCropImage);
+    },
+    [finalCropImage],
+  );
+  useEffect(
+    () => () => {
+      if (media.preview) URL.revokeObjectURL(media.preview);
+    },
+    [media.preview],
+  );
 
   // handle image input change
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const message = profileImageError(file);
+    if (message) {
+      setError(message);
+      event.target.value = "";
+      return;
+    }
     handleMediaInput(event);
+    event.target.value = "";
     setIsOpen(true);
     setIsActionOpen(false);
   };
 
   // image crop compelte function
   const handleCropComplete = (img: any) => {
-    setFinalCropImage(img?.croppedPrev);
+    const message = profileImageError(img?.croppedData);
+    if (message) {
+      setError(message);
+      return;
+    }
+    setFinalCropImage(img.croppedPrev);
     fieldChange(img.croppedData);
     setIsOpen(false);
     resetMedia();
@@ -46,13 +73,14 @@ const CoverPhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
   const handleDelete = () => {
     setFinalCropImage(null);
     setPrevMedia(null);
+    fieldChange(null);
     setIsActionOpen(false);
   };
 
   // handling invalid media
   const handleOkClick = () => {
     setError("");
-    setMedia(defaultMediaState);
+    resetMedia();
     setIsOpen(false);
   };
 
@@ -83,7 +111,8 @@ const CoverPhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
           </p>
         )}
 
-        <div
+        <button
+          type="button"
           className="shad-button_dark absolute bottom-2 right-2"
           onClick={handleInputBtn}
         >
@@ -95,7 +124,7 @@ const CoverPhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
             <CameraIcon fill="white" width="21px" height="21px" />
           )}
           {finalCropImage || prevMedia ? "Edit Cover Photo" : "Add Cover Photo"}
-        </div>
+        </button>
       </div>
 
       <ErrorAlert
@@ -105,8 +134,11 @@ const CoverPhoto = ({ fieldChange, mediaUrl }: TCoverProfilePhotoProps) => {
         onClick={handleOkClick}
       />
       <Dialog
-        open={isOpen && media && !error}
-        onOpenChange={() => setIsOpen(false)}
+        open={isOpen && !!media.data && !error}
+        onOpenChange={() => {
+          setIsOpen(false);
+          resetMedia();
+        }}
       >
         <CropImgModal
           modalFor="cover"

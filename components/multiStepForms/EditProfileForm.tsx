@@ -5,17 +5,22 @@ import { EditPersonalInfoForm, EditProInfoForm } from "@/components/forms";
 // import { TransparentLoader } from "@/components/modals";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import { useUserContext } from "@/context/AuthProvider";
-import { uploadFileToStorage } from "@/lib/utils/uploadFile";
+import { AUTH_USER_CACHE_KEY, useUserContext } from "@/context/AuthProvider";
+import { prepareProfileEditPayload } from "@/lib/utils/profile-editor";
+import { useProfileAwardWrite as useProfileDetailWrite } from "@/lib/hooks/useProfileAwardWrite";
+import { uploadFileToStorage, type UploadedFile } from "@/lib/utils/uploadFile";
 import { getEditProfileValidation } from "@/lib/validations/profile.validation";
 import { TCurrentUserData } from "@/types/profile.types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { getProfileLocationValues, getProfileLocationUpdate } from "@/lib/utils/profileLocation";
+import {
+  getProfileLocationValues,
+  getProfileLocationUpdate,
+} from "@/lib/utils/profileLocation";
 
 type Props = {
   langData: any;
@@ -25,9 +30,12 @@ type Props = {
 
 const EditProfileForm = ({ langData, professionData, userData }: Props) => {
   const router = useRouter();
-  const { user } = useUserContext();
+  const { user, setUser } = useUserContext();
+  const write = useProfileDetailWrite(userData._id);
+  const uploads = useRef(new Map<File, UploadedFile>());
+  const profilePath = `/profile/${encodeURIComponent(userData.userName || user.username)}/${userData._id}`;
   const [prevURLs, setPrevURLs] = useState<string[]>(
-    userData?.morePersonalInfo?.featuredPhotos || []
+    userData?.morePersonalInfo?.featuredPhotos || [],
   );
   const LangOptions = langData?.response?.map((item: any) => ({
     _id: item._id,
@@ -56,129 +64,124 @@ const EditProfileForm = ({ langData, professionData, userData }: Props) => {
       coverPhoto: undefined,
       profilePhoto: undefined,
       // professional info
-      bio: userData?.morePersonalInfo.bio || "",
-      ethnic: userData?.morePersonalInfo.ethnic || "",
+      bio: userData?.morePersonalInfo?.bio || "",
+      ethnic: userData?.morePersonalInfo?.ethnicId || "",
       featuredPhotos: [],
-      socialLinks: userData?.morePersonalInfo.socialLinks || [],
+      socialLinks: userData?.morePersonalInfo?.socialLinks || [],
     },
   });
 
-  const onInvalid = (errors: typeof form.formState.errors) => {
-    console.log("❌ Validation errors:", errors);
-    console.log("Current values:", form.getValues());
-  };
+  const onInvalid = () =>
+    write.setError("Please check the highlighted fields before saving.");
 
   async function onSubmit(values: z.infer<typeof validationSchema>) {
-    let locationUpdate;
     try {
-      locationUpdate = getProfileLocationUpdate(userData, values);
+      getProfileLocationUpdate(userData, values);
     } catch {
       form.setError("location", { message: "Please select a valid location." });
+      write.setError("Please select a valid location.");
       return;
     }
-    console.log(values);
-    // personal information form data
-    let profileImageKey: any;
-    let coverImageKey: any;
-
-    if (values.profilePhoto) {
-      profileImageKey = await uploadFileToStorage(
-        values.profilePhoto,
-        "profile-pic",
-        values.firstName
-      );
-      console.log("profile-photo - values.profilephoto true", profileImageKey);
-    }
-
-    if (values.coverPhoto) {
-      coverImageKey = await uploadFileToStorage(
-        values.coverPhoto,
-        "cover-pic",
-        values.firstName
-      );
-      console.log("cover-photo - values.coverphoto true", coverImageKey);
-    }
-
-    const personalInfo = {
-      ...locationUpdate,
-      firstName: values.firstName,
-      lastName: values.lastName,
-      dob: values.dob,
-      gender: values.gender,
-      languageKnown: values.knownLanguage,
-      profileImage: profileImageKey
-        ? profileImageKey.url
-        : userData?.personalInfo.profileImage,
-      coverImage: coverImageKey
-        ? coverImageKey.url
-        : userData?.personalInfo.coverImage,
-      shortBio: values.quotes ?? "",
-      professional: values.profession ?? null,
-
-      moreInfo: {
-        _id: userData?.morePersonalInfo._id,
-        bio: values.bio ?? "",
-        ethnic: values.ethnic === "" ? null : values.ethnic,
-        featuredPhotos: prevURLs ?? [],
-        socialLinks: values.socialLinks,
+    let savedPayload:
+      | Awaited<ReturnType<typeof prepareProfileEditPayload>>
+      | undefined;
+    await write.run(
+      async (active) => {
+        try {
+          savedPayload = await prepareProfileEditPayload(
+            values,
+            userData,
+            prevURLs,
+            uploadFileToStorage,
+            uploads.current,
+            active,
+            !!form.formState.dirtyFields.ethnic,
+          );
+          if (!active()) return;
+          return await userPersonalInfoEditAction(savedPayload, userData._id);
+        } catch (error) {
+          return {
+            status: "400",
+            message:
+              error instanceof Error
+                ? error.message
+                : "Unable to update your profile. Please try again.",
+          };
+        }
       },
-    };
-
-    const res = await userPersonalInfoEditAction(personalInfo);
-
-    if (res.status === "7400") {
-      router.push(`/profile/${user.username}/${user.currentUserId}`);
-      toast.success("Profile updated successfully!", { duration: 4000 });
-    } else {
-      toast.error("Failed to update profile. Please try again.", {
-        duration: 4000,
-      });
-    }
+      () => {
+        try {
+          sessionStorage.removeItem(AUTH_USER_CACHE_KEY);
+        } catch {}
+        setUser((previous) =>
+          previous.currentUserId === userData._id
+            ? {
+                ...previous,
+                firstName: values.firstName,
+                lastName: values.lastName,
+                imageUrl: savedPayload?.profileImage ?? previous.imageUrl,
+              }
+            : previous,
+        );
+        toast.success("Profile updated successfully!", { duration: 4000 });
+        router.push(profilePath);
+        router.refresh();
+      },
+    );
   }
 
   return (
-    <>
-      {/* {form.formState.isSubmitting && (
-        <TransparentLoader text="Updating Profile" />
-      )} */}
-      <Form {...form}>
-        <EditPersonalInfoForm
-          form={form}
-          userData={userData}
-          LangOptions={LangOptions}
-          professionOptions={professionOptions}
-        />
-        {userData?.isTalent && (
-          <EditProInfoForm
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit, onInvalid)}
+        className="w-full"
+        aria-busy={write.pending}
+      >
+        <fieldset disabled={write.pending} className="min-w-0">
+          <EditPersonalInfoForm
             form={form}
             userData={userData}
-            prevURLs={prevURLs}
-            setPrevURLs={setPrevURLs}
+            LangOptions={LangOptions}
+            professionOptions={professionOptions}
           />
-        )}
-      </Form>
-      <div className="my-3 mb-5 flex w-full justify-end gap-3">
-        <Button
-          className="shad-button_secondary w-40"
-          type="button"
-          onClick={() =>
-            router.push(`/profile/${user.username}/${user.currentUserId}`)
-          }
-        >
-          Cancel
-        </Button>
-        <Button
-          type="submit"
-          disabled={form.formState.isSubmitting}
-          onClick={form.handleSubmit(onSubmit, onInvalid)}
-          className="shad-button_primary w-40"
-        >
-          {form.formState.isSubmitting
-            ? "Updating Profile..."
-            : "Update Profile"}
-        </Button>
-      </div>
-    </>
+          {isTalent && (
+            <EditProInfoForm
+              form={form}
+              userData={userData}
+              prevURLs={prevURLs}
+              setPrevURLs={setPrevURLs}
+            />
+          )}
+        </fieldset>
+        {write.error ? (
+          <p
+            role="alert"
+            className="mt-4 text-sm text-red-700 dark:text-red-300"
+          >
+            {write.error}
+          </p>
+        ) : null}
+        <div className="my-3 mb-5 flex w-full justify-end gap-3">
+          <Button
+            className="shad-button_secondary w-40"
+            type="button"
+            disabled={write.pending}
+            onClick={() => router.push(profilePath)}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            disabled={write.pending || form.formState.isSubmitting}
+            className="shad-button_primary w-40"
+          >
+            {write.pending || form.formState.isSubmitting
+              ? "Updating Profile..."
+              : "Update Profile"}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 };
 

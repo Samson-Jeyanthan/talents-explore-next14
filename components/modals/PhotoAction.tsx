@@ -38,7 +38,8 @@ const PhotoAction = ({
           accept="image/jpeg,image/jpg,image/png,image/webp"
         />
 
-        <div
+        <button
+          type="button"
           className="flex-center body-regular w-full cursor-pointer gap-2 rounded-md bg-dark-300 p-3 text-primary-500"
           onClick={onDelete}
         >
@@ -46,13 +47,14 @@ const PhotoAction = ({
           {photoActionFor === "profile"
             ? "Delete Profile Photo"
             : "Delete Cover Photo"}
-        </div>
-        <div
+        </button>
+        <button
+          type="button"
           className="flex-center body-regular w-full cursor-pointer gap-2 rounded-md bg-dark-300 p-3 text-light-900"
           onClick={() => photoRef.current?.click()}
         >
           <BiPlus className="text-xl" /> Choose From Device
-        </div>
+        </button>
       </DialogContent>
     </>
   );

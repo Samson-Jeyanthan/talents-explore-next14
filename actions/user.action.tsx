@@ -1,12 +1,14 @@
 "use server";
 
 import SkillCard from "@/components/cards/SkillCard";
-import { getAuthHeaders , getSession } from "@/lib/session";
+import { getAuthHeaders, getSession } from "@/lib/session";
 import { resolveViewerIdAction } from "./session.action";
 import { IProfileSkills, ITopPost } from "@/types/profile.types";
 import { getUserPersonalInfoAction } from "./auth.action";
 import { TopPostCard } from "@/components/cards";
 import { revalidatePath } from "next/cache";
+import { isRedirectError } from "next/dist/client/components/redirect";
+import { profileEditPayloadValidation } from "@/lib/utils/profile-editor";
 
 // import { TopPostCard } from "@/components/cards";
 
@@ -284,10 +286,61 @@ export async function getUserLanguageInfoAction(userId: string | undefined) {
   }
 }
 
-export async function userPersonalInfoEditAction(formData: unknown) {
-  console.log("formData", formData);
+export async function userPersonalInfoEditAction(
+  formData: unknown,
+  profileId: string,
+) {
+  const parsed = profileEditPayloadValidation.safeParse(formData);
+  if (!parsed.success || !/^[a-f\d]{24}$/i.test(profileId))
+    return {
+      status: "400",
+      message: "Check your profile fields and photo URLs before saving.",
+    };
   try {
     const headers = await getAuthHeaders();
+    const identityResponse = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/`,
+      { headers, cache: "no-store", signal: AbortSignal.timeout(15000) },
+    );
+    const identity = await identityResponse.json();
+    const current = identity?.response;
+    if (
+      !identityResponse.ok ||
+      identity?.status !== "7400" ||
+      current?._id !== profileId ||
+      typeof current.isTalent !== "boolean" ||
+      !current.personalInfo
+    )
+      return {
+        status: "400",
+        message: "Unable to verify your profile. Please reload and try again.",
+      };
+    if (parsed.data.moreInfo && !current.isTalent)
+      return {
+        status: "400",
+        message: "Your profile type has changed. Reload before saving.",
+      };
+    const payload = {
+      ...parsed.data,
+      profileImage:
+        parsed.data.profileImage ?? current.personalInfo.profileImage ?? "",
+      coverImage:
+        parsed.data.coverImage ?? current.personalInfo.coverImage ?? "",
+      ...(parsed.data.moreInfo
+        ? {
+            moreInfo: {
+              ...parsed.data.moreInfo,
+              ...(parsed.data.moreInfo.ethnic === undefined &&
+              current.morePersonalInfo?.ethnicId
+                ? { ethnic: current.morePersonalInfo.ethnicId }
+                : {}),
+              ...(current.morePersonalInfo?._id
+                ? { _id: current.morePersonalInfo._id }
+                : {}),
+            },
+          }
+        : {}),
+    };
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/editPersonalInfo`,
       {
@@ -297,27 +350,30 @@ export async function userPersonalInfoEditAction(formData: unknown) {
           ...headers,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(15000),
       },
     );
 
     const res = await response.json();
-    console.log("// user-personal-info-edit //", res);
-
-    if (res.status === "7400") {
-      return res;
+    if (response.ok && res?.status === "7400") {
+      try {
+        revalidatePath("/profile", "layout");
+      } catch {}
+      return { status: "7400", message: "Profile updated successfully." };
     } else {
       const data = {
-        status: 400,
+        status: "400",
         message: "Could not edit personal info data",
       };
       return data;
     }
   } catch (error) {
-    console.error("user-personal-edit error:", error);
+    if (isRedirectError(error)) throw error;
     return {
-      status: 500,
-      message: "Internal server error - client side",
+      status: "400",
+      message:
+        "Unable to update your profile. Your changes are still here; please try again.",
     };
   }
 }

@@ -15,7 +15,7 @@ type ParamsProps = {
 
 export async function generateMetadata(
   { params }: ParamsProps,
-  parent: ResolvingMetadata
+  parent: ResolvingMetadata,
 ): Promise<Metadata> {
   const userData = await fetchUserDataAction(params.userId, params.userId);
 
@@ -46,6 +46,13 @@ const EditProfile = async ({ params }: ParamsProps) => {
   if (!isOwnProfile) {
     redirect("/home");
   }
+
+  if (!userData)
+    return (
+      <p role="alert" className="container-wrapper text-light-900">
+        Unable to load your profile. Please refresh and try again.
+      </p>
+    );
 
   return (
     <div className="container-wrapper flex-col pb-6">

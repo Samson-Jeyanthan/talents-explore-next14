@@ -1,129 +1,142 @@
 "use client";
-
-import React, { useRef, ChangeEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import Image from "next/image";
-import { useMediaSelection } from "@/lib/hooks/useMedia";
 import { BiPlus } from "react-icons/bi";
 import { MdDelete } from "react-icons/md";
+import { profileImageError } from "@/lib/utils/profile-editor";
 
-export const MyPhotosImgCard = ({ onClick, src, alt }: any) => {
-  return (
-    <div className="relative size-32 rounded-md">
-      <div
-        onClick={onClick}
-        className="flex-center hover:myphotos-gradient absolute left-0 top-0 size-full cursor-pointer rounded-md text-white opacity-0 transition-opacity duration-500 hover:z-10 hover:opacity-100"
-      >
-        <MdDelete className="text-2xl" />
-      </div>
-      <Image
-        src={src}
-        alt={alt}
-        width={512}
-        height={512}
-        className="!max-h-32 !min-h-32 !min-w-32 !max-w-32 rounded-md !object-cover"
-      />
-    </div>
-  );
-};
-
-const MyPhotosInput = ({ prevURLs, setPrevURLs, values, fieldChange }: any) => {
-  const myPhotoRefs = useRef<(HTMLInputElement | null)[]>([]); // Store refs as an array
-  const { handleMediaInput, error } = useMediaSelection(true);
-
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    handleMediaInput(event);
-    console.log(error);
-    if (!event.target.files) return; // Exit if no files are selected
-
-    // Convert FileList to array
-    const newFiles = Array.from(event.target.files);
-    // Merge new files with existing ones
-    const updatedFiles = [...(values || []), ...newFiles];
-
-    if (!error) {
-      // Update field with merged files
-      fieldChange(updatedFiles);
+export const MyPhotosImgCard = ({
+  onClick,
+  src,
+  alt,
+}: {
+  onClick: () => void;
+  src: string;
+  alt: string;
+}) => (
+  <div className="group relative size-32 rounded-md">
+    <button
+      type="button"
+      aria-label={"Remove " + alt}
+      onClick={onClick}
+      className="flex-center hover:myphotos-gradient absolute left-0 top-0 z-10 size-full cursor-pointer rounded-md text-white opacity-100 transition-opacity duration-500 focus-visible:opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+    >
+      <MdDelete className="rounded-full bg-black/50 p-1 text-3xl" />
+    </button>
+    <Image
+      src={src}
+      alt={alt}
+      width={512}
+      height={512}
+      className="!max-h-32 !min-h-32 !min-w-32 !max-w-32 rounded-md !object-cover"
+    />
+  </div>
+);
+function SelectedPhoto({
+  file,
+  onDelete,
+}: {
+  file: File;
+  onDelete: () => void;
+}) {
+  const [url, setUrl] = useState("");
+  useEffect(() => {
+    const next = URL.createObjectURL(file);
+    setUrl(next);
+    return () => URL.revokeObjectURL(next);
+  }, [file]);
+  return url ? (
+    <MyPhotosImgCard src={url} alt={file.name} onClick={onDelete} />
+  ) : null;
+}
+export default function MyPhotosInput({
+  prevURLs = [],
+  setPrevURLs,
+  values = [],
+  fieldChange,
+}: {
+  prevURLs?: string[];
+  setPrevURLs: (urls: string[]) => void;
+  values?: File[];
+  fieldChange: (files: File[]) => void;
+}) {
+  const input = useRef<HTMLInputElement>(null);
+  const [error, setError] = useState("");
+  const count = prevURLs.length + values.length;
+  const select = (event: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    event.target.value = "";
+    if (!files.length) return;
+    const invalid = files.map(profileImageError).find(Boolean);
+    if (invalid) {
+      setError(invalid);
+      return;
     }
-  };
-
-  const handleInputDelete = (index: number, fileType: string) => {
-    if (fileType === "url") {
-      const updatedUrls = [...prevURLs];
-      updatedUrls.splice(index, 1);
-      setPrevURLs(updatedUrls);
-    } else {
-      const updatedFiles = [...values];
-      updatedFiles.splice(index, 1);
-      fieldChange(updatedFiles);
+    if (count + files.length > 3) {
+      setError("You can add up to 3 featured photos.");
+      return;
     }
+    setError("");
+    fieldChange([...values, ...files]);
   };
-
-  // Ensure refs array length matches inputs
-  const ensureRefsArrayLength = (length: number) => {
-    while (myPhotoRefs.current.length < length) {
-      myPhotoRefs.current.push(null);
-    }
-  };
-
-  // Ensure refs match the required number of inputs
-  const inputCount = 3 - (prevURLs?.length + values?.length);
-  ensureRefsArrayLength(inputCount);
-
   return (
     <div className="flex w-full flex-col gap-2">
-      <label className="shad-auth_form_label">Featured Photos</label>
-      <div className="flex !gap-4">
-        {/* displaying singed url values */}
-
-        {prevURLs?.map((url: string, index: number) => (
+      <p className="shad-auth_form_label">Featured Photos</p>
+      <input
+        type="file"
+        ref={input}
+        hidden
+        aria-label="Choose featured photo"
+        accept="image/jpeg,image/png,image/webp"
+        onChange={select}
+      />
+      <div className="flex flex-wrap !gap-4">
+        {prevURLs.map((url, index) => (
           <MyPhotosImgCard
-            key={index}
+            key={url + index}
             src={url}
-            alt={`Image ${index}`}
-            onClick={() => handleInputDelete(index, "url")}
+            alt={"featured photo " + (index + 1)}
+            onClick={() => {
+              setPrevURLs(prevURLs.filter((_, i) => i !== index));
+              setError("");
+            }}
           />
         ))}
-
-        {/* displaying selected image files */}
-        {values.map((img: any, index: number) => (
-          <MyPhotosImgCard
+        {values.map((file, index) => (
+          <SelectedPhoto
+            key={file.name + file.lastModified + index}
+            file={file}
+            onDelete={() => {
+              fieldChange(values.filter((_, i) => i !== index));
+              setError("");
+            }}
+          />
+        ))}
+        {Array.from({ length: Math.max(0, 3 - count) }, (_, index) => (
+          <button
             key={index}
-            src={URL.createObjectURL(img)}
-            alt={`Image ${index}`}
-            onClick={() => handleInputDelete(index, "file")}
-          />
-        ))}
-
-        {/* input fields based on the number of empty slots */}
-        {Array.from({ length: inputCount }).map((_, index) => (
-          <React.Fragment key={index}>
-            <input
-              type="file"
-              ref={(el) => {
-                myPhotoRefs.current[index] = el; // Assign ref without returning
-              }}
-              hidden
-              onChange={handleInputChange}
-              accept="image/jpeg,image/png,image/webp"
-            />
-            <div
-              onClick={() => myPhotoRefs.current[index]?.click()}
-              className="flex-center !size-32  cursor-pointer flex-col gap-2 rounded-md  bg-dark-300 text-sm text-light-500"
-            >
-              <BiPlus className="text-xl" />
-              <p>Add Photo</p>
-            </div>
-          </React.Fragment>
+            type="button"
+            aria-label={"Add featured photo " + (count + index + 1)}
+            onClick={() => input.current?.click()}
+            className="flex-center !size-32 cursor-pointer flex-col gap-2 rounded-md bg-dark-300 text-sm text-light-500"
+          >
+            <BiPlus className="text-xl" />
+            <span>Add Photo</span>
+          </button>
         ))}
       </div>
+      {error ? (
+        <p role="alert" className="text-sm text-red-700 dark:text-red-300">
+          {error}
+        </p>
+      ) : null}
       <p className="text-[13px] text-light-600">
         Add photos of yourself to showcase your work.
       </p>
       <p className="-mt-2 text-[13px] text-light-600">
-        You can add up to 3 photos in JPEG, PNG, or WEBP format.
+        You can add up to 3 photos in JPEG, PNG, or WEBP format. Maximum 8 MB
+        each.
       </p>
     </div>
   );
-};
-
-export default MyPhotosInput;
+}

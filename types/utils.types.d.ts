@@ -25,7 +25,7 @@ export type TCropImgModalProps = {
 };
 
 export type TCoverProfilePhotoProps = {
-  fieldChange: (FILES: File[]) => void;
+  fieldChange: (file: File | null) => void;
   mediaUrl?: string;
 };
 
