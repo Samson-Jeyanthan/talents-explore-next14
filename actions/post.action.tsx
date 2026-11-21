@@ -1,10 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import AllPostCard from "@/components/cards/AllPostCard";
 import { IPost } from "@/types/post.types";
 import { getUserPersonalInfoAction } from "./auth.action";
-import { getAuthHeaders , getSession } from "@/lib/session";
+import { getAuthHeaders, getSession } from "@/lib/session";
 import { resolveViewerIdAction } from "./tokenAndHeaders.action";
 import { isRedirectError } from "next/dist/client/components/redirect";
 import { postUpdateValidation } from "@/lib/validations/postUpdate.validation";
@@ -237,38 +236,6 @@ export async function getWebCrawlerLinkAction(url: string) {
   }
 }
 
-export async function getUserAllPostsAction(
-  userId: string | undefined,
-  viewerId: string | undefined,
-  pageNo: number,
-  pageSize: number,
-) {
-  try {
-    const resolvedViewerId = await resolveRouteUserId(viewerId);
-    const headers = await getAuthHeaders();
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/profile/all?userId=${userId}&viewUserId=${resolvedViewerId}&pageNo=${pageNo}&pageSize=${pageSize}`,
-      {
-        cache: "no-store",
-        headers,
-      },
-    );
-    const res = await response.json();
-    if (res.status === "7400") {
-      const data = res.response;
-      return data.map((item: IPost, index: number) => (
-        <AllPostCard key={index} allPostCard={item} index={index} />
-      ));
-    } else {
-      const data = {
-        status: 400,
-        message: "Could not fetch all posts data",
-      };
-      return data;
-    }
-  } catch {}
-}
-
 export async function addPostToBestWorkAction(
   userId: string,
   postId: string,
@@ -321,38 +288,6 @@ export async function removeFromBestWorkAction(
     console.error(error);
     return error;
   }
-}
-
-export async function getUserCreditPostsAction(
-  userId: string | undefined,
-  viewerId: string | undefined,
-  pageNo: number,
-  pageSize: number,
-) {
-  try {
-    const resolvedViewerId = await resolveRouteUserId(viewerId);
-    const headers = await getAuthHeaders();
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/feeds/profile/credit?userId=${userId}&viewUserId=${resolvedViewerId}&pageNo=${pageNo}&pageSize=${pageSize}`,
-      {
-        cache: "no-store",
-        headers,
-      },
-    );
-    const res = await response.json();
-    if (res.status === "7400") {
-      const data = res.response;
-      return data.map((item: IPost, index: number) => (
-        <AllPostCard key={index} allPostCard={item} index={index} />
-      ));
-    } else {
-      const data = {
-        status: 400,
-        message: "Could not fetch credit data",
-      };
-      return data;
-    }
-  } catch {}
 }
 
 export async function getPostByIdAction(

@@ -7,6 +7,7 @@ import { GoDotFill } from "react-icons/go";
 import { FaLocationDot } from "react-icons/fa6";
 import { PostOptions } from "../options";
 import { RenderTag } from "../others";
+import { profilePostThumbnail } from "@/lib/utils/profile-feed";
 
 interface Prop {
   allPostCard: IPost;
@@ -19,6 +20,7 @@ const variants = {
 };
 
 function AllPostCard({ allPostCard, index }: Prop) {
+  const thumbnail = profilePostThumbnail(allPostCard);
   const postRatingValue = Math.floor(allPostCard.postRating * 10) / 10;
   const postLink = `/post/${allPostCard._id}`;
 
@@ -31,7 +33,7 @@ function AllPostCard({ allPostCard, index }: Prop) {
       initial="hidden"
       animate="visible"
       transition={{
-        delay: index * 0.12,
+        delay: Math.min(index, 4) * 0.12,
         ease: "easeInOut",
         duration: 0.2,
       }}
@@ -51,10 +53,12 @@ function AllPostCard({ allPostCard, index }: Prop) {
         </span>
 
         <Image
-          src={
-            allPostCard.media[0].mediaType === "image"
-              ? allPostCard.media[0].url
-              : "/assets/images/sample-post-img.jpg"
+          src={thumbnail}
+          unoptimized={
+            thumbnail.startsWith("http") &&
+            !thumbnail.startsWith(
+              "https://te-files-media.s3.eu-west-2.amazonaws.com/",
+            )
           }
           alt={allPostCard.about.title}
           width={1024}
@@ -70,7 +74,7 @@ function AllPostCard({ allPostCard, index }: Prop) {
         </div>
       </Link>
 
-      <div className="flex w-full min-w-0 flex-col gap-2 pb-10 sm:w-3/5 sm:pb-0 2xl:w-4/6 2xl:gap-1">
+      <div className="flex w-full min-w-0 flex-col gap-2 sm:w-3/5 2xl:w-4/6 2xl:gap-1">
         <Link
           href={postLink}
           className="cursor-pointer truncate text-xl font-semibold capitalize text-light-900"
@@ -89,7 +93,7 @@ function AllPostCard({ allPostCard, index }: Prop) {
         <p className="line-clamp-3 text-ellipsis text-justify text-xs text-light-500 first-letter:capitalize 2xl:text-sm">
           {allPostCard.about.description}
         </p>
-        <div className="absolute bottom-3 right-3 flex max-w-[calc(100%-1.5rem)] flex-wrap justify-end gap-2">
+        <div className="flex max-w-full flex-wrap justify-end gap-2 sm:absolute sm:bottom-3 sm:right-3 sm:max-w-[calc(100%-1.5rem)]">
           {allPostCard.about.mainCategory && (
             <RenderTag Icon="" name={allPostCard.about.mainCategory} />
           )}
