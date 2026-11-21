@@ -1,7 +1,11 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
 import { getProfileEducationsAction } from "@/actions/profile-education.action";
-import { educationKey } from "@/lib/utils/profile-education";
+import {
+  educationKey,
+  type ProfileEducation,
+} from "@/lib/utils/profile-education";
+import { useProfileSectionRead } from "@/lib/hooks/useProfileSectionRead";
+import type { ProfileSectionResult } from "@/lib/utils/profile-sections";
 import { ProInfoAddBtn } from "@/components/buttons";
 import { EducationCard } from "@/components/cards/ProDetailCards";
 import { Button } from "@/components/ui/button";
@@ -15,44 +19,34 @@ export default function ProfileEducationList({
 }: {
   profileId: string;
   isOwnProfile: boolean;
-  initialResult: Awaited<ReturnType<typeof getProfileEducationsAction>>;
+  initialResult: ProfileSectionResult<ProfileEducation>;
 }) {
-  const [result, setResult] = useState(initialResult);
-  const [loading, setLoading] = useState(false);
-  const request = useRef({ version: 0, busy: false });
-  useEffect(() => {
-    const current = request.current;
-    current.version++;
-    current.busy = false;
-    setLoading(false);
-    setResult(initialResult);
-    return () => {
-      current.version++;
-    };
-  }, [profileId, initialResult]);
-  const retry = async () => {
-    const current = request.current;
-    if (current.busy) return;
-    current.busy = true;
-    const version = current.version;
-    setLoading(true);
-    try {
-      const next = await getProfileEducationsAction(profileId);
-      if (version === current.version) setResult(next);
-    } catch {
-      if (version === current.version)
-        setResult({
-          status: "400",
-          response: [],
-          message: "Unable to load education details. Please try again.",
-        });
-    } finally {
-      if (version === current.version) {
-        current.busy = false;
-        setLoading(false);
-      }
-    }
-  };
+  const state = useProfileSectionRead(
+    profileId,
+    initialResult,
+    getProfileEducationsAction,
+    "Unable to load education details. Please try again.",
+  );
+  return (
+    <ProfileEducationSection
+      isOwnProfile={isOwnProfile}
+      result={state.result}
+      loading={state.pending}
+      retry={state.retry}
+    />
+  );
+}
+export function ProfileEducationSection({
+  isOwnProfile,
+  result,
+  loading,
+  retry,
+}: {
+  isOwnProfile: boolean;
+  result: ProfileSectionResult<ProfileEducation>;
+  loading: boolean;
+  retry: () => Promise<void>;
+}) {
   if (result.status === "7400" && !isOwnProfile && !result.response.length)
     return null;
   return (
@@ -63,7 +57,9 @@ export default function ProfileEducationList({
           <ProInfoAddBtn detailName="education" dataArray={result.response} />
         ) : null}
       </h4>
-      {result.status !== "7400" ? (
+      {result.status === "private" ? (
+        <p className="text-sm text-light-700">{result.message}</p>
+      ) : result.status !== "7400" ? (
         <div
           role="alert"
           className="rounded-2xl border border-dark-400 bg-dark-250 p-4 text-sm text-light-700"

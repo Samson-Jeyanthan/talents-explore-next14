@@ -388,6 +388,11 @@ function hooks() {
           },
         ];
       },
+      useMemo(fn, deps) {
+        const i = cursor++;
+        if (changed(cells[i]?.deps, deps)) cells[i] = { deps, value: fn() };
+        return cells[i].value;
+      },
       useRef(initial) {
         const i = cursor++;
         return (cells[i] ||= { current: initial });
@@ -527,7 +532,14 @@ test("failed list loads show retry instead of an empty profile and retry renders
   const initialResult = { status: "400", response: [], message: "Offline" };
   const render = () =>
     host.render(() =>
-      component({ profileId: profile, isOwnProfile: true, initialResult }),
+      (() => {
+        const view = component({
+          profileId: profile,
+          isOwnProfile: true,
+          initialResult,
+        });
+        return view.type(view.props);
+      })(),
     );
   render();
   assert.ok(find(render(), (node) => node.props?.role === "alert"));

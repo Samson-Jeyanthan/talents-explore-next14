@@ -32,7 +32,7 @@ const TopPostsCarousel = ({ slides, options, length }: PropType) => {
       <div className="embla__viewport" ref={emblaRef}>
         <div className="embla__container">
           {slides.map((item, index) => (
-            <div className="embla__slide" key={index}>
+            <div className="embla__slide" key={item._id}>
               <TopPostCard userTopPostCard={item} index={index} />
             </div>
           ))}
@@ -43,10 +43,12 @@ const TopPostsCarousel = ({ slides, options, length }: PropType) => {
         <div className="embla__controls">
           <div className="embla__buttons">
             <PrevButton
+              aria-label="Previous top post"
               onClick={onPrevButtonClick}
               disabled={prevBtnDisabled}
             />
             <NextButton
+              aria-label="Next top post"
               onClick={onNextButtonClick}
               disabled={nextBtnDisabled}
             />

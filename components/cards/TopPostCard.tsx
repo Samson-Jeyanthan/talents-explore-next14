@@ -3,6 +3,7 @@ import { MotionDiv } from "../others/MotionDiv";
 import Link from "next/link";
 import Image from "next/image";
 import { StarIcon } from "@/public/assets/svgs";
+import { profilePostThumbnail } from "@/lib/utils/profile-feed";
 
 interface Prop {
   userTopPostCard: ITopPost;
@@ -15,11 +16,12 @@ const variants = {
 };
 
 const TopPostCard = ({ userTopPostCard, index }: Prop) => {
+  const thumbnail = profilePostThumbnail(userTopPostCard);
   const postRatingValue = Math.floor(userTopPostCard.postRating * 10) / 10;
   return (
     <Link
       href={`/post/${userTopPostCard._id}`}
-      className="h-52 w-80 min-w-80 rounded-2xl border-2 border-dark-300 bg-dark-250 p-1"
+      className="h-52 w-80 min-w-0 max-w-full rounded-2xl border-2 border-dark-300 bg-dark-250 p-1 sm:min-w-80"
     >
       <MotionDiv
         variants={variants}
@@ -34,10 +36,12 @@ const TopPostCard = ({ userTopPostCard, index }: Prop) => {
         className="relative flex size-full flex-col gap-2"
       >
         <Image
-          src={
-            userTopPostCard?.media[0]?.mediaType === "image"
-              ? userTopPostCard?.media[0]?.url
-              : "/assets/images/sample-post-img.jpg"
+          src={thumbnail}
+          unoptimized={
+            thumbnail.startsWith("http") &&
+            !thumbnail.startsWith(
+              "https://te-files-media.s3.eu-west-2.amazonaws.com/",
+            )
           }
           alt={userTopPostCard.about.title}
           width={1024}

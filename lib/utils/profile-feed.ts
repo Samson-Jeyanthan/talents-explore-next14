@@ -41,7 +41,11 @@ export function profilePostRows(value: unknown): IPost[] {
   });
 }
 
-export function profilePostThumbnail(post: IPost) {
+export function profilePostThumbnail(post: {
+  media?: { mediaType?: string; url?: string; thumbnailUrl?: string }[] | null;
+  website?: unknown;
+  shareLinkThumbnail?: unknown;
+}) {
   const first = post.media?.[0];
   const selected =
     post.website && post.shareLinkThumbnail
