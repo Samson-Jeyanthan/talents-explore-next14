@@ -10,6 +10,7 @@ const EditProInfoForm = ({
   prevURLs,
   setPrevURLs,
   isTalentRegister,
+  onDraftChange,
 }: any) => {
   return (
     <div
@@ -51,6 +52,7 @@ const EditProInfoForm = ({
           name="socialLinks"
           render={({ field }) => (
             <SocialMediaInput
+              onDraftChange={onDraftChange}
               fieldChange={field.onChange}
               values={form.getValues("socialLinks")}
             />

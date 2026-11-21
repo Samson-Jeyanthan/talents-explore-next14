@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { registrationAwardValidation } from "@/lib/utils/talent-registration";
 import { CertificateInput, Dropdown } from "@/components/inputs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +13,7 @@ type AwardSet = {
   name: string;
   givenBy: string;
   year: string;
-  certificate: File | string | undefined;
+  certificate: File | string | null | undefined;
 };
 
 const INITIAL_VALUES: AwardSet = {
@@ -22,15 +23,21 @@ const INITIAL_VALUES: AwardSet = {
   certificate: undefined,
 };
 
-const AwardsForm = ({ form }: any) => {
+const AwardsForm = ({ form, onDraftChange }: any) => {
   const [award, setAward] = useState(INITIAL_VALUES);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    onDraftChange?.(
+      !!(award.name || award.givenBy || award.year || award.certificate),
+    );
+  }, [award, onDraftChange]);
   const [addedAward, setAddedAward] = useState<AwardSet[]>(
     form.getValues("awardsOrCertificate") || [],
   );
   const { years } = useDateSelector({});
 
   const YEARS = years.map((item) => ({
-    _id: item.id,
+    _id: String(item.id),
     name: item.label,
   }));
 
@@ -42,7 +49,12 @@ const AwardsForm = ({ form }: any) => {
   const handleAddClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
-    console.log(award);
+    const parsed = registrationAwardValidation.safeParse(award);
+    if (!parsed.success) {
+      setError(parsed.error.issues[0].message);
+      return;
+    }
+    setError("");
 
     syncForm([
       ...addedAward,
@@ -62,8 +74,8 @@ const AwardsForm = ({ form }: any) => {
   };
 
   return (
-    <form className="mt-4 flex min-h-[90%] justify-between gap-6">
-      <div className="flex w-1/2 flex-col gap-4">
+    <div className="mt-4 flex min-h-[90%] flex-col justify-between gap-6 md:flex-row">
+      <div className="flex w-full min-w-0 flex-col gap-4 md:w-1/2">
         <CertificateInput
           fieldChange={(val: any) =>
             setAward({
@@ -110,6 +122,23 @@ const AwardsForm = ({ form }: any) => {
           }
         />
         <div className="flex w-full justify-end">
+          {error ? (
+            <p role="alert" className="text-sm text-red-700 dark:text-red-300">
+              {error}
+            </p>
+          ) : null}
+          {award.name || award.givenBy || award.year || award.certificate ? (
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => {
+                setAward(INITIAL_VALUES);
+                setError("");
+              }}
+            >
+              Clear
+            </Button>
+          ) : null}
           <Button
             type="button"
             onClick={handleAddClick}
@@ -120,7 +149,7 @@ const AwardsForm = ({ form }: any) => {
           </Button>
         </div>
       </div>
-      <div className="flex w-2/5 flex-col gap-2">
+      <div className="flex w-full min-w-0 flex-col gap-2 md:w-2/5">
         {addedAward.map((item, index) => {
           const cert = item.certificate;
           const certName = typeof cert === "string" ? cert : cert?.name;
@@ -168,7 +197,7 @@ const AwardsForm = ({ form }: any) => {
           );
         })}
       </div>
-    </form>
+    </div>
   );
 };
 

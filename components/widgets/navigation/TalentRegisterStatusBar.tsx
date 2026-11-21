@@ -1,6 +1,6 @@
 const TalentRegisterStatusBar = ({ data, page }: any) => {
   return (
-    <aside className="sticky flex h-[80vh] w-[22rem] flex-col gap-4 border-r border-solid border-dark-300">
+    <aside className="sticky hidden h-[80vh] w-[22rem] shrink-0 flex-col gap-4 border-r border-solid border-dark-300 lg:flex">
       {data.map((item: any, index: number) => (
         <div
           key={index}

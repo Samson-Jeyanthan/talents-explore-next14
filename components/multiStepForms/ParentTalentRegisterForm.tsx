@@ -3,7 +3,7 @@
 import { TransparentLoader } from "@/components/modals";
 import { TalentRegisterValidation } from "@/lib/validations/auth.validation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useState } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { TALENT_REG_FORM_DETAILS } from "@/constants";
@@ -25,36 +25,85 @@ import { CheckIcon } from "lucide-react";
 import { TalentRegisterStatusBar } from "../widgets/navigation";
 import { Footer } from "../widgets";
 import { Form } from "../ui/form";
-import { getSubCategoriesAction } from "@/actions/utils.action";
+import { prepareTalentRegistration } from "@/lib/utils/talent-registration";
+import { useProfileAwardWrite as useProfileDetailWrite } from "@/lib/hooks/useProfileAwardWrite";
 import { AiOutlineLogout } from "react-icons/ai";
-import { INITIAL_USER, useUserContext } from "@/context/AuthProvider";
+import {
+  AUTH_USER_CACHE_KEY,
+  INITIAL_USER,
+  useUserContext,
+} from "@/context/AuthProvider";
 import { logoutAction } from "@/actions/auth.action";
 import { handleClearStorage } from "@/lib/functions/auth.functions";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { uploadFileToStorage } from "@/lib/utils/uploadFile";
+import { uploadFileToStorage, type UploadedFile } from "@/lib/utils/uploadFile";
 import { editUserProfessionalInfoAction } from "@/actions/user.action";
 
 interface Props {
   langData: any;
-  mainCategoryData: any;
 }
 
-const ParentTalentRegisterForm = ({ langData, mainCategoryData }: Props) => {
+function validationMessage(error: unknown): string | undefined {
+  if (!error || typeof error !== "object") return;
+  if ("message" in error && typeof error.message === "string")
+    return error.message;
+  for (const [key, value] of Object.entries(error)) {
+    if (key === "ref") continue;
+    const message = validationMessage(value);
+    if (message) return message;
+  }
+}
+
+const ParentTalentRegisterForm = ({ langData }: Props) => {
   const LangOptions = (langData?.response || []).map((item: any) => ({
     _id: item._id,
     name: item.language,
   }));
 
-  const mainCategoryOptions = (mainCategoryData?.response || []).map(
-    (item: any) => ({
-      _id: item._id,
-      name: item.name,
-    })
-  );
   const { user, setUser } = useUserContext();
   const [page, setPage] = useState(0);
-  const [subCategoryOptions, setSubCategoryOptions] = useState([]);
+  const write = useProfileDetailWrite(user.currentUserId);
+  const uploads = useRef(new Map<File, UploadedFile>());
+  const nextBusy = useRef(false);
+  const [nextPending, setNextPending] = useState(false);
+  const [drafts, setDrafts] = useState([false, false, false, false]);
+  const report0 = useCallback(
+    (value: boolean) =>
+      setDrafts((previous) =>
+        previous[0] === value
+          ? previous
+          : previous.map((old, i) => (i === 0 ? value : old)),
+      ),
+    [],
+  );
+  const report1 = useCallback(
+    (value: boolean) =>
+      setDrafts((previous) =>
+        previous[1] === value
+          ? previous
+          : previous.map((old, i) => (i === 1 ? value : old)),
+      ),
+    [],
+  );
+  const report2 = useCallback(
+    (value: boolean) =>
+      setDrafts((previous) =>
+        previous[2] === value
+          ? previous
+          : previous.map((old, i) => (i === 2 ? value : old)),
+      ),
+    [],
+  );
+  const report3 = useCallback(
+    (value: boolean) =>
+      setDrafts((previous) =>
+        previous[3] === value
+          ? previous
+          : previous.map((old, i) => (i === 3 ? value : old)),
+      ),
+    [],
+  );
   const router = useRouter();
 
   type FormValues = z.infer<typeof TalentRegisterValidation>;
@@ -91,27 +140,12 @@ const ParentTalentRegisterForm = ({ langData, mainCategoryData }: Props) => {
     window.location.assign("/sign-in");
   };
 
-  async function fetchSubcategories(mainCategory: string) {
-    setSubCategoryOptions([]);
-    try {
-      const res = await getSubCategoriesAction(mainCategory);
-      setSubCategoryOptions(
-        (res?.response || []).map((item: any) => ({
-          _id: item._id,
-          name: item.name,
-        }))
-      );
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
-  }
-
   const RegisterForm = [
     {
       form: (
         <EditProInfoForm
           form={form}
+          onDraftChange={report0}
           isTalentRegister={true}
           prevURLs={[]}
           setPrevURLs={() => {}}
@@ -122,29 +156,59 @@ const ParentTalentRegisterForm = ({ langData, mainCategoryData }: Props) => {
       form: (
         <SkillsForm
           form={form}
-          mainCategoryOptions={mainCategoryOptions}
-          fetchSubcategories={fetchSubcategories}
-          subCategoryOptions={subCategoryOptions}
+          onDraftChange={report1}
           page={page}
           isTalentRegister={true}
         />
       ),
     },
-    { form: <LangEducationForm form={form} LangOptions={LangOptions} /> },
-    { form: <AwardsForm form={form} /> },
+    {
+      form: (
+        <LangEducationForm
+          form={form}
+          LangOptions={LangOptions}
+          onDraftChange={report2}
+        />
+      ),
+    },
+    { form: <AwardsForm form={form} onDraftChange={report3} /> },
     { form: <CompleteForm form={form} /> },
   ];
 
   const handleNext = async () => {
-    const isValid = await form.trigger(STEP_FIELDS[page], {
-      shouldFocus: true,
-    });
-    if (!isValid) return;
-    setPage((current) => current + 1);
+    if (nextBusy.current || write.pending) return;
+    if (drafts[page]) {
+      write.setError(
+        "Add or clear the unfinished entry on this step before continuing.",
+      );
+      return;
+    }
+    nextBusy.current = true;
+    setNextPending(true);
+    write.setError("");
+    try {
+      const valid = await form.trigger(STEP_FIELDS[page], {
+        shouldFocus: true,
+      });
+      if (valid)
+        setPage((current) => Math.min(current + 1, RegisterForm.length - 1));
+      else
+        write.setError(
+          STEP_FIELDS[page]
+            .map((field) => validationMessage(form.getFieldState(field).error))
+            .find(Boolean) ||
+            "Check the details on this step before continuing.",
+        );
+    } finally {
+      nextBusy.current = false;
+      setNextPending(false);
+    }
   };
-
   const handlePrevious = () => {
-    setPage((currentPage) => currentPage - 1);
+    if (!write.pending && !nextBusy.current) {
+      write.setError("");
+      setPage((current) => Math.max(0, current - 1));
+    }
   };
 
   const TalentsFormStatus = [
@@ -180,95 +244,80 @@ const ParentTalentRegisterForm = ({ langData, mainCategoryData }: Props) => {
     },
   ];
 
-  async function onSubmit(values: z.infer<typeof TalentRegisterValidation>) {
-    if (!values.completeForm) {
-      toast.error("Please agree and continue to create your account", {
-        duration: 5000,
-      });
+  async function onSubmit(values: FormValues) {
+    if (drafts.some(Boolean)) {
+      write.setError("Add or clear your unfinished entries before submitting.");
       return;
     }
-
-    try {
-      const awardsOrCertificate = await Promise.all(
-        (values.awardsOrCertificate ?? []).map(async (award) => {
-          let certificateUrl: string | undefined;
-          let certificateUrlKey: string | undefined;
-
-          // only upload when a new File was actually selected
-          if (award.certificate instanceof File) {
-            const uploaded = await uploadFileToStorage(
-              award.certificate,
-              "Certificates",
-              user?.username
-            );
-            certificateUrl = uploaded.url;
-            certificateUrlKey = uploaded.key;
-          } else if (typeof award.certificate === "string") {
-            // already-uploaded URL, keep as is
-            certificateUrl = award.certificate;
-          }
-
-          return {
-            name: award.name,
-            givenBy: award.givenBy,
-            year: Number(award.year),
-            certificateUrl,
-            certificateUrlKey,
-          };
-        })
+    if (!values.completeForm) {
+      write.setError(
+        "Please agree to the terms before creating your talent profile.",
       );
-
-      const formData = {
-        moreInfo: {
-          bio: values.bio,
-          ethnic: values.ethnic ? values.ethnic : null,
-          featuredPhotos: [],
-          socialLinks: [],
-        },
-        skillSets: (values.skillSets ?? []).map((set) => ({
-          mainCategoryId: set.mainCategoryId,
-          subCategoryId: set.subCategoryId,
-          skillsHave: set.skillsHave.map((skill) => ({
-            skillId: skill.skillId,
-            level: skill.level,
-          })),
-          description: set.description,
-          hashTags: set.hashTags,
-        })),
-        languageKnown: (values.languageKnown ?? []).map((set) => ({
-          languageId: set.languageId,
-          level: set.level,
-        })),
-        education: (values.education ?? []).map((set) => ({
-          course: set.course,
-          institution: set.institution,
-          from: Number(set.from),
-          to: Number(set.to),
-        })),
-        awardsOrCertificate,
-      };
-
-      console.log(formData);
-      const res = await editUserProfessionalInfoAction(formData);
-
-      if (res?.success) {
-        toast.success("Successfully you have created Talent Profile");
-        router.push(`/profile/${user.username}/${user.currentUserId}`);
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to upload certificates. Please try again.");
+      return;
     }
+    await write.run(
+      async (active) => {
+        try {
+          const payload = await prepareTalentRegistration(
+            values,
+            user.currentUserId,
+            uploadFileToStorage,
+            uploads.current,
+            active,
+          );
+          if (!active()) return;
+          return await editUserProfessionalInfoAction(
+            payload,
+            user.currentUserId,
+            true,
+          );
+        } catch (error) {
+          return {
+            status: "400",
+            message:
+              error instanceof Error
+                ? error.message
+                : "Unable to create your talent profile. Please try again.",
+          };
+        }
+      },
+      () => {
+        try {
+          sessionStorage.removeItem(AUTH_USER_CACHE_KEY);
+        } catch {}
+        setUser((previous) =>
+          previous.currentUserId === user.currentUserId
+            ? { ...previous, isTalent: true }
+            : previous,
+        );
+        toast.success("Your talent profile has been created.");
+        router.push(
+          `/profile/${encodeURIComponent(user.username)}/${user.currentUserId}`,
+        );
+        router.refresh();
+      },
+    );
   }
+  const onInvalid = (errors: typeof form.formState.errors) => {
+    const target = STEP_FIELDS.findIndex((fields) =>
+      fields.some((field) => errors[field]),
+    );
+    if (target >= 0) setPage(target);
+    write.setError(
+      validationMessage(errors) ||
+        "Check the highlighted fields before creating your talent profile.",
+    );
+  };
 
   return (
     <>
-      {form.formState.isSubmitting && (
-        <TransparentLoader text="Creating Talent Profile" />
-      )}
+      {write.pending && <TransparentLoader text="Creating Talent Profile" />}
       <Form {...form}>
-        <div className="flex flex-col items-center justify-center gap-4">
-          <section className="flex w-[1300px] max-w-screen-xl flex-col">
+        <div className="flex w-full min-w-0 flex-col items-center justify-center gap-4">
+          <fieldset
+            disabled={write.pending}
+            className="flex w-full min-w-0 max-w-screen-xl flex-col"
+          >
             <header className="flex h-28 w-full items-center justify-between gap-5 border-b border-solid border-dark-300">
               {TALENT_REG_FORM_DETAILS.filter((_, index) => index === page).map(
                 (item, index) => (
@@ -278,37 +327,54 @@ const ParentTalentRegisterForm = ({ langData, mainCategoryData }: Props) => {
                     </h1>
                     <p className="text-sm text-light-500">{item.description}</p>
                   </div>
-                )
+                ),
               )}
               <div className="flex items-center gap-4">
-                <p
+                <button
+                  type="button"
                   onClick={() =>
                     router.push(
-                      `/profile/${user.username}/${user.currentUserId}`
+                      `/profile/${user.username}/${user.currentUserId}`,
                     )
                   }
                   className="cursor-pointer text-light-500 hover:text-light-850"
                 >
                   Skip
-                </p>
-                <div
+                </button>
+                <button
+                  type="button"
+                  aria-label="Sign out"
                   className="flex-center cursor-pointer rounded-full border border-light-500 p-2 text-light-500 hover:text-light-850"
                   onClick={handleLogoutClick}
                 >
                   <AiOutlineLogout className="text-lg" />
-                </div>
+                </button>
               </div>
             </header>
 
             <div className="flex gap-4">
               <TalentRegisterStatusBar data={TalentsFormStatus} page={page} />
-              <div className="flex min-h-[85vh] w-full flex-col">
-                {RegisterForm[page].form}
+              <div className="flex min-h-[85vh] w-full min-w-0 flex-col">
+                {RegisterForm.map((step, index) => (
+                  <div key={index} hidden={page !== index}>
+                    {step.form}
+                  </div>
+                ))}
+                {write.error ? (
+                  <p
+                    role="alert"
+                    className="my-3 text-sm text-red-700 dark:text-red-300"
+                  >
+                    {write.error}
+                  </p>
+                ) : null}
                 <footer
                   className={`${page === 0 ? "justify-end" : "justify-between"} flex gap-4`}
                 >
                   {page > 0 && (
                     <Button
+                      type="button"
+                      disabled={nextPending || write.pending}
                       onClick={handlePrevious}
                       className="shad-button_secondary !w-32"
                     >
@@ -318,8 +384,8 @@ const ParentTalentRegisterForm = ({ langData, mainCategoryData }: Props) => {
                   {RegisterForm.length - 1 === page ? (
                     <Button
                       type="submit"
-                      disabled={form.formState.isSubmitting}
-                      onClick={form.handleSubmit(onSubmit)}
+                      disabled={write.pending || form.formState.isSubmitting}
+                      onClick={form.handleSubmit(onSubmit, onInvalid)}
                       className="shad-button_primary"
                     >
                       Create Account
@@ -327,6 +393,7 @@ const ParentTalentRegisterForm = ({ langData, mainCategoryData }: Props) => {
                   ) : (
                     <Button
                       type="button"
+                      disabled={nextPending || write.pending}
                       onClick={handleNext}
                       className="shad-button_primary !w-32"
                     >
@@ -336,7 +403,7 @@ const ParentTalentRegisterForm = ({ langData, mainCategoryData }: Props) => {
                 </footer>
               </div>
             </div>
-          </section>
+          </fieldset>
           <Footer />
         </div>
       </Form>

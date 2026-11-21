@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { SOCIAL_MEDIA_OPTIONS } from "@/constants";
 import {
   Select,
@@ -17,6 +17,7 @@ type SocialLink = { type: string; url: string };
 interface Props {
   values?: SocialLink[];
   fieldChange: (links: SocialLink[]) => void;
+  onDraftChange?: (pending: boolean) => void;
 }
 
 // computed once at module level, not on every render
@@ -49,9 +50,16 @@ const LinkRow = ({
   );
 };
 
-const SocialMediaInput = ({ values = [], fieldChange }: Props) => {
+const SocialMediaInput = ({
+  values = [],
+  fieldChange,
+  onDraftChange,
+}: Props) => {
   const [pending, setPending] = useState<SocialLink>({ type: "", url: "" });
   const [error, setError] = useState("");
+  useEffect(() => {
+    onDraftChange?.(!!(pending.type || pending.url));
+  }, [pending.type, pending.url, onDraftChange]);
 
   const urlFor = (type: string) =>
     values.find((l) => l.type === type)?.url ?? "";
@@ -62,15 +70,15 @@ const SocialMediaInput = ({ values = [], fieldChange }: Props) => {
     fieldChange(
       exists
         ? values.map((l) => (l.type === type ? { ...l, url } : l))
-        : [...values, { type, url }]
+        : [...values, { type, url }],
     );
   };
 
   const addedExtras = values.filter(
-    (l) => !OPTION_BY_TYPE.get(l.type)?.default
+    (l) => !OPTION_BY_TYPE.get(l.type)?.default,
   );
   const availableExtras = EXTRA_OPTIONS.filter(
-    (o) => !values.some((l) => l.type === o.type)
+    (o) => !values.some((l) => l.type === o.type),
   );
 
   const handleOkClick = () => {
@@ -149,6 +157,18 @@ const SocialMediaInput = ({ values = [], fieldChange }: Props) => {
             {error && <p className="shad-auth_form_message">{error}</p>}
 
             <footer className="flex justify-end">
+              {pending.type || pending.url ? (
+                <button
+                  type="button"
+                  className="teritory-button mr-3"
+                  onClick={() => {
+                    setPending({ type: "", url: "" });
+                    setError("");
+                  }}
+                >
+                  Clear
+                </button>
+              ) : null}
               <button
                 type="button"
                 className="teritory-button"

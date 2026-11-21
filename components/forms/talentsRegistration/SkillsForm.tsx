@@ -1,11 +1,10 @@
 "use client";
 
-import {
-  getMainCategoriesAction,
-  getSkillsAction,
-  getSubCategoriesAction,
-} from "@/actions/utils.action";
-import { Dropdown, TextArea } from "@/components/inputs";
+import { useProfileSkillOptions } from "@/lib/hooks/useProfileSkillOptions";
+import { registrationSkillValidation } from "@/lib/utils/talent-registration";
+import { parseSkillHashtags } from "@/lib/utils/profile-skills";
+import { Input } from "@/components/ui/input";
+import { Dropdown } from "@/components/inputs";
 import { Button } from "@/components/ui/button";
 import { LEVEL_VALUES } from "@/constants";
 import { ChevronRight, X } from "lucide-react";
@@ -13,7 +12,6 @@ import React, { useEffect, useState } from "react";
 import { MdDelete } from "react-icons/md";
 
 type SkillRow = { skillId: string; skill: string; level: string };
-type SelectOption = { _id: string; name: string };
 type SkillSet = {
   mainCategory: string;
   mainCategoryId: string;
@@ -26,85 +24,65 @@ type SkillSet = {
 
 const EMPTY_ROW: SkillRow = { skillId: "", skill: "", level: "" };
 
-const SkillsForm = ({ form, isTalentRegister, page }: any) => {
-  const [mainCategoryOptions, setMainCategoryOption] = useState<SelectOption[]>(
-    [],
-  );
-  const [subCategoryOptions, setSubCategoryOptions] = useState<SelectOption[]>(
-    [],
-  );
-  const [skillOptions, setSkillOptions] = useState<SelectOption[]>([]);
+const SkillsForm = ({ form, isTalentRegister, page, onDraftChange }: any) => {
   const [skills, setSkills] = useState({
     mainCategory: "",
     subCategory: "",
-    skillsHave: [
-      {
-        skillId: "",
-        level: "",
-      },
-    ],
+    skillsHave: [{ skillId: "", level: "" }],
     description: "",
-    hashTags: [],
+    hashtags: "",
   });
   const [addedSkills, setAddedSkills] = useState<SkillSet[]>(
     form.getValues("skillSets") || [],
   );
-
-  const mapOptions = (res: any) =>
-    (res?.response || []).map((item: any) => ({
-      _id: item._id,
-      name: item.name,
-    }));
-
-  async function fetchMainCategories() {
-    const res = await getMainCategoriesAction();
-    setMainCategoryOption(mapOptions(res));
-  }
-
-  async function fetchSubcategories(mainCategory: string) {
-    setSubCategoryOptions([]);
-    setSkillOptions([]);
-    setSkills({
-      ...skills,
-      mainCategory,
-    });
-    try {
-      const res = await getSubCategoriesAction(mainCategory);
-      setSubCategoryOptions(mapOptions(res));
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
-  }
-
-  async function fetchSkills(subCategory: string) {
-    setSkillOptions([]);
-    setSkills({
-      ...skills,
-      subCategory,
-    });
-    try {
-      const res = await getSkillsAction(subCategory);
-      const nextSkillOptions = mapOptions(res);
-
-      setSkillOptions(nextSkillOptions);
-      if (nextSkillOptions.length === 0) {
-        setSkills({
-          ...skills,
-          skillsHave: [],
-        });
-      }
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
-  }
-
+  const [error, setError] = useState("");
+  const main = useProfileSkillOptions("main", "", page === 1);
+  const sub = useProfileSkillOptions("sub", skills.mainCategory, page === 1);
+  const availableSkills = useProfileSkillOptions(
+    "skill",
+    skills.subCategory,
+    page === 1,
+  );
+  const mainCategoryOptions = main.options;
+    const subCategoryOptions = sub.options;
+    const skillOptions = availableSkills.options;
+  const ready =
+    main.status === "ready" &&
+    sub.status === "ready" &&
+    availableSkills.status === "ready";
+  const hasDraft = !!(
+    skills.mainCategory ||
+    skills.subCategory ||
+    skills.description ||
+    skills.hashtags ||
+    skills.skillsHave.some((row) => row.skillId || row.level)
+  );
   useEffect(() => {
-    if (page === 1) fetchMainCategories();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page]);
-
+    onDraftChange?.(hasDraft);
+  }, [hasDraft, onDraftChange]);
+  const clear = () => {
+    setSkills({
+      mainCategory: "",
+      subCategory: "",
+      skillsHave: [{ skillId: "", level: "" }],
+      description: "",
+      hashtags: "",
+    });
+    setError("");
+  };
+  const fetchSubcategories = (mainCategory: string) =>
+    setSkills((previous) => ({
+      ...previous,
+      mainCategory,
+      subCategory: "",
+      skillsHave: [{ skillId: "", level: "" }],
+    }));
+  const fetchSkills = (subCategory: string) =>
+    setSkills((previous) => ({
+      ...previous,
+      subCategory,
+      skillsHave: [{ skillId: "", level: "" }],
+    }));
   // Update a row, and automatically push an empty row when the last one is complete
   async function autoAddSkillsLevel(
     index: number,
@@ -150,44 +128,59 @@ const SkillsForm = ({ form, isTalentRegister, page }: any) => {
   const handleAddClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
-    const completeRows = skills.skillsHave.filter((r) => r.skillId && r.level);
-    if (
-      !skills.mainCategory ||
-      !skills.subCategory ||
-      completeRows.length === 0
-    )
+    if (!ready) {
+      setError(
+        "Wait for the category choices to load, or retry the failed request.",
+      );
       return;
-
-    const newSet: SkillSet = {
-      mainCategory:
-        mainCategoryOptions.find((o) => o._id === skills.mainCategory)?.name ??
-        skills.mainCategory,
+    }
+    const rows = skills.skillsHave.filter((row) => row.skillId || row.level);
+    const parsed = registrationSkillValidation.safeParse({
       mainCategoryId: skills.mainCategory,
-      subCategory:
-        subCategoryOptions.find((o) => o._id === skills.subCategory)?.name ??
-        skills.subCategory,
       subCategoryId: skills.subCategory,
-      skillsHave: completeRows.map((row) => ({
-        ...row,
-        skill:
-          skillOptions.find((o) => o._id === row.skillId)?.name ?? row.skillId,
-        skillId: row.skillId,
-        level:
-          (LEVEL_VALUES as any[]).find((l) => (l._id ?? l.value) === row.level)
-            ?.name ?? row.level,
-      })),
-      description: skills.description ?? "",
-      hashTags: [],
-    };
-
-    setAddedSkills((prev) => {
-      const next = [...prev, newSet];
-      // keep react-hook-form in sync if your schema has this field
-      form.setValue?.("skillSets", next);
-      return next;
+      skillsHave: rows,
+      description: skills.description,
+      hashTags: parseSkillHashtags(skills.hashtags),
     });
-
-    console.log(form.getValues("skillSets"));
+    if (!parsed.success) {
+      setError(parsed.error.issues[0].message);
+      return;
+    }
+    if (
+      (skillOptions.length > 0 && !rows.length) ||
+      rows.some(
+        (row) => !skillOptions.some((option) => option._id === row.skillId),
+      ) ||
+      !mainCategoryOptions.some(
+        (option) => option._id === skills.mainCategory,
+      ) ||
+      !subCategoryOptions.some((option) => option._id === skills.subCategory)
+    ) {
+      setError(
+        "Choose available categories and add each skill with its level.",
+      );
+      return;
+    }
+    const newSet: SkillSet = {
+      mainCategory: mainCategoryOptions.find(
+        (row) => row._id === skills.mainCategory,
+      )!.name,
+      mainCategoryId: skills.mainCategory,
+      subCategory: subCategoryOptions.find(
+        (row) => row._id === skills.subCategory,
+      )!.name,
+      subCategoryId: skills.subCategory,
+      skillsHave: rows.map((row) => ({
+        ...row,
+        skill: skillOptions.find((option) => option._id === row.skillId)!.name,
+      })),
+      description: parsed.data.description,
+      hashTags: parsed.data.hashTags,
+    };
+    const next = [...addedSkills, newSet];
+    setAddedSkills(next);
+    form.setValue("skillSets", next, { shouldValidate: true });
+    clear();
   };
 
   function removeAddedSkills(index: number) {
@@ -197,9 +190,9 @@ const SkillsForm = ({ form, isTalentRegister, page }: any) => {
   }
 
   return (
-    <div className="flex min-h-[90%] justify-between gap-6">
-      <form
-        className={`${isTalentRegister ? "mt-6 w-[45%]" : "w-full"} flex flex-col gap-4`}
+    <div className="flex min-h-[90%] flex-col justify-between gap-6 md:flex-row">
+      <div
+        className={`${isTalentRegister ? "mt-6 w-full md:w-[45%]" : "w-full"} flex min-w-0 flex-col gap-4`}
       >
         <Dropdown
           form={form}
@@ -220,66 +213,116 @@ const SkillsForm = ({ form, isTalentRegister, page }: any) => {
           dependentFieldValue={skills.mainCategory !== ""}
         />
 
-        {skills.skillsHave.map((row, index) => (
-          <div className="relative flex gap-6" key={index}>
-            <Dropdown
-              form={form}
-              inputName={`skills.skillsHave${index}.skillId`}
-              placeholder="Select Skill"
-              options={optionsForRow(index)}
-              value={row.skillId}
-              dependentFieldPlaceholder={"Please select sub category"}
-              dependentFieldValue={skills.subCategory !== ""}
-              onValueChange={(_id: string) =>
-                autoAddSkillsLevel(index, "skillId", _id)
-              }
-            />
-            <Dropdown
-              form={form}
-              inputName={`skills.skillsHave${index}.level`}
-              placeholder="Select level"
-              options={LEVEL_VALUES}
-              value={row.level}
-              onValueChange={(value: string) =>
-                autoAddSkillsLevel(index, "level", value)
-              }
-            />
-            {skills.skillsHave.length !== 1 && (
-              <span
-                onClick={() => removeRow(index)}
-                className="flex-center absolute -right-8 top-3 size-5 cursor-pointer rounded-full border border-light-500 p-[2px] text-light-600 hover:text-light-850"
-              >
-                <X />
-              </span>
-            )}
-          </div>
-        ))}
+        {skills.subCategory &&
+          availableSkills.status === "ready" &&
+          skillOptions.length > 0 &&
+          skills.skillsHave.map((row, index) => (
+            <div className="relative flex min-w-0 gap-6 pr-6" key={index}>
+              <Dropdown
+                form={form}
+                inputName={`skills.skillsHave${index}.skillId`}
+                placeholder="Select Skill"
+                options={optionsForRow(index)}
+                value={row.skillId}
+                dependentFieldPlaceholder={"Please select sub category"}
+                dependentFieldValue={skills.subCategory !== ""}
+                onValueChange={(_id: string) =>
+                  autoAddSkillsLevel(index, "skillId", _id)
+                }
+              />
+              <Dropdown
+                form={form}
+                inputName={`skills.skillsHave${index}.level`}
+                placeholder="Select level"
+                options={LEVEL_VALUES}
+                value={row.level}
+                onValueChange={(value: string) =>
+                  autoAddSkillsLevel(index, "level", value)
+                }
+              />
+              {skills.skillsHave.length !== 1 && (
+                <button
+                  type="button"
+                  aria-label={`Remove skill ${index+1}`}
+                  onClick={() => removeRow(index)}
+                  className="flex-center absolute right-0 top-3 size-5 cursor-pointer rounded-full border border-light-500 p-[2px] text-light-600 hover:text-light-850"
+                >
+                  <X />
+                </button>
+              )}
+            </div>
+          ))}
 
-        <TextArea
-          form={form}
-          inputName={skills.description}
+        {[
+          main,
+          ...(skills.mainCategory ? [sub] : []),
+          ...(skills.subCategory ? [availableSkills] : []),
+        ].map((choices, index) =>
+          choices.status === "error" ? (
+            <div
+              role="alert"
+              key={index}
+              className="text-sm text-red-700 dark:text-red-300"
+            >
+              {choices.error}
+              <Button type="button" variant="ghost" onClick={choices.retry}>
+                Try again
+              </Button>
+            </div>
+          ) : choices.status === "loading" ? (
+            <p key={index} role="status" className="text-xs text-light-500">
+              Loading choices...
+            </p>
+          ) : null,
+        )}
+        <textarea
+          aria-label="Skill description"
+          value={skills.description}
+          onChange={(event) =>
+            setSkills((previous) => ({
+              ...previous,
+              description: event.target.value,
+            }))
+          }
           placeholder="Describe your skill"
           maxLength={500}
-          className="h-48"
-          onChange={(e) => {
-            setSkills({
-              ...skills,
-              description: e.target.value,
-            });
-          }}
+          className="shad-auth_form_textarea h-48"
         />
-
+        <Input
+          aria-label="Skill hashtags"
+          value={skills.hashtags}
+          onChange={(event) =>
+            setSkills((previous) => ({
+              ...previous,
+              hashtags: event.target.value,
+            }))
+          }
+          placeholder="#talent #explorer"
+          className="shad-auth_form_input"
+        />
+        {error ? (
+          <p role="alert" className="text-sm text-red-700 dark:text-red-300">
+            {error}
+          </p>
+        ) : null}
         <div className="flex w-full justify-end">
+          {hasDraft ? (
+            <Button type="button" variant="ghost" onClick={clear}>
+              Clear
+            </Button>
+          ) : null}
           <Button
+            type="button"
+            disabled={!ready}
             onClick={handleAddClick}
             className="shad-button_secondary !w-32 !text-custom-100"
           >
             Add Skill
           </Button>
         </div>
-      </form>
+      </div>
       {isTalentRegister && (
-        <div className="mt-6 flex w-1/2 flex-col gap-4">
+        <div className="mt-6 flex w-full min-w-0 flex-col gap-4 md:w-1/2">
           <h3 className="border-b border-dark-400 pb-2 text-light-850">
             Added Skills {addedSkills.length}
           </h3>
@@ -306,13 +349,18 @@ const SkillsForm = ({ form, isTalentRegister, page }: any) => {
               </ul>
 
               <p className="mt-2 text-sm text-light-500">{set.description}</p>
+              <p className="mt-2 text-xs text-light-500">
+                {set.hashTags.join(" ")}
+              </p>
 
-              <span
+              <button
+                type="button"
+                aria-label={`Remove ${set.subCategory}`}
                 className="absolute right-2 top-2 cursor-pointer text-lg text-light-900"
                 onClick={() => removeAddedSkills(index)}
               >
                 <MdDelete />
-              </span>
+              </button>
             </article>
           ))}
         </div>

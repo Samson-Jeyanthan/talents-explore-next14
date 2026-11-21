@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LEVEL_VALUES } from "@/constants";
 import useDateSelector from "@/lib/hooks/useDateSelector";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { profileEducationValidation } from "@/lib/utils/profile-education";
 import { MdDelete } from "react-icons/md";
 
 type LanguageSet = {
@@ -30,7 +31,7 @@ const INITIAL_VALUES = {
 
 type LangOption = { _id: string; name: string };
 
-const LangEducationForm = ({ form, LangOptions }: any) => {
+const LangEducationForm = ({ form, LangOptions, onDraftChange }: any) => {
   const [selectedLangId, setSelectedLangId] = useState("");
   const [selectedLevel, setSelectedLevel] = useState("");
   const [addedLang, setAddedLang] = useState<LanguageSet[]>(
@@ -40,17 +41,14 @@ const LangEducationForm = ({ form, LangOptions }: any) => {
     form.getValues("education") || [],
   );
   const [eduErr, setEduErr] = useState("");
-  const { years, presentAddedYears } = useDateSelector({});
+  const { years } = useDateSelector({});
 
   const YEARS = years.map((item) => ({
-    _id: item.id,
+    _id: String(item.id),
     name: item.label,
   }));
 
-  const PRESENT_YEARS = presentAddedYears.map((item) => ({
-    _id: item.id,
-    name: item.label === 0 ? "Present" : item.label,
-  }));
+  const PRESENT_YEARS = [{ _id: "present", name: "Present" }, ...YEARS];
 
   // Languages details --------------------------------------------------------
 
@@ -90,10 +88,15 @@ const LangEducationForm = ({ form, LangOptions }: any) => {
   // education details ---------------------------------------------------------
 
   const [education, setEducation] = useState(INITIAL_VALUES);
-
-  const yearRangeInvalid =
-    Number(education.from) <= Number(education.to) ||
-    (Number(education.from) && education.to === "Present");
+  useEffect(() => {
+    onDraftChange?.(
+      !!(
+        selectedLangId ||
+        selectedLevel ||
+        Object.values(education).some(Boolean)
+      ),
+    );
+  }, [selectedLangId, selectedLevel, education, onDraftChange]);
 
   const canAddEdu =
     !!education.course?.trim() && !!education.institution?.trim();
@@ -104,25 +107,18 @@ const LangEducationForm = ({ form, LangOptions }: any) => {
   };
 
   const handleEduAddClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    console.log(education);
     e.preventDefault();
-    if (!canAddEdu) {
-      setEduErr("Please enter both your course name and institution name.");
+    const parsed = profileEducationValidation.safeParse(education);
+    if (!parsed.success) {
+      setEduErr(parsed.error.issues[0].message);
       return;
-    } else if (!yearRangeInvalid) {
-      setEduErr("The end year can't be earlier than the start year.");
-      return;
-    } else {
-      setEduErr("");
     }
+    setEduErr("");
 
     syncEduForm([
       ...addedEdu,
       {
-        course: education.course.trim(),
-        institution: education.institution.trim(),
-        from: education.from,
-        to: education.to,
+        ...parsed.data,
       },
     ]);
 
@@ -134,12 +130,12 @@ const LangEducationForm = ({ form, LangOptions }: any) => {
   };
 
   return (
-    <form className="flex min-h-[90%] flex-col gap-5">
+    <div className="flex min-h-[90%] flex-col gap-5">
       <h3 className="mt-4 border-b border-dark-400 pb-2 text-lg font-semibold text-light-900">
         Language Details
       </h3>
-      <div className="flex justify-between gap-6">
-        <div className="flex w-1/2 flex-col gap-4">
+      <div className="flex flex-col justify-between gap-6 md:flex-row">
+        <div className="flex w-full min-w-0 flex-col gap-4 md:w-1/2">
           <Dropdown
             form={form}
             inputName="languagePicker"
@@ -169,7 +165,7 @@ const LangEducationForm = ({ form, LangOptions }: any) => {
           </div>
         </div>
 
-        <div className="flex w-2/5 flex-col gap-2">
+        <div className="flex w-full min-w-0 flex-col gap-2 md:w-2/5">
           {addedLang.map((item) => (
             <article
               className="flex items-center justify-between rounded-md bg-dark-300 p-3 text-sm text-light-850"
@@ -179,12 +175,14 @@ const LangEducationForm = ({ form, LangOptions }: any) => {
                 {item.language} - {item.level}
               </p>
 
-              <span
+              <button
+                type="button"
+                aria-label={`Remove ${item.language}`}
                 className="cursor-pointer text-lg text-light-900"
                 onClick={() => handleLangRemove(item.languageId)}
               >
                 <MdDelete />
-              </span>
+              </button>
             </article>
           ))}
         </div>
@@ -193,8 +191,8 @@ const LangEducationForm = ({ form, LangOptions }: any) => {
       <h3 className="border-b border-dark-400 pb-2 text-lg font-semibold text-light-900">
         Education Details
       </h3>
-      <div className="flex justify-between gap-6">
-        <div className="flex w-1/2 flex-col gap-5">
+      <div className="flex flex-col justify-between gap-6 md:flex-row">
+        <div className="flex w-full min-w-0 flex-col gap-5 md:w-1/2">
           <Input
             value={education.course}
             onChange={(e) => {
@@ -249,7 +247,11 @@ const LangEducationForm = ({ form, LangOptions }: any) => {
               />
             </div>
           </div>
-          {eduErr && <p className="-mt-2 text-sm text-custom-100">{eduErr}</p>}
+          {eduErr && (
+            <p role="alert" className="-mt-2 text-sm text-custom-100">
+              {eduErr}
+            </p>
+          )}
           <div className="flex w-full justify-end">
             <Button
               type="button"
@@ -262,7 +264,7 @@ const LangEducationForm = ({ form, LangOptions }: any) => {
           </div>
         </div>
 
-        <div className="flex w-2/5 flex-col gap-2">
+        <div className="flex w-full min-w-0 flex-col gap-2 md:w-2/5">
           {addedEdu.map((item, index) => (
             <article
               className="flex items-center justify-between gap-4 rounded-md bg-dark-300 p-3 text-light-850"
@@ -272,7 +274,7 @@ const LangEducationForm = ({ form, LangOptions }: any) => {
                 <p className="font-medium">{item.course}</p>
                 <p className="text-sm text-light-500">{item.institution}</p>
                 <p className="text-sm text-light-500">
-                  {item.from} - {item.to}
+                  {item.from} - {item.to === "present" ? "Present" : item.to}
                 </p>
               </div>
               <button
@@ -287,7 +289,23 @@ const LangEducationForm = ({ form, LangOptions }: any) => {
           ))}
         </div>
       </div>
-    </form>
+      {selectedLangId ||
+      selectedLevel ||
+      Object.values(education).some(Boolean) ? (
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={() => {
+            setSelectedLangId("");
+            setSelectedLevel("");
+            setEducation(INITIAL_VALUES);
+            setEduErr("");
+          }}
+        >
+          Clear unfinished entry
+        </Button>
+      ) : null}
+    </div>
   );
 };
 

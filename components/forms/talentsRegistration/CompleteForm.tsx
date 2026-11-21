@@ -10,6 +10,7 @@ import { CheckIcon, UserIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+import { FOOTER_LINKS } from "@/constants";
 
 const CompleteForm = ({ form }: any) => {
   const TalentForms = [
@@ -49,7 +50,7 @@ const CompleteForm = ({ form }: any) => {
         </p>
       </div>
 
-      <div className="flex gap-4">
+      <div className="flex flex-wrap gap-4">
         {TalentForms.map((item, index) => (
           <div
             key={index}
@@ -88,11 +89,21 @@ const CompleteForm = ({ form }: any) => {
               <FormLabel className="shad-auth_form_label pb-1">
                 I confirm that the information provided is accurate, and I agree
                 to the{" "}
-                <Link href="/terms-and-conditions" className="underline">
+                <Link
+                  href={FOOTER_LINKS[0].path}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline"
+                >
                   Terms & Conditions
                 </Link>{" "}
                 and{" "}
-                <Link href="/privacy-policy" className="underline">
+                <Link
+                  href={FOOTER_LINKS[1].path}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline"
+                >
                   Privacy Policy
                 </Link>{" "}
                 to create my talent profile.

@@ -8,6 +8,7 @@ import { getUserPersonalInfoAction } from "./auth.action";
 import { TopPostCard } from "@/components/cards";
 import { revalidatePath } from "next/cache";
 import { isRedirectError } from "next/dist/client/components/redirect";
+import { talentRegistrationPayloadValidation } from "@/lib/utils/talent-registration";
 import { profileEditPayloadValidation } from "@/lib/utils/profile-editor";
 
 // import { TopPostCard } from "@/components/cards";
@@ -103,35 +104,78 @@ export async function fetchUserDataAction(userId: string, viewerId: string) {
   }
 }
 
-export async function editUserProfessionalInfoAction(formData: any) {
+export async function editUserProfessionalInfoAction(
+  formData: unknown,
+  profileId: string,
+  agreed = false,
+) {
+  const parsed = talentRegistrationPayloadValidation.safeParse(formData);
+  if (!parsed.success || agreed !== true || !/^[a-f\d]{24}$/i.test(profileId))
+    return {
+      success: false,
+      status: "400",
+      message:
+        "Check your registration details and accept the terms before submitting.",
+    };
   try {
     const headers = await getAuthHeaders();
+    const identityResponse = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/`,
+      { headers, cache: "no-store", signal: AbortSignal.timeout(15000) },
+    );
+    const identity = await identityResponse.json();
+    if (
+      !identityResponse.ok ||
+      identity?.status !== "7400" ||
+      identity.response?._id !== profileId ||
+      typeof identity.response?.isTalent !== "boolean"
+    )
+      return {
+        success: false,
+        status: "400",
+        message: "Unable to verify your account. Reload and try again.",
+      };
+    if (identity.response.isTalent)
+      return {
+        success: false,
+        status: "400",
+        message:
+          "This account already has a talent profile. Open your profile to review it before making further changes.",
+      };
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/professionalInfo`,
       {
         method: "PUT",
         cache: "no-store",
-        headers: {
-          ...headers,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify(parsed.data),
+        signal: AbortSignal.timeout(15000),
       },
     );
-
-    const res = await response.json();
-
-    console.log("response_from_edit_action", res);
-
-    if (res.status === "7400") {
-      return { success: true, data: res };
-    }
-
-    console.error("Update talent profile failed:", response.status, res);
-    return { success: false, status: response.status, error: res };
+    const result = await response.json();
+    if (!response.ok || result?.status !== "7400")
+      return {
+        success: false,
+        status: "400",
+        message:
+          "Unable to create your talent profile. Your entries are still here; please try again.",
+      };
+    try {
+      revalidatePath("/profile", "layout");
+    } catch {}
+    return {
+      success: true,
+      status: "7400",
+      message: "Talent profile created.",
+    };
   } catch (error) {
-    console.error("editUserProfessionalInfoAction error:", error);
-    return { success: false, error: "Something went wrong" };
+    if (isRedirectError(error)) throw error;
+    return {
+      success: false,
+      status: "400",
+      message:
+        "Unable to create your talent profile. Your entries are still here; please try again.",
+    };
   }
 }
 
