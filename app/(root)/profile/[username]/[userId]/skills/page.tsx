@@ -1,7 +1,6 @@
-import {
-  fetchUserDataAction,
-  userSkillsInfoAction,
-} from "@/actions/user.action";
+import { fetchUserDataAction } from "@/actions/user.action";
+import { getProfileSkillsAction } from "@/actions/profile-skills.action";
+import ProfileSkillsList from "@/components/widgets/profile/ProfileSkillsList";
 import AlertNote from "@/components/others/AlertNote";
 import { getCurrentChatUserAction } from "@/actions/chat.action";
 import { getProfileVisibilityState } from "@/lib/utils/profilePrivacy";
@@ -26,16 +25,14 @@ async function Skills({ params }: TProfileURLProps) {
     );
   }
 
-  const data = await userSkillsInfoAction(params.userId);
-
-  if (data?.status === 400) {
-    return <AlertNote />;
-  }
+  const result = await getProfileSkillsAction(params.userId);
 
   return (
-    <section className="my-8 grid min-h-80 w-full grid-cols-1 justify-end gap-8 md:grid-cols-2">
-      {data.length > 0 ? data : <p className="text-light-900">NO DATA FOUND</p>}
-    </section>
+    <ProfileSkillsList
+      profileId={params.userId}
+      isOwnProfile={isOwnProfile}
+      initialResult={result}
+    />
   );
 }
 
