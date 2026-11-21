@@ -1,5 +1,6 @@
 "use client";
 
+import ProfileAwardEditor from "@/components/widgets/profile/ProfileAwardEditor";
 import { Dialog, DialogClose, DialogContent, DialogTitle } from "../ui/dialog";
 import { z } from "zod";
 import { MdClose } from "react-icons/md";
@@ -13,7 +14,6 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  awardValidation,
   educationValidation,
   languageValidation,
 } from "@/lib/validations/profile.validation";
@@ -25,7 +25,7 @@ import {
 } from "@/actions/user.action";
 import { toast } from "sonner";
 import { usePathname } from "next/navigation";
-import { AwardEditForm, EducationEditForm, LanguageEditForm } from "../forms";
+import { EducationEditForm, LanguageEditForm } from "../forms";
 
 type Prop = {
   isEdit: boolean;
@@ -37,7 +37,7 @@ type Prop = {
   selectedIndex: number;
 };
 
-const ProDetailsModal = ({
+const ProfessionalDetailsModal = ({
   isEdit,
   detailModalFor,
   isOpen,
@@ -87,20 +87,9 @@ const ProDetailsModal = ({
     },
   });
 
-  const awardForm = useForm<z.infer<typeof awardValidation>>({
-    resolver: zodResolver(awardValidation),
-    defaultValues: {
-      name: data?.name || "",
-      givenBy: data?.givenBy || "",
-      year: String(data?.year) || "",
-      certificate: undefined,
-    },
-  });
-
   const handleClose = () => {
     languageForm.reset();
     educationForm.reset();
-    awardForm.reset();
     onClick?.();
   };
 
@@ -130,7 +119,7 @@ const ProDetailsModal = ({
 
   // Language submit
   async function handleLanguageSubmit(
-    values: z.infer<typeof languageValidation>
+    values: z.infer<typeof languageValidation>,
   ) {
     const existingLanguages = dataArray ?? [];
     const formData = {
@@ -140,7 +129,7 @@ const ProDetailsModal = ({
 
     const updatedLanguages = isEdit
       ? existingLanguages.map((lang: ILanguage) =>
-          lang._id === data?._id ? { ...lang, ...formData } : lang
+          lang._id === data?._id ? { ...lang, ...formData } : lang,
         )
       : [...existingLanguages, formData];
 
@@ -164,7 +153,7 @@ const ProDetailsModal = ({
 
   // Education submit
   async function handleEducationSubmit(
-    values: z.infer<typeof educationValidation>
+    values: z.infer<typeof educationValidation>,
   ) {
     const existingEducations = dataArray ?? [];
     const formData = {
@@ -176,7 +165,7 @@ const ProDetailsModal = ({
 
     const updatedEducations = isEdit
       ? existingEducations.map((lang: IEducation) =>
-          lang._id === data?._id ? { ...lang, ...formData } : lang
+          lang._id === data?._id ? { ...lang, ...formData } : lang,
         )
       : [...existingEducations, formData];
 
@@ -196,20 +185,6 @@ const ProDetailsModal = ({
         duration: 5000,
       });
     }
-  }
-
-  // Award submit
-  async function handleAwardSubmit(values: z.infer<typeof awardValidation>) {
-    const existingAwards = dataArray ?? [];
-    const formData = {
-      name: values.name,
-      givenBy: values.givenBy,
-      year: values.year,
-      cretificateUrl: "",
-      certificateUrlKey: "",
-    };
-
-    console.log(formData, existingAwards, "values.certificate");
   }
 
   return (
@@ -246,16 +221,6 @@ const ProDetailsModal = ({
           </Form>
         )}
 
-        {(detailModalFor === "award" || detailModalFor === "awardEdit") && (
-          <Form {...awardForm}>
-            <AwardEditForm
-              isEdit={detailModalFor === "awardEdit"}
-              form={awardForm}
-              onSubmit={handleAwardSubmit}
-            />
-          </Form>
-        )}
-
         <DialogClose
           className="absolute -right-8 -top-8 cursor-pointer rounded-full bg-dark-400 p-[6px] text-light-900 focus:outline-none"
           onClick={handleClose}
@@ -267,4 +232,15 @@ const ProDetailsModal = ({
   );
 };
 
-export default ProDetailsModal;
+export default function ProDetailsModal(props: Prop) {
+  if (props.detailModalFor === "award" || props.detailModalFor === "awardEdit")
+    return (
+      <ProfileAwardEditor
+        isOpen={props.isOpen}
+        isEdit={props.isEdit}
+        data={props.data}
+        onClose={() => props.onClick?.()}
+      />
+    );
+  return <ProfessionalDetailsModal {...props} />;
+}

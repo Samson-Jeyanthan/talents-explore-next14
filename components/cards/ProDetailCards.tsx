@@ -1,13 +1,14 @@
 "use client";
 
 import {
-  IEducation,
-  ILanguage,
-  IAwardsOrCertificate,
-} from "@/types/profile.types";
+  certificateName,
+  certificateUrl,
+  type ProfileAward,
+} from "@/lib/utils/profile-awards";
+
+import { IEducation, ILanguage } from "@/types/profile.types";
 import { MotionDiv } from "../others/MotionDiv";
 import { ProInfoEditOptions } from "../options";
-
 interface EProp {
   data: IEducation;
   index: number;
@@ -23,10 +24,10 @@ interface LProp {
 }
 
 interface AProp {
-  data: IAwardsOrCertificate;
+  data: ProfileAward;
   index: number;
   length: number;
-  dataArray?: IAwardsOrCertificate[];
+  dataArray?: ProfileAward[];
 }
 
 const variants = {
@@ -98,6 +99,7 @@ export const LanguageCard = ({ index, length, data, dataArray }: LProp) => {
 };
 
 export const AwardCard = ({ data, index, length, dataArray }: AProp) => {
+  const url = certificateUrl(data);
   return (
     <MotionDiv
       variants={variants}
@@ -115,6 +117,20 @@ export const AwardCard = ({ data, index, length, dataArray }: AProp) => {
       <h1 className="max-w-[85%] text-[13px] text-light-900">{data.name}</h1>
       <p className="text-xs text-light-500">{data.givenBy}</p>
       <p className="text-xs text-light-500">{data.year}</p>
+      {url ? (
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-2 block break-words text-sm text-primary-500 underline"
+          aria-label={`Open certificate for ${data.name}`}
+        >
+          Open certificate{" "}
+          <span className="text-xs">({certificateName(data)})</span>
+        </a>
+      ) : (
+        <p className="text-xs text-light-600">No certificate attached.</p>
+      )}
       <div className="pro-info-options-wrap">
         <ProInfoEditOptions
           cardName="award"

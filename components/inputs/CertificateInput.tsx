@@ -1,80 +1,89 @@
 "use client";
+import { useId, useState } from "react";
+import {
+  certificateFileError,
+  certificateName,
+  certificateUrl,
+} from "@/lib/utils/profile-awards";
+import { Button } from "@/components/ui/button";
 
-import { useMediaSelection } from "@/lib/hooks/useMedia";
-import { Paperclip, X } from "lucide-react";
-import Image from "next/image";
-import { ChangeEvent, useRef } from "react";
-
-const CertificateInput = ({ fieldChange, values }: any) => {
-  const mediaRef = useRef<HTMLInputElement>(null);
-  const { handleMediaInput, error, media } = useMediaSelection(false);
-
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    handleMediaInput(event);
-    console.log(error);
-    if (!event.target.files) return;
-    const newFile = event.target.files[0];
-
-    if (!error) {
-      fieldChange(newFile);
-    }
-  };
-
-  const handleInputDelete = () => {
-    fieldChange(null);
-  };
-
+export default function CertificateInput({
+  fieldChange,
+  values,
+  disabled = false,
+}: {
+  fieldChange: (value: File | null) => void;
+  values: any;
+  disabled?: boolean;
+}) {
+  const id = useId();
+  const [error, setError] = useState("");
+  const existing =
+    typeof values === "string"
+      ? certificateUrl({ certificateUrl: values })
+      : certificateUrl(values);
+  const selected = values != null && values !== "";
   return (
-    <>
-      <input
-        type="file"
-        ref={mediaRef}
-        hidden
-        onChange={handleInputChange}
-        accept="image/jpeg,image/jpg,image/png,image/webp/application/pdf"
-      />
-
-      <div className="flex-center relative !h-20 w-full gap-2 rounded-lg border border-solid border-dark-300 bg-dark-300 p-2 text-light-500">
-        {values ? (
-          <div className="flex-center gap-2">
-            <Image
-              src={
-                media.fileType === "application/pdf"
-                  ? "/assets/images/pdf.png"
-                  : "/assets/images/image.png"
-              }
-              width={512}
-              height={512}
-              alt="profile-pic"
-              className="h-10 w-auto bg-transparent object-cover"
-            />
-            <p
-              className="w-3/5 truncate text-sm"
-              title={media?.fileName ?? undefined}
-            >
-              {media.fileName}
-            </p>
-          </div>
-        ) : (
-          <div
-            className="flex-center size-full cursor-pointer gap-2"
-            onClick={() => mediaRef.current?.click()}
-          >
-            <Paperclip className="size-5" />
-            <p className="text-center text-sm">Upload document</p>
-          </div>
-        )}
-        {values && (
-          <span
-            className="absolute right-3 top-3 cursor-pointer text-light-900"
-            onClick={handleInputDelete}
-          >
-            <X size={16} />
-          </span>
-        )}
-      </div>
-    </>
+    <div className="grid min-w-0 gap-2">
+      <label
+        htmlFor={id}
+        className="cursor-pointer rounded-xl border border-dashed border-dark-400 bg-dark-200 p-4 text-sm text-light-800 focus-within:ring-2 focus-within:ring-primary-500"
+      >
+        <span>{selected ? "Replace certificate" : "Choose certificate"}</span>
+        <input
+          id={id}
+          className="sr-only"
+          type="file"
+          disabled={disabled}
+          accept=".pdf,.docx,image/jpeg,image/png,image/webp,image/gif"
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            event.target.value = "";
+            if (!file) return;
+            const message = certificateFileError(file);
+            if (message) {
+              setError(message);
+              return;
+            }
+            setError("");
+            fieldChange(file);
+          }}
+        />
+      </label>
+      <p className="break-words text-xs text-light-600">
+        {selected
+          ? certificateName(values)
+          : "PDF, DOCX, JPG, PNG, WebP, or GIF. Maximum 20 MB."}
+      </p>
+      {existing ? (
+        <a
+          href={existing}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm text-primary-500 underline"
+        >
+          Open existing certificate
+        </a>
+      ) : null}
+      {selected ? (
+        <Button
+          type="button"
+          disabled={disabled}
+          variant="ghost"
+          className="justify-self-start"
+          onClick={() => {
+            setError("");
+            fieldChange(null);
+          }}
+        >
+          Remove certificate
+        </Button>
+      ) : null}
+      {error ? (
+        <p role="alert" className="text-sm text-red-700 dark:text-red-300">
+          {error}
+        </p>
+      ) : null}
+    </div>
   );
-};
-
-export default CertificateInput;
+}

@@ -1,5 +1,6 @@
 "use client";
 
+import ProfileAwardDeleteDialog from "@/components/widgets/profile/ProfileAwardDeleteDialog";
 import { editUserLanguageInfoAction } from "@/actions/user.action";
 import {
   AlertDialog,
@@ -24,7 +25,7 @@ type Props = {
   selectedIndex?: number;
 };
 
-const ProInfoDeleteAlert = ({
+const ProfessionalInfoDeleteAlert = ({
   isOpen,
   modalFor,
   onCancel,
@@ -36,7 +37,7 @@ const ProInfoDeleteAlert = ({
 
   const handleInfoDelete = async () => {
     const updatedArray = dataArray?.filter(
-      (item: any) => item._id !== data._id
+      (item: any) => item._id !== data._id,
     );
 
     let res: any = {};
@@ -98,4 +99,14 @@ const ProInfoDeleteAlert = ({
   );
 };
 
-export default ProInfoDeleteAlert;
+export default function ProInfoDeleteAlert(props: Props) {
+  if (props.modalFor === "award")
+    return (
+      <ProfileAwardDeleteDialog
+        isOpen={props.isOpen}
+        onClose={props.onCancel}
+        data={props.data}
+      />
+    );
+  return <ProfessionalInfoDeleteAlert {...props} />;
+}

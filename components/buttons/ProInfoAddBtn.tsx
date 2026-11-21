@@ -21,12 +21,14 @@ const ProInfoAddBtn = ({ detailName, dataArray }: Prop) => {
   return (
     <>
       {isOwnProfile && (
-        <p
+        <button
+          type="button"
+          aria-label={`Add ${detailName}`}
           className="cursor-pointer text-xs text-custom-100"
           onClick={() => setOpen(!open)}
         >
           + ADD
-        </p>
+        </button>
       )}
 
       <ProDetailsModal
