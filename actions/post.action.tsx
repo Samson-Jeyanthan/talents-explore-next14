@@ -236,57 +236,61 @@ export async function getWebCrawlerLinkAction(url: string) {
   }
 }
 
-export async function addPostToBestWorkAction(
-  userId: string,
-  postId: string,
-  revalidatePathURL: string,
-) {
-  const formData = {
-    userId,
-    postId,
-  };
-  try {
-    const headers = await getAuthHeaders();
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/te-post/addToBestWork`,
-      {
-        method: "POST",
-        headers,
-        body: JSON.stringify(formData),
-      },
-    );
-    const res = await response.json();
-    console.log(res);
-    revalidatePath(revalidatePathURL);
-    return res;
-  } catch {}
+export async function addPostToBestWorkAction(userId: string, postId: string) {
+  return updateBestWork(userId, postId, true);
 }
 
-export async function removeFromBestWorkAction(
-  userId: string,
-  postId: string,
-  revalidatePathURL: string,
-) {
-  const formData = {
-    userId,
-    postId,
+export async function removeFromBestWorkAction(userId: string, postId: string) {
+  return updateBestWork(userId, postId, false);
+}
+
+async function updateBestWork(userId: string, postId: string, pinned: boolean) {
+  const failure = {
+    status: "7500",
+    message: "Unable to update Best Work. Please try again.",
   };
+  if (!/^[a-f\d]{24}$/i.test(postId) || !/^[a-f\d]{24}$/i.test(userId))
+    return { status: "7401", message: "Invalid post or account." };
   try {
+    const viewerId = await resolveViewerIdAction();
+    if (!viewerId || viewerId !== userId)
+      return {
+        status: "7403",
+        message: "Please sign in to your account again.",
+      };
     const headers = await getAuthHeaders();
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/te-post/removeFromBestWork`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/te-post/${pinned ? "addToBestWork" : "removeFromBestWork"}`,
       {
         method: "POST",
         headers,
-        body: JSON.stringify(formData),
+        cache: "no-store",
+        signal: AbortSignal.timeout(15000),
+        body: JSON.stringify({ userId: viewerId, postId }),
       },
     );
     const res = await response.json();
-    revalidatePath(revalidatePathURL);
-    return res;
+    if (!response.ok || res?.status !== "7400")
+      return {
+        ...failure,
+        message:
+          typeof res?.message === "string" && res.message.trim()
+            ? res.message
+            : failure.message,
+      };
+    revalidatePath("/profile/[username]/[userId]", "layout");
+    revalidatePath("/home");
+    revalidatePath(`/post/${postId}`);
+    revalidatePath("/explore", "layout");
+    revalidatePath("/category/[id]", "page");
+    revalidatePath("/saved-collection", "layout");
+    return {
+      status: "7400",
+      message: pinned ? "Pinned to top posts" : "Removed from top posts",
+    };
   } catch (error) {
-    console.error(error);
-    return error;
+    if (isRedirectError(error)) throw error;
+    return failure;
   }
 }
 

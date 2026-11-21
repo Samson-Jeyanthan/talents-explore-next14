@@ -9,13 +9,11 @@ import {
 } from "@/components/ui/menubar";
 import { POST_OPTIONS } from "@/constants";
 import { useUserContext } from "@/context/AuthProvider";
-import {
-  handlePinnedToProfile,
-  handleRemoveFromProfile,
-} from "@/lib/functions/post.functions";
+import { useBestWorkPin } from "@/lib/hooks/useBestWorkPin";
 import { cn, getLinkCopied } from "@/lib/utils";
 import React, { useState } from "react";
 import { BsThreeDotsVertical } from "react-icons/bs";
+import { Loader2 } from "lucide-react";
 import { deletePostAction } from "@/actions/post.action";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -48,7 +46,12 @@ const PostOptions = ({
 }: Prop) => {
   const { user } = useUserContext();
   const isOwnPost = authorId === user?.currentUserId;
-  const [isPinned, setIsPinned] = useState(isBestWork);
+  const { isPinned, pinning, togglePin } = useBestWorkPin(
+    postId,
+    user?.currentUserId || "",
+    isBestWork,
+    isOwnPost && postType !== "SHARELINK",
+  );
   const router = useRouter();
   const pathname = usePathname();
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -81,21 +84,7 @@ const PostOptions = ({
 
   const handlePostOptionClick = (id: number) => {
     if (id === 0) {
-      if (isPinned) {
-        handleRemoveFromProfile(
-          user?.currentUserId,
-          postId,
-          `/profile/${user?.username}/${user?.currentUserId}/all-posts`,
-        );
-        setIsPinned(false);
-      } else {
-        handlePinnedToProfile(
-          user?.currentUserId,
-          postId,
-          `/profile/${user?.username}/${user?.currentUserId}/all-posts`,
-        );
-        setIsPinned(true);
-      }
+      return togglePin();
     } else if (id === 2 && isOwnPost) {
       router.push(
         `/${postType === "SHARELINK" ? "share" : "post"}/edit/${postId}`,
@@ -118,10 +107,15 @@ const PostOptions = ({
       >
         <MenubarMenu>
           <MenubarTrigger
-            aria-label="Post options"
+            aria-label={pinning ? "Saving Best Work" : "Post options"}
+            aria-busy={pinning}
             className="cursor-pointer rounded-lg text-lg text-light-700 hover:text-light-900"
           >
-            <BsThreeDotsVertical />
+            {pinning ? (
+              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <BsThreeDotsVertical />
+            )}
           </MenubarTrigger>
           <MenubarContent className="absolute -right-5 min-w-36 gap-10 rounded-lg border border-solid border-dark-400 bg-dark-300 p-2 shadow-xl shadow-dark-100/25">
             {POST_OPTIONS.map((item, index) => (
@@ -129,6 +123,7 @@ const PostOptions = ({
                 {isOwnPost === item.isOwnPost &&
                   !(postType === "SHARELINK" && index === 0) && (
                     <MenubarItem
+                      disabled={pinning}
                       className={`${
                         item.isRed
                           ? "fill-custom-200 text-custom-200"
@@ -143,10 +138,14 @@ const PostOptions = ({
                       )}
 
                       <p className="text-xs">
-                        {index === 0
-                          ? isPinned
-                            ? "Remove Pin"
-                            : "Pin on Profile"
+                        {item.id === 0
+                          ? pinning
+                            ? isPinned
+                              ? "Removing pin..."
+                              : "Pinning..."
+                            : isPinned
+                              ? "Remove Pin"
+                              : "Pin on Profile"
                           : item.id === 2 && postType === "SHARELINK"
                             ? "Edit Shared Content"
                             : item.name}
