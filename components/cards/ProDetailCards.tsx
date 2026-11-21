@@ -6,14 +6,15 @@ import {
   type ProfileAward,
 } from "@/lib/utils/profile-awards";
 
-import { IEducation, ILanguage } from "@/types/profile.types";
+import { type ProfileEducation } from "@/lib/utils/profile-education";
+import { ILanguage } from "@/types/profile.types";
 import { MotionDiv } from "../others/MotionDiv";
 import { ProInfoEditOptions } from "../options";
 interface EProp {
-  data: IEducation;
+  data: ProfileEducation;
   index: number;
   length: number;
-  dataArray?: IEducation[];
+  dataArray?: ProfileEducation[];
 }
 
 interface LProp {
@@ -54,7 +55,9 @@ export const EducationCard = ({ data, index, length, dataArray }: EProp) => {
       <div className="flex items-center gap-2 text-xs text-light-500">
         <p>{data.from}</p>
         <p>-</p>
-        <p>{data.to}</p>
+        <p>
+          {String(data.to).toLowerCase() === "present" ? "Present" : data.to}
+        </p>
       </div>
       <div className="pro-info-options-wrap">
         <ProInfoEditOptions

@@ -1,5 +1,6 @@
 "use client";
 
+import ProfileEducationDeleteDialog from "@/components/widgets/profile/ProfileEducationDeleteDialog";
 import ProfileAwardDeleteDialog from "@/components/widgets/profile/ProfileAwardDeleteDialog";
 import { editUserLanguageInfoAction } from "@/actions/user.action";
 import {
@@ -100,6 +101,14 @@ const ProfessionalInfoDeleteAlert = ({
 };
 
 export default function ProInfoDeleteAlert(props: Props) {
+  if (props.modalFor === "education")
+    return (
+      <ProfileEducationDeleteDialog
+        isOpen={props.isOpen}
+        onClose={props.onCancel}
+        data={props.data}
+      />
+    );
   if (props.modalFor === "award")
     return (
       <ProfileAwardDeleteDialog
