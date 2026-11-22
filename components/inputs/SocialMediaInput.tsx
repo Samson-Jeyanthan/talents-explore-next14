@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { SOCIAL_MEDIA_OPTIONS } from "@/constants";
 import {
   Select,
@@ -56,10 +56,19 @@ const SocialMediaInput = ({
   onDraftChange,
 }: Props) => {
   const [pending, setPending] = useState<SocialLink>({ type: "", url: "" });
+  const pendingRef = useRef(pending);
   const [error, setError] = useState("");
   useEffect(() => {
-    onDraftChange?.(!!(pending.type || pending.url));
+    onDraftChange?.(!!(pendingRef.current.type || pendingRef.current.url));
   }, [pending.type, pending.url, onDraftChange]);
+
+  const updatePending = (patch: Partial<SocialLink>) => {
+    const next = { ...pendingRef.current, ...patch };
+    pendingRef.current = next;
+    setPending(next);
+    // Notify during the input event so Enter/submit cannot race the next effect.
+    onDraftChange?.(!!(next.type || next.url));
+  };
 
   const urlFor = (type: string) =>
     values.find((l) => l.type === type)?.url ?? "";
@@ -82,12 +91,13 @@ const SocialMediaInput = ({
   );
 
   const handleOkClick = () => {
-    if (!pending.type || !pending.url.trim()) {
+    const draft = pendingRef.current;
+    if (!draft.type || !draft.url.trim()) {
       setError("Please fill all the fields");
       return;
     }
-    fieldChange([...values, { type: pending.type, url: pending.url.trim() }]);
-    setPending({ type: "", url: "" });
+    fieldChange([...values, { type: draft.type, url: draft.url.trim() }]);
+    updatePending({ type: "", url: "" });
     setError("");
   };
 
@@ -124,7 +134,7 @@ const SocialMediaInput = ({
               <Select
                 value={pending.type}
                 onValueChange={(type) => {
-                  setPending((p) => ({ ...p, type }));
+                  updatePending({ type });
                   setError("");
                 }}
               >
@@ -146,7 +156,7 @@ const SocialMediaInput = ({
               <Input
                 value={pending.url}
                 onChange={(e) => {
-                  setPending((p) => ({ ...p, url: e.target.value }));
+                  updatePending({ url: e.target.value });
                   setError("");
                 }}
                 placeholder="Add related URL"
@@ -162,7 +172,7 @@ const SocialMediaInput = ({
                   type="button"
                   className="teritory-button mr-3"
                   onClick={() => {
-                    setPending({ type: "", url: "" });
+                    updatePending({ type: "", url: "" });
                     setError("");
                   }}
                 >

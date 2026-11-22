@@ -56,6 +56,9 @@ function hooks() {
     a.some((value, i) => !Object.is(value, b[i]));
   return {
     react: {
+      useCallback(fn) {
+        return fn;
+      },
       useState(initial) {
         const i = cursor++;
         if (!(i in cells))
@@ -572,6 +575,7 @@ function editor(options = {}) {
     fail = options.fail ?? true;
   const form = {
     formState: { dirtyFields: {}, isSubmitting: false, errors: {} },
+    getValues: (key) => fields[key],
     setError() {},
     handleSubmit: (onSubmit) => () => onSubmit(fields),
   };
@@ -648,6 +652,231 @@ function editor(options = {}) {
     },
   };
 }
+function socialEditor(h) {
+  const host = hooks();
+  const section = load("components/forms/EditProInfoForm.tsx", {
+    ...ui,
+    "../inputs": {
+      MyPhotosInput: "photos",
+      SocialMediaInput: "social",
+      TextArea: "textarea",
+    },
+    "../inputs/ProfileEthnicityInput": "ethnicity",
+    "../ui/form": { FormField: "field", FormMessage: "message" },
+  }).default;
+  const component = load("components/inputs/SocialMediaInput.tsx", {
+    ...ui,
+    react: host.react,
+    "@/constants": {
+      SOCIAL_MEDIA_OPTIONS: [
+        { type: "facebook", default: true, icon: "icon" },
+        { type: "portfolio", default: false, icon: "icon" },
+      ],
+    },
+    "@/public/assets/svgs": { LinkIcon: "icon" },
+    "../ui/input": { Input: "input" },
+    "../ui/select": Object.fromEntries(
+      [
+        "Select",
+        "SelectContent",
+        "SelectItem",
+        "SelectTrigger",
+        "SelectValue",
+      ].map((name) => [name, name]),
+    ),
+  }).default;
+  const render = () => {
+    const props = find(
+      h.render(),
+      (node) => node.type === "professional-fields",
+    ).props;
+    const tree = section(props);
+    const field = find(
+      tree,
+      (node) => node.type === "field" && node.props.name === "socialLinks",
+    );
+    const input = field.props.render({
+      field: {
+        onChange: (value) => {
+          h.fields().socialLinks = value;
+        },
+      },
+    });
+    return host.render(() => component(input.props));
+  };
+  render();
+  return {
+    render,
+    choose(type) {
+      find(render(), (node) => node.type === "Select").props.onValueChange(
+        type,
+      );
+    },
+    type(url) {
+      find(
+        render(),
+        (node) =>
+          node.type === "input" && node.props.placeholder === "Add related URL",
+      ).props.onChange({ target: { value: url } });
+    },
+    click(label) {
+      find(
+        render(),
+        (node) => node.type === "button" && node.props.children === label,
+      ).props.onClick();
+    },
+  };
+}
+test("unfinished social link blocks uploads and saving immediately and retains the draft", async () => {
+  const h = editor({ fail: false }),
+    social = socialEditor(h);
+  h.fields().profilePhoto = photo("profile.jpg");
+  h.fields().firstName = "Changed";
+  social.choose("portfolio");
+  social.type("https://example.test/work");
+  // Submit before rendering the child's effect for the final input event.
+  await h.submit();
+  assert.equal(h.calls.length, 0);
+  assert.equal(h.uploads.length, 0);
+  assert.equal(h.navigation.length, 0);
+  assert.equal(h.fields().firstName, "Changed");
+  assert.equal(h.fields().profilePhoto.name, "profile.jpg");
+  assert.match(
+    find(h.render(), (node) => node.props?.role === "alert").props.children,
+    /Click OK.*Clear/,
+  );
+  assert.equal(
+    find(social.render(), (node) => node.type === "Select").props.value,
+    "portfolio",
+  );
+  assert.equal(
+    find(
+      social.render(),
+      (node) =>
+        node.type === "input" && node.props.placeholder === "Add related URL",
+    ).props.value,
+    "https://example.test/work",
+  );
+});
+test("partial social links remain protected when OK cannot add them", async () => {
+  for (const part of ["type", "url"]) {
+    const h = editor({ fail: false }),
+      social = socialEditor(h);
+    if (part === "type") social.choose("portfolio");
+    else social.type("https://example.test/work");
+    social.click("OK");
+    await h.submit();
+    assert.equal(h.calls.length, 0);
+    assert.equal(h.navigation.length, 0);
+    assert.match(
+      find(h.render(), (node) => node.props?.role === "alert").props.children,
+      /unfinished social link/,
+    );
+  }
+});
+test("batched type and URL input retain both values before the next render", async () => {
+  const h = editor({ fail: false });
+  const social = socialEditor(h);
+  const tree = social.render();
+  find(tree, (node) => node.type === "Select").props.onValueChange("portfolio");
+  find(
+    tree,
+    (node) =>
+      node.type === "input" && node.props.placeholder === "Add related URL",
+  ).props.onChange({ target: { value: "https://example.test/batched" } });
+  await h.submit();
+  assert.equal(h.calls.length, 0);
+  assert.equal(
+    find(social.render(), (node) => node.type === "Select").props.value,
+    "portfolio",
+  );
+  social.click("OK");
+  await h.submit();
+  assert.equal(h.calls[0].payload.moreInfo.socialLinks[1].type, "portfolio");
+  assert.equal(
+    h.calls[0].payload.moreInfo.socialLinks[1].url,
+    "https://example.test/batched",
+  );
+});
+test("adding the social link clears its warning and saves the link with existing visibility preserved", async () => {
+  const h = editor({ fail: false }),
+    social = socialEditor(h);
+  social.choose("portfolio");
+  social.type("https://example.test/work");
+  await h.submit();
+  social.click("OK");
+  assert.equal(
+    find(h.render(), (node) => node.props?.role === "alert"),
+    undefined,
+  );
+  await h.submit();
+  assert.equal(h.calls.length, 1);
+  const links = h.calls[0].payload.moreInfo.socialLinks;
+  assert.equal(links[0].show, false);
+  assert.equal(links[1].type, "portfolio");
+  assert.equal(links[1].url, "https://example.test/work");
+  assert.ok(h.navigation.includes("/profile/qa-user/" + profile));
+});
+test("clearing an unfinished link permits saving without adding it", async () => {
+  const h = editor({ fail: false }),
+    social = socialEditor(h),
+    before = plain(h.fields().socialLinks);
+  social.choose("portfolio");
+  social.type("https://example.test/work");
+  await h.submit();
+  social.click("Clear");
+  assert.equal(
+    find(h.render(), (node) => node.props?.role === "alert"),
+    undefined,
+  );
+  await h.submit();
+  assert.equal(h.calls.length, 1);
+  assert.deepEqual(h.calls[0].payload.moreInfo.socialLinks, before);
+});
+test("editing an existing social link saves directly without an extra OK step", async () => {
+  const h = editor({ fail: false }),
+    social = socialEditor(h);
+  find(
+    social.render(),
+    (node) =>
+      node.props?.type === "facebook" &&
+      typeof node.props.onChange === "function",
+  ).props.onChange("https://facebook.com/updated");
+  await h.submit();
+  assert.equal(h.calls.length, 1);
+  assert.equal(
+    h.calls[0].payload.moreInfo.socialLinks[0].url,
+    "https://facebook.com/updated",
+  );
+  assert.equal(h.calls[0].payload.moreInfo.socialLinks[0].show, false);
+});
+test("clearing a draft does not hide an unrelated backend save error", async () => {
+  const h = editor(),
+    social = socialEditor(h);
+  await h.submit();
+  assert.equal(
+    find(h.render(), (node) => node.props?.role === "alert").props.children,
+    "Offline",
+  );
+  social.choose("portfolio");
+  social.click("Clear");
+  assert.equal(
+    find(h.render(), (node) => node.props?.role === "alert").props.children,
+    "Offline",
+  );
+});
+test("regular profile saving remains available without talent social-link controls", async () => {
+  const h = editor({ fail: false });
+  h.props.userData.isTalent = false;
+  assert.equal(
+    find(h.render(), (node) => node.type === "professional-fields"),
+    undefined,
+  );
+  await h.submit();
+  assert.equal(h.calls.length, 1);
+  assert.equal(h.calls[0].payload.moreInfo, undefined);
+});
+
 test("editor retains text and selected files after rejection and reuses uploads before navigating on success", async () => {
   const h = editor();
   h.fields().firstName = "Changed";

@@ -13,7 +13,7 @@ import { getEditProfileValidation } from "@/lib/validations/profile.validation";
 import { TCurrentUserData } from "@/types/profile.types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -28,10 +28,25 @@ type Props = {
   userData: TCurrentUserData;
 };
 
+const UNFINISHED_SOCIAL_LINK =
+  "You have an unfinished social link. Click OK to add it, or Clear to discard it, before updating your profile.";
+
 const EditProfileForm = ({ langData, professionData, userData }: Props) => {
   const router = useRouter();
   const { user, setUser } = useUserContext();
   const write = useProfileDetailWrite(userData._id);
+  const { setError: setWriteError } = write;
+  const socialDraft = useRef(false);
+  const onSocialDraftChange = useCallback(
+    (pending: boolean) => {
+      socialDraft.current = pending;
+      if (!pending)
+        setWriteError((previous) =>
+          previous === UNFINISHED_SOCIAL_LINK ? "" : previous,
+        );
+    },
+    [setWriteError],
+  );
   const uploads = useRef(new Map<File, UploadedFile>());
   const profilePath = `/profile/${encodeURIComponent(userData.userName || user.username)}/${userData._id}`;
   const [prevURLs, setPrevURLs] = useState<string[]>(
@@ -75,6 +90,10 @@ const EditProfileForm = ({ langData, professionData, userData }: Props) => {
     write.setError("Please check the highlighted fields before saving.");
 
   async function onSubmit(values: z.infer<typeof validationSchema>) {
+    if (isTalent && socialDraft.current) {
+      write.setError(UNFINISHED_SOCIAL_LINK);
+      return;
+    }
     try {
       getProfileLocationUpdate(userData, values);
     } catch {
@@ -146,6 +165,7 @@ const EditProfileForm = ({ langData, professionData, userData }: Props) => {
           />
           {isTalent && (
             <EditProInfoForm
+              onDraftChange={onSocialDraftChange}
               form={form}
               userData={userData}
               prevURLs={prevURLs}
