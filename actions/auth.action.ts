@@ -10,6 +10,7 @@ import {
 } from "@/lib/session";
 import { clearSession, storeIsAbout } from "./session.action";
 import { signupRequestValidation } from "@/lib/validations/signup.validation";
+import { isRedirectError } from "next/dist/client/components/redirect";
 
 export async function registerAction(formData: unknown) {
   const parsed = signupRequestValidation.safeParse(formData);
@@ -65,21 +66,26 @@ export async function resendOtpAction(userId: string) {
 }
 
 export async function completeProfileAction(formData: unknown) {
-  console.log("formdata-of-complete-profile", formData);
+  const failure = {
+    status: "400",
+    message:
+      "Unable to create your profile. Your details are still here; please try again.",
+  };
   try {
     const headers = await getAuthHeaders();
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/personalInfo/`,
       {
         method: "PUT",
-        headers,
+        headers: { ...headers, "Content-Type": "application/json" },
         body: JSON.stringify(formData),
+        signal: AbortSignal.timeout(15000),
       },
     );
 
-    const res = await response.json();
+    const res = await response.json().catch(() => null);
 
-    if (res.status === "7400") {
+    if (response.ok && res?.status === "7400") {
       await storeIsAbout(true);
 
       const data = {
@@ -88,9 +94,10 @@ export async function completeProfileAction(formData: unknown) {
       };
       return data;
     }
+    return failure;
   } catch (error) {
-    console.error(error);
-    return error;
+    if (isRedirectError(error)) throw error;
+    return failure;
   }
 }
 
