@@ -109,14 +109,24 @@ function deferred() {
   });
   return { promise, resolve };
 }
-function formHarness({ upload, save } = {}) {
+function formHarness({ upload, save, cacheStorage } = {}) {
   const state = hooks(),
     uploads = [],
     saves = [],
     redirects = [],
     users = [],
     notices = [],
-    fieldErrors = [];
+    fieldErrors = [],
+    cacheWrites = [];
+  const cacheEntries = new Map();
+  const storage = cacheStorage || {
+    getItem: (key) => cacheEntries.get(key) ?? null,
+    setItem: (key, value) => {
+      cacheWrites.push({ key, value });
+      cacheEntries.set(key, value);
+    },
+    removeItem: (key) => cacheEntries.delete(key),
+  };
   let user = {
     currentUserId: "111111111111111111111111",
     username: "qa-user",
@@ -182,10 +192,9 @@ function formHarness({ upload, save } = {}) {
     "../inputs/ProfileLocation": {},
     sonner: { toast: { success: (message) => notices.push(message) } },
   };
-  const component = load(
-    "components/forms/CompleteProfileForm.tsx",
-    mocks,
-  ).default;
+  const component = load("components/forms/CompleteProfileForm.tsx", mocks, {
+    window: { sessionStorage: storage },
+  }).default;
   const render = () =>
     state.render(() =>
       component({
@@ -202,6 +211,9 @@ function formHarness({ upload, save } = {}) {
     users,
     notices,
     fieldErrors,
+    storage,
+    cacheEntries,
+    cacheWrites,
     render,
     submit: () =>
       find(render(), (node) => node.type === "form").props.onSubmit(),
@@ -642,4 +654,233 @@ test("server validation messages map to the displayed fields while retaining the
   assert.equal(h.values.firstName, "Test");
   assert.equal(h.pending(), false);
   assert.equal(h.redirects.length, 0);
+});
+
+const cacheKey = "talents-explore-auth-user";
+const previousProfile = {
+  currentUserId: "111111111111111111111111",
+  username: "qa-user",
+  email: "qa@example.test",
+  firstName: "Old",
+  lastName: "Name",
+  imageUrl: "https://example.test/old.jpg",
+  isTalent: false,
+};
+function restoredProfile(storage, response) {
+  const state = hooks(),
+    requests = [],
+    errors = [];
+  const react = {
+    ...state.react,
+    createContext: () => ({ Provider: "provider" }),
+  };
+  const Provider = load(
+    "context/AuthProvider.tsx",
+    {
+      react,
+      "react/jsx-runtime": jsx,
+      "@/actions/session.action": {
+        getCurrentSessionUserAction: async () => {
+          requests.push(true);
+          return response;
+        },
+      },
+      sonner: {
+        toast: { info() {}, error: (message) => errors.push(message) },
+      },
+    },
+    { window: { sessionStorage: storage }, console: { error() {} } },
+  ).default;
+  const render = () => state.render(() => Provider({ children: "test" }));
+  render();
+  return { user: () => render().props.value.user, requests, errors };
+}
+test("successful profile setup replaces stale cached data before a fresh provider restores it", async () => {
+  const h = formHarness();
+  h.cacheEntries.set(cacheKey, JSON.stringify(previousProfile));
+  await h.submit();
+  const saved = JSON.parse(h.storage.getItem(cacheKey));
+  assert.equal(saved.firstName, "Test");
+  assert.equal(saved.lastName, "User");
+  assert.equal(saved.imageUrl, "https://example.test/profile.jpg");
+  assert.equal(saved.username, previousProfile.username);
+  assert.equal(saved.email, previousProfile.email);
+  assert.deepEqual(saved, JSON.parse(JSON.stringify(h.users[0])));
+  assert.equal(h.cacheWrites.length, 1);
+  const restored = restoredProfile(h.storage);
+  assert.deepEqual(JSON.parse(JSON.stringify(restored.user())), saved);
+  assert.equal(restored.requests.length, 0);
+});
+test("failed uploads or saves never overwrite the last saved cached profile", async () => {
+  for (const options of [
+    {
+      upload: async () => {
+        throw Error("offline");
+      },
+    },
+    { save: async () => ({ status: "400", message: "retry" }) },
+  ]) {
+    const h = formHarness(options);
+    const original = JSON.stringify(previousProfile);
+    h.cacheEntries.set(cacheKey, original);
+    await h.submit();
+    assert.equal(h.storage.getItem(cacheKey), original);
+    assert.equal(h.cacheWrites.length, 0);
+  }
+});
+test("profile cache is written only by the current account after a delayed save", async () => {
+  const wait = deferred();
+  const h = formHarness({ save: () => wait.promise });
+  h.values.profilePhoto = undefined;
+  h.values.coverPhoto = undefined;
+  const pending = h.submit();
+  await new Promise(setImmediate);
+  h.switchUser();
+  h.cacheEntries.set(
+    cacheKey,
+    JSON.stringify({
+      ...previousProfile,
+      currentUserId: "222222222222222222222222",
+    }),
+  );
+  wait.resolve({ status: "7400" });
+  await pending;
+  assert.equal(h.cacheWrites.length, 0);
+  assert.equal(
+    JSON.parse(h.storage.getItem(cacheKey)).currentUserId,
+    "222222222222222222222222",
+  );
+});
+test("quota failure invalidates stale cache and the saved profile is fetched on remount", async () => {
+  const entries = new Map([[cacheKey, JSON.stringify(previousProfile)]]);
+  const storage = {
+    getItem: (key) => entries.get(key) ?? null,
+    setItem() {
+      throw Error("quota");
+    },
+    removeItem: (key) => entries.delete(key),
+  };
+  const h = formHarness({ cacheStorage: storage });
+  await h.submit();
+  assert.equal(storage.getItem(cacheKey), null);
+  assert.deepEqual(h.redirects, ["/onboarding"]);
+  const restored = restoredProfile(storage, {
+    status: "7400",
+    response: {
+      _id: previousProfile.currentUserId,
+      userName: previousProfile.username,
+      email: previousProfile.email,
+      isTalent: false,
+      personalInfo: {
+        firstName: "Test",
+        lastName: "User",
+        profileImage: "https://example.test/profile.jpg",
+      },
+    },
+  });
+  await new Promise(setImmediate);
+  assert.equal(restored.user().firstName, "Test");
+  assert.equal(restored.user().imageUrl, "https://example.test/profile.jpg");
+  assert.equal(restored.requests.length, 1);
+  assert.deepEqual(restored.errors, []);
+});
+test("fully blocked storage does not interrupt saving or a fresh provider's API fallback", async () => {
+  const storage = {
+    getItem() {
+      throw Error("blocked");
+    },
+    setItem() {
+      throw Error("blocked");
+    },
+    removeItem() {
+      throw Error("blocked");
+    },
+  };
+  const h = formHarness({ cacheStorage: storage });
+  await h.submit();
+  assert.deepEqual(h.redirects, ["/onboarding"]);
+  assert.equal(h.error(), "");
+  const restored = restoredProfile(storage, {
+    status: "7400",
+    response: {
+      _id: previousProfile.currentUserId,
+      userName: previousProfile.username,
+      email: previousProfile.email,
+      isTalent: false,
+      personalInfo: { firstName: "Test", lastName: "User", profileImage: null },
+    },
+  });
+  await new Promise(setImmediate);
+  assert.equal(restored.user().firstName, "Test");
+  assert.equal(restored.requests.length, 1);
+  assert.deepEqual(restored.errors, []);
+});
+test("malformed cached data is ignored and recovered from the server", async () => {
+  for (const raw of [
+    "invalid-json",
+    "null",
+    "[]",
+    JSON.stringify({ ...previousProfile, firstName: {} }),
+    JSON.stringify({ ...previousProfile, currentUserId: " " }),
+  ]) {
+    const entries = new Map([[cacheKey, raw]]);
+    const storage = {
+      getItem: (key) => entries.get(key) ?? null,
+      setItem: (key, value) => entries.set(key, value),
+      removeItem: (key) => entries.delete(key),
+    };
+    const restored = restoredProfile(storage, {
+      status: "7400",
+      response: {
+        _id: previousProfile.currentUserId,
+        userName: previousProfile.username,
+        email: previousProfile.email,
+        isTalent: false,
+        personalInfo: {
+          firstName: "Recovered",
+          lastName: "User",
+          profileImage: null,
+        },
+      },
+    });
+    await new Promise(setImmediate);
+    assert.equal(restored.user().firstName, "Recovered");
+    assert.equal(restored.requests.length, 1);
+    assert.equal(JSON.parse(storage.getItem(cacheKey)).firstName, "Recovered");
+  }
+});
+test("legacy incomplete cache entries retain identity and new writes store only display fields", () => {
+  const entries = new Map([
+    [
+      cacheKey,
+      JSON.stringify({
+        currentUserId: previousProfile.currentUserId,
+        username: "qa-user",
+        email: previousProfile.email,
+      }),
+    ],
+  ]);
+  const storage = {
+    getItem: (key) => entries.get(key) ?? null,
+    setItem: (key, value) => entries.set(key, value),
+    removeItem: (key) => entries.delete(key),
+  };
+  const cache = load(
+    "lib/utils/auth-user-cache.ts",
+    {},
+    { window: { sessionStorage: storage } },
+  );
+  assert.equal(cache.readCachedAuthUser().firstName, "");
+  assert.equal(cache.readCachedAuthUser().imageUrl, null);
+  assert.equal(
+    cache.writeCachedAuthUser({
+      ...previousProfile,
+      accessToken: "never-store",
+      refreshToken: "never-store",
+    }),
+    true,
+  );
+  const saved = JSON.parse(storage.getItem(cacheKey));
+  assert.equal("accessToken" in saved, false);
+  assert.equal("refreshToken" in saved, false);
 });

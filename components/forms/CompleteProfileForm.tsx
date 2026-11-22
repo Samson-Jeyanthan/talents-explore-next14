@@ -25,6 +25,7 @@ import { uploadFileToStorage, type UploadedFile } from "@/lib/utils/uploadFile";
 import { useEffect, useRef } from "react";
 import { useProfileAwardWrite as useProfileWrite } from "@/lib/hooks/useProfileAwardWrite";
 import ProfileLocation from "../inputs/ProfileLocation";
+import { writeCachedAuthUser } from "@/lib/utils/auth-user-cache";
 
 const CompleteProfileForm = ({ langData, professionData }: any) => {
   const { user, setUser } = useUserContext();
@@ -156,7 +157,7 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
         }
       },
       () => {
-        setUser({
+        const nextUser = {
           currentUserId: user.currentUserId,
           firstName: formData.firstName,
           lastName: formData.lastName,
@@ -164,7 +165,9 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
           email: user.email,
           imageUrl: formData.profileImage ?? null,
           isTalent: false,
-        });
+        };
+        writeCachedAuthUser(nextUser);
+        setUser(nextUser);
         toast.success("Profile Created Successfully", { duration: 5000 });
         router.push("/onboarding");
       },

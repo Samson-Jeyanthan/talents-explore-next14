@@ -10,8 +10,12 @@ import React, {
   useRef,
 } from "react";
 import { toast } from "sonner";
+import {
+  readCachedAuthUser,
+  writeCachedAuthUser,
+} from "@/lib/utils/auth-user-cache";
 
-export const AUTH_USER_CACHE_KEY = "talents-explore-auth-user";
+export { AUTH_USER_CACHE_KEY } from "@/lib/utils/auth-user-cache";
 
 export const INITIAL_USER = {
   currentUserId: "",
@@ -38,16 +42,10 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const authCheckStarted = useRef(false);
 
   async function checkAuthUser() {
-    if (typeof window !== "undefined") {
-      const cachedUser = sessionStorage.getItem(AUTH_USER_CACHE_KEY);
-      if (cachedUser) {
-        try {
-          setUser(JSON.parse(cachedUser));
-          return;
-        } catch {
-          sessionStorage.removeItem(AUTH_USER_CACHE_KEY);
-        }
-      }
+    const cachedUser = readCachedAuthUser();
+    if (cachedUser) {
+      setUser(cachedUser);
+      return;
     }
 
     setIsLoading(true);
@@ -67,7 +65,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             isTalent: res?.response?.isTalent,
           };
           setUser(nextUser);
-          sessionStorage.setItem(AUTH_USER_CACHE_KEY, JSON.stringify(nextUser));
+          writeCachedAuthUser(nextUser);
         } else {
           const nextUser = {
             currentUserId: res?.response?._id || "",
@@ -79,7 +77,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             isTalent: false,
           };
           setUser(nextUser);
-          sessionStorage.setItem(AUTH_USER_CACHE_KEY, JSON.stringify(nextUser));
+          writeCachedAuthUser(nextUser);
           // router.push("/complete-profile");
           toast.info("Please complete your profile", {
             duration: 5000,
