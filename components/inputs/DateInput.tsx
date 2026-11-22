@@ -1,9 +1,10 @@
 "use client";
 
-import useDateSelector, {
+import useDateSelector from "@/lib/hooks/useDateSelector";
+import {
   convertToISOString,
   formatISOStringDate,
-} from "@/lib/hooks/useDateSelector";
+} from "@/lib/utils/birth-date";
 import {
   Select,
   SelectContent,
@@ -11,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Props = {
   formLabel?: string;
@@ -33,47 +34,59 @@ const DateInput = ({
     selectedMonth: String(month) || "",
     selectedDay: String(day) || "",
   });
+  const lastEmitted = useRef<string | null>(null);
   const { years, months, days } = useDateSelector({
     yearValue: dates.selectedYear,
     monthValue: Number(dates.selectedMonth),
-    dayValue: dates.selectedDay,
   });
 
-  const handleDropdownChange = () => {
-    const convertedDate = convertToISOString(
-      dates.selectedYear,
-      dates.selectedMonth,
-      dates.selectedDay
-    );
-    fieldChange(convertedDate);
-  };
-
+  // Reflect loaded/reset values without writing back on mount or prop changes.
   useEffect(() => {
-    if (
-      dates.selectedYear !== "" &&
-      dates.selectedMonth !== "" &&
-      dates.selectedDay !== ""
-    ) {
-      handleDropdownChange();
+    if (isoDate === lastEmitted.current) {
+      lastEmitted.current = null;
+      return;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dates]);
+    const incoming = formatISOStringDate(isoDate);
+    setDates({
+      selectedYear: incoming.year,
+      selectedMonth: incoming.month,
+      selectedDay: incoming.day,
+    });
+  }, [isoDate]);
+
+  const selectDate = (part: keyof typeof dates, value: string) => {
+    const next = { ...dates, [part]: value };
+    let iso = convertToISOString(
+      next.selectedYear,
+      next.selectedMonth,
+      next.selectedDay,
+    );
+    if (!iso && part !== "selectedDay") next.selectedDay = "";
+    iso = convertToISOString(
+      next.selectedYear,
+      next.selectedMonth,
+      next.selectedDay,
+    );
+    setDates(next);
+    // Clear the submitted value while incomplete, so a stale DOB cannot be saved.
+    lastEmitted.current = iso;
+    fieldChange(iso);
+  };
 
   return (
     <div className="flex w-full flex-col gap-2">
       {formLabel && <p className="shad-auth_form_label">{formLabel}</p>}
       <div className="flex-center w-full gap-4">
         <Select
-          onValueChange={(id: string) => {
-            setDates({
-              ...dates,
-              selectedYear: id,
-            });
-          }}
+          value={dates.selectedYear}
+          onValueChange={(id: string) => selectDate("selectedYear", id)}
         >
-          <SelectTrigger className="flex-between shad-auth_form_input">
+          <SelectTrigger
+            aria-label={`${formLabel || "Date"} year`}
+            className="flex-between shad-auth_form_input"
+          >
             {years?.find(
-              (year) => Number(year.id) === Number(dates.selectedYear)
+              (year) => Number(year.id) === Number(dates.selectedYear),
             )?.label || <SelectValue />}
             {!dates.selectedYear && (
               <p className="flex w-full items-start text-light-500">Year</p>
@@ -93,16 +106,15 @@ const DateInput = ({
         </Select>
 
         <Select
-          onValueChange={(id: string) => {
-            setDates({
-              ...dates,
-              selectedMonth: id,
-            });
-          }}
+          value={dates.selectedMonth}
+          onValueChange={(id: string) => selectDate("selectedMonth", id)}
         >
-          <SelectTrigger className="flex-between shad-auth_form_input">
+          <SelectTrigger
+            aria-label={`${formLabel || "Date"} month`}
+            className="flex-between shad-auth_form_input"
+          >
             {months?.find(
-              (month) => Number(month.id) === Number(dates.selectedMonth)
+              (month) => Number(month.id) === Number(dates.selectedMonth),
             )?.label || <SelectValue />}
             {!dates.selectedMonth && (
               <p className="flex w-full items-start text-light-500">Month</p>
@@ -122,14 +134,14 @@ const DateInput = ({
         </Select>
 
         <Select
-          onValueChange={(id: string) => {
-            setDates({
-              ...dates,
-              selectedDay: id,
-            });
-          }}
+          value={dates.selectedDay}
+          disabled={days.length === 0}
+          onValueChange={(id: string) => selectDate("selectedDay", id)}
         >
-          <SelectTrigger className="flex-between shad-auth_form_input">
+          <SelectTrigger
+            aria-label={`${formLabel || "Date"} day`}
+            className="flex-between shad-auth_form_input"
+          >
             {days?.find((day) => Number(day.id) === Number(dates.selectedDay))
               ?.label || <SelectValue />}
             {!dates.selectedDay && (

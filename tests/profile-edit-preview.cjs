@@ -6,6 +6,7 @@ const fs = require("node:fs"),
   tailwind = require("tailwindcss");
 (async () => {
   const files = [
+    "lib/utils/birth-date.ts",
     "lib/utils/profile-editor.ts",
     "lib/utils/profileLocation.ts",
     "lib/utils/getCroppedImg.js",

@@ -2,6 +2,9 @@ import { z } from "zod";
 import { getProfileLocationUpdate } from "./profileLocation";
 import type { TCurrentUserData } from "@/types/profile.types";
 import type { UploadedFile } from "./uploadFile";
+import { validProfileBirthDate } from "./birth-date";
+
+export { validProfileBirthDate } from "./birth-date";
 
 export function profileImageError(file: unknown): string {
   if (typeof File === "undefined" || !(file instanceof File))
@@ -25,26 +28,6 @@ export const profileImageSelection = z
   .nullable()
   .optional();
 
-export function validProfileBirthDate(value: string, today = new Date()) {
-  const parts = /^(\d{4})-(\d{2})-(\d{2})(?:T.*)?$/.exec(value);
-  if (!parts || !Number.isFinite(Date.parse(value))) return false;
-  const [year, month, day] = parts.slice(1).map(Number);
-  const date = new Date(Date.UTC(year, month - 1, day));
-  if (
-    date.getUTCFullYear() !== year ||
-    date.getUTCMonth() !== month - 1 ||
-    date.getUTCDate() !== day
-  )
-    return false;
-  const age =
-    today.getUTCFullYear() -
-    year -
-    (today.getUTCMonth() + 1 < month ||
-    (today.getUTCMonth() + 1 === month && today.getUTCDate() < day)
-      ? 1
-      : 0);
-  return age >= 13;
-}
 const httpUrl = z.string().refine((value) => {
   try {
     const url = new URL(value);

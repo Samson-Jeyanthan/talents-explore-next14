@@ -1,7 +1,7 @@
 import * as z from "zod";
 import { newPasswordValidation } from "./password.validation";
 import { profileLocationSchema } from "../utils/profileLocation";
-import { formatISOStringDate } from "../hooks/useDateSelector";
+import { validProfileBirthDate } from "../utils/birth-date";
 
 export { SignupValidation } from "./signup.validation";
 
@@ -39,31 +39,9 @@ export const CompleteProfileValidation = z
     coverPhoto: z.custom<File>().optional(),
     profilePhoto: z.custom<File>().optional(),
   })
-  .refine(
-    (data) => {
-      const { dob } = data;
-
-      const { year, month, day } = formatISOStringDate(dob);
-      const refinedDob = new Date(Number(year), Number(month) - 1, Number(day));
-      const today = new Date();
-      const age = today.getFullYear() - refinedDob.getFullYear();
-      const isMonthPast = today.getMonth() - refinedDob.getMonth();
-      const isDayPast = today.getDate() - refinedDob.getDate();
-
-      console.log(dob, refinedDob, age);
-
-      // Calculate the exact age considering month and day
-      const exactAge =
-        isMonthPast > 0 || (isMonthPast === 0 && isDayPast >= 0)
-          ? age
-          : age - 1;
-
-      return exactAge >= 13;
-    },
-    {
-      message: "You must be at least 13 years old",
-      path: ["dob"],
-    },
-  );
+  .refine((data) => validProfileBirthDate(data.dob), {
+    message: "You must be at least 13 years old",
+    path: ["dob"],
+  });
 
 export { talentRegistrationValidation as TalentRegisterValidation } from "../utils/talent-registration";

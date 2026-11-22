@@ -6,6 +6,7 @@ const fs = require("node:fs"),
   tailwind = require("tailwindcss");
 (async () => {
   const files = [
+    "lib/utils/birth-date.ts",
     "lib/utils/talent-registration.ts",
     "lib/utils/profile-skills.ts",
     "lib/utils/profile-education.ts",
