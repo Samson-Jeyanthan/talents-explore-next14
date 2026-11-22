@@ -13,9 +13,11 @@ import {
 } from "@/types/auth.types";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "sonner";
+import { browserPush } from "@/lib/browser-push-client";
 
 // removing localstorage items when canceling the forgot password function
 export async function handleClearStorage() {
+  await browserPush.disconnect();
   sessionStorage.removeItem("talents-explore-auth-user");
   localStorage.removeItem("countdown");
   localStorage.removeItem("isOTP");

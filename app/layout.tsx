@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { ThemeProvider } from "@/context/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
 import AuthProvider from "@/context/AuthProvider";
+import BrowserPushBridge from "@/components/widgets/BrowserPushBridge";
 import { UtilsProvider } from "@/context/UtilsProvider";
 // import { LoadingProvider } from "@/context/LoadingProvider";
 // import NavigationLoader from "@/components/widgets/NavigationLoader";
@@ -44,6 +45,7 @@ export default function RootLayout({
       <body>
         {/* <LoadingProvider> */}
         <AuthProvider>
+          <BrowserPushBridge />
           {/* <Suspense>
               <NavigationLoader />
             </Suspense> */}

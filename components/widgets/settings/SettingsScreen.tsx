@@ -39,6 +39,7 @@ import { INITIAL_USER, useUserContext } from "@/context/AuthProvider";
 import PromotionRequests from "./PromotionRequests";
 import SupportFeedback from "./SupportFeedback";
 import AppearanceSettings from "@/components/options/AppearanceSettings";
+import BrowserPushSettings from "./BrowserPushSettings";
 
 type Props = {
   slugPath: string;
@@ -1075,6 +1076,10 @@ function SettingsScreen({
               })
             }
           />
+        </SectionBlock>
+
+        <SectionBlock title="This Device">
+          <BrowserPushSettings accountEnabled={notification.pushNotofication} />
         </SectionBlock>
 
         <SectionBlock title="Quiet Mode">
