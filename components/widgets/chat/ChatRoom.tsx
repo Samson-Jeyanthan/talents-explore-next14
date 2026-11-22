@@ -3,7 +3,6 @@
 import {
   acceptChatRequestAction,
   deleteChatMessageAction,
-  deleteConversationAction,
   getChatMembersAction,
   getChatMessagesAction,
   sendChatMessageAction,
@@ -22,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { useUserContext } from "@/context/AuthProvider";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { ArrowLeft, MoreVertical, Trash2 } from "lucide-react";
+import { ArrowLeft, Trash2 } from "lucide-react";
 import ChatComposer from "./ChatComposer";
 import ChatMessageMedia from "./ChatMessageMedia";
 import type { ChatMessageInput } from "@/lib/validations/chat.validation";
@@ -32,6 +31,8 @@ import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { io, type Socket } from "socket.io-client";
 import { toast } from "sonner";
 import type { SharedPost } from "@/lib/utils/postSharing";
+import { chatEntityId, chatCollaborationHref } from "@/lib/utils/chat-header";
+import ChatHeaderActions from "./ChatHeaderActions";
 
 type CurrentUser = {
   _id: string;
@@ -127,8 +128,6 @@ function ChatRoom({
   const [typing, setTyping] = useState<any>(null);
   const [isLoadingOlder, setIsLoadingOlder] = useState(false);
   const [deleteMessageId, setDeleteMessageId] = useState<string | null>(null);
-  const [confirmDeleteConversation, setConfirmDeleteConversation] =
-    useState(false);
   const [isPending, startTransition] = useTransition();
   const listRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<Socket | null>(null);
@@ -138,11 +137,18 @@ function ChatRoom({
   const activeUserId = currentUser?._id || user.currentUserId;
   const activeUserName = currentUser?.userName || user.username;
   const sender = useMemo(
-    () => members.find((member) => member?.userId !== activeUserId),
+    () =>
+      members.find((member) => {
+        const id = chatEntityId(member?.userId);
+        return id && id !== chatEntityId(activeUserId);
+      }),
     [members, activeUserId],
   );
   const selfMember = useMemo(
-    () => members.find((member) => member?.userId === activeUserId),
+    () =>
+      members.find(
+        (member) => chatEntityId(member?.userId) === chatEntityId(activeUserId),
+      ),
     [members, activeUserId],
   );
 
@@ -165,6 +171,20 @@ function ChatRoom({
       : initialType === "group"
         ? `${members.length} ${members.length === 1 ? "member" : "members"}`
         : sender?.professional || chatInfo?.type || "";
+
+  const recipientId = chatEntityId(sender?.userId);
+  const headerHref =
+    initialType === "group"
+      ? chatCollaborationHref(initialGroupChatDetails)
+      : recipientId
+        ? `/profile/${encodeURIComponent(sender?.userName || "user")}/${recipientId}`
+        : null;
+  const headerContent = (
+    <>
+      <p className="truncate text-base font-semibold">{title}</p>
+      <p className="truncate text-xs text-light-500">{subtitle}</p>
+    </>
+  );
 
   useEffect(() => {
     setMessages(initialMessages || []);
@@ -447,19 +467,6 @@ function ChatRoom({
     });
   };
 
-  const handleDeleteConversation = () => {
-    startTransition(async () => {
-      const res = await deleteConversationAction(roomId);
-
-      if (!res || res.status !== "7400") {
-        toast.error("Couldn't delete conversation", { duration: 4000 });
-        return;
-      }
-
-      router.push("/chat");
-    });
-  };
-
   const handleAcceptRequest = () => {
     if (!chatInfo?._id) {
       return;
@@ -485,37 +492,37 @@ function ChatRoom({
           <div className="flex min-w-0 items-center gap-3">
             <Button
               type="button"
+              aria-label="Back to conversations"
               className="rounded-full bg-dark-200 px-3 text-light-900 hover:bg-dark-300"
               onClick={() => router.push("/chat")}
             >
               <ArrowLeft className="size-4" />
             </Button>
 
-            <div className="min-w-0">
-              {initialType === "group" ? (
-                <p className="truncate text-base font-semibold">{title}</p>
-              ) : sender?.userId ? (
-                <Link
-                  href={`/profile/${sender?.userName || "user"}/${sender.userId}`}
-                  className="truncate text-base font-semibold hover:text-primary-500"
-                >
-                  {title}
-                </Link>
-              ) : (
-                <p className="truncate text-base font-semibold">{title}</p>
-              )}
-
-              <p className="truncate text-xs text-light-500">{subtitle}</p>
-            </div>
+            {headerHref ? (
+              <Link
+                href={headerHref}
+                aria-label={
+                  initialType === "group"
+                    ? `Open collaboration: ${title}`
+                    : `Open profile: ${title}`
+                }
+                className="block min-w-0 hover:text-primary-500"
+              >
+                {headerContent}
+              </Link>
+            ) : (
+              <div className="min-w-0">{headerContent}</div>
+            )}
           </div>
 
-          <Button
-            type="button"
-            className="rounded-full bg-dark-200 px-3 text-light-500 hover:bg-dark-300 hover:text-light-900"
-            onClick={() => setConfirmDeleteConversation(true)}
-          >
-            <MoreVertical className="size-4" />
-          </Button>
+          <ChatHeaderActions
+            key={`${roomId}:${initialType}:${recipientId || "none"}`}
+            roomId={roomId}
+            type={initialType}
+            activeUserId={activeUserId}
+            recipientId={recipientId}
+          />
         </div>
 
         <div className="flex flex-1 flex-col overflow-hidden rounded-b-[28px] border border-t-0 border-dark-300 bg-dark-200">
@@ -693,31 +700,6 @@ function ChatRoom({
             <AlertDialogAction
               className="bg-primary-500 text-light-900"
               onClick={handleDeleteMessage}
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog
-        open={confirmDeleteConversation}
-        onOpenChange={setConfirmDeleteConversation}
-      >
-        <AlertDialogContent className="border-dark-300 bg-dark-200 text-light-900">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Conversation?</AlertDialogTitle>
-            <AlertDialogDescription className="text-light-500">
-              This removes the conversation from your chat history.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="border-dark-300 bg-dark-250 text-light-900 hover:bg-dark-300">
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-primary-500 text-light-900"
-              onClick={handleDeleteConversation}
             >
               Delete
             </AlertDialogAction>

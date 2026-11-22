@@ -24,6 +24,7 @@ type Props = {
   targetType: ReportTargetType;
   targetId: string;
   title: string;
+  onCloseAutoFocus?: (event: Event) => void;
 };
 
 export default function ReportDialog({
@@ -32,6 +33,7 @@ export default function ReportDialog({
   targetType,
   targetId,
   title,
+  onCloseAutoFocus,
 }: Props) {
   const [reason, setReason] = useState("");
   const [description, setDescription] = useState("");
@@ -88,7 +90,10 @@ export default function ReportDialog({
         if (!inFlight.current) onOpenChange(next);
       }}
     >
-      <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto rounded-2xl border-dark-300 bg-dark-250 text-light-900">
+      <DialogContent
+        onCloseAutoFocus={onCloseAutoFocus}
+        className="max-h-[90vh] max-w-lg overflow-y-auto rounded-2xl border-dark-300 bg-dark-250 text-light-900"
+      >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
