@@ -1,0 +1,60 @@
+.auth-screen {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 1fr auto;
+  min-height: 100svh;
+  width: 100%;
+}
+.auth-visual {
+  display: none;
+  position: relative;
+  min-width: 0;
+}
+.auth-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: clamp(2.5rem, 5svh, 4rem) 1.25rem clamp(1rem, 3svh, 2rem);
+}
+.auth-content {
+  width: 100%;
+  max-width: 26rem;
+  padding: 1rem;
+}
+.auth-footer {
+  grid-column: 1 / -1;
+  width: 100%;
+  border-top-width: 1px;
+  padding: 0.875rem max(1rem, env(safe-area-inset-left))
+    max(0.875rem, env(safe-area-inset-bottom));
+}
+.auth-footer nav {
+  margin: 0;
+  width: 100%;
+  max-width: none;
+  column-gap: 1.5rem;
+  row-gap: 0.5rem;
+}
+@media (max-width: 640px), (max-height: 580px) {
+  .auth-footer .auth-policy-full {
+    display: none;
+  }
+  .auth-footer .auth-policy-short {
+    display: inline;
+  }
+}
+@media (min-width: 1024px) {
+  .auth-screen {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  }
+  .auth-visual {
+    display: block;
+  }
+  .auth-panel {
+    padding-inline: 0;
+  }
+  .auth-content {
+    width: 60%;
+  }
+}

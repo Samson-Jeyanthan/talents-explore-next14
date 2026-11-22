@@ -1,7 +1,7 @@
 import type { IPost } from "@/types/post.types";
 
 export const PROFILE_POST_PAGE_SIZE = 10;
-export type ProfileFeedKind = "all" | "credit";
+export type ProfileFeedKind = "all" | "credit" | "sharelink";
 export type ProfilePostPage =
   | { status: "7400"; response: IPost[] }
   | { status: "400" | "private"; message: string };

@@ -4,6 +4,7 @@ import axios from "axios";
 import { getAuthHeaders as resolveSessionHeaders } from "@/lib/session";
 import { isRedirectError } from "next/dist/client/components/redirect";
 import { getUserPersonalInfoAction } from "./auth.action";
+import { deleteCurrentAccountAction } from "./account-deletion.action";
 
 type PrivacyPayload = Record<string, any>;
 
@@ -366,27 +367,11 @@ export async function deactivateAccountSettingsAction() {
   }
 }
 
-export async function deleteAccountSettingsAction() {
-  try {
-    const { token } = await getCurrentUser();
-
-    if (!token) {
-      return false;
-    }
-
-    const response = await axios.delete(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/deleteAccount`,
-      {
-        headers: getAuthHeaders(token),
-      },
-    );
-
-    return response.data;
-  } catch (error) {
-    if (isRedirectError(error)) throw error;
-    console.error("deleteAccountSettingsAction failed:", error);
-    return false;
-  }
+export async function deleteAccountSettingsAction(
+  expectedAccountId: unknown,
+  confirmed: unknown,
+) {
+  return deleteCurrentAccountAction(expectedAccountId, confirmed);
 }
 
 export async function getSettingsActivityFeedAction(

@@ -207,8 +207,12 @@ function api(responses = [], authError) {
   return { actions, calls, logs, auth: () => auth };
 }
 test("profile pages use mobile endpoints, page size ten and the authenticated viewer", async () => {
-  for (const kind of ["all", "credit"]) {
-    const h = api([ok(viewer()), ok(target()), ok(rows())]);
+  for (const kind of ["all", "credit", "sharelink"]) {
+    const h = api([
+      ok(viewer()),
+      ok({ ...target(), isTalent: true }),
+      ok(rows()),
+    ]);
     const result = await h.actions.getProfilePostPageAction(profile, kind, 2);
     assert.equal(result.status, "7400");
     assert.equal(result.response.length, 10);
@@ -413,6 +417,7 @@ function feed(initialResult = ok(rows()), request = async () => ok([])) {
     "@/components/others/EmptyDetails": "empty",
     "@/public/assets/svgs/CameraIcon": "camera",
     "@/public/assets/svgs/CreditIcon": "credit",
+    "@/public/assets/svgs/LinkIcon": "link",
     "@/actions/profile-feed.action": {
       getProfilePostPageAction: async (id, kind, page) => {
         calls.push({ id, kind, page });
@@ -570,4 +575,217 @@ test("refreshing server data resets pagination and unmounting discards pending r
   close(ok([post(11)]));
   await closing;
   assert.equal(gone.cards().length, 10);
+});
+
+test("shared links match mobile permissions for owners, talents and regular accounts", async () => {
+  for (const data of [
+    { ...target(), isTalent: true },
+    { ...target(), isTalent: false, permissions: { canShare: true } },
+    { ...target(), isTalent: false, canShare: "1" },
+  ]) {
+    const h = api([ok(viewer()), ok(data), ok([])]);
+    assert.equal(
+      (await h.actions.getProfilePostPageAction(profile, "sharelink")).status,
+      "7400",
+    );
+  }
+  for (const data of [
+    { ...target(), isTalent: true, permissions: { canShare: false } },
+    { ...target(), isTalent: true, permissions: { canShare: "false" } },
+    { ...target(), isTalent: true, canShare: false },
+    { ...target(), isTalent: false },
+    { ...target({ profileView: "NO_ONE" }), permissions: { canShare: true } },
+    { ...target({ profileView: "FOLLOW" }), permissions: { canShare: true } },
+  ]) {
+    const h = api([ok(viewer()), ok(data)]);
+    assert.equal(
+      (await h.actions.getProfilePostPageAction(profile, "sharelink")).status,
+      "private",
+    );
+    assert.equal(
+      h.calls.some((c) => c.url.includes("/feeds/")),
+      false,
+    );
+  }
+  const own = api([
+    ok({
+      _id: profile,
+      isTalent: false,
+      privacySettings: { profileView: "NO_ONE" },
+      permissions: { canShare: false },
+    }),
+    ok([]),
+  ]);
+  assert.equal(
+    (await own.actions.getProfilePostPageAction(profile, "sharelink")).status,
+    "7400",
+  );
+  const follower = api([
+    ok(viewer()),
+    ok({
+      ...target({ profileView: "FOLLOW" }, true),
+      permissions: { canShare: true },
+    }),
+    ok([]),
+  ]);
+  assert.equal(
+    (await follower.actions.getProfilePostPageAction(profile, "sharelink"))
+      .status,
+    "7400",
+  );
+});
+
+test("shared link failures are explicit and successful rows retain URLs and thumbnails", async () => {
+  const link = {
+    ...post(),
+    media: [],
+    website: "https://example.test/project",
+    shareLinkThumbnail: "https://example.test/link.jpg",
+  };
+  const success = api([
+    ok(viewer()),
+    ok({ ...target(), isTalent: true }),
+    ok([link]),
+  ]);
+  const result = await success.actions.getProfilePostPageAction(
+    profile,
+    "sharelink",
+  );
+  assert.equal(result.response[0].website, link.website);
+  assert.equal(
+    util.profilePostThumbnail(result.response[0]),
+    link.shareLinkThumbnail,
+  );
+  const failed = api([
+    ok(viewer()),
+    ok({ ...target(), isTalent: true }),
+    Error("Offline"),
+  ]);
+  const error = await failed.actions.getProfilePostPageAction(
+    profile,
+    "sharelink",
+  );
+  assert.equal(error.status, "400");
+  assert.match(error.message, /shared links/);
+});
+
+test("shared link pagination retries page two without dropping cards and has a distinct empty state", async () => {
+  let fails = true;
+  const h = feed(ok(rows()), async () =>
+    fails
+      ? { status: "400", message: "Links unavailable" }
+      : ok([post(10), post(11)]),
+  );
+  h.props.kind = "sharelink";
+  h.render();
+  await h.next();
+  assert.equal(h.cards().length, 10);
+  assert.ok(find(h.render(), (n) => n.props?.role === "alert"));
+  fails = false;
+  await h.next();
+  assert.deepEqual(
+    h.calls.map((c) => [c.kind, c.page]),
+    [
+      ["sharelink", 2],
+      ["sharelink", 2],
+    ],
+  );
+  assert.equal(h.cards().length, 11);
+  const empty = feed(ok([]));
+  empty.props.kind = "sharelink";
+  const view = find(empty.render(), (n) => n.type === "empty");
+  assert.equal(view.props.text, "No Shared Links Available");
+  assert.equal(view.props.Icon, "link");
+});
+
+test("profile navigation exposes Shared Links to regular owners and permitted visitors without talent-only tabs", () => {
+  const tabs = load("lib/utils/profile-tabs.ts").getProfileTabs;
+  const titles = (values) => values.map((t) => t.title).join(",");
+  assert.equal(
+    titles(tabs({ isTalent: true }, true, "qa-user", profile)),
+    "Overview,All Posts,Shared Links,Credits,Skills",
+  );
+  const own = tabs({ isTalent: false }, true, "qa-user", profile);
+  assert.equal(titles(own), "Overview,Shared Links");
+  assert.equal(own[1].href, `/profile/qa-user/${profile}/shared-links`);
+  assert.equal(
+    titles(
+      tabs(
+        { isTalent: false, permissions: { canShare: true } },
+        false,
+        "qa-user",
+        profile,
+      ),
+    ),
+    "Overview,Shared Links",
+  );
+  assert.equal(
+    titles(
+      tabs(
+        { isTalent: false, permissions: { canShare: false } },
+        false,
+        "qa-user",
+        profile,
+      ),
+    ),
+    "Overview",
+  );
+  assert.equal(
+    tabs(
+      { isTalent: true, permissions: { canShare: false } },
+      false,
+      "qa-user",
+      profile,
+    ).some((t) => t.value === "shared-links"),
+    false,
+  );
+  assert.equal(
+    tabs(
+      { isTalent: true, privacySettings: { profileView: "NO_ONE" } },
+      false,
+      "qa-user",
+      profile,
+    ).some((t) => t.value === "shared-links"),
+    false,
+  );
+});
+
+test("shared links route loads its own endpoint and active profile tab is announced", async () => {
+  const calls = [];
+  const Page = load(
+    "app/(root)/profile/[username]/[userId]/shared-links/page.tsx",
+    {
+      ...ui,
+      "@/actions/profile-feed.action": {
+        getProfilePostPageAction: async (...args) => {
+          calls.push(args);
+          return ok([]);
+        },
+      },
+      "@/components/widgets/profile/ProfilePostFeed": "feed",
+    },
+  ).default;
+  const page = await Page({ params: { userId: profile, username: "qa-user" } });
+  assert.equal(calls[0].join(","), [profile, "sharelink", 1].join(","));
+  assert.equal(page.props.kind, "sharelink");
+  const tabs = load("lib/utils/profile-tabs.ts").getProfileTabs(
+    { isTalent: true },
+    true,
+    "qa-user",
+    profile,
+  );
+  const Tabs = load("components/widgets/profile/ProfileTabs.tsx", {
+    ...ui,
+    react: {},
+    "framer-motion": { motion: { div: "div" } },
+    "@/lib/utils": { cn: (...args) => args.filter(Boolean).join(" ") },
+    "next/link": "link",
+    "next/navigation": {
+      usePathname: () => `/profile/qa-user/${profile}/shared-links`,
+    },
+  }).default;
+  const tree = Tabs({ tabs });
+  const active = find(tree, (n) => n.props?.["aria-current"] === "page");
+  assert.equal(active.props.href, `/profile/qa-user/${profile}/shared-links`);
+  assert.equal(tree.props["aria-label"], "Profile sections");
 });

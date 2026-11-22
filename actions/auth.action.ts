@@ -2,16 +2,34 @@
 
 import axiosInstance from "@/lib/config/axiosInstance";
 import { resetPasswordRequestValidation } from "@/lib/validations/password.validation";
-import { createSession, getAuthHeaders, getRefreshToken , getSession } from "@/lib/session";
+import {
+  createSession,
+  getAuthHeaders,
+  getRefreshToken,
+  getSession,
+} from "@/lib/session";
 import { clearSession, storeIsAbout } from "./session.action";
+import { signupRequestValidation } from "@/lib/validations/signup.validation";
 
 export async function registerAction(formData: unknown) {
+  const parsed = signupRequestValidation.safeParse(formData);
+  if (!parsed.success)
+    return { status: "7401", message: parsed.error.issues[0].message };
+  const { email, password, userName } = parsed.data;
   try {
-    const response = await axiosInstance.post("/auth/register", formData);
+    const response = await axiosInstance.post("/auth/register", {
+      email,
+      password,
+      userName,
+    });
     return response.data;
   } catch (error) {
-    console.error(error);
-    return error;
+    const status = (error as { response?: { data?: { status?: string } } })
+      ?.response?.data?.status;
+    return {
+      status: status === "7405" ? "7405" : "7500",
+      message: "Unable to register right now. Please try again.",
+    };
   }
 }
 

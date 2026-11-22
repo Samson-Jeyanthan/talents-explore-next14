@@ -22,6 +22,8 @@ export async function handleClearStorage() {
   localStorage.removeItem("verifiedEmail");
   localStorage.removeItem("registerUserId");
   localStorage.removeItem("resetpassword");
+  localStorage.removeItem("token");
+  localStorage.removeItem("refreshToken");
 }
 
 // signup otp function

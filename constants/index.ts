@@ -252,27 +252,35 @@ interface IFooterLinks {
 export const FOOTER_LINKS: IFooterLinks[] = [
   {
     name: "Terms & Conditions",
-    path: "https://talentsexplore.com/terms-and-conditions",
+    path: "/terms-and-conditions",
   },
   {
     name: "Privacy Policy",
-    path: "https://talentsexplore.com/privacy-policy",
+    path: "/privacy-policy",
   },
   {
-    name: "Branded Policy",
-    path: "https://talentsexplore.com/branded-policy",
+    name: "Branded Content Policy",
+    path: "/branded-content-policy",
   },
   {
-    name: "Cookies",
-    path: "https://talentsexplore.com/cookies-policy",
+    name: "Cookies Policy",
+    path: "/cookies-policy",
   },
   {
-    name: "Community",
-    path: "https://talentsexplore.com/community-guidelines",
+    name: "Community Standards",
+    path: "/community-guidelines",
   },
   {
-    name: "Intellectual Property",
-    path: "https://talentsexplore.com/intellectual-property-policy",
+    name: "Intellectual Property Policy",
+    path: "/intellectual-property-policy",
+  },
+  {
+    name: "Child Safety Standards",
+    path: "/child-safety-standards",
+  },
+  {
+    name: "Delete Account",
+    path: "/delete-account",
   },
 ];
 

@@ -31,27 +31,16 @@ const ProfileTabs = ({
   const currentPath = pathname.replace(/\/+$/, "");
   const isProfileOverview = /^\/profile\/[^/]+\/[^/]+$/.test(currentPath);
 
-  // const [active, setActive] = useState<Tab>(propTabs[0]);
-  // const [tabs, setTabs] = useState<Tab[]>(propTabs);
-
-  const moveSelectedTabToTop = (idx: number) => {
-    const newTabs = [...propTabs];
-    const selectedTab = newTabs.splice(idx, 1);
-    newTabs.unshift(selectedTab[0]);
-    // setTabs(newTabs);
-    // setActive(newTabs[0]);
-  };
-
-  // const [hovering, setHovering] = useState(false);
-
   return (
     <div
+      role="navigation"
+      aria-label="Profile sections"
       className={cn(
-        "flex flex-row items-center gap-2 sm:gap-4 justify-center [perspective:1000px] relative overflow-auto sm:overflow-visible no-visible-scrollbar w-full",
-        containerClassName
+        "relative flex w-full min-w-0 items-center gap-2 overflow-x-auto no-visible-scrollbar [perspective:1000px] sm:gap-4",
+        containerClassName,
       )}
     >
-      {propTabs.map((tab, idx) => {
+      {propTabs.map((tab) => {
         const isActive = isProfileOverview
           ? tab.title.toLowerCase() === "overview"
           : currentPath.endsWith(`/${tab.value}`);
@@ -60,14 +49,10 @@ const ProfileTabs = ({
           <Link
             href={tab.href}
             key={tab.title}
-            onClick={() => {
-              moveSelectedTabToTop(idx);
-            }}
-            // onMouseEnter={() => setHovering(true)}
-            // onMouseLeave={() => setHovering(false)}
+            aria-current={isActive ? "page" : undefined}
             className={cn(
-              "relative px-3 sm:px-4 py-2 rounded-full",
-              tabClassName
+              "relative shrink-0 rounded-full px-3 py-2 first:ml-auto last:mr-auto sm:px-4",
+              tabClassName,
             )}
             style={{
               transformStyle: "preserve-3d",
@@ -80,13 +65,13 @@ const ProfileTabs = ({
                 transition={{ type: "spring", bounce: 0.3, duration: 0.6 }}
                 className={cn(
                   "absolute inset-0 bg-dark-300 dark:bg-dark-300 rounded-full",
-                  activeTabClassName
+                  activeTabClassName,
                 )}
               />
             )}
             <span
               className={cn(
-                `${isActive ? "text-light-900" : "text-light-600"} relative block text-sm w-max`
+                `${isActive ? "text-light-900" : "text-light-600"} relative block text-sm w-max`,
               )}
             >
               {tab.title}

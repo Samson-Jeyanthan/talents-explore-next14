@@ -3,20 +3,7 @@ import { newPasswordValidation } from "./password.validation";
 import { profileLocationSchema } from "../utils/profileLocation";
 import { formatISOStringDate } from "../hooks/useDateSelector";
 
-export const SignupValidation = z.object({
-  username: z
-    .string()
-    .min(1, { message: "Username is required" })
-    .min(4, { message: "Username is too short" })
-    .max(30)
-    .regex(/^[A-Za-z0-9_]{4,24}$/, {
-      message:
-        "Username should be 4-24 characters and shouldn't include any special character!",
-    })
-    .trim(),
-  email: z.string().min(1, { message: "Email is required" }).email(),
-  password: newPasswordValidation,
-});
+export { SignupValidation } from "./signup.validation";
 
 export const SigninValidation = z.object({
   email: z.string().min(1, { message: "Email is required" }).email(),

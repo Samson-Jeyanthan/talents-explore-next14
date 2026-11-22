@@ -1,0 +1,46 @@
+.policy-document {
+  max-width: 56rem;
+  margin-inline: auto;
+  overflow-wrap: anywhere;
+}
+.policy-document .policy-paragraph {
+  margin-bottom: 1rem;
+}
+.policy-document .policy-point {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  margin: 0.75rem 0 0.75rem 1rem;
+}
+.policy-document .policy-point > span:first-child {
+  flex: 0 0 auto;
+}
+.policy-document .policy-subtitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 1.75rem 0 1rem;
+}
+.policy-document .policy-third-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 1.25rem 0 0.75rem;
+}
+.policy-document a {
+  text-underline-offset: 0.2em;
+}
+.policy-document .policy-paragraph a,
+.policy-document .policy-point a {
+  text-decoration: underline;
+}
+.policy-document [id] {
+  scroll-margin-top: 1.25rem;
+}
+@media print {
+  .policy-document {
+    max-width: none;
+    color: #111;
+  }
+  .policy-document section {
+    break-inside: auto;
+  }
+}

@@ -88,8 +88,21 @@ export function getProfileVisibilityState(
   userData: any,
   isOwnProfile: boolean,
 ) {
+  const canViewProfile = canViewByVisibility(
+    userData,
+    "profileView",
+    isOwnProfile,
+  );
   return {
-    canViewProfile: canViewByVisibility(userData, "profileView", isOwnProfile),
+    canViewProfile,
+    canViewSharedLinks:
+      isOwnProfile ||
+      (canViewProfile &&
+        followFlag(
+          userData?.permissions?.canShare ??
+            userData?.canShare ??
+            userData?.isTalent,
+        )),
     canViewPosts: canViewByVisibility(userData, "postView", isOwnProfile),
     canViewSharedPosts: canViewByVisibility(
       userData,

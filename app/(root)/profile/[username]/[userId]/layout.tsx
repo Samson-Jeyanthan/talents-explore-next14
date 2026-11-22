@@ -10,12 +10,12 @@ import type { Metadata, ResolvingMetadata } from "next";
 import { fetchUserDataAction } from "@/actions/user.action";
 import NotFound from "../../not-found";
 import { TProfileURLProps } from "@/types/utils.types";
-import { getProfileVisibilityState } from "@/lib/utils/profilePrivacy";
+import { getProfileTabs } from "@/lib/utils/profile-tabs";
 import { getUserPersonalInfoAction } from "@/actions/auth.action";
 
 export async function generateMetadata(
   { params }: TProfileURLProps,
-  parent: ResolvingMetadata
+  parent: ResolvingMetadata,
 ): Promise<Metadata> {
   const userData = await fetchUserDataAction(params.userId, params.username);
   // const visibility = getProfileVisibilityState(userData, isOwnProfile);
@@ -61,7 +61,12 @@ async function layout({
   }
 
   const isTalent = userData?.isTalent;
-  const visibility = getProfileVisibilityState(userData, isOwnProfile);
+  const tabs = getProfileTabs(
+    userData,
+    isOwnProfile,
+    params.username,
+    params.userId,
+  );
 
   return (
     <main className="container-wrapper -mt-4 flex-col gap-6 pb-6">
@@ -84,44 +89,7 @@ async function layout({
         )}
 
         <div className="flex-center w-full max-w-screen-xl flex-col gap-6 bg-dark-200 pt-8">
-          {isTalent ? (
-            <ProfileTabs
-              tabs={[
-                {
-                  title: "Overview",
-                  value: "",
-                  href: `/profile/${params.username}/${params.userId}/`,
-                },
-                ...(visibility.canViewPosts
-                  ? [
-                      {
-                        title: "All Posts",
-                        value: "all-posts",
-                        href: `/profile/${params.username}/${params.userId}/all-posts`,
-                      },
-                    ]
-                  : []),
-                ...(visibility.canViewSharedPosts
-                  ? [
-                      {
-                        title: "Credits",
-                        value: "credits",
-                        href: `/profile/${params.username}/${params.userId}/credits`,
-                      },
-                    ]
-                  : []),
-                ...(visibility.canViewProfile
-                  ? [
-                      {
-                        title: "Skills",
-                        value: "skills",
-                        href: `/profile/${params.username}/${params.userId}/skills`,
-                      },
-                    ]
-                  : []),
-              ]}
-            />
-          ) : null}
+          {isTalent || tabs.length > 1 ? <ProfileTabs tabs={tabs} /> : null}
           {children}
         </div>
       </section>

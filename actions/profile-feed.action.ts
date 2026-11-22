@@ -16,7 +16,7 @@ export async function getProfilePostPageAction(
 ): Promise<ProfilePostPage> {
   if (
     !/^[a-f\d]{24}$/i.test(profileId) ||
-    !["all", "credit"].includes(kind) ||
+    !["all", "credit", "sharelink"].includes(kind) ||
     !Number.isSafeInteger(page) ||
     page < 1 ||
     page > 100000
@@ -46,7 +46,9 @@ export async function getProfilePostPageAction(
       !visibility.canViewProfile ||
       !(kind === "all"
         ? visibility.canViewPosts
-        : visibility.canViewSharedPosts)
+        : kind === "sharelink"
+          ? visibility.canViewSharedLinks
+          : visibility.canViewSharedPosts)
     )
       return {
         status: "private",
@@ -54,7 +56,9 @@ export async function getProfilePostPageAction(
           ? "This user's profile details are private."
           : kind === "all"
             ? "This user's posts are private."
-            : "This user's shared posts are private.",
+            : kind === "sharelink"
+              ? "This user's shared links are unavailable."
+              : "This user's shared posts are private.",
       };
     const query = new URLSearchParams({
       userId: profileId,
@@ -68,7 +72,7 @@ export async function getProfilePostPageAction(
     if (isRedirectError(error)) throw error;
     return {
       status: "400",
-      message: `Unable to load ${kind === "all" ? "posts" : "credits"}. Please try again.`,
+      message: `Unable to load ${kind === "all" ? "posts" : kind === "sharelink" ? "shared links" : "credits"}. Please try again.`,
     };
   }
 }

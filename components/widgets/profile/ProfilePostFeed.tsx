@@ -12,6 +12,7 @@ import AllPostCard from "@/components/cards/AllPostCard";
 import EmptyDetails from "@/components/others/EmptyDetails";
 import CameraIcon from "@/public/assets/svgs/CameraIcon";
 import CreditIcon from "@/public/assets/svgs/CreditIcon";
+import LinkIcon from "@/public/assets/svgs/LinkIcon";
 import { Button } from "@/components/ui/button";
 
 export default function ProfilePostFeed({
@@ -120,8 +121,18 @@ export default function ProfilePostFeed({
       {!state.items.length && !error && !state.loading && state.page > 0 ? (
         <div className="flex w-full justify-center pt-8">
           <EmptyDetails
-            Icon={kind === "all" ? CameraIcon : CreditIcon}
-            text="No Posts Available"
+            Icon={
+              kind === "all"
+                ? CameraIcon
+                : kind === "sharelink"
+                  ? LinkIcon
+                  : CreditIcon
+            }
+            text={
+              kind === "sharelink"
+                ? "No Shared Links Available"
+                : "No Posts Available"
+            }
             size="56px"
           />
         </div>

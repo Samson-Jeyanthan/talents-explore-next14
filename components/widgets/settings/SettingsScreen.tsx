@@ -4,6 +4,7 @@ import Link from "next/link";
 import {
   useEffect,
   useMemo,
+  useRef,
   useState,
   useTransition,
   type ReactNode,
@@ -646,6 +647,9 @@ function SettingsScreen({
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [confirmAction, setConfirmAction] = useState<ConfirmAccountAction>("");
+  const [accountPending, setAccountPending] = useState(false);
+  const [accountError, setAccountError] = useState("");
+  const accountBusy = useRef(false);
   const [deleteActivityItem, setDeleteActivityItem] = useState<any>(null);
   const [activityTab, setActivityTab] = useState<"post" | "shared">("post");
   const [activityData, setActivityData] = useState<ActivityCollections>({
@@ -685,8 +689,12 @@ function SettingsScreen({
   );
 
   const runSignedOutRedirect = async () => {
-    await clearSession();
-    await handleClearStorage();
+    try {
+      await clearSession();
+    } catch {}
+    try {
+      await handleClearStorage();
+    } catch {}
     setUser(INITIAL_USER);
     window.location.assign("/sign-in");
   };
@@ -804,21 +812,24 @@ function SettingsScreen({
     });
   };
 
-  const handleAccountAction = () => {
-    if (!confirmAction) {
+  const handleAccountAction = async () => {
+    if (!confirmAction || accountBusy.current) {
       return;
     }
-
-    startTransition(async () => {
+    accountBusy.current = true;
+    setAccountPending(true);
+    setAccountError("");
+    try {
       const res =
         confirmAction === "delete"
-          ? await deleteAccountSettingsAction()
+          ? await deleteAccountSettingsAction(currentUser?._id, true)
           : await deactivateAccountSettingsAction();
 
       if (!res || res.status !== "7400") {
-        toast.error(res?.message || `Couldn't ${confirmAction} account`, {
-          duration: 4000,
-        });
+        setAccountError(
+          res?.message ||
+            `Couldn't ${confirmAction} account. Please try again.`,
+        );
         return;
       }
 
@@ -831,7 +842,14 @@ function SettingsScreen({
 
       setConfirmAction("");
       await runSignedOutRedirect();
-    });
+    } catch {
+      setAccountError(
+        `Unable to confirm account ${confirmAction === "delete" ? "deletion" : "deactivation"}. Please try again.`,
+      );
+    } finally {
+      accountBusy.current = false;
+      setAccountPending(false);
+    }
   };
 
   const loadActivity = (mode: ActivityMode) => {
@@ -1642,8 +1660,9 @@ function SettingsScreen({
       <AlertDialog
         open={confirmAction !== ""}
         onOpenChange={(open) => {
-          if (!open) {
+          if (!open && !accountBusy.current) {
             setConfirmAction("");
+            setAccountError("");
           }
         }}
       >
@@ -1660,16 +1679,37 @@ function SettingsScreen({
                 : "This will deactivate your account until you sign in again."}
             </AlertDialogDescription>
           </AlertDialogHeader>
+          {confirmAction === "delete" && (
+            <p className="break-all text-sm text-light-700">
+              {currentUser?.email}
+            </p>
+          )}
+          {accountError && (
+            <p role="alert" className="text-sm text-red-700 dark:text-red-300">
+              {accountError}
+            </p>
+          )}
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-dark-300 bg-dark-250 text-light-900 hover:bg-dark-300">
+            <AlertDialogCancel
+              disabled={accountPending}
+              className="border-dark-300 bg-dark-250 text-light-900 hover:bg-dark-300"
+            >
               Cancel
             </AlertDialogCancel>
-            <AlertDialogAction
+            <Button
+              type="button"
+              disabled={accountPending}
               className="bg-primary-500 text-light-900"
               onClick={handleAccountAction}
             >
-              Continue
-            </AlertDialogAction>
+              {accountPending
+                ? confirmAction === "delete"
+                  ? "Deleting..."
+                  : "Deactivating..."
+                : confirmAction === "delete"
+                  ? "Yes, delete my account"
+                  : "Continue"}
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
