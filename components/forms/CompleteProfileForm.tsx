@@ -53,7 +53,7 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
       knownLanguage: "",
       profession: "",
       dob: "",
-      gender: "",
+      gender: undefined,
       quotes: "",
       coverPhoto: undefined,
       profilePhoto: undefined,
@@ -79,7 +79,7 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
     await write.run(
       async (active) => {
         const uploadPhoto = async (
-          file: File | undefined,
+          file: File | null | undefined,
           prefix: string,
           label: string,
         ) => {
@@ -114,7 +114,37 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
             "cover photo",
           );
           if (!active()) return;
-          return await completeProfileAction(formData);
+          const result = await completeProfileAction(formData);
+          if (
+            active() &&
+            result &&
+            "fieldErrors" in result &&
+            result.fieldErrors
+          ) {
+            const fields: Record<
+              string,
+              keyof z.infer<typeof CompleteProfileValidation>
+            > = {
+              firstName: "firstName",
+              lastName: "lastName",
+              dob: "dob",
+              gender: "gender",
+              languageKnown: "knownLanguage",
+              professional: "profession",
+              shortBio: "quotes",
+              location: "location",
+              latitude: "latitude",
+              longitude: "longitude",
+              profileImage: "profilePhoto",
+              coverImage: "coverPhoto",
+            };
+            for (const [key, messages] of Object.entries(result.fieldErrors)) {
+              const field = fields[key];
+              if (field && messages?.[0])
+                form.setError(field, { message: messages[0] });
+            }
+          }
+          return result;
         } catch (error) {
           return {
             status: "400",
@@ -146,7 +176,11 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
       {write.pending && <TransparentLoader text="Submitting Form" />}
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={form.handleSubmit(onSubmit, () =>
+            write.setError(
+              "Please check the highlighted fields before creating your profile.",
+            ),
+          )}
           className="mt-4 flex w-full flex-col gap-5"
           aria-busy={write.pending}
         >
@@ -156,14 +190,28 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
                 control={form.control}
                 name="coverPhoto"
                 render={({ field }) => (
-                  <CoverPhoto fieldChange={field.onChange} />
+                  <>
+                    <CoverPhoto fieldChange={field.onChange} />
+                    <FormMessage
+                      id="complete-profile-cover-error"
+                      role="alert"
+                      className="shad-auth_form_message"
+                    />
+                  </>
                 )}
               />
               <FormField
                 control={form.control}
                 name="profilePhoto"
                 render={({ field }) => (
-                  <ProfilePhoto fieldChange={field.onChange} />
+                  <>
+                    <ProfilePhoto fieldChange={field.onChange} />
+                    <FormMessage
+                      id="complete-profile-photo-error"
+                      role="alert"
+                      className="shad-auth_form_message"
+                    />
+                  </>
                 )}
               />
             </div>

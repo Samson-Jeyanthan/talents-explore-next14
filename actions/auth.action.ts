@@ -11,6 +11,7 @@ import {
 import { clearSession, storeIsAbout } from "./session.action";
 import { signupRequestValidation } from "@/lib/validations/signup.validation";
 import { isRedirectError } from "next/dist/client/components/redirect";
+import { completeProfilePayloadValidation } from "@/lib/validations/complete-profile.validation";
 
 export async function registerAction(formData: unknown) {
   const parsed = signupRequestValidation.safeParse(formData);
@@ -66,6 +67,14 @@ export async function resendOtpAction(userId: string) {
 }
 
 export async function completeProfileAction(formData: unknown) {
+  const parsed = completeProfilePayloadValidation.safeParse(formData);
+  if (!parsed.success) {
+    return {
+      status: "400",
+      message: parsed.error.issues[0].message,
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
+  }
   const failure = {
     status: "400",
     message:
@@ -78,7 +87,7 @@ export async function completeProfileAction(formData: unknown) {
       {
         method: "PUT",
         headers: { ...headers, "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(parsed.data),
         signal: AbortSignal.timeout(15000),
       },
     );
