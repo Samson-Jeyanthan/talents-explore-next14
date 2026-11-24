@@ -15,6 +15,7 @@ export type IsOpenState = {
 
 export type TOTPProps = {
   userId: string;
+  email?: string;
   isSignup?: boolean;
   setVerifiedUserId?: (verifiedUserId: string) => void;
   setVerifiedOtp?: (otp: string) => void;

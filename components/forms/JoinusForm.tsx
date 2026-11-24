@@ -7,16 +7,20 @@ import { SignupValidation } from "@/lib/validations/signup.validation";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { OTPModal } from "../modals";
 import { Dialog } from "../ui/dialog";
 import { FormInput } from "../inputs";
 import { registerAction } from "@/actions/auth.action";
 import { toast } from "sonner";
-import { useUserContext } from "@/context/AuthProvider";
+import {
+  readOtpSession,
+  startOtpSession,
+  validOtpIdentifier,
+} from "@/lib/utils/otp-session";
 
 const JoinusForm = () => {
-  const { setUser } = useUserContext();
+  const request = useRef({ active: true, busy: false });
   const [isOTPOpen, setIsOTPOpen] = useState(false);
   const [decodedUserId, setDecodedUserId] = useState<any>("");
 
@@ -31,6 +35,7 @@ const JoinusForm = () => {
   });
 
   async function onSubmit(values: z.infer<typeof SignupValidation>) {
+    if (request.current.busy) return;
     if (values.acceptedPolicies !== true) {
       form.setError("acceptedPolicies", {
         message:
@@ -44,44 +49,47 @@ const JoinusForm = () => {
       userName: values.username,
       acceptedPolicies: values.acceptedPolicies,
     };
-    const res = await registerAction(formData);
-
-    if (res?.status === "7400") {
-      setUser({
-        currentUserId: res.response,
-        firstName: "",
-        lastName: "",
-        username: formData.userName,
-        email: formData.email,
-        imageUrl: null,
-        isTalent: false,
-      });
-      localStorage.setItem("registerUserId", res.response);
-      setDecodedUserId(res.response);
-      toast.success("You Have Registered Successfully", { duration: 3000 });
-      localStorage.setItem("isOTP", "true");
-      setIsOTPOpen(true);
-    } else if (res?.status === "7405") {
-      toast.error("Registration Failed, Email or Username is alreay in use", {
-        duration: 4000,
-      });
-    } else {
-      toast.error("Something went wrong, please try again", {
-        duration: 4000,
-      });
+    request.current.busy = true;
+    try {
+      const res = await registerAction(formData);
+      if (!request.current.active) return;
+      if (
+        res?.status === "7400" &&
+        validOtpIdentifier("signup", res.response)
+      ) {
+        startOtpSession("signup", res.response);
+        setDecodedUserId(res.response);
+        toast.success("You Have Registered Successfully", { duration: 3000 });
+        setIsOTPOpen(true);
+      } else if (res?.status === "7405") {
+        toast.error("Registration Failed, Email or Username is alreay in use", {
+          duration: 4000,
+        });
+      } else {
+        toast.error("Something went wrong, please try again", {
+          duration: 4000,
+        });
+      }
+    } catch {
+      if (request.current.active)
+        toast.error("Unable to create your account. Please try again.");
+    } finally {
+      request.current.busy = false;
     }
   }
 
   // check if OTP is open even user refresh the page
   useEffect(() => {
-    const isTimer = localStorage.getItem("countdown") !== "00:00";
-    const isOTP = localStorage.getItem("isOTP") === "true";
-    const registerUserId: string | null =
-      localStorage.getItem("registerUserId");
-    if (isTimer || isOTP) {
+    const current = request.current;
+    current.active = true;
+    const pending = readOtpSession("signup");
+    if (pending) {
       setIsOTPOpen(true);
-      setDecodedUserId(registerUserId);
+      setDecodedUserId(pending.identifier);
     }
+    return () => {
+      current.active = false;
+    };
   }, []);
 
   return (

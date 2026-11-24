@@ -151,6 +151,7 @@ test("signup starts unchecked, gates submission, passes consent, and retains the
       "react/jsx-runtime": jsx,
       react: {
         useEffect() {},
+        useRef: (initial) => ({ current: initial }),
         useState: (initial) => [initial, (next) => states.push(next)],
       },
       "react-hook-form": {
@@ -170,11 +171,16 @@ test("signup starts unchecked, gates submission, passes consent, and retains the
       "@/actions/auth.action": {
         registerAction: async (input) => {
           calls.push(input);
-          return { status: "7400", response: "qa-test-user" };
+          return { status: "7400", response: "111111111111111111111111" };
         },
       },
       "@/context/AuthProvider": {
         useUserContext: () => ({ setUser: (value) => states.push(value) }),
+      },
+      "@/lib/utils/otp-session": {
+        readOtpSession: () => null,
+        validOtpIdentifier: (_kind, value) => /^[a-f\d]{24}$/i.test(value),
+        startOtpSession: (kind, identifier) => storage.push([kind, identifier]),
       },
       sonner: { toast: { success() {}, error() {} } },
     },
@@ -202,11 +208,9 @@ test("signup starts unchecked, gates submission, passes consent, and retains the
   await submit({ ...valid, username: valid.userName });
   assert.equal(calls[0].acceptedPolicies, true);
   assert.ok(
-    storage.some(([key, value]) => key === "isOTP" && value === "true"),
-  );
-  assert.ok(
     storage.some(
-      ([key, value]) => key === "registerUserId" && value === "qa-test-user",
+      ([kind, identifier]) =>
+        kind === "signup" && identifier === "111111111111111111111111",
     ),
   );
   accepted = false;

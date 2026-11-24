@@ -12,6 +12,12 @@ import { clearSession, storeIsAbout } from "./session.action";
 import { signupRequestValidation } from "@/lib/validations/signup.validation";
 import { isRedirectError } from "next/dist/client/components/redirect";
 import { completeProfilePayloadValidation } from "@/lib/validations/complete-profile.validation";
+import {
+  signupOtpRequestValidation,
+  passwordOtpRequestValidation,
+  otpEmailValidation,
+} from "@/lib/validations/otp.validation";
+import { jwtDecode } from "jwt-decode";
 
 export async function registerAction(formData: unknown) {
   const parsed = signupRequestValidation.safeParse(formData);
@@ -36,33 +42,67 @@ export async function registerAction(formData: unknown) {
 }
 
 export async function otpVerificationAction(formData: unknown) {
+  const failure = {
+    status: "400",
+    message: "Unable to verify this code. Check it or request a new one.",
+  };
+  const parsed = signupOtpRequestValidation.safeParse(formData);
+  if (!parsed.success) return failure;
   try {
-    const response = await axiosInstance.post("/auth/verifyEmailOtp", formData);
+    const response = await axiosInstance.post(
+      "/auth/verifyEmailOtp",
+      parsed.data,
+      { timeout: 15000 },
+    );
     const res = response.data;
     if (res?.status === "7400") {
-      await storeIsAbout(false);
+      const tokens = res.response;
+      if (
+        typeof tokens?.accessToken !== "string" ||
+        typeof tokens.refreshToken !== "string" ||
+        !tokens.refreshToken.trim() ||
+        jwtDecode<{ sub?: unknown }>(tokens.accessToken).sub !==
+          parsed.data.userId
+      )
+        return failure;
       const result = await createSession(
-        res.response.accessToken,
-        res.response.refreshToken,
+        tokens.accessToken,
+        tokens.refreshToken,
       );
-      console.log(result, "result-access-token-isAbout");
-      return res;
+      if (!result.success) return failure;
+      await storeIsAbout(false);
+      return { status: "7400", response: { userId: parsed.data.userId } };
     } else {
-      return false;
+      return failure;
     }
-  } catch (error) {
-    console.error(error);
-    return error;
+  } catch {
+    return failure;
   }
 }
 
 export async function resendOtpAction(userId: string) {
+  if (!signupOtpRequestValidation.shape.userId.safeParse(userId).success)
+    return {
+      status: "400",
+      message: "Please restart registration to request a code.",
+    };
   try {
-    const response = await axiosInstance.post(`/auth/resendOtp/${userId}`);
-    return response.data;
-  } catch (error) {
-    console.error(error);
-    return error;
+    const response = await axiosInstance.post(
+      `/auth/resendOtp/${userId}`,
+      undefined,
+      { timeout: 15000 },
+    );
+    return response.data?.status === "7400"
+      ? { status: "7400" }
+      : {
+          status: "400",
+          message: "Unable to resend the code. Please try again.",
+        };
+  } catch {
+    return {
+      status: "400",
+      message: "Unable to resend the code. Please try again.",
+    };
   }
 }
 
@@ -174,9 +214,14 @@ export async function signinAction(formData: unknown) {
 }
 
 export async function forgotPasswordAction(email: string) {
+  const parsed = otpEmailValidation.safeParse(email);
+  if (!parsed.success)
+    return { status: "ERROR", message: "Enter a valid email address." };
   try {
     const response = await axiosInstance.post(
-      `/auth/forgotPassword/${encodeURIComponent(email)}`,
+      `/auth/forgotPassword/${encodeURIComponent(parsed.data)}`,
+      undefined,
+      { timeout: 15000 },
     );
     return response.data;
   } catch (error) {
@@ -188,10 +233,17 @@ export async function forgotPasswordAction(email: string) {
 }
 
 export async function verifyForgotPasswordAction(formData: unknown) {
+  const parsed = passwordOtpRequestValidation.safeParse(formData);
+  if (!parsed.success)
+    return {
+      status: "ERROR",
+      message: "Enter a valid email and 6-digit code.",
+    };
   try {
     const response = await axiosInstance.post(
       "/auth/verifyForgotPassword",
-      formData,
+      parsed.data,
+      { timeout: 15000 },
     );
     return response.data;
   } catch (error) {

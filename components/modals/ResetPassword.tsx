@@ -17,7 +17,7 @@ import { Form } from "../ui/form";
 import { FormInput } from "../inputs";
 import { resetPasswordAction } from "@/actions/auth.action";
 import { toast } from "sonner";
-import { handleClearStorage } from "@/lib/functions/auth.functions";
+import { clearOtpSession } from "@/lib/utils/otp-session";
 
 const ResetPassword = ({
   verifiedUserId,
@@ -43,7 +43,7 @@ const ResetPassword = ({
     };
     const res = await resetPasswordAction(formData);
     if (res.status === true) {
-      await handleClearStorage();
+      clearOtpSession("password");
       toast.success("Password Has Reset Successfully", { duration: 5000 });
       router.push("/sign-in");
     } else {
@@ -52,7 +52,7 @@ const ResetPassword = ({
   }
 
   const handleCancel = async () => {
-    await handleClearStorage();
+    clearOtpSession("password");
     router.push("/sign-in");
   };
 
