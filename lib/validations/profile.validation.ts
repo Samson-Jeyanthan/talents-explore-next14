@@ -4,11 +4,7 @@ import {
   validProfileBirthDate,
 } from "../utils/profile-editor";
 
-export const languageValidation = z.object({
-  languageId: z.string(),
-  languageName: z.string().min(1, { message: "Language is required" }),
-  languageLevel: z.string().min(1, { message: "Level is required" }),
-});
+export { profileLanguageFormValidation as languageValidation } from "../utils/profile-languages";
 
 export const awardValidation = z.object({
   name: z.string().min(1, { message: "Award / Certificate Name is required" }),
