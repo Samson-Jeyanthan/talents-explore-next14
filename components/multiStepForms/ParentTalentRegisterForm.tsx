@@ -56,11 +56,6 @@ function validationMessage(error: unknown): string | undefined {
 }
 
 const ParentTalentRegisterForm = ({ langData }: Props) => {
-  const LangOptions = (langData?.response || []).map((item: any) => ({
-    _id: item._id,
-    name: item.language,
-  }));
-
   const { user, setUser } = useUserContext();
   const [page, setPage] = useState(0);
   const write = useProfileDetailWrite(user.currentUserId);
@@ -166,7 +161,7 @@ const ParentTalentRegisterForm = ({ langData }: Props) => {
       form: (
         <LangEducationForm
           form={form}
-          LangOptions={LangOptions}
+          langData={langData}
           onDraftChange={report2}
         />
       ),

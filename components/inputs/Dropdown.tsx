@@ -31,6 +31,7 @@ type Props = {
   onValueChange?: (value: string) => void;
   resetFiled?: () => void;
   isModal?: boolean;
+  disabled?: boolean;
 };
 
 const Dropdown = ({
@@ -46,6 +47,7 @@ const Dropdown = ({
   onValueChange,
   resetFiled,
   isModal,
+  disabled,
 }: Props) => {
   const [selectedValue, setSelectedValue] = useState(value || "");
 
@@ -71,6 +73,7 @@ const Dropdown = ({
           )}
           <FormControl>
             <Select
+              disabled={disabled}
               value={selectedValue as string}
               onValueChange={(_id: string) => handleOnChange(_id, field)}
             >

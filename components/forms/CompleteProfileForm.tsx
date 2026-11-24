@@ -5,7 +5,6 @@ import {
   CheckboxInput,
   CoverPhoto,
   DateInput,
-  Dropdown,
   FormInput,
   ProfilePhoto,
   TextArea,
@@ -26,6 +25,7 @@ import { useEffect, useRef } from "react";
 import { useProfileAwardWrite as useProfileWrite } from "@/lib/hooks/useProfileAwardWrite";
 import ProfileLocation from "../inputs/ProfileLocation";
 import { writeCachedAuthUser } from "@/lib/utils/auth-user-cache";
+import ProfileOptionField from "../inputs/ProfileOptionField";
 
 const CompleteProfileForm = ({ langData, professionData }: any) => {
   const { user, setUser } = useUserContext();
@@ -35,15 +35,6 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
   useEffect(() => {
     uploads.current = new Map();
   }, [user.currentUserId]);
-  const LangOptions = langData.response.map((item: any) => ({
-    _id: item._id,
-    name: item.language,
-  }));
-
-  const professionOptions = professionData.response.map((item: any) => ({
-    _id: item._id,
-    name: item.professional,
-  }));
 
   const form = useForm<z.infer<typeof CompleteProfileValidation>>({
     resolver: zodResolver(CompleteProfileValidation),
@@ -275,24 +266,15 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
                 )}
               />
 
-              <Dropdown
+              <ProfileOptionField
                 form={form}
-                value={form.getValues("knownLanguage")}
-                formLabel="Native Language"
-                inputName="knownLanguage"
-                placeholder="Select your native language"
-                formDescription="Let us know the language you speak so we can connect you with people who share your interests and culture."
-                options={LangOptions}
+                kind="language"
+                initialResult={langData}
               />
-
-              <Dropdown
+              <ProfileOptionField
                 form={form}
-                value={form.getValues("profession")}
-                formLabel="Profession"
-                inputName="profession"
-                placeholder="Select your profession"
-                formDescription="This information helps us understand your professional background and can be used to provide you with relevant content and services."
-                options={professionOptions}
+                kind="profession"
+                initialResult={professionData}
               />
 
               <TextArea

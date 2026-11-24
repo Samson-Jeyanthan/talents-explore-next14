@@ -10,8 +10,10 @@ export const metadata: Metadata = {
 };
 
 const CompleteProfile = async () => {
-  const langData = await getLanguagesAction();
-  const professionData = await getProfessionsAction();
+  const [langData, professionData] = await Promise.all([
+    getLanguagesAction(),
+    getProfessionsAction(),
+  ]);
 
   return (
     <div className="flex-start min-h-screen w-full flex-col">

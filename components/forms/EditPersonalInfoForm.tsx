@@ -5,19 +5,19 @@ import {
   CheckboxInput,
   CoverPhoto,
   DateInput,
-  Dropdown,
   FormInput,
   ProfilePhoto,
   TextArea,
 } from "../inputs";
 import { FormField, FormMessage } from "../ui/form";
 import ProfileLocation from "../inputs/ProfileLocation";
+import ProfileOptionField from "../inputs/ProfileOptionField";
 
 const EditPersonalInfoForm = ({
   form,
   userData,
-  LangOptions,
-  professionOptions,
+  langData,
+  professionData,
 }: any) => {
   return (
     <div className="mt-4 flex w-full flex-col gap-5">
@@ -85,24 +85,19 @@ const EditPersonalInfoForm = ({
           )}
         />
 
-        <Dropdown
+        <ProfileOptionField
           form={form}
-          value={form.getValues("knownLanguage")}
-          formLabel="Native Language"
-          inputName="knownLanguage"
-          placeholder="Select your native language"
-          formDescription="Let us know the language you speak so we can connect you with people who share your interests and culture."
-          options={LangOptions}
+          kind="language"
+          initialResult={langData}
+          selectedLabel={userData?.personalInfo?.language}
+          savedId={userData?.personalInfo?.languageKnown}
         />
-
-        <Dropdown
+        <ProfileOptionField
           form={form}
-          inputName="profession"
-          formLabel="Profession"
-          placeholder="Select your profession"
-          options={professionOptions}
-          value={form.getValues("profession")}
-          formDescription="This information helps us understand your professional background and can be used to provide you with relevant content and services."
+          kind="profession"
+          initialResult={professionData}
+          selectedLabel={userData?.personalInfo?.professional}
+          savedId={userData?.personalInfo?.professionalId}
         />
 
         <TextArea

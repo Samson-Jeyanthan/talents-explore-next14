@@ -39,8 +39,10 @@ const EditProfile = async ({ params }: ParamsProps) => {
   const currentUser = res?.response;
   const isOwnProfile = currentUser?._id === params.userId;
 
-  const langData = await getLanguagesAction();
-  const professionData = await getProfessionsAction();
+  const [langData, professionData] = await Promise.all([
+    getLanguagesAction(),
+    getProfessionsAction(),
+  ]);
   const userData = await fetchUserDataAction(params.userId, params.userId);
 
   if (!isOwnProfile) {

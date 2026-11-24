@@ -1,6 +1,7 @@
 "use server";
 
 import { getAuthHeaders } from "@/lib/session";
+import { isRedirectError } from "next/dist/client/components/redirect";
 
 const EMPTY_RESPONSE = {
   status: "400",
@@ -16,7 +17,8 @@ export async function getLanguagesAction() {
       {
         cache: "no-store",
         headers,
-      }
+        signal: AbortSignal.timeout(15000),
+      },
     );
 
     if (!response.ok) {
@@ -27,12 +29,15 @@ export async function getLanguagesAction() {
     }
 
     const data = await response.json();
+    if (!Array.isArray(data?.response))
+      return { ...EMPTY_RESPONSE, message: "Failed to fetch languages" };
     return {
       ...EMPTY_RESPONSE,
       ...data,
       response: Array.isArray(data?.response) ? data.response : [],
     };
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error(error);
     return {
       ...EMPTY_RESPONSE,
@@ -49,7 +54,8 @@ export async function getProfessionsAction() {
       {
         cache: "no-store",
         headers,
-      }
+        signal: AbortSignal.timeout(15000),
+      },
     );
 
     if (!response.ok) {
@@ -60,12 +66,15 @@ export async function getProfessionsAction() {
     }
 
     const data = await response.json();
+    if (!Array.isArray(data?.response))
+      return { ...EMPTY_RESPONSE, message: "Failed to fetch professions" };
     return {
       ...EMPTY_RESPONSE,
       ...data,
       response: Array.isArray(data?.response) ? data.response : [],
     };
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error(error);
     return {
       ...EMPTY_RESPONSE,
@@ -82,7 +91,7 @@ export async function getMainCategoriesAction() {
       {
         cache: "no-store",
         headers,
-      }
+      },
     );
 
     if (!response.ok) {
@@ -115,7 +124,7 @@ export async function getSubCategoriesAction(mainCategoryId: string) {
       {
         cache: "no-store",
         headers,
-      }
+      },
     );
 
     if (!response.ok) {
@@ -148,7 +157,7 @@ export async function getSkillsAction(subCategoryId: string) {
       {
         cache: "no-store",
         headers,
-      }
+      },
     );
 
     if (!response.ok) {
@@ -181,7 +190,7 @@ export async function getCountriesAction() {
       {
         cache: "no-store",
         headers,
-      }
+      },
     );
 
     if (!response.ok) {
@@ -214,7 +223,7 @@ export async function getStatesAction(country: string) {
       {
         cache: "no-store",
         headers,
-      }
+      },
     );
 
     if (!response.ok) {
@@ -247,7 +256,7 @@ export async function getEthnicAction() {
       {
         cache: "no-store",
         headers,
-      }
+      },
     );
 
     if (!response.ok) {

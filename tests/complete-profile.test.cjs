@@ -190,6 +190,7 @@ function formHarness({ upload, save, cacheStorage } = {}) {
     },
     "../modals": { TransparentLoader: "loader" },
     "../inputs/ProfileLocation": {},
+    "../inputs/ProfileOptionField": "profile-option",
     sonner: { toast: { success: (message) => notices.push(message) } },
   };
   const component = load("components/forms/CompleteProfileForm.tsx", mocks, {

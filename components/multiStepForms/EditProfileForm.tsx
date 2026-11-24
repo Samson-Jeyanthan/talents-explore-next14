@@ -52,15 +52,6 @@ const EditProfileForm = ({ langData, professionData, userData }: Props) => {
   const [prevURLs, setPrevURLs] = useState<string[]>(
     userData?.morePersonalInfo?.featuredPhotos || [],
   );
-  const LangOptions = langData?.response?.map((item: any) => ({
-    _id: item._id,
-    name: item.language,
-  }));
-
-  const professionOptions = professionData?.response?.map((item: any) => ({
-    _id: item._id,
-    name: item.professional,
-  }));
 
   const isTalent = userData?.isTalent === true;
   const validationSchema = getEditProfileValidation(isTalent);
@@ -160,8 +151,8 @@ const EditProfileForm = ({ langData, professionData, userData }: Props) => {
           <EditPersonalInfoForm
             form={form}
             userData={userData}
-            LangOptions={LangOptions}
-            professionOptions={professionOptions}
+            langData={langData}
+            professionData={professionData}
           />
           {isTalent && (
             <EditProInfoForm

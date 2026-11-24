@@ -8,6 +8,8 @@ import useDateSelector from "@/lib/hooks/useDateSelector";
 import React, { useState, useEffect } from "react";
 import { profileEducationValidation } from "@/lib/utils/profile-education";
 import { MdDelete } from "react-icons/md";
+import { useProfileOptions } from "@/lib/hooks/useProfileOptions";
+import { ProfileOptionsStatus } from "@/components/inputs/ProfileOptionField";
 
 type LanguageSet = {
   languageId: string;
@@ -29,9 +31,9 @@ const INITIAL_VALUES = {
   to: "",
 };
 
-type LangOption = { _id: string; name: string };
-
-const LangEducationForm = ({ form, LangOptions, onDraftChange }: any) => {
+const LangEducationForm = ({ form, langData, onDraftChange }: any) => {
+  const languages = useProfileOptions("language", langData);
+  const LangOptions = languages.options;
   const [selectedLangId, setSelectedLangId] = useState("");
   const [selectedLevel, setSelectedLevel] = useState("");
   const [addedLang, setAddedLang] = useState<LanguageSet[]>(
@@ -53,7 +55,7 @@ const LangEducationForm = ({ form, LangOptions, onDraftChange }: any) => {
   // Languages details --------------------------------------------------------
 
   // Hide languages that were already added
-  const availableOptions = (LangOptions as LangOption[]).filter(
+  const availableOptions = LangOptions.filter(
     (opt) => !addedLang.some((item) => item.languageId === opt._id),
   );
 
@@ -64,11 +66,10 @@ const LangEducationForm = ({ form, LangOptions, onDraftChange }: any) => {
 
   const handleLangAddClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    if (!selectedLangId || !selectedLevel) return;
+    if (!selectedLangId || !selectedLevel || languages.status !== "ready")
+      return;
 
-    const option = (LangOptions as LangOption[]).find(
-      (o) => o._id === selectedLangId,
-    );
+    const option = LangOptions.find((o) => o._id === selectedLangId);
     if (!option) return;
 
     syncForm([
@@ -141,8 +142,14 @@ const LangEducationForm = ({ form, LangOptions, onDraftChange }: any) => {
             inputName="languagePicker"
             placeholder="Select language"
             options={availableOptions}
+            disabled={languages.status !== "ready"}
             value={selectedLangId}
             onValueChange={setSelectedLangId}
+          />
+          <ProfileOptionsStatus
+            kind="language"
+            status={languages.status}
+            retry={languages.retry}
           />
           <Dropdown
             form={form}
@@ -157,7 +164,11 @@ const LangEducationForm = ({ form, LangOptions, onDraftChange }: any) => {
             <Button
               type="button"
               onClick={handleLangAddClick}
-              disabled={!selectedLangId || !selectedLevel}
+              disabled={
+                !selectedLangId ||
+                !selectedLevel ||
+                languages.status !== "ready"
+              }
               className="shad-button_secondary !w-32 !text-custom-100"
             >
               Add Language
