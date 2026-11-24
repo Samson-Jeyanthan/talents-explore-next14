@@ -18,6 +18,10 @@ import {
   otpEmailValidation,
 } from "@/lib/validations/otp.validation";
 import { jwtDecode } from "jwt-decode";
+import {
+  signinRequestValidation,
+  signinUserValidation,
+} from "@/lib/validations/signin.validation";
 
 export async function registerAction(formData: unknown) {
   const parsed = signupRequestValidation.safeParse(formData);
@@ -166,6 +170,15 @@ export async function deleteToken() {
 }
 
 export async function signinAction(formData: unknown) {
+  const failure = (
+    message = "Unable to sign in right now. Please try again.",
+  ) => ({ status: "400" as const, message });
+  const parsed = signinRequestValidation.safeParse(formData);
+  if (!parsed.success)
+    return failure("Enter a valid email address and password.");
+  // One deadline covers login, the account lookup and response-body parsing.
+  const signal = AbortSignal.timeout(15000);
+  let sessionAttempted = false;
   try {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`,
@@ -174,42 +187,86 @@ export async function signinAction(formData: unknown) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(parsed.data),
+        signal,
+        cache: "no-store",
       },
     );
-
+    if (response.status === 401 || response.status === 403)
+      return failure("Your email or password is incorrect. Please try again.");
+    if (!response.ok)
+      return failure(
+        "The login service is temporarily unavailable. Please try again.",
+      );
     const res = await response.json();
+    if (res?.status !== "7400")
+      return failure("Your email or password is incorrect. Please try again.");
+    const tokens = res.response;
+    if (
+      typeof tokens?.accessToken !== "string" ||
+      !tokens.accessToken.trim() ||
+      typeof tokens.refreshToken !== "string" ||
+      !tokens.refreshToken.trim()
+    )
+      return failure();
+    const claims = jwtDecode<{ sub?: unknown; exp?: number }>(
+      tokens.accessToken,
+    );
+    if (
+      typeof claims.sub !== "string" ||
+      typeof claims.exp !== "number" ||
+      !Number.isFinite(claims.exp) ||
+      claims.exp * 1000 <= Date.now()
+    )
+      return failure();
 
-    if (res?.status === "7400") {
-      //  check the user has complete the about section
-      const accessToken = res.response.accessToken;
-      const userDetailsRes = await getUserPersonalInfoAction(accessToken);
-
-      const userPersonalInfo = userDetailsRes?.response?.personalInfo;
-      const userFirstName = userPersonalInfo?.firstName;
-
-      // store isAbout based on user's first name
-      if (userFirstName) {
-        await storeIsAbout(true);
-        await createSession(
-          res.response.accessToken,
-          res.response.refreshToken,
-        );
-      } else {
-        await storeIsAbout(false);
-        await createSession(
-          res.response.accessToken,
-          res.response.refreshToken,
-        );
-      }
-
-      return userDetailsRes;
-    } else {
-      return false;
+    const profileResponse = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/`,
+      {
+        headers: { Authorization: `Bearer ${tokens.accessToken}` },
+        cache: "no-store",
+        signal,
+      },
+    );
+    if (!profileResponse.ok)
+      return failure(
+        "Unable to load your account. Please try signing in again.",
+      );
+    const profile = await profileResponse.json();
+    const user = signinUserValidation.safeParse(profile?.response);
+    if (
+      profile?.status !== "7400" ||
+      !user.success ||
+      user.data._id !== claims.sub
+    )
+      return failure();
+    signal.throwIfAborted();
+    sessionAttempted = true;
+    const session = await createSession(
+      tokens.accessToken,
+      tokens.refreshToken,
+    );
+    if (!session.success) {
+      await clearSession();
+      return failure(
+        "Unable to start your session. Please try signing in again.",
+      );
     }
-  } catch (error) {
-    console.error(error);
-    return error;
+    await storeIsAbout(!!user.data.personalInfo.firstName);
+    return { status: "7400" as const, response: user.data };
+  } catch {
+    if (sessionAttempted) {
+      try {
+        await clearSession();
+      } catch {
+        /* Best-effort rollback of partial cookie writes. */
+      }
+    }
+    return failure(
+      signal.aborted
+        ? "Sign in timed out. Please check your connection and try again."
+        : "Unable to connect or complete sign in. Please try again.",
+    );
   }
 }
 

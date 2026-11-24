@@ -3,10 +3,7 @@ import { newPasswordValidation } from "./password.validation";
 
 export { SignupValidation } from "./signup.validation";
 
-export const SigninValidation = z.object({
-  email: z.string().min(1, { message: "Email is required" }).email(),
-  password: z.string().min(1, { message: "Password is required" }),
-});
+export { SigninValidation } from "./signin.validation";
 
 export const ForgotPasswordValidation = z.object({
   email: z.string().min(1, { message: "Email is required" }).email(),
