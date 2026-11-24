@@ -464,6 +464,40 @@ test("invalid data and unaccepted terms cannot reach authentication", async () =
   );
   assert.equal(h.auth(), 0);
 });
+
+test("talent registration continues to require a bio in the form and API payload", async () => {
+  for (const bio of ["", " \n\t "]) {
+    const input = { ...values(), bio };
+    assert.equal(
+      util.talentRegistrationValidation.safeParse(input).success,
+      false,
+    );
+    let uploads = 0;
+    await assert.rejects(
+      util.prepareTalentRegistration(
+        input,
+        profile,
+        async () => {
+          uploads++;
+          return upload(photo());
+        },
+        new Map(),
+        () => true,
+      ),
+    );
+    assert.equal(uploads, 0);
+    const data = await payload();
+    data.moreInfo.bio = bio;
+    const h = api();
+    assert.equal(
+      (await h.actions.editUserProfessionalInfoAction(data, profile, true))
+        .success,
+      false,
+    );
+    assert.equal(h.auth(), 0);
+    assert.equal(h.calls.length, 0);
+  }
+});
 test("other users, invalid identities, failed reads and existing talent profiles cannot be overwritten", async () => {
   for (const identity of [
     ok({ _id: second, isTalent: false }),

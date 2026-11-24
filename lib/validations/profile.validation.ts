@@ -100,7 +100,7 @@ const baseObjectSchema = z.object({
   coverPhoto: profileImageSelection,
   profilePhoto: profileImageSelection,
 
-  // professional info — required ONLY for talents, enforced via superRefine below
+  // Professional details are optional when editing an existing profile.
   bio: z.string().trim().max(1000).optional(),
   ethnic: z.string().optional(),
   featuredPhotos: z
@@ -121,23 +121,11 @@ const baseObjectSchema = z.object({
     .optional(),
 });
 
-export const getEditProfileValidation = (isTalent: boolean) =>
-  baseObjectSchema
-    .superRefine((data, ctx) => {
-      if (!isTalent) return;
-
-      if (!data.bio || data.bio.trim().length === 0) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Bio is required",
-          path: ["bio"],
-        });
-      }
-    })
-    .refine((data) => validProfileBirthDate(data.dob), {
-      message: "You must be at least 13 years old",
-      path: ["dob"],
-    });
+export const getEditProfileValidation = (_isTalent: boolean) =>
+  baseObjectSchema.refine((data) => validProfileBirthDate(data.dob), {
+    message: "You must be at least 13 years old",
+    path: ["dob"],
+  });
 
 // single stable type for the form — no ternary needed
 export type EditProfileFormValues = z.infer<typeof baseObjectSchema>;

@@ -24,7 +24,7 @@ const EditProInfoForm = ({
         )}
         <TextArea
           form={form}
-          formLabel="Bio"
+          formLabel={isTalentRegister ? "Bio" : "Bio (optional)"}
           inputName="bio"
           placeholder="About your self, your work, and your experience"
           formDescription="This will be displayed on your profile and will help others understand more about you."

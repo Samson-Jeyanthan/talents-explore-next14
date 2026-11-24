@@ -308,7 +308,7 @@ test("all validation runs before uploading and the combined featured count canno
   };
   for (const input of [
     { ...values(), featuredPhotos: [photo("x.pdf", "application/pdf")] },
-    { ...values(), bio: " " },
+    { ...values(), bio: "a".repeat(1001) },
     {
       ...values(),
       socialLinks: [{ type: "website", url: "javascript:alert(1)" }],
@@ -428,7 +428,7 @@ test("basic profiles never submit talent-only fields and optional ethnicity does
     schema(false).safeParse({ ...values(), bio: "", ethnic: "" }).success,
     true,
   );
-  assert.equal(schema(true).safeParse({ ...values(), bio: "" }).success, false);
+  assert.equal(schema(true).safeParse({ ...values(), bio: "" }).success, true);
 });
 
 function api(responses = [], authError, cacheError = false) {
@@ -484,6 +484,68 @@ function api(responses = [], authError, cacheError = false) {
   return { actions, calls, logs, invalidations, auth: () => auth };
 }
 const ok = (response) => ({ status: "7400", response });
+
+test("clearing a talent bio passes form validation and sends an explicit empty bio to the API", async () => {
+  const schema = load(
+    "lib/validations/profile.validation.ts",
+  ).getEditProfileValidation(true);
+  for (const bio of ["", " \n\t ", undefined]) {
+    const input = { ...values(), bio };
+    assert.equal(schema.safeParse(input).success, true);
+    const result = await util.prepareProfileEditPayload(
+      input,
+      user(),
+      [...user().morePersonalInfo.featuredPhotos],
+      async () => {
+        throw Error("Unexpected upload");
+      },
+      new Map(),
+      () => true,
+    );
+    assert.equal(result.moreInfo.bio, "");
+    const h = api([ok(user()), ok({})]);
+    assert.equal(
+      (await h.actions.userPersonalInfoEditAction(result, profile)).status,
+      "7400",
+    );
+    const saved = h.calls[1].body;
+    assert.equal(Object.hasOwn(saved.moreInfo, "bio"), true);
+    assert.equal(saved.moreInfo.bio, "");
+    assert.equal(saved.moreInfo._id, user().morePersonalInfo._id);
+    assert.deepEqual(
+      saved.moreInfo.featuredPhotos,
+      plain(user().morePersonalInfo.featuredPhotos),
+    );
+    assert.deepEqual(saved.moreInfo.socialLinks, plain(input.socialLinks));
+    assert.equal(saved.profileImage, user().personalInfo.profileImage);
+    assert.equal(saved.coverImage, user().personalInfo.coverImage);
+  }
+});
+
+test("optional edit bios still enforce the length limit and reject malformed API values", async () => {
+  const schema = load(
+    "lib/validations/profile.validation.ts",
+  ).getEditProfileValidation(true);
+  assert.equal(
+    schema.safeParse({ ...values(), bio: "a".repeat(1000) }).success,
+    true,
+  );
+  assert.equal(
+    schema.safeParse({ ...values(), bio: "a".repeat(1001) }).success,
+    false,
+  );
+  for (const bio of ["a".repeat(1001), null, 123, {}]) {
+    const payload = body();
+    payload.moreInfo.bio = bio;
+    const h = api();
+    assert.equal(
+      (await h.actions.userPersonalInfoEditAction(payload, profile)).status,
+      "400",
+    );
+    assert.equal(h.auth(), 0);
+    assert.equal(h.calls.length, 0);
+  }
+});
 test("server verifies ownership, preserves fresh unchanged photos, and derives the more-info ID from the account", async () => {
   const payload = body();
   payload.moreInfo._id = first;
@@ -896,6 +958,21 @@ test("editor retains text and selected files after rejection and reuses uploads 
   assert.ok(h.navigation.includes("/profile/qa-user/" + profile));
   assert.equal(h.users[0].firstName, "Changed");
   assert.equal(h.users[0].imageUrl, "https://example.test/profile.jpg");
+});
+
+test("the profile editor saves after the bio is cleared and keeps retry behavior", async () => {
+  const h = editor();
+  h.fields().bio = "";
+  await h.submit();
+  assert.equal(h.calls.length, 1);
+  assert.equal(h.calls[0].payload.moreInfo.bio, "");
+  assert.equal(h.navigation.length, 0);
+  assert.equal(h.fields().bio, "");
+  h.accept();
+  await h.submit();
+  assert.equal(h.calls.length, 2);
+  assert.equal(h.calls[1].payload.moreInfo.bio, "");
+  assert.ok(h.navigation.includes("/profile/qa-user/" + profile));
 });
 test("duplicate submissions issue one request and navigation is blocked while saving", async () => {
   let finish;

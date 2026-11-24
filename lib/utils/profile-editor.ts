@@ -61,7 +61,7 @@ export const profileEditPayloadValidation = z
     longitude: z.number().finite().min(-180).max(180).optional(),
     moreInfo: z
       .object({
-        bio: z.string().trim().min(1).max(1000),
+        bio: z.string().trim().max(1000),
         ethnic: z
           .string()
           .regex(/^[a-f\d]{24}$/i)
