@@ -106,3 +106,55 @@ export async function saveProfileLanguageAction(payload: unknown) {
     };
   }
 }
+
+export async function deleteProfileLanguageAction(
+  profileId: string,
+  entryId: string,
+) {
+  if (
+    typeof profileId !== "string" ||
+    !/^[a-f\d]{24}$/i.test(profileId) ||
+    typeof entryId !== "string" ||
+    !entryId.trim() ||
+    entryId.length > 4096
+  )
+    return {
+      status: "400",
+      message:
+        "Invalid language selection. Refresh your profile and try again.",
+    };
+  try {
+    const headers = await getAuthHeaders();
+    const viewer = await request("/user/", headers);
+    if (viewer?._id !== profileId)
+      return {
+        status: "400",
+        message: "You can only delete your own languages.",
+      };
+    const rows = profileLanguageRows(
+      await request(`/user/languages/${profileId}`, headers),
+    );
+    const remaining = rows.filter((row) => row._id !== entryId);
+    // Retrying after a lost response must not delete a different entry.
+    if (remaining.length !== rows.length)
+      await request("/user/languages", headers, remaining);
+    try {
+      revalidatePath("/profile/[username]/[userId]", "layout");
+    } catch {
+      /* Server state confirms the deletion. */
+    }
+    return {
+      status: "7400",
+      message:
+        remaining.length === rows.length
+          ? "Language already deleted."
+          : "Language deleted.",
+    };
+  } catch (error) {
+    if (isRedirectError(error)) throw error;
+    return {
+      status: "400",
+      message: "Unable to confirm language deletion. Please try again.",
+    };
+  }
+}

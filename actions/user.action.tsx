@@ -270,43 +270,6 @@ export async function userPersonalInfoEditAction(
 
 // edit & update
 
-export async function editUserLanguageInfoAction({
-  formData,
-  path,
-}: {
-  formData: unknown;
-  path: string;
-}) {
-  console.log(formData);
-  try {
-    const headers = await getAuthHeaders();
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/languages`,
-      {
-        method: "PUT",
-        cache: "no-store",
-        headers: {
-          ...headers,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      },
-    );
-
-    const res = await response.json();
-    if (res.status === "7400") {
-      revalidatePath(path);
-      return res;
-    } else {
-      const data = {
-        status: 400,
-        message: "Could not edit language data",
-      };
-      return data;
-    }
-  } catch {}
-}
-
 export async function editUserEducationInfoAction({
   formData,
   path,
