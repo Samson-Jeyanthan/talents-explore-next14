@@ -17,6 +17,7 @@ import { useCallback, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { normalizeProfileBirthDate } from "@/lib/utils/birth-date";
 import {
   getProfileLocationValues,
   getProfileLocationUpdate,
@@ -64,7 +65,7 @@ const EditProfileForm = ({ langData, professionData, userData }: Props) => {
       lastName: userData?.personalInfo.lastName || "",
       knownLanguage: userData?.personalInfo.languageKnown || "",
       profession: userData?.personalInfo.professionalId || "",
-      dob: userData?.personalInfo?.dob,
+      dob: normalizeProfileBirthDate(userData?.personalInfo?.dob),
       gender: userData?.personalInfo.gender || "",
       quotes: userData?.personalInfo.shortBio || "",
       coverPhoto: undefined,

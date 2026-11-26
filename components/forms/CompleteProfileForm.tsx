@@ -9,7 +9,7 @@ import {
   ProfilePhoto,
   TextArea,
 } from "../inputs";
-import { GENDER_VALUES } from "@/constants";
+import { PROFILE_GENDER_OPTIONS } from "@/lib/utils/profile-gender";
 import { Button } from "../ui/button";
 import { CompleteProfileValidation } from "@/lib/validations/auth.validation";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,14 +21,28 @@ import { useRouter } from "next/navigation";
 import { useUserContext } from "@/context/AuthProvider";
 import { TransparentLoader } from "../modals";
 import { uploadFileToStorage, type UploadedFile } from "@/lib/utils/uploadFile";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useProfileAwardWrite as useProfileWrite } from "@/lib/hooks/useProfileAwardWrite";
 import ProfileLocation from "../inputs/ProfileLocation";
-import { writeCachedAuthUser } from "@/lib/utils/auth-user-cache";
+import {
+  clearCachedAuthUser,
+  writeCachedAuthUser,
+} from "@/lib/utils/auth-user-cache";
 import ProfileOptionField from "../inputs/ProfileOptionField";
 
 const CompleteProfileForm = ({ langData, professionData }: any) => {
-  const { user, setUser } = useUserContext();
+  const { user, setUser, isLoading, checkAuthUser } = useUserContext();
+  const accountReady =
+    /^[a-f\d]{24}$/i.test(user.currentUserId) && !!user.username?.trim();
+  const [retryPending, setRetryPending] = useState(false);
+  const recovery = useRef({ active: true, busy: false });
+  useEffect(() => {
+    const current = recovery.current;
+    current.active = true;
+    return () => {
+      current.active = false;
+    };
+  }, []);
   const router = useRouter();
   const write = useProfileWrite(user.currentUserId);
   const uploads = useRef(new Map<File, UploadedFile>());
@@ -53,6 +67,12 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
   });
 
   async function onSubmit(values: z.infer<typeof CompleteProfileValidation>) {
+    if (!accountReady || isLoading || retryPending) {
+      write.setError(
+        "Please wait for your account details to load, or retry account loading before creating your profile.",
+      );
+      return;
+    }
     const formData = {
       firstName: values.firstName,
       lastName: values.lastName,
@@ -165,6 +185,22 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
     );
   }
 
+  const retryAccount = async () => {
+    if (recovery.current.busy || isLoading) return;
+    recovery.current.busy = true;
+    setRetryPending(true);
+    write.setError("");
+    try {
+      clearCachedAuthUser();
+      await checkAuthUser();
+    } catch {
+      // The account status below remains available for another retry.
+    } finally {
+      recovery.current.busy = false;
+      if (recovery.current.active) setRetryPending(false);
+    }
+  };
+
   return (
     <>
       {write.pending && <TransparentLoader text="Submitting Form" />}
@@ -176,7 +212,7 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
             ),
           )}
           className="mt-4 flex w-full flex-col gap-5"
-          aria-busy={write.pending}
+          aria-busy={write.pending || !!isLoading || retryPending}
         >
           <fieldset disabled={write.pending} className="contents">
             <div className="flex w-full flex-col gap-6">
@@ -248,7 +284,7 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
                 form={form}
                 inputName="gender"
                 formLabel="Gender"
-                data={GENDER_VALUES}
+                data={PROFILE_GENDER_OPTIONS}
               />
 
               <FormField
@@ -258,6 +294,7 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
                   <>
                     <DateInput
                       formLabel="Date of Birth"
+                      minimumAge={13}
                       fieldChange={field.onChange}
                       isoDate={form.getValues("dob")}
                     />
@@ -287,6 +324,29 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
               />
             </div>
 
+            {(!accountReady || isLoading || retryPending) && (
+              <div
+                role={isLoading || retryPending ? "status" : "alert"}
+                className="text-sm text-light-700"
+              >
+                {isLoading || retryPending ? (
+                  "Loading your account details..."
+                ) : (
+                  <>
+                    Unable to load your account details. Your entries have been
+                    kept.
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={retryAccount}
+                      className="ml-2"
+                    >
+                      Retry account loading
+                    </Button>
+                  </>
+                )}
+              </div>
+            )}
             {write.error && (
               <p
                 role="alert"
@@ -298,7 +358,13 @@ const CompleteProfileForm = ({ langData, professionData }: any) => {
             <div className="flex w-full justify-end">
               <Button
                 type="submit"
-                disabled={write.pending || form.formState.isSubmitting}
+                disabled={
+                  !accountReady ||
+                  !!isLoading ||
+                  retryPending ||
+                  write.pending ||
+                  form.formState.isSubmitting
+                }
                 className="shad-button_primary mt-4 w-40"
               >
                 {write.pending || form.formState.isSubmitting

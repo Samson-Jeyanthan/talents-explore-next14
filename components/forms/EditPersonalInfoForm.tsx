@@ -1,6 +1,6 @@
 "use client";
 
-import { GENDER_VALUES } from "@/constants";
+import { getProfileGenderOptions } from "@/lib/utils/profile-gender";
 import {
   CheckboxInput,
   CoverPhoto,
@@ -67,7 +67,7 @@ const EditPersonalInfoForm = ({
           form={form}
           inputName="gender"
           formLabel="Gender"
-          data={GENDER_VALUES}
+          data={getProfileGenderOptions(form.watch("gender"))}
         />
 
         <FormField
@@ -77,6 +77,7 @@ const EditPersonalInfoForm = ({
             <>
               <DateInput
                 formLabel="Date of Birth"
+                minimumAge={13}
                 fieldChange={field.onChange}
                 isoDate={form.getValues("dob")}
               />

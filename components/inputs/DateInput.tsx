@@ -4,6 +4,7 @@ import useDateSelector from "@/lib/hooks/useDateSelector";
 import {
   convertToISOString,
   formatISOStringDate,
+  profileBirthDateCutoff,
 } from "@/lib/utils/birth-date";
 import {
   Select,
@@ -19,6 +20,7 @@ type Props = {
   formDescription?: string;
   isoDate?: string;
   fieldChange: (value: string) => void;
+  minimumAge?: number;
 };
 
 const DateInput = ({
@@ -26,6 +28,7 @@ const DateInput = ({
   formDescription,
   fieldChange,
   isoDate,
+  minimumAge,
 }: Props) => {
   const { year, month, day } = formatISOStringDate(isoDate);
 
@@ -39,6 +42,21 @@ const DateInput = ({
     yearValue: dates.selectedYear,
     monthValue: Number(dates.selectedMonth),
   });
+  const cutoff =
+    minimumAge === undefined ? "" : profileBirthDateCutoff(minimumAge);
+  const latest = formatISOStringDate(cutoff);
+  const selectableYears = cutoff
+    ? years.filter((option) => Number(option.id) <= Number(latest.year))
+    : years;
+  const monthUnavailable = (month: string) =>
+    !!cutoff &&
+    dates.selectedYear === latest.year &&
+    Number(month) > Number(latest.month);
+  const dayUnavailable = (day: string) =>
+    !!cutoff &&
+    dates.selectedYear === latest.year &&
+    dates.selectedMonth === latest.month &&
+    Number(day) > Number(latest.day);
 
   // Reflect loaded/reset values without writing back on mount or prop changes.
   useEffect(() => {
@@ -55,7 +73,25 @@ const DateInput = ({
   }, [isoDate]);
 
   const selectDate = (part: keyof typeof dates, value: string) => {
+    if (
+      cutoff &&
+      ((part === "selectedYear" && Number(value) > Number(latest.year)) ||
+        (part === "selectedMonth" && monthUnavailable(value)) ||
+        (part === "selectedDay" && dayUnavailable(value)))
+    )
+      return;
     const next = { ...dates, [part]: value };
+    if (cutoff && next.selectedYear === latest.year) {
+      if (Number(next.selectedMonth) > Number(latest.month)) {
+        next.selectedMonth = "";
+        next.selectedDay = "";
+      } else if (
+        next.selectedMonth === latest.month &&
+        Number(next.selectedDay) > Number(latest.day)
+      ) {
+        next.selectedDay = "";
+      }
+    }
     let iso = convertToISOString(
       next.selectedYear,
       next.selectedMonth,
@@ -93,7 +129,7 @@ const DateInput = ({
             )}
           </SelectTrigger>
           <SelectContent className="shad-auth_form_select_option">
-            {years.map((option, index) => (
+            {selectableYears.map((option, index) => (
               <SelectItem
                 key={index}
                 value={String(option.id)}
@@ -125,6 +161,7 @@ const DateInput = ({
               <SelectItem
                 key={index}
                 value={String(option.id)}
+                disabled={monthUnavailable(String(option.id))}
                 className="shad-auth_form_select_item"
               >
                 {option.label}
@@ -154,6 +191,7 @@ const DateInput = ({
                 <SelectItem
                   key={index}
                   value={String(option.id)}
+                  disabled={dayUnavailable(String(option.id))}
                   className="shad-auth_form_select_item"
                 >
                   {option.label}

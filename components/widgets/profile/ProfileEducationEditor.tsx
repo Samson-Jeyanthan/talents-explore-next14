@@ -9,6 +9,7 @@ import { MdClose } from "react-icons/md";
 import { saveProfileEducationAction } from "@/actions/profile-education.action";
 import {
   educationKey,
+  educationEndValue,
   profileEducationValidation,
   type ProfileEducation,
 } from "@/lib/utils/profile-education";
@@ -48,7 +49,7 @@ export default function ProfileEducationEditor({
       course: row?.course || "",
       institution: row?.institution || "",
       from: row?.from == null ? "" : String(row.from),
-      to: row?.to == null ? "" : String(row.to).toLowerCase(),
+      to: educationEndValue(row?.to),
     });
   }, [isOpen, selection, isEdit, reset]);
   const submit = async (

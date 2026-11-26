@@ -7,6 +7,7 @@ const fs = require("node:fs"),
 (async () => {
   const files = [
     "lib/utils/profile-languages.ts",
+    "lib/utils/profile-gender.ts",
     "lib/utils/profile-options.ts",
     "lib/hooks/useProfileOptions.ts",
     "components/inputs/ProfileOptionField.tsx",

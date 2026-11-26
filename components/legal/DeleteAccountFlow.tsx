@@ -4,6 +4,7 @@ import { useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -186,11 +187,11 @@ export default function DeleteAccountFlow() {
                 className="h-12 bg-dark-300"
               />
             </label>
-            <label className="flex flex-col gap-2 text-sm">
-              Password
-              <Input
+            <div className="flex flex-col gap-2 text-sm">
+              <label htmlFor="delete-account-password">Password</label>
+              <PasswordInput
+                id="delete-account-password"
                 name="password"
-                type="password"
                 autoComplete="current-password"
                 required
                 maxLength={256}
@@ -199,7 +200,7 @@ export default function DeleteAccountFlow() {
                 disabled={!!pending}
                 className="h-12 bg-dark-300"
               />
-            </label>
+            </div>
             {error && !account && (
               <p
                 role="alert"

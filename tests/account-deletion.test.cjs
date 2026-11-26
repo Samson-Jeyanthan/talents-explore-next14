@@ -326,6 +326,7 @@ function client() {
     "next/link": "link",
     "@/components/ui/button": { Button: "button" },
     "@/components/ui/input": { Input: "input" },
+    "@/components/ui/password-input": { PasswordInput: "input" },
     "@/components/ui/alert-dialog": Object.fromEntries(
       [
         "AlertDialog",

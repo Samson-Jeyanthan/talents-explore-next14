@@ -5,6 +5,7 @@ import { getAuthHeaders as resolveSessionHeaders } from "@/lib/session";
 import { isRedirectError } from "next/dist/client/components/redirect";
 import { getUserPersonalInfoAction } from "./auth.action";
 import { deleteCurrentAccountAction } from "./account-deletion.action";
+import { changePasswordRequestValidation } from "@/lib/validations/password.validation";
 
 type PrivacyPayload = Record<string, any>;
 
@@ -317,10 +318,10 @@ export async function updateNotificationSettingsAction(
   }
 }
 
-export async function changePasswordSettingsAction(payload: {
-  oldPassword: string;
-  newPassword: string;
-}) {
+export async function changePasswordSettingsAction(payload: unknown) {
+  const parsed = changePasswordRequestValidation.safeParse(payload);
+  if (!parsed.success)
+    return { status: "400", message: parsed.error.issues[0].message };
   try {
     const { token } = await getCurrentUser();
 
@@ -330,17 +331,20 @@ export async function changePasswordSettingsAction(payload: {
 
     const response = await axios.put(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/changePassword`,
-      payload,
+      parsed.data,
       {
         headers: getAuthHeaders(token),
+        timeout: 15000,
       },
     );
 
     return response.data;
   } catch (error) {
     if (isRedirectError(error)) throw error;
-    console.error("changePasswordSettingsAction failed:", error);
-    return false;
+    return {
+      status: "400",
+      message: "Unable to change your password. Please try again.",
+    };
   }
 }
 

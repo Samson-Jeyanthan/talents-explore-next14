@@ -2,6 +2,7 @@ import { z } from "zod";
 import { validProfileBirthDate } from "../utils/birth-date";
 import { profileLocationSchema } from "../utils/profileLocation";
 import { profileImageSelection } from "../utils/profile-editor";
+import { profileGenderValidation } from "../utils/profile-gender";
 
 const optionId = (label: string) =>
   z
@@ -25,10 +26,7 @@ const personalFields = {
     .trim()
     .min(1, "Last name is required.")
     .max(150, "Last name must be 150 characters or fewer."),
-  // Preserve the API's existing spelling for Prefer not to say.
-  gender: z.enum(["male", "female", "other", "prefferNotToSay"], {
-    errorMap: () => ({ message: "Please select a valid gender." }),
-  }),
+  gender: profileGenderValidation,
   dob: z
     .string()
     .trim()

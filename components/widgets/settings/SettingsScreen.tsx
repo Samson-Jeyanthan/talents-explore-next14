@@ -12,6 +12,7 @@ import {
 import { toast } from "sonner";
 import { newPasswordValidation } from "@/lib/validations/password.validation";
 import { Button } from "@/components/ui/button";
+import { PasswordInput } from "@/components/ui/password-input";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -1216,20 +1217,29 @@ function SettingsScreen({
               onChange: setConfirmPassword,
             },
           ].map((field) => (
-            <label
+            <div
               key={field.label}
               className="rounded-2xl border border-dark-300 bg-dark-200 px-4 py-3"
             >
-              <span className="block pb-2 text-sm text-light-500">
+              <label
+                htmlFor={`settings-${field.label.replaceAll(" ", "-")}`}
+                className="block pb-2 text-sm text-light-500"
+              >
                 {field.label}
-              </span>
-              <input
-                type="password"
+              </label>
+              <PasswordInput
+                id={`settings-${field.label.replaceAll(" ", "-")}`}
+                visibilityLabel={field.label.toLowerCase()}
+                autoComplete={
+                  field.label === "Current password"
+                    ? "current-password"
+                    : "new-password"
+                }
                 value={field.value}
                 onChange={(event) => field.onChange(event.target.value)}
-                className="w-full bg-transparent text-light-900 outline-none"
+                className="h-10 rounded-none border-0 bg-transparent p-0 text-light-900 focus-visible:ring-0 focus-visible:ring-offset-0"
               />
-            </label>
+            </div>
           ))}
           <Button
             type="button"

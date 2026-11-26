@@ -7,6 +7,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "../ui/input";
+import { PasswordInput } from "../ui/password-input";
 
 type TInputProps = {
   form: any;
@@ -27,6 +28,7 @@ const FormInput = ({
   formDescription,
   isAuthForm,
 }: TInputProps) => {
+  const InputComponent = inputType === "password" ? PasswordInput : Input;
   return (
     <FormField
       control={form.control}
@@ -37,10 +39,13 @@ const FormInput = ({
             <FormLabel className="shad-auth_form_label">{formLabel}</FormLabel>
           )}
           <FormControl>
-            <Input
+            <InputComponent
               type={inputType}
               placeholder={placeholder}
               {...field}
+              {...(inputType === "password"
+                ? { visibilityLabel: formLabel || placeholder || "password" }
+                : {})}
               className={`${!isAuthForm ? "shad-form-input" : "shad-auth_form_input"}`}
             />
           </FormControl>

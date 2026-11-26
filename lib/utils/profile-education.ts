@@ -10,6 +10,11 @@ export type ProfileEducation = {
   [key: string]: unknown;
 };
 
+export function educationEndValue(value: ProfileEducation["to"]): string {
+  if (value === null) return "present";
+  return value === undefined ? "" : String(value).trim().toLowerCase();
+}
+
 export function educationKey(row?: ProfileEducation) {
   if (!row) return "";
   return (

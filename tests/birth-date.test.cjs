@@ -126,6 +126,56 @@ test("age validation rejects invalid dates and enforces the thirteenth birthday 
     true,
   );
 });
+
+test("backend Date.toString DOBs restore the same calendar day in every viewer time zone", () => {
+  const previous = process.env.TZ;
+  try {
+    for (const zone of [
+      "UTC",
+      "America/Los_Angeles",
+      "Asia/Colombo",
+      "Pacific/Kiritimati",
+    ]) {
+      process.env.TZ = zone;
+      for (const value of [
+        "Sat Jan 01 2000 00:00:00 GMT+0000 (Coordinated Universal Time)",
+        "Sat Jan 01 2000 00:00:00 GMT+0530 (India Standard Time)",
+        "Sat Jan 01 2000 23:59:59 GMT-1000",
+      ]) {
+        assert.deepEqual(plain(dates.formatISOStringDate(value)), {
+          year: "2000",
+          month: "01",
+          day: "01",
+        });
+        assert.equal(
+          dates.normalizeProfileBirthDate(value),
+          "2000-01-01T00:00:00.000Z",
+        );
+        assert.equal(
+          dates.validProfileBirthDate(value, new Date("2026-11-26T12:00:00Z")),
+          true,
+        );
+      }
+    }
+    assert.equal(
+      dates.validProfileBirthDate(
+        "Wed Nov 27 2013 00:00:00 GMT+0000",
+        new Date("2026-11-26T12:00:00Z"),
+      ),
+      false,
+    );
+    for (const value of [
+      "Sat Feb 31 2000 00:00:00 GMT+0000",
+      "Sat Jan 01 2000 99:00:00 GMT+0000",
+      "01/02/2000",
+    ]) {
+      assert.equal(dates.formatISOStringDate(value).year, "");
+    }
+  } finally {
+    if (previous === undefined) delete process.env.TZ;
+    else process.env.TZ = previous;
+  }
+});
 test("profile setup and editing reject invalid and underage dates consistently", () => {
   const setup = load(
     "lib/validations/auth.validation.ts",
@@ -166,7 +216,7 @@ function all(tree, type) {
     ...all(tree.props?.children, type),
   ];
 }
-function picker(value = "") {
+function picker(value = "", options = {}) {
   const cells = [];
   let cursor = 0,
     effects = [],
@@ -174,6 +224,7 @@ function picker(value = "") {
     tree;
   const emitted = [];
   const props = {
+    ...options,
     isoDate: value,
     formLabel: "Date of Birth",
     fieldChange(next) {
@@ -252,6 +303,8 @@ function picker(value = "") {
     },
     dayOptions: () =>
       all(render()[2], "SelectItem").map((item) => item.props.value),
+    options: (index) =>
+      all(render()[index], "SelectItem").map((item) => item.props),
   };
 }
 test("opening or externally resetting the picker never rewrites the saved birthday", () => {
@@ -296,4 +349,70 @@ test("new profile selection retains partial year/month choices and submits only 
   assert.equal(control.dayOptions().length, 29);
   control.select(2, "29");
   assert.deepEqual(control.emitted, ["", "", "2000-02-29T00:00:00.000Z"]);
+});
+
+test("DOB pickers exclude under-13 years and disable months and days beyond the thirteenth birthday cutoff", () => {
+  const today = new Date();
+  const year = String(today.getUTCFullYear() - 13);
+  const month = String(today.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(
+    Math.min(
+      today.getUTCDate(),
+      dates.getDaysInMonth(Number(year), Number(month)),
+    ),
+  ).padStart(2, "0");
+  const control = picker("", { minimumAge: 13 });
+  assert.equal(control.options(0)[0].value, year);
+  assert.ok(
+    control.options(0).every((option) => Number(option.value) <= Number(year)),
+  );
+  control.select(0, String(Number(year) + 1));
+  assert.deepEqual(control.values(), ["", "", ""]);
+  control.select(0, year);
+  for (const option of control.options(1))
+    assert.equal(!!option.disabled, Number(option.value) > Number(month));
+  if (Number(month) < 12) {
+    control.select(1, String(Number(month) + 1).padStart(2, "0"));
+    assert.equal(control.values()[1], "");
+  }
+  control.select(1, month);
+  for (const option of control.options(2))
+    assert.equal(!!option.disabled, Number(option.value) > Number(day));
+  control.select(2, day);
+  assert.equal(control.emitted.at(-1), `${year}-${month}-${day}T00:00:00.000Z`);
+  const accepted = control.emitted.at(-1);
+  if (Number(day) < dates.getDaysInMonth(Number(year), Number(month))) {
+    control.select(2, String(Number(day) + 1).padStart(2, "0"));
+    assert.equal(control.emitted.at(-1), accepted);
+  }
+});
+
+test("changing the DOB year to the age boundary clears any month or day beyond the limit", () => {
+  const today = new Date();
+  const year = String(today.getUTCFullYear() - 13);
+  const control = picker(`${Number(year) - 1}-12-31`, { minimumAge: 13 });
+  control.select(0, year);
+  if (today.getUTCMonth() < 11) {
+    assert.deepEqual(control.values(), [year, "", ""]);
+    assert.equal(control.emitted.at(-1), "");
+  } else if (today.getUTCDate() < 31) {
+    assert.deepEqual(control.values(), [year, "12", ""]);
+    assert.equal(control.emitted.at(-1), "");
+  } else assert.equal(control.values()[2], "31");
+});
+
+test("birthday cutoff clamps leap years and other date pickers retain their existing year choices", () => {
+  assert.equal(
+    dates.profileBirthDateCutoff(13, new Date("2024-02-29T12:00:00Z")),
+    "2011-02-28",
+  );
+  assert.equal(
+    dates.profileBirthDateCutoff(13, new Date("2025-03-01T12:00:00Z")),
+    "2012-03-01",
+  );
+  const creditPicker = picker();
+  assert.equal(
+    creditPicker.options(0)[0].value,
+    String(new Date().getFullYear()),
+  );
 });

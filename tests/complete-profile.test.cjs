@@ -109,7 +109,14 @@ function deferred() {
   });
   return { promise, resolve };
 }
-function formHarness({ upload, save, cacheStorage } = {}) {
+function formHarness({
+  upload,
+  save,
+  cacheStorage,
+  identity,
+  loading = false,
+  reload,
+} = {}) {
   const state = hooks(),
     uploads = [],
     saves = [],
@@ -131,7 +138,10 @@ function formHarness({ upload, save, cacheStorage } = {}) {
     currentUserId: "111111111111111111111111",
     username: "qa-user",
     email: "qa@example.test",
+    ...identity,
   };
+  let accountLoading = loading,
+    reloadCalls = 0;
   const values = {
     firstName: "Test",
     lastName: "User",
@@ -169,7 +179,16 @@ function formHarness({ upload, save, cacheStorage } = {}) {
       }),
     },
     "@/context/AuthProvider": {
-      useUserContext: () => ({ user, setUser: (value) => users.push(value) }),
+      useUserContext: () => ({
+        user,
+        isLoading: accountLoading,
+        setUser: (value) => users.push(value),
+        checkAuthUser: async () => {
+          reloadCalls++;
+          const result = await reload?.();
+          if (result) user = { ...user, ...result };
+        },
+      }),
     },
     "@/actions/auth.action": {
       completeProfileAction: async (payload) => {
@@ -216,6 +235,15 @@ function formHarness({ upload, save, cacheStorage } = {}) {
     cacheEntries,
     cacheWrites,
     render,
+    reloadCalls: () => reloadCalls,
+    setIdentity(patch) {
+      user = { ...user, ...patch };
+      render();
+    },
+    setLoading(value) {
+      accountLoading = value;
+      render();
+    },
     submit: () =>
       find(render(), (node) => node.type === "form").props.onSubmit(),
     error: () =>
@@ -884,4 +912,152 @@ test("legacy incomplete cache entries retain identity and new writes store only 
   const saved = JSON.parse(storage.getItem(cacheKey));
   assert.equal("accessToken" in saved, false);
   assert.equal("refreshToken" in saved, false);
+});
+
+const mobileGenders = [
+  "female",
+  "male",
+  "transmale",
+  "transfemale",
+  "nonconfirming",
+  "nottosay",
+  "notlistedadd",
+];
+test("profile creation offers every mobile gender and saves each exact mobile API value", async () => {
+  const h = formHarness();
+  const choices = find(h.render(), (node) => node.props?.inputName === "gender")
+    .props.data;
+  assert.deepEqual(
+    Array.from(choices, (choice) => choice.id),
+    mobileGenders,
+  );
+  for (const gender of mobileGenders) {
+    assert.equal(formSchema.parse({ ...formValues, gender }).gender, gender);
+    const endpoint = server({ ok: true, body: { status: "7400" } });
+    assert.equal(
+      (await endpoint.action({ ...validPayload, gender })).status,
+      "7400",
+    );
+    assert.equal(JSON.parse(endpoint.calls[0].options.body).gender, gender);
+    h.values.gender = gender;
+    await h.submit();
+    assert.equal(h.saves.at(-1).gender, gender);
+  }
+});
+test("editing mobile and legacy genders shows the saved choice without changing its API value", () => {
+  const Component = load("components/forms/EditPersonalInfoForm.tsx", {
+    "react/jsx-runtime": jsx,
+    "../inputs": {},
+    "../ui/form": { FormField: "field", FormMessage: "message" },
+    "../inputs/ProfileLocation": {},
+    "../inputs/ProfileOptionField": {},
+  }).default;
+  for (const gender of [...mobileGenders, "other", "prefferNotToSay"]) {
+    const tree = Component({ form: { watch: () => gender }, userData: {} });
+    const options = find(tree, (node) => node.props?.inputName === "gender")
+      .props.data;
+    assert.equal(options.filter((option) => option.id === gender).length, 1);
+    assert.equal(formSchema.parse({ ...formValues, gender }).gender, gender);
+  }
+});
+test("missing or invalid account identity blocks uploads, saves, caching and navigation even on direct submission", async () => {
+  for (const identity of [
+    { currentUserId: "" },
+    { currentUserId: "invalid" },
+    { currentUserId: " " },
+    { username: "" },
+  ]) {
+    const h = formHarness({ identity });
+    const button = find(
+      h.render(),
+      (node) =>
+        node.type === "button" && node.props.children === "Create Profile",
+    );
+    assert.equal(button.props.disabled, true);
+    await h.submit();
+    assert.equal(h.uploads.length, 0);
+    assert.equal(h.saves.length, 0);
+    assert.equal(h.cacheWrites.length, 0);
+    assert.equal(h.users.length, 0);
+    assert.equal(h.redirects.length, 0);
+    h.values.profilePhoto = null;
+    h.values.coverPhoto = null;
+    await h.submit();
+    assert.equal(h.saves.length, 0);
+  }
+});
+test("account loading blocks submission until complete and then preserves all entered fields", async () => {
+  const h = formHarness({ loading: true });
+  const entered = { ...h.values };
+  await h.submit();
+  assert.equal(h.saves.length, 0);
+  assert.equal(h.uploads.length, 0);
+  assert.equal(
+    find(h.render(), (node) => node.props?.role === "status").props.children,
+    "Loading your account details...",
+  );
+  h.setLoading(false);
+  await h.submit();
+  assert.deepEqual(h.values, entered);
+  assert.equal(h.saves.length, 1);
+  assert.equal(h.users[0].currentUserId, "111111111111111111111111");
+});
+test("account retry discards an invalid cached identity, deduplicates requests, and resumes the same form", async () => {
+  const response = deferred();
+  const h = formHarness({
+    identity: { currentUserId: "" },
+    reload: () => response.promise,
+  });
+  const entered = { ...h.values };
+  h.storage.setItem("talents-explore-auth-user", "stale identity");
+  const retry = find(
+    h.render(),
+    (node) =>
+      node.type === "button" && node.props.children === "Retry account loading",
+  ).props.onClick;
+  const pending = retry();
+  await retry();
+  await h.submit();
+  assert.equal(h.reloadCalls(), 1);
+  assert.equal(h.saves.length, 0);
+  assert.equal(h.uploads.length, 0);
+  assert.equal(h.storage.getItem("talents-explore-auth-user"), null);
+  response.resolve({
+    currentUserId: "222222222222222222222222",
+    username: "recovered",
+  });
+  await pending;
+  await h.submit();
+  assert.deepEqual(h.values, entered);
+  assert.equal(h.users[0].currentUserId, "222222222222222222222222");
+  assert.ok(h.uploads.every((file) => file.id === "222222222222222222222222"));
+  assert.deepEqual(h.redirects, ["/onboarding"]);
+});
+test("failed account retry stays recoverable without discarding inputs or creating a profile", async () => {
+  let fails = true;
+  const h = formHarness({
+    identity: { currentUserId: "" },
+    reload: async () => {
+      if (fails) throw Error("offline");
+      return { currentUserId: "111111111111111111111111" };
+    },
+  });
+  const entered = { ...h.values };
+  const retry = () =>
+    find(
+      h.render(),
+      (node) =>
+        node.type === "button" &&
+        node.props.children === "Retry account loading",
+    ).props.onClick();
+  await retry();
+  await h.submit();
+  assert.equal(h.saves.length, 0);
+  assert.deepEqual(h.values, entered);
+  fails = false;
+  await retry();
+  await h.submit();
+  assert.equal(h.reloadCalls(), 2);
+  assert.equal(h.saves.length, 1);
+  assert.deepEqual(h.values, entered);
 });

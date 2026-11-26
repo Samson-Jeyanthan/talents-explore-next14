@@ -465,6 +465,78 @@ const ui = {
   ),
 };
 
+test("ongoing education from the API displays Present and numeric end years remain unchanged", () => {
+  const { EducationCard } = load("components/cards/ProDetailCards.tsx", {
+    "react/jsx-runtime": jsx,
+    "../others/MotionDiv": { MotionDiv: "motion" },
+    "../options": { ProInfoEditOptions: "options" },
+  });
+  for (const to of [null, "present", "Present", " PRESENT "]) {
+    assert.ok(
+      find(
+        EducationCard({ data: { ...education(), to }, index: 0, length: 1 }),
+        (node) => node.type === "p" && node.props.children === "Present",
+      ),
+    );
+  }
+  assert.ok(
+    find(
+      EducationCard({
+        data: { ...education(), to: 2022 },
+        index: 0,
+        length: 1,
+      }),
+      (node) => node.type === "p" && node.props.children === 2022,
+    ),
+  );
+});
+
+test("editing a null end year restores Present while new education keeps an empty selection", () => {
+  for (const [row, isEdit, expected] of [
+    [{ ...education(), to: null }, true, "present"],
+    [{ ...education(), to: 2022 }, true, "2022"],
+    [undefined, false, ""],
+  ]) {
+    const host = hooks();
+    let restored;
+    const Component = load(
+      "components/widgets/profile/ProfileEducationEditor.tsx",
+      {
+        ...ui,
+        react: host.react,
+        "next/navigation": {
+          useParams: () => ({ userId: profile }),
+          useRouter: () => ({ refresh() {} }),
+        },
+        "react-hook-form": {
+          useForm: () => ({
+            reset: (value) => {
+              restored = value;
+            },
+            handleSubmit: (fn) => fn,
+            formState: {},
+          }),
+        },
+        "@hookform/resolvers/zod": { zodResolver() {} },
+        "@/actions/profile-education.action": {
+          saveProfileEducationAction: async () => ({ status: "7400" }),
+        },
+        "@/components/ui/form": { Form: "form-provider" },
+        "@/components/forms/EducationEditForm": "editor",
+      },
+    ).default;
+    host.render(() =>
+      Component({ isOpen: true, data: row, isEdit, onClose() {} }),
+    );
+    assert.equal(restored.to, expected);
+    if (isEdit)
+      assert.equal(
+        util.profileEducationValidation.safeParse(restored).success,
+        true,
+      );
+  }
+});
+
 test("failed deletion keeps its confirmation open and duplicate clicks send once", async () => {
   const host = hooks();
   let finish,
