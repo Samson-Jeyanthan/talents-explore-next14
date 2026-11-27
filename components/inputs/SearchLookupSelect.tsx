@@ -67,7 +67,11 @@ export default function LookupSelect({
         aria-busy={loading}
       >
         <option value="">
-          {loading ? "Loading options..." : `Any ${label.toLowerCase()}`}
+          {kind === "states" && !parent
+            ? "Choose a country first"
+            : loading
+              ? kind === "states" ? "Loading towns..." : "Loading options..."
+              : `Any ${label.toLowerCase()}`}
         </option>
         {value && !options.some((option) => option.value === value) && (
           <option value={value}>Current selection</option>
@@ -78,6 +82,11 @@ export default function LookupSelect({
           </option>
         ))}
       </select>
+      {kind === "states" && parent && !loading && !error && !options.length && (
+        <p role="status" className="text-xs text-light-600">
+          No towns are available for this country.
+        </p>
+      )}
       {error && (
         <div role="alert" className="text-xs text-light-600">
           <p>{error}</p>

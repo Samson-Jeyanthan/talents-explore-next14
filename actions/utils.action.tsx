@@ -216,6 +216,9 @@ export async function getCountriesAction() {
 }
 
 export async function getStatesAction(country: string) {
+  if (typeof country !== "string" || !country.trim()) {
+    return { ...EMPTY_RESPONSE, message: "Choose a country first." };
+  }
   try {
     const headers = await getAuthHeaders();
     const response = await fetch(
@@ -223,13 +226,14 @@ export async function getStatesAction(country: string) {
       {
         cache: "no-store",
         headers,
+        signal: AbortSignal.timeout(15000),
       },
     );
 
     if (!response.ok) {
       return {
         ...EMPTY_RESPONSE,
-        message: "Failed to fetch states",
+        message: "Failed to fetch towns",
       };
     }
 
@@ -243,7 +247,7 @@ export async function getStatesAction(country: string) {
     console.error(error);
     return {
       ...EMPTY_RESPONSE,
-      message: "Failed to fetch states",
+      message: "Failed to fetch towns",
     };
   }
 }

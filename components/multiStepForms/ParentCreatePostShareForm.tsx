@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FieldErrors, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -27,6 +27,7 @@ import { uploadFileToStorage, UploadedFile } from "@/lib/utils/uploadFile";
 import { validatePostFile } from "@/lib/utils/postMedia";
 import { useRouter } from "next/navigation";
 import { Footer } from "../widgets";
+import { townOptions } from "@/lib/utils/towns";
 
 interface Props {
   langData: any;
@@ -88,6 +89,15 @@ const ParentCreatePostShareForm = ({
   const [processingMedia, setProcessingMedia] = useState(false);
   const [uploadStatus, setUploadStatus] = useState("Uploading Post");
   const uploadedFiles = useRef(new WeakMap<File, UploadedFile>());
+  const townRequest = useRef(0);
+  const [townLoading, setTownLoading] = useState(false);
+  const [townError, setTownError] = useState("");
+  useEffect(
+    () => () => {
+      townRequest.current += 1;
+    },
+    [],
+  );
 
   async function uploadPostFile(file: File, prefix: string, label: string) {
     const cached = uploadedFiles.current.get(file);
@@ -108,10 +118,7 @@ const ParentCreatePostShareForm = ({
     { _id: string; name: string }[]
   >(
     withSavedOption(
-      (initialOptions?.states || []).map((item) => ({
-        _id: item.state || item.name || item,
-        name: item.state || item.name || item,
-      })),
+      townOptions(initialOptions?.states),
       savedValues?.state,
     ),
   );
@@ -182,20 +189,26 @@ const ParentCreatePostShareForm = ({
   }
 
   async function fetchStates(country: string) {
-    form.resetField("state");
+    const request = ++townRequest.current;
+    // resetField would restore an edited post's previous country's town.
+    form.setValue("state", "", { shouldDirty: true, shouldValidate: true });
     setStateOptions([]);
+    setTownError("");
+    setTownLoading(Boolean(country));
+    if (!country) return;
     try {
       const res = await getStatesAction(country);
-      console.log("states-res", res);
-      setStateOptions(
-        (res?.response || []).map((item: any) => ({
-          _id: item.state || item.name || item,
-          name: item.state || item.name || item,
-        })),
-      );
-    } catch (error) {
-      console.error(error);
-      throw error;
+      if (request !== townRequest.current) return;
+      if (res?.status !== "7400") {
+        setTownError("Unable to load towns. Please try again.");
+        return;
+      }
+      setStateOptions(townOptions(res.response));
+    } catch {
+      if (request === townRequest.current)
+        setTownError("Unable to load towns. Please try again.");
+    } finally {
+      if (request === townRequest.current) setTownLoading(false);
     }
   }
 
@@ -470,6 +483,8 @@ const ParentCreatePostShareForm = ({
           )}
           countryOptions={withSavedOption(countryOptions, savedValues?.country)}
           fetchStates={fetchStates}
+          townLoading={townLoading}
+          townError={townError}
           stateOptions={stateOptions}
           fetchSubcategories={fetchSubcategories}
           subCategoryOptions={subCategoryOptions}

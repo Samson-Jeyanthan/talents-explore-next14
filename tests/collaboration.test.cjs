@@ -685,6 +685,13 @@ test("dashboard renders retry on failure, and reset submits new empty filters im
   find(render(), (node) => node.type === "input").props.onChange({
     target: { value: "old" },
   });
+  find(render(), (node) => node.props?.children === "Show Filters").props.onClick();
+  const back = find(render(), (node) => node.props?.children === "Back to results");
+  assert.equal(back.props.type, "button");
+  back.props.onClick();
+  assert.ok(find(render(), (node) => node.props?.children === "Show Filters"));
+  assert.equal(find(render(), (node) => node.type === "input").props.value, "old");
+  assert.equal(calls.length, 0, "Closing filters must not apply or clear selections");
   find(
     render(),
     (node) => node.type === "button" && node.props.children === "Reset filters",

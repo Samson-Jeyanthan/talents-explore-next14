@@ -99,6 +99,19 @@ export default function CollaborationPeopleFilters({
             Filter people
           </summary>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <Button
+              type="button"
+              className="shad-button_secondary justify-self-start sm:col-span-2"
+              onClick={(event) => {
+                const panel = event.currentTarget.closest("details");
+                if (panel) {
+                  panel.open = false;
+                  panel.querySelector("summary")?.focus();
+                }
+              }}
+            >
+              Back to results
+            </Button>
             <LookupSelect
               label="Main category"
               kind="categories"
@@ -165,7 +178,7 @@ export default function CollaborationPeopleFilters({
               onChange={(value) => change("country", value)}
             />
             <LookupSelect
-              label="State"
+              label="Town"
               kind="states"
               parent={values.country}
               value={values.state}

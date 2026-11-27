@@ -227,7 +227,7 @@ export default function ExploreFilters({
         </>
       )}
       {lookup("country", "Country", "countries")}
-      {lookup("state", "State or town", "states", values.country)}
+      {lookup("state", "Town", "states", values.country)}
       {text("creditTitle", "Credit title")}
       {error && (
         <p role="alert" className="text-sm text-primary-500">

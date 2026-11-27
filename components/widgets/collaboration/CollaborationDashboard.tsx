@@ -5,7 +5,7 @@ import LookupSelect from "@/components/inputs/SearchLookupSelect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { useId, useState, type FormEvent } from "react";
+import { useId, useRef, useState, type FormEvent } from "react";
 import { useCollaborationLists } from "@/lib/hooks/useCollaborationLists";
 import {
   emptyCollaborationFilters,
@@ -76,6 +76,8 @@ export default function CollaborationDashboard({
       ) as Record<CollaborationTab, FilterState>,
   );
   const [showFilters, setShowFilters] = useState(false);
+  const filterToggle = useRef<HTMLButtonElement>(null);
+  const filterPanelId = useId();
   const [filterError, setFilterError] = useState("");
   const inbox = useCollaborationLists(initialResult);
   const state = inbox.tabs[activeTab];
@@ -107,7 +109,12 @@ export default function CollaborationDashboard({
       return;
     }
     setFilterError("");
+    if (showFilters) closeFilters();
     return inbox.apply(activeTab, parsed.data);
+  }
+  function closeFilters() {
+    setShowFilters(false);
+    filterToggle.current?.focus();
   }
   function reset() {
     const empty = emptyCollaborationFilters();
@@ -173,8 +180,10 @@ export default function CollaborationDashboard({
           </Button>
           <Button
             type="button"
+            ref={filterToggle}
             onClick={() => setShowFilters((value) => !value)}
             aria-expanded={showFilters}
+            aria-controls={filterPanelId}
             className="shad-button_secondary rounded-full"
           >
             {showFilters ? "Hide Filters" : "Show Filters"}
@@ -202,7 +211,13 @@ export default function CollaborationDashboard({
           </p>
         )}
         {showFilters && (
-          <div className="mt-5 grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div id={filterPanelId} className="mt-5 grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 sm:col-span-2 lg:col-span-3">
+              <h2 className="text-lg font-semibold text-light-900">Search filters</h2>
+              <Button type="button" onClick={closeFilters} className="shad-button_secondary">
+                Back to results
+              </Button>
+            </div>
             <LookupSelect
               key={`category-${activeTab}`}
               label="Main category"
@@ -264,7 +279,7 @@ export default function CollaborationDashboard({
             />
             <LookupSelect
               key={`state-${activeTab}`}
-              label="State"
+              label="Town"
               kind="states"
               parent={draft.country}
               value={draft.state}
@@ -292,6 +307,14 @@ export default function CollaborationDashboard({
                 onChange={(event) => update("city", event.target.value)}
                 className="shad-form-input w-full"
               />
+            </div>
+            <div className="flex flex-wrap gap-3 border-t border-dark-300 pt-4 sm:col-span-2 lg:col-span-3">
+              <Button type="button" onClick={closeFilters} className="shad-button_secondary">
+                Back to results
+              </Button>
+              <Button type="submit" disabled={state.loading && !draftChanged} className="shad-button_primary">
+                Apply filters
+              </Button>
             </div>
           </div>
         )}

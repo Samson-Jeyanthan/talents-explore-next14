@@ -19,6 +19,8 @@ const CreatePostAboutForm = ({
   countryOptions,
   fetchStates,
   stateOptions,
+  townLoading,
+  townError,
   fetchSubcategories,
   subCategoryOptions,
   fetchSkills,
@@ -163,7 +165,7 @@ const CreatePostAboutForm = ({
       <div className="flex flex-col gap-2">
         <ToolTip
           title="Location Info"
-          description="List individuals or contributors who participated in this work or post. include their titles and tag their names if applicable. Propper credit recognition is fosters a sense of community and collaboration"
+          description="Choose the country and town associated with this work or shared content."
         />
         <Dropdown
           form={form}
@@ -177,11 +179,28 @@ const CreatePostAboutForm = ({
           form={form}
           value={form.getValues("state")}
           inputName="state"
-          placeholder="State"
+          placeholder={townLoading ? "Loading towns..." : "Town"}
           options={stateOptions}
+          disabled={!form.getValues("country") || townLoading || !!townError}
           dependentFieldPlaceholder="Please select country"
           dependentFieldValue={form.getValues("country") !== ""}
         />
+        {townError ? (
+          <div role="alert" className="text-sm text-light-700">
+            <p>{townError}</p>
+            <button
+              type="button"
+              className="text-blue-600 underline dark:text-blue-400"
+              onClick={() => fetchStates(form.getValues("country"))}
+            >
+              Retry towns
+            </button>
+          </div>
+        ) : !townLoading && form.getValues("country") && !stateOptions.length ? (
+          <p role="status" className="text-sm text-light-700">
+            No towns are available for this country.
+          </p>
+        ) : null}
       </div>
 
       <div className="flex flex-col gap-2">
