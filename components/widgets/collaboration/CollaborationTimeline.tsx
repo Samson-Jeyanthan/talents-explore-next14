@@ -1,4 +1,6 @@
 "use client";
+import LinkedText from "@/components/others/LinkedText";
+
 import { useEffect, useState } from "react";
 import {
   detailText,
@@ -104,7 +106,7 @@ export default function CollaborationTimeline({ role }: { role: any }) {
             </dl>
             {detailText(item?.description, "") ? (
               <p className="mt-4 whitespace-pre-wrap break-words text-sm text-light-700">
-                {detailText(item.description)}
+                <LinkedText text={detailText(item.description)} />
               </p>
             ) : null}
           </article>

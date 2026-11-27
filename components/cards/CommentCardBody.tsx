@@ -1,4 +1,5 @@
 "use client";
+import LinkedText from "@/components/others/LinkedText";
 
 import Link from "next/link";
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -133,7 +134,7 @@ export default function CommentCardBody({
               : "whitespace-pre-wrap break-words rounded-2xl rounded-tl-sm border border-[#ECEEF7] bg-[#F7F8FC] px-4 py-3 text-sm leading-6 text-light-900 dark:border-dark-400 dark:bg-dark-300"
           }
         >
-          {comment.comment}
+          <LinkedText text={comment.comment} />
         </p>
         <div className="mt-2 flex flex-wrap items-center gap-4 text-xs text-light-600">
           {canReply && (

@@ -1,3 +1,4 @@
+import LinkedText from "@/components/others/LinkedText";
 import { IPost } from "@/types/post.types";
 import { MotionDiv } from "../others/MotionDiv";
 import Image from "next/image";
@@ -91,9 +92,15 @@ function AllPostCard({ allPostCard, index }: Prop) {
           {allPostCard.numberOfRating} Ratings
         </p>
         <p className="line-clamp-3 text-ellipsis text-justify text-xs text-light-500 first-letter:capitalize 2xl:text-sm">
-          {allPostCard.about.description}
+          <LinkedText text={allPostCard.about.description} />
         </p>
-        <div className="flex max-w-full flex-wrap justify-end gap-2 sm:absolute sm:bottom-3 sm:right-3 sm:max-w-[calc(100%-1.5rem)]">
+        <Link
+          href={postLink}
+          className="inline-flex min-h-10 w-fit items-center gap-1 text-sm font-medium text-blue-600 underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:outline focus-visible:outline-2 dark:text-blue-400"
+        >
+          View details <span aria-hidden="true">→</span>
+        </Link>
+        <div className="mt-auto flex max-w-full flex-wrap justify-end gap-2 pt-2">
           {allPostCard.about.mainCategory && (
             <RenderTag Icon="" name={allPostCard.about.mainCategory} />
           )}

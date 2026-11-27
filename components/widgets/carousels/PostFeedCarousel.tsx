@@ -11,6 +11,7 @@ import {
 } from "./EmblaCarouselArrowButtons";
 import Image from "next/image";
 import VideoCard from "@/components/video/VideoCard";
+import { useEffect, useState } from "react";
 
 type Props = {
   slides: any[];
@@ -19,6 +20,31 @@ type Props = {
 };
 const PostFeedCarousel = ({ slides, options, length }: Props) => {
   const [emblaRef, emblaApi] = useEmblaCarousel(options);
+  const [mediaHeight, setMediaHeight] = useState<number>();
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    const updateHeight = () => {
+      const slide = emblaApi.slideNodes()[emblaApi.selectedScrollSnap()];
+      const height = slide?.getBoundingClientRect().height;
+      if (height && height > 0) setMediaHeight(Math.ceil(height));
+    };
+    const observer = new ResizeObserver(updateHeight);
+    const observeSelectedSlide = () => {
+      observer.disconnect();
+      const slide = emblaApi.slideNodes()[emblaApi.selectedScrollSnap()];
+      if (slide) observer.observe(slide);
+      updateHeight();
+    };
+    observeSelectedSlide();
+    emblaApi.on("select", observeSelectedSlide);
+    emblaApi.on("reInit", observeSelectedSlide);
+    return () => {
+      observer.disconnect();
+      emblaApi.off("select", observeSelectedSlide);
+      emblaApi.off("reInit", observeSelectedSlide);
+    };
+  }, [emblaApi, slides]);
 
   const { selectedIndex } = useDotButton(emblaApi);
 
@@ -31,7 +57,11 @@ const PostFeedCarousel = ({ slides, options, length }: Props) => {
 
   return (
     <section className="pf-embla">
-      <div className="pf-embla__viewport" ref={emblaRef}>
+      <div
+        className="pf-embla__viewport"
+        ref={emblaRef}
+        style={{ height: mediaHeight }}
+      >
         <div className="pf-embla__container">
           {slides.map((item, index) => {
             const isVideo = item.mediaType === "video";
@@ -43,6 +73,7 @@ const PostFeedCarousel = ({ slides, options, length }: Props) => {
                     videoUrl={item.url}
                     thumbnailUrl={item.thumbnailUrl}
                     isControl={true}
+                    className="block h-auto max-h-[34rem] w-full rounded-xl bg-dark-200 object-contain"
                   />
                 ) : (
                   <Image
@@ -51,7 +82,7 @@ const PostFeedCarousel = ({ slides, options, length }: Props) => {
                     width={500}
                     height={500}
                     alt="post"
-                    className="max-h-[34rem] w-full rounded-xl bg-dark-200 object-contain"
+                    className="block h-auto max-h-[34rem] w-full rounded-xl bg-dark-200 object-contain"
                   />
                 )}
               </div>

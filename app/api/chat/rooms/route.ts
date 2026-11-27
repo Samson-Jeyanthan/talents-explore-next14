@@ -1,8 +1,9 @@
-// import { getSession } from "@/lib/session";
 import { getUserPersonalInfoAction } from "@/actions/auth.action";
-import { getSession } from "@/lib/session";
+import { getAuthHeaders as resolveSessionHeaders } from "@/lib/session";
 import axios from "axios";
 import { NextRequest, NextResponse } from "next/server";
+
+export const dynamic = "force-dynamic";
 
 function getAuthHeaders(token: string) {
   return {
@@ -78,7 +79,8 @@ function normalizeChatRoomResponse(responseData: any) {
 }
 
 async function getCurrentUserResponse() {
-  const token = await getSession();
+  const sessionHeaders = await resolveSessionHeaders();
+  const token = sessionHeaders.Authorization.slice("Bearer ".length);
 
   if (!token) {
     return { token: "", user: null };
@@ -98,6 +100,7 @@ async function getCurrentUserResponse() {
 }
 
 export async function GET(request: NextRequest) {
+  let viewerId: string | null = null;
   try {
     const { searchParams } = new URL(request.url);
     const tab = searchParams.get("tab") || "chat";
@@ -106,17 +109,20 @@ export async function GET(request: NextRequest) {
 
     const { token, user } = await getCurrentUserResponse();
 
-    if (!token || !user?._id) {
-      return NextResponse.json({
-        rooms: [],
-        debug: { tab, reason: "no-session" },
-      });
-    }
+    if (!token || !user?._id)
+      return chatResponse({ viewerId: null, rooms: [] }, { status: 401 });
+    viewerId = user._id;
+    const expectedViewer = searchParams.get("viewerId");
+    if (expectedViewer && expectedViewer !== viewerId)
+      return chatResponse(
+        { viewerId, rooms: [], message: "Your account changed." },
+        { status: 409 },
+      );
 
     const isGroup = tab === "group";
     if (isGroup && user.isTalent !== true)
-      return NextResponse.json(
-        { rooms: [], message: "Become a talent to use group chats." },
+      return chatResponse(
+        { viewerId, rooms: [], message: "Become a talent to use group chats." },
         { status: 403 },
       );
     if (
@@ -127,7 +133,7 @@ export async function GET(request: NextRequest) {
       pageSize < 1 ||
       pageSize > 100
     )
-      return NextResponse.json({ rooms: [] }, { status: 400 });
+      return chatResponse({ viewerId, rooms: [] }, { status: 400 });
     const url = isGroup
       ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/chat/group/getChatRooms/${user._id}`
       : `${process.env.NEXT_PUBLIC_BACKEND_URL}/chat/getChatRooms/${user._id}/${tab.toUpperCase()}`;
@@ -139,37 +145,29 @@ export async function GET(request: NextRequest) {
         pageNumber,
         pageSize,
       },
+      timeout: 15000,
     });
 
-    const rooms = normalizeChatRoomResponse(response.data);
-
-    return NextResponse.json({
-      rooms,
-      debug: {
-        tab,
-        status: response.data?.status || null,
-        message: response.data?.message || null,
-        normalizedCount: rooms.length,
-        responseType: Array.isArray(response.data?.response)
-          ? "array"
-          : typeof response.data?.response,
-      },
+    if (response.data?.status !== "7400")
+      return chatResponse({ viewerId, rooms: [] }, { status: 502 });
+    return chatResponse({
+      viewerId,
+      rooms: normalizeChatRoomResponse(response.data),
     });
-  } catch (error: any) {
-    const raw = error?.response?.data;
-    const rooms = normalizeChatRoomResponse(raw);
-
-    return NextResponse.json({
-      rooms,
-      debug: {
-        tab: request.nextUrl.searchParams.get("tab") || "chat",
-        status: raw?.status || error?.response?.status || null,
-        message: raw?.message || error?.message || "Unknown error",
-        normalizedCount: rooms.length,
-        responseType: Array.isArray(raw?.response)
-          ? "array"
-          : typeof raw?.response,
-      },
-    });
+  } catch {
+    return chatResponse(
+      { viewerId, rooms: [], message: "Unable to load conversations." },
+      { status: 503 },
+    );
   }
+}
+
+function chatResponse(body: unknown, options: { status?: number } = {}) {
+  return NextResponse.json(body, {
+    ...options,
+    headers: {
+      "Cache-Control": "private, no-store, max-age=0",
+      Vary: "Cookie",
+    },
+  });
 }

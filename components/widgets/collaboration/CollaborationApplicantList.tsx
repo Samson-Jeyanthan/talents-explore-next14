@@ -1,4 +1,5 @@
 "use client";
+import LinkedText from "@/components/others/LinkedText";
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -209,18 +210,22 @@ export default function CollaborationApplicantList({
       {filter === "ROLE" ? (
         <div className="grid gap-3">
           {roles.map((item: any) => (
-            <Link
+            <article
               key={collaborationSelection(item)}
-              href={`/collaboration/${collaborationId}/roles/${collaborationSelection(item)}/applicants`}
-              className="rounded-3xl border border-dark-300 bg-dark-250 p-5"
+              className="relative rounded-3xl border border-dark-300 bg-dark-250 p-5"
             >
               <h2 className="text-lg font-semibold text-light-900">
-                {item.name}
+                <Link
+                  href={`/collaboration/${collaborationId}/roles/${collaborationSelection(item)}/applicants`}
+                  className="after:absolute after:inset-0 after:rounded-3xl focus-visible:outline focus-visible:outline-2"
+                >
+                  {item.name}
+                </Link>
               </h2>
-              <p className="mt-2 text-sm text-light-600">
-                {item.subtitle || item.description}
+              <p className="mt-2 text-sm text-light-600 [&_a]:relative [&_a]:z-10">
+                <LinkedText text={item.subtitle || item.description} />
               </p>
-            </Link>
+            </article>
           ))}
           {!roles.length ? (
             <p className="text-light-600">No roles found.</p>

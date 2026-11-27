@@ -11,12 +11,16 @@ import type {
   TVerifyOTPProps,
 } from "@/types/auth.types";
 import { browserPush } from "@/lib/browser-push-client";
-import { clearCachedAuthUser } from "@/lib/utils/auth-user-cache";
+import {
+  clearCachedAuthUser,
+  publishAuthSessionChange,
+} from "@/lib/utils/auth-user-cache";
 import { clearOtpSession } from "@/lib/utils/otp-session";
 
 export async function handleClearStorage() {
   await browserPush.disconnect();
   clearCachedAuthUser();
+  publishAuthSessionChange(null);
   clearOtpSession("signup");
   clearOtpSession("password");
   for (const key of [

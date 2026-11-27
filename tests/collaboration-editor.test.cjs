@@ -16,7 +16,11 @@ function load(file, mocks = {}, globals = {}) {
     {
       module,
       exports: module.exports,
-      require: (name) => mocks[name] || require(name),
+      require: (name) =>
+        mocks[name] ||
+        (name === "@/components/others/LinkedText"
+          ? "linked-text"
+          : require(name)),
       URL,
       ...globals,
     },

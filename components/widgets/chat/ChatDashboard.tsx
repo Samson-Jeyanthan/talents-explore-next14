@@ -5,14 +5,12 @@ import { Button } from "@/components/ui/button";
 import { formatDistanceToNowStrict } from "date-fns";
 import { Inbox, MessageSquare, Search, Users } from "lucide-react";
 import Link from "next/link";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  useTransition,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { postShareParams, SharedPost } from "@/lib/utils/postSharing";
+import {
+  clearLegacyChatStorage,
+  fetchAccountChatRooms,
+} from "@/lib/utils/chat-session";
 
 type TabKey = "chat" | "request" | "group";
 
@@ -23,6 +21,7 @@ type ChatUnreadCount = {
 };
 
 type Props = {
+  accountId: string;
   isTalent: boolean;
   initialChats: any[];
   initialRequests: any[];
@@ -31,49 +30,7 @@ type Props = {
   sharedPost?: SharedPost;
 };
 
-type ChatRoomsApiResult = {
-  rooms?: any[];
-  debug?: {
-    tab?: string;
-    status?: string | number | null;
-    message?: string | null;
-    normalizedCount?: number;
-    responseType?: string;
-    reason?: string;
-  };
-};
-
 const PAGE_SIZE = 10;
-const RECENT_CHATS_KEY = "te-web-recent-chats";
-const RECENT_GROUPS_KEY = "te-web-recent-groups";
-
-function readRecentChatsStorage(key: string) {
-  if (typeof window === "undefined") {
-    return [];
-  }
-
-  try {
-    const stored = window.localStorage.getItem(key);
-    const parsed = stored ? JSON.parse(stored) : [];
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
-function mergeRoomsByKey(primary: any[], fallback: any[]) {
-  const merged = [...primary];
-  const ids = new Set(primary.map((room) => room?._id || room?.roomId));
-
-  fallback.forEach((room) => {
-    const key = room?._id || room?.roomId;
-    if (key && !ids.has(key)) {
-      merged.push(room);
-    }
-  });
-
-  return merged;
-}
 
 function formatTimeAgo(value?: string) {
   if (!value) {
@@ -91,7 +48,8 @@ function sumUnread(rooms: any[]) {
   return rooms.reduce((total, room) => total + Number(room?.unread || 0), 0);
 }
 
-function ChatDashboard({
+function AccountChatDashboard({
+  accountId,
   isTalent,
   initialChats,
   initialRequests,
@@ -110,80 +68,94 @@ function ChatDashboard({
     request: (initialRequests || []).length >= PAGE_SIZE,
     group: (initialGroups || []).length >= PAGE_SIZE,
   });
-  const [debugState, setDebugState] = useState<Record<string, any>>({});
-  const [isPending, startTransition] = useTransition();
+  const [isPending, setIsPending] = useState(false);
+  const [loadError, setLoadError] = useState("");
+  const [sessionChanged, setSessionChanged] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  const active = useRef(false);
+  const loadingMore = useRef(false);
+  const requests = useRef(new Set<AbortController>());
 
   const fetchRooms = useCallback(
-    async (tab: TabKey, pageNumber = 1) => {
+    async (tab: TabKey, pageNumber: number, signal: AbortSignal) => {
       if (tab === "group" && !isTalent) return [];
-      const response = await fetch(
-        `/api/chat/rooms?tab=${tab}&pageNumber=${pageNumber}&pageSize=${PAGE_SIZE}`,
-        {
-          method: "GET",
-          cache: "no-store",
-        },
+      return fetchAccountChatRooms(
+        accountId,
+        tab,
+        pageNumber,
+        PAGE_SIZE,
+        signal,
       );
-
-      const data = (await response.json()) as ChatRoomsApiResult;
-
-      setDebugState((prev) => ({
-        ...prev,
-        [tab]: data?.debug || null,
-      }));
-
-      return Array.isArray(data?.rooms) ? data.rooms : [];
     },
-    [isTalent],
+    [accountId, isTalent],
   );
 
   useEffect(() => {
-    const recentChats = readRecentChatsStorage(RECENT_CHATS_KEY);
-    const recentGroups = isTalent
-      ? readRecentChatsStorage(RECENT_GROUPS_KEY)
-      : [];
+    clearLegacyChatStorage();
+    active.current = true;
+    const controller = new AbortController();
+    requests.current.add(controller);
+    setIsPending(true);
+    setLoadError("");
+    const refresh = async () => {
+      try {
+        const [latestChats, latestRequests, latestGroups] = await Promise.all([
+          fetchRooms("chat", 1, controller.signal),
+          fetchRooms("request", 1, controller.signal),
+          fetchRooms("group", 1, controller.signal),
+        ]);
+        if (controller.signal.aborted || !active.current) return;
 
-    if (recentChats.length > 0) {
-      setChatRooms((prev) => mergeRoomsByKey(prev, recentChats));
-    }
+        if (Array.isArray(latestChats)) {
+          setChatRooms(latestChats);
+          setHasMore((prev) => ({
+            ...prev,
+            chat: latestChats.length >= PAGE_SIZE,
+          }));
+        }
 
-    if (recentGroups.length > 0) {
-      setGroupRooms((prev) => mergeRoomsByKey(prev, recentGroups));
-    }
+        if (Array.isArray(latestRequests)) {
+          setRequestRooms(latestRequests);
+          setHasMore((prev) => ({
+            ...prev,
+            request: latestRequests.length >= PAGE_SIZE,
+          }));
+        }
 
-    startTransition(async () => {
-      const [latestChats, latestRequests, latestGroups] = await Promise.all([
-        fetchRooms("chat", 1),
-        fetchRooms("request", 1),
-        fetchRooms("group", 1),
-      ]);
+        if (Array.isArray(latestGroups)) {
+          setGroupRooms(latestGroups);
+          setHasMore((prev) => ({
+            ...prev,
+            group: latestGroups.length >= PAGE_SIZE,
+          }));
+        }
 
-      if (Array.isArray(latestChats)) {
-        setChatRooms((prev) => mergeRoomsByKey(latestChats, prev));
-        setHasMore((prev) => ({
-          ...prev,
-          chat: latestChats.length >= PAGE_SIZE,
-        }));
+        setPages({ chat: 1, request: 1, group: 1 });
+      } catch (error) {
+        if (controller.signal.aborted || !active.current) return;
+        if (
+          error instanceof Error &&
+          error.name === "ChatSessionChangedError"
+        ) {
+          setSessionChanged(true);
+          setChatRooms([]);
+          setRequestRooms([]);
+          setGroupRooms([]);
+        } else setLoadError("Unable to load conversations. Please try again.");
+      } finally {
+        requests.current.delete(controller);
+        if (!controller.signal.aborted && active.current) setIsPending(false);
       }
-
-      if (Array.isArray(latestRequests)) {
-        setRequestRooms(latestRequests);
-        setHasMore((prev) => ({
-          ...prev,
-          request: latestRequests.length >= PAGE_SIZE,
-        }));
-      }
-
-      if (Array.isArray(latestGroups)) {
-        setGroupRooms((prev) => mergeRoomsByKey(latestGroups, prev));
-        setHasMore((prev) => ({
-          ...prev,
-          group: latestGroups.length >= PAGE_SIZE,
-        }));
-      }
-
-      setPages({ chat: 1, request: 1, group: 1 });
-    });
-  }, [fetchRooms, isTalent]);
+    };
+    refresh();
+    const pending = requests.current;
+    return () => {
+      active.current = false;
+      pending.forEach((request) => request.abort());
+      pending.clear();
+      loadingMore.current = false;
+    };
+  }, [fetchRooms, attempt]);
 
   useEffect(() => {
     if (!isTalent) {
@@ -221,12 +193,6 @@ function ChatDashboard({
     });
   }, [activeTab, chatRooms, requestRooms, groupRooms, searchKey]);
 
-  const activeRawCount =
-    activeTab === "chat"
-      ? chatRooms.length
-      : activeTab === "request"
-        ? requestRooms.length
-        : groupRooms.length;
   const visibleUnreadCount = {
     oneToOne: sumUnread(chatRooms),
     request: sumUnread(requestRooms),
@@ -250,10 +216,21 @@ function ChatDashboard({
     setGroupRooms((prev) => prev.map(updater));
   };
 
-  const handleLoadMore = () => {
-    startTransition(async () => {
+  const handleLoadMore = async () => {
+    if (loadingMore.current || isPending || sessionChanged) return;
+    loadingMore.current = true;
+    const controller = new AbortController();
+    requests.current.add(controller);
+    setIsPending(true);
+    setLoadError("");
+    try {
       const nextPage = pages[activeTab] + 1;
-      const nextRooms = await fetchRooms(activeTab, nextPage);
+      const nextRooms = await fetchRooms(
+        activeTab,
+        nextPage,
+        controller.signal,
+      );
+      if (controller.signal.aborted || !active.current) return;
 
       if (!Array.isArray(nextRooms) || nextRooms.length === 0) {
         setHasMore((prev) => ({ ...prev, [activeTab]: false }));
@@ -287,11 +264,48 @@ function ChatDashboard({
         ...prev,
         [activeTab]: nextRooms.length >= PAGE_SIZE,
       }));
-    });
+    } catch (error) {
+      if (controller.signal.aborted || !active.current) return;
+      if (error instanceof Error && error.name === "ChatSessionChangedError") {
+        setSessionChanged(true);
+        setChatRooms([]);
+        setRequestRooms([]);
+        setGroupRooms([]);
+      } else
+        setLoadError("Unable to load more conversations. Please try again.");
+    } finally {
+      requests.current.delete(controller);
+      if (!controller.signal.aborted && active.current) {
+        setIsPending(false);
+        loadingMore.current = false;
+      }
+    }
   };
+
+  if (sessionChanged)
+    return (
+      <section role="alert" className="m-4 grid gap-3 text-light-900">
+        <p>Your account changed. Reload chat to continue.</p>
+        <Button type="button" onClick={() => window.location.reload()}>
+          Reload chat
+        </Button>
+      </section>
+    );
 
   return (
     <div className="flex w-full max-w-6xl flex-col gap-5 px-4 py-6 text-light-900 sm:px-6">
+      {loadError && (
+        <div role="alert" className="text-sm text-red-700 dark:text-red-300">
+          {loadError}
+          <Button
+            type="button"
+            disabled={isPending}
+            onClick={() => setAttempt((value) => value + 1)}
+          >
+            Try again
+          </Button>
+        </div>
+      )}
       {sharedPost && (
         <section
           aria-label="Share post in chat"
@@ -524,30 +538,16 @@ function ChatDashboard({
           {activeData.length === 0 ? (
             <div className="rounded-[22px] border border-dashed border-dark-300 bg-dark-200 px-4 py-10 text-center">
               <p className="text-sm text-light-500">
-                {searchKey
-                  ? "No conversations match your search."
-                  : activeTab === "request"
-                    ? "No message requests found."
-                    : activeTab === "group"
-                      ? "No group chats found."
-                      : "No chat history found."}
+                {isPending
+                  ? "Loading conversations..."
+                  : searchKey
+                    ? "No conversations match your search."
+                    : activeTab === "request"
+                      ? "No message requests found."
+                      : activeTab === "group"
+                        ? "No group chats found."
+                        : "No chat history found."}
               </p>
-              <p className="pt-3 text-xs text-light-500/80">
-                Debug: tab=`{activeTab}` visible=`{activeData.length}` raw=`
-                {activeRawCount}`
-              </p>
-              {debugState?.[activeTab] ? (
-                <p className="pt-2 text-xs text-light-500/70">
-                  API: status=`{String(debugState[activeTab]?.status ?? "null")}
-                  ` type=`
-                  {debugState[activeTab]?.responseType || "unknown"}` count=`
-                  {String(debugState[activeTab]?.normalizedCount ?? 0)}` msg=`
-                  {debugState[activeTab]?.message ||
-                    debugState[activeTab]?.reason ||
-                    "-"}
-                  `
-                </p>
-              ) : null}
             </div>
           ) : null}
 
@@ -567,4 +567,6 @@ function ChatDashboard({
   );
 }
 
-export default ChatDashboard;
+export default function ChatDashboard(props: Props) {
+  return <AccountChatDashboard key={props.accountId} {...props} />;
+}

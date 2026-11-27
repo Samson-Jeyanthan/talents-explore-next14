@@ -1,4 +1,5 @@
 "use client";
+import LinkedText from "@/components/others/LinkedText";
 
 import Image from "next/image";
 import { Button } from "../../ui/button";
@@ -64,7 +65,7 @@ const NormalUserProfileHeader = ({
           </p>
           {userData?.personalInfo?.shortBio && (
             <p className="w-96 text-xs text-light-600">
-              {userData?.personalInfo?.shortBio}
+              <LinkedText text={userData?.personalInfo?.shortBio} />
             </p>
           )}
           {visibility.canViewFollowings ? (

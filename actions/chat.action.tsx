@@ -31,6 +31,7 @@ type ChatMessagesParams = {
   id?: string | null;
   direction?: "up" | "down";
   pageSize?: number;
+  expectedViewerId?: string;
 };
 
 type SendChatMessagePayload = ChatMessageInput;
@@ -154,14 +155,9 @@ async function getCurrentUserResponse() {
     };
   } catch (error) {
     if (isRedirectError(error)) throw error;
-    console.error("getCurrentUserResponse failed:", error);
+    console.error("getCurrentUserResponse failed:");
     return { token: "", user: null };
   }
-}
-
-async function getCurrentUserId() {
-  const { user } = await getCurrentUserResponse();
-  return user?._id || "";
 }
 
 export async function getCurrentChatUserAction(): Promise<CurrentChatUser | null> {
@@ -209,7 +205,7 @@ export async function getChatUnreadCountAction(): Promise<ChatUnreadCount> {
     return { oneToOne: 0, group: 0, request: 0 };
   } catch (error) {
     if (isRedirectError(error)) throw error;
-    console.error("getChatUnreadCountAction failed:", error);
+    console.error("getChatUnreadCountAction failed:");
     return { oneToOne: 0, group: 0, request: 0 };
   }
 }
@@ -241,27 +237,15 @@ export async function getChatRoomsAction(
 
     const normalizedRooms = normalizeChatRoomResponse(response.data);
 
-    if (
-      response.data?.status === SUCCESS_STATUS ||
-      normalizedRooms.length > 0
-    ) {
+    if (response.data?.status === SUCCESS_STATUS) {
       return normalizedRooms;
     }
 
-    console.error("getChatRoomsAction unexpected response:", response.data);
+    console.error("getChatRoomsAction unexpected response:");
     return [];
   } catch (error) {
     if (isRedirectError(error)) throw error;
-    const axiosError = error as any;
-    const normalizedRooms = normalizeChatRoomResponse(
-      axiosError?.response?.data,
-    );
-
-    if (normalizedRooms.length > 0) {
-      return normalizedRooms;
-    }
-
-    console.error("getChatRoomsAction failed:", error);
+    console.error("getChatRoomsAction failed:");
     return [];
   }
 }
@@ -289,30 +273,15 @@ export async function getGroupChatRoomsAction(pageNumber = 1, pageSize = 10) {
 
     const normalizedRooms = normalizeChatRoomResponse(response.data);
 
-    if (
-      response.data?.status === SUCCESS_STATUS ||
-      normalizedRooms.length > 0
-    ) {
+    if (response.data?.status === SUCCESS_STATUS) {
       return normalizedRooms;
     }
 
-    console.error(
-      "getGroupChatRoomsAction unexpected response:",
-      response.data,
-    );
+    console.error("getGroupChatRoomsAction unexpected response:");
     return [];
   } catch (error) {
     if (isRedirectError(error)) throw error;
-    const axiosError = error as any;
-    const normalizedRooms = normalizeChatRoomResponse(
-      axiosError?.response?.data,
-    );
-
-    if (normalizedRooms.length > 0) {
-      return normalizedRooms;
-    }
-
-    console.error("getGroupChatRoomsAction failed:", error);
+    console.error("getGroupChatRoomsAction failed:");
     return [];
   }
 }
@@ -341,48 +310,45 @@ export async function createOneToOneChatAction(userIdB: string) {
       : null;
   } catch (error) {
     if (isRedirectError(error)) throw error;
-    console.error("createOneToOneChatAction failed:", error);
+    console.error("createOneToOneChatAction failed:");
     return null;
   }
 }
 
-export async function getChatMembersAction(roomId: string) {
+async function readChatMembers(token: string, user: any, roomId: string) {
+  if (!token || !user?._id || !roomId)
+    return { status: "400", list: [], info: null };
+  const response = await axios.get(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/chat/members/${roomId}/${user._id}`,
+    { headers: getAuthHeaders(token), timeout: 15000 },
+  );
+  const list = response.data?.response?.list;
+  if (response.data?.status !== SUCCESS_STATUS || !Array.isArray(list))
+    return { status: "400", list: [], info: null };
+  const belongsToViewer = list.some((member: any) => {
+    const id = member?.userId;
+    return (typeof id === "string" ? id : id?._id || id?.id) === user._id;
+  });
+  const info = response.data.response.info;
+  if (
+    !belongsToViewer ||
+    (user.isTalent !== true && !["CHAT", "REQUEST"].includes(info?.type))
+  )
+    return { status: "403", list: [], info: null };
+  return { status: SUCCESS_STATUS, list, info: info || null };
+}
+
+export async function getChatMembersAction(
+  roomId: string,
+  expectedViewerId?: string,
+) {
   try {
     const { token, user } = await getCurrentUserResponse();
-
-    if (!token || !user?._id || !roomId) {
-      return { status: "400", list: [], info: null };
-    }
-
-    const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/chat/members/${roomId}/${user._id}`,
-      {
-        headers: getAuthHeaders(token),
-        timeout: 15000,
-      },
-    );
-
-    if (
-      response.data?.status === SUCCESS_STATUS &&
-      Array.isArray(response.data?.response?.list)
-    ) {
-      const info = response.data.response.info;
-      // Classify from the server response, not the caller's ?type=chat hint.
-      if (user.isTalent !== true && !["CHAT", "REQUEST"].includes(info?.type))
-        return { status: "403", list: [], info: null };
-      return {
-        status: SUCCESS_STATUS,
-        list: Array.isArray(response.data?.response?.list)
-          ? response.data.response.list
-          : [],
-        info: response.data?.response?.info || null,
-      };
-    }
-
-    return { status: "400", list: [], info: null };
+    if (expectedViewerId && user?._id !== expectedViewerId)
+      return { status: "403", list: [], info: null };
+    return await readChatMembers(token, user, roomId);
   } catch (error) {
     if (isRedirectError(error)) throw error;
-
     return { status: "400", list: [], info: null };
   }
 }
@@ -394,6 +360,8 @@ export async function getGroupChatRoomDetailsAction(roomId: string) {
     if (!token || !roomId || user?.isTalent !== true) {
       return null;
     }
+    if ((await readChatMembers(token, user, roomId)).status !== SUCCESS_STATUS)
+      return null;
 
     const response = await axios.get(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/chat/groupChatRoomDetails/${roomId}`,
@@ -418,6 +386,7 @@ export async function getChatMessagesAction({
   id = null,
   direction = "down",
   pageSize = 10,
+  expectedViewerId,
 }: ChatMessagesParams) {
   try {
     const { token, user } = await getCurrentUserResponse();
@@ -426,8 +395,8 @@ export async function getChatMessagesAction({
       return [];
     }
     if (
-      user.isTalent !== true &&
-      (await getChatMembersAction(roomId)).status !== SUCCESS_STATUS
+      (expectedViewerId && user._id !== expectedViewerId) ||
+      (await readChatMembers(token, user, roomId)).status !== SUCCESS_STATUS
     )
       return [];
 
@@ -453,12 +422,15 @@ export async function getChatMessagesAction({
     return [];
   } catch (error) {
     if (isRedirectError(error)) throw error;
-    console.error("getChatMessagesAction failed:", error);
-    return normalizeChatMessagesResponse((error as any)?.response?.data);
+    console.error("getChatMessagesAction failed:");
+    return [];
   }
 }
 
-export async function sendChatMessageAction(payload: SendChatMessagePayload) {
+export async function sendChatMessageAction(
+  payload: SendChatMessagePayload,
+  expectedViewerId?: string,
+) {
   const parsed = chatMessageValidation.safeParse(payload);
   if (!parsed.success)
     return { status: "ERROR", message: parsed.error.issues[0].message };
@@ -474,8 +446,9 @@ export async function sendChatMessageAction(payload: SendChatMessagePayload) {
     }
 
     if (
-      user.isTalent !== true &&
-      (await getChatMembersAction(payload.roomId)).status !== SUCCESS_STATUS
+      (expectedViewerId && user._id !== expectedViewerId) ||
+      (await readChatMembers(token, user, payload.roomId)).status !==
+        SUCCESS_STATUS
     )
       return {
         status: "ERROR",
@@ -528,7 +501,11 @@ export async function sendChatMessageAction(payload: SendChatMessagePayload) {
   }
 }
 
-export async function deleteChatMessageAction(roomId: string, chatId: string) {
+export async function deleteChatMessageAction(
+  roomId: string,
+  chatId: string,
+  expectedViewerId?: string,
+) {
   try {
     const { token, user } = await getCurrentUserResponse();
 
@@ -536,8 +513,8 @@ export async function deleteChatMessageAction(roomId: string, chatId: string) {
       return false;
     }
     if (
-      user?.isTalent !== true &&
-      (await getChatMembersAction(roomId)).status !== SUCCESS_STATUS
+      (expectedViewerId && user?._id !== expectedViewerId) ||
+      (await readChatMembers(token, user, roomId)).status !== SUCCESS_STATUS
     )
       return false;
 
@@ -555,12 +532,15 @@ export async function deleteChatMessageAction(roomId: string, chatId: string) {
     return response.data;
   } catch (error) {
     if (isRedirectError(error)) throw error;
-    console.error("deleteChatMessageAction failed:", error);
+    console.error("deleteChatMessageAction failed:");
     return false;
   }
 }
 
-export async function deleteConversationAction(roomId: string) {
+export async function deleteConversationAction(
+  roomId: string,
+  expectedViewerId?: string,
+) {
   try {
     const { token, user } = await getCurrentUserResponse();
     const userId = user?._id;
@@ -569,8 +549,8 @@ export async function deleteConversationAction(roomId: string) {
       return false;
     }
     if (
-      user.isTalent !== true &&
-      (await getChatMembersAction(roomId)).status !== SUCCESS_STATUS
+      (expectedViewerId && user._id !== expectedViewerId) ||
+      (await readChatMembers(token, user, roomId)).status !== SUCCESS_STATUS
     )
       return false;
 
@@ -585,15 +565,19 @@ export async function deleteConversationAction(roomId: string) {
     return response.data;
   } catch (error) {
     if (isRedirectError(error)) throw error;
-    console.error("deleteConversationAction failed:", error);
+    console.error("deleteConversationAction failed:");
     return false;
   }
 }
 
-export async function acceptChatRequestAction(requestId: string) {
+export async function acceptChatRequestAction(
+  requestId: string,
+  expectedViewerId?: string,
+) {
   try {
-    const token = await getAccessToken();
-    const userId = await getCurrentUserId();
+    const { token, user } = await getCurrentUserResponse();
+    const userId = user?._id;
+    if (expectedViewerId && userId !== expectedViewerId) return false;
 
     if (!token || !userId || !requestId) {
       return false;
@@ -610,7 +594,7 @@ export async function acceptChatRequestAction(requestId: string) {
     return response.data;
   } catch (error) {
     if (isRedirectError(error)) throw error;
-    console.error("acceptChatRequestAction failed:", error);
+    console.error("acceptChatRequestAction failed:");
     return false;
   }
 }

@@ -1,4 +1,5 @@
 "use client";
+import LinkedText from "@/components/others/LinkedText";
 
 import {
   acceptChatRequestAction,
@@ -18,7 +19,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { useUserContext } from "@/context/AuthProvider";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ArrowLeft, Trash2 } from "lucide-react";
@@ -51,33 +51,6 @@ type Props = {
   currentUser: CurrentUser | null;
   sharedPost?: SharedPost;
 };
-
-const RECENT_CHATS_KEY = "te-web-recent-chats";
-const RECENT_GROUPS_KEY = "te-web-recent-groups";
-
-function persistRecentRoom(
-  key: string,
-  room: Record<string, any>,
-  roomLimit = 25,
-) {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  try {
-    const stored = window.localStorage.getItem(key);
-    const parsed = stored ? JSON.parse(stored) : [];
-    const current = Array.isArray(parsed) ? parsed : [];
-    const filtered = current.filter(
-      (item: any) =>
-        (item?._id || item?.roomId) !== (room?._id || room?.roomId),
-    );
-    const next = [room, ...filtered].slice(0, roomLimit);
-    window.localStorage.setItem(key, JSON.stringify(next));
-  } catch {
-    // ignore localStorage errors
-  }
-}
 
 function formatMessageTime(value?: string) {
   if (!value) {
@@ -121,7 +94,6 @@ function ChatRoom({
   sharedPost,
 }: Props) {
   const router = useRouter();
-  const { user } = useUserContext();
   const [messages, setMessages] = useState<any[]>(initialMessages || []);
   const [members, setMembers] = useState<any[]>(initialMembers || []);
   const [chatInfo, setChatInfo] = useState<any>(initialChatInfo || null);
@@ -131,11 +103,17 @@ function ChatRoom({
   const [isPending, startTransition] = useTransition();
   const listRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<Socket | null>(null);
-  const activeRoom = useRef(roomId);
-  activeRoom.current = roomId;
-
-  const activeUserId = currentUser?._id || user.currentUserId;
-  const activeUserName = currentUser?.userName || user.username;
+  const activeUserId = currentUser?._id || "";
+  const activeUserName = currentUser?.userName || "";
+  const sessionKey = `${activeUserId}:${roomId}`;
+  const activeRoom = useRef(sessionKey);
+  activeRoom.current = sessionKey;
+  useEffect(() => {
+    activeRoom.current = sessionKey;
+    return () => {
+      activeRoom.current = "";
+    };
+  }, [sessionKey]);
   const sender = useMemo(
     () =>
       members.find((member) => {
@@ -193,62 +171,6 @@ function ChatRoom({
   }, [roomId, initialMessages, initialMembers, initialChatInfo]);
 
   useEffect(() => {
-    if (!roomId) {
-      return;
-    }
-
-    const latestMessage = [...messages].reverse().find((item) => !item?.type);
-    const lastMessageLabel =
-      latestMessage?.content ||
-      (latestMessage?.media
-        ? latestMessage.mediaType === "video"
-          ? "Video"
-          : "Image"
-        : "Open conversation");
-    const roomPayload =
-      initialType === "group"
-        ? {
-            _id: initialGroupChatDetails?._id || roomId,
-            roomId,
-            title: initialGroupChatDetails?.title || "Group chat",
-            collaboration: initialGroupChatDetails || null,
-            lastMessage: lastMessageLabel,
-            updatedAt: latestMessage?.createdAt || new Date().toISOString(),
-            unread: 0,
-          }
-        : {
-            _id: chatInfo?._id || roomId,
-            roomId,
-            member: sender
-              ? [
-                  {
-                    userId: sender.userId,
-                    userName: sender.userName,
-                    userProfilePicture: sender.userProfilePicture,
-                    professional: sender.professional,
-                  },
-                ]
-              : [],
-            info: chatInfo || null,
-            lastMessage: lastMessageLabel,
-            updatedAt: latestMessage?.createdAt || new Date().toISOString(),
-            unread: 0,
-          };
-
-    persistRecentRoom(
-      initialType === "group" ? RECENT_GROUPS_KEY : RECENT_CHATS_KEY,
-      roomPayload,
-    );
-  }, [
-    roomId,
-    initialType,
-    initialGroupChatDetails,
-    chatInfo,
-    sender,
-    messages,
-  ]);
-
-  useEffect(() => {
     const container = listRef.current;
     if (container) {
       container.scrollTop = container.scrollHeight;
@@ -269,10 +191,16 @@ function ChatRoom({
     socketRef.current = socket;
 
     socket.on("connect", () => {
+      if (activeRoom.current !== sessionKey) return;
       socket.emit("join", { roomId, userId: activeUserId });
     });
 
     socket.on("newMessage", (data: any) => {
+      if (
+        activeRoom.current !== sessionKey ||
+        (data?.roomId && data.roomId !== roomId)
+      )
+        return;
       setMessages((prev) => {
         if (prev.some((item) => item?._id === data?._id)) {
           return prev;
@@ -290,20 +218,23 @@ function ChatRoom({
     });
 
     socket.on("onlineUsers", (data: any) => {
+      if (activeRoom.current !== sessionKey) return;
       if (Array.isArray(data?.members)) {
         setMembers(data.members);
       }
     });
 
     socket.on("typing", (data: any) => {
+      if (activeRoom.current !== sessionKey) return;
       setTyping(data?.isTyping ? data : null);
     });
 
     return () => {
       socket.emit("leave", { roomId, userId: activeUserId });
       socket.disconnect();
+      if (socketRef.current === socket) socketRef.current = null;
     };
-  }, [activeUserId, roomId]);
+  }, [activeUserId, roomId, sessionKey]);
 
   const emitTyping = (isTyping: boolean) => {
     socketRef.current?.emit("typing", {
@@ -326,10 +257,12 @@ function ChatRoom({
     startTransition(async () => {
       const older = await getChatMessagesAction({
         roomId,
+        expectedViewerId: activeUserId,
         direction: "up",
         id: firstMessageId,
         pageSize: 10,
       });
+      if (activeRoom.current !== sessionKey) return;
 
       if (Array.isArray(older) && older.length > 0) {
         const prepared = [...older].reverse();
@@ -345,24 +278,33 @@ function ChatRoom({
   };
 
   const refreshChatMeta = async () => {
-    const memberRes = await getChatMembersAction(roomId);
+    const memberRes = await getChatMembersAction(roomId, activeUserId);
+    if (activeRoom.current !== sessionKey) return;
     setMembers(memberRes?.list || []);
     setChatInfo(memberRes?.info || null);
   };
 
   const handleSendMessage = async (payload: ChatMessageInput) => {
-    const res = await sendChatMessageAction({
-      ...payload,
-      roomId,
-      colorCode: selfMember?.colorCode || null,
-    });
+    if (activeRoom.current !== sessionKey)
+      return {
+        success: false,
+        message: "Your chat session changed. Reload chat to continue.",
+      };
+    const res = await sendChatMessageAction(
+      {
+        ...payload,
+        roomId,
+        colorCode: selfMember?.colorCode || null,
+      },
+      activeUserId,
+    );
     if (!res || res.status !== "7400")
       return {
         success: false,
         message:
           res?.message || "Unable to send your message. Please try again.",
       };
-    if (activeRoom.current !== roomId) return { success: true };
+    if (activeRoom.current !== sessionKey) return { success: true };
 
     const result = res.response?.message || res.response?.data || res.response;
     if (result && typeof result === "object" && result._id) {
@@ -387,12 +329,13 @@ function ChatRoom({
     try {
       const latest = await getChatMessagesAction({
         roomId,
+        expectedViewerId: activeUserId,
         id: messages[messages.length - 1]?._id || null,
         direction: "down",
         pageSize: 10,
       });
       if (
-        activeRoom.current === roomId &&
+        activeRoom.current === sessionKey &&
         Array.isArray(latest) &&
         latest.length
       ) {
@@ -410,40 +353,7 @@ function ChatRoom({
       /* Sending succeeded; realtime updates or refresh can reload it. */
     }
 
-    if (activeRoom.current !== roomId) return { success: true };
-    const lastMessage =
-      payload.content || (payload.mediaType === "video" ? "Video" : "Image");
-    persistRecentRoom(
-      initialType === "group" ? RECENT_GROUPS_KEY : RECENT_CHATS_KEY,
-      initialType === "group"
-        ? {
-            _id: initialGroupChatDetails?._id || roomId,
-            roomId,
-            title: initialGroupChatDetails?.title || "Group chat",
-            collaboration: initialGroupChatDetails || null,
-            lastMessage,
-            updatedAt: new Date().toISOString(),
-            unread: 0,
-          }
-        : {
-            _id: chatInfo?._id || roomId,
-            roomId,
-            member: sender
-              ? [
-                  {
-                    userId: sender.userId,
-                    userName: sender.userName,
-                    userProfilePicture: sender.userProfilePicture,
-                    professional: sender.professional,
-                  },
-                ]
-              : [],
-            info: chatInfo || null,
-            lastMessage,
-            updatedAt: new Date().toISOString(),
-            unread: 0,
-          },
-    );
+    if (activeRoom.current !== sessionKey) return { success: true };
     return { success: true };
   };
 
@@ -453,7 +363,12 @@ function ChatRoom({
     }
 
     startTransition(async () => {
-      const res = await deleteChatMessageAction(roomId, deleteMessageId);
+      const res = await deleteChatMessageAction(
+        roomId,
+        deleteMessageId,
+        activeUserId,
+      );
+      if (activeRoom.current !== sessionKey) return;
 
       if (!res || res.status !== "7400") {
         toast.error("Couldn't delete message", { duration: 4000 });
@@ -473,7 +388,8 @@ function ChatRoom({
     }
 
     startTransition(async () => {
-      const res = await acceptChatRequestAction(chatInfo._id);
+      const res = await acceptChatRequestAction(chatInfo._id, activeUserId);
+      if (activeRoom.current !== sessionKey) return;
 
       if (!res || res.status !== "7400") {
         toast.error("Couldn't accept request", { duration: 4000 });
@@ -613,7 +529,7 @@ function ChatRoom({
 
                       {item?.content ? (
                         <p className="whitespace-pre-wrap break-words text-sm">
-                          {item.content}
+                          <LinkedText text={item.content} inverted={isOwn} />
                         </p>
                       ) : null}
 

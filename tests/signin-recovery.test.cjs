@@ -323,7 +323,11 @@ function form({ reply = async () => success(), blocked = false } = {}) {
       removeItem: (key) => cache.delete(key),
     },
   };
-  const cacheUtils = load("lib/utils/auth-user-cache.ts", {}, { window });
+  const cacheUtils = load(
+    "lib/utils/auth-user-cache.ts",
+    { "./chat-session": { clearLegacyChatStorage() {} } },
+    { window },
+  );
   const Component = load(
     "components/forms/SigninForm.tsx",
     {

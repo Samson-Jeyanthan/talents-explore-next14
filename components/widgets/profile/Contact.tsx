@@ -1,3 +1,4 @@
+import LinkedText from "@/components/others/LinkedText";
 import React from "react";
 import { EmptyDetails } from "@/components/others";
 import {
@@ -77,7 +78,7 @@ const Contact = ({
                   <FiUser />
                 </span>
                 <p className="line-clamp-2 w-full max-w-[70%] pt-2 text-left">
-                  {mediaLink.url}
+                  <LinkedText text={mediaLink.url} />
                 </p>
               </div>
             </React.Fragment>

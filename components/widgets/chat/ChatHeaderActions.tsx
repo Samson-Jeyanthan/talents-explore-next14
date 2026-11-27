@@ -69,7 +69,7 @@ export default function ChatHeaderActions({
     setDeleting(true);
     setDeleteError("");
     try {
-      const result = await deleteConversationAction(roomId);
+      const result = await deleteConversationAction(roomId, activeUserId);
       if (!mounted.current) return;
       if (result?.status !== "7400") {
         setDeleteError("Unable to delete this conversation. Please try again.");

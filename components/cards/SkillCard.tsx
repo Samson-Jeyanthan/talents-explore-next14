@@ -1,3 +1,4 @@
+import LinkedText from "@/components/others/LinkedText";
 import type { ReactNode } from "react";
 import type { ProfileSkill } from "@/lib/utils/profile-skills";
 import { MotionDiv } from "../others/MotionDiv";
@@ -47,7 +48,7 @@ function SkillCard({ userSkillCard, index, actions }: Prop) {
       </div>
       <p className="-mb-1 mt-1 text-xs text-light-900">Description</p>
       <p className="whitespace-pre-wrap text-justify text-xs text-light-500 [overflow-wrap:anywhere]">
-        {userSkillCard.description}
+        <LinkedText text={userSkillCard.description} />
       </p>
       {userSkillCard.hashTags?.length ? (
         <div className="mt-2 flex flex-wrap gap-2">

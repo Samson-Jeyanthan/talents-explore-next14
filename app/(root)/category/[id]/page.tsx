@@ -1,3 +1,4 @@
+import LinkedText from "@/components/others/LinkedText";
 import { getCategoryPostsAction } from "@/actions/category.action";
 import { buildCategoryFeedQuery } from "@/lib/utils/categoryFeed";
 import { getAuthHeaders } from "@/lib/session";
@@ -47,7 +48,7 @@ const TagPage = async ({ params, searchParams }: any) => {
             {categoryData?.name}
           </div>
           <p className="z-20 pb-3 pt-1 text-sm text-light-700">
-            {categoryData?.description}
+            <LinkedText text={categoryData?.description} />
           </p>
           <ExploreSearchSection
             langData={langData}

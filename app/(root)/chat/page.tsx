@@ -25,6 +25,8 @@ export default async function ChatPage({
 
   return (
     <ChatDashboard
+      key={account._id}
+      accountId={account._id}
       isTalent={account.isTalent}
       initialChats={initialChats}
       initialRequests={initialRequests}

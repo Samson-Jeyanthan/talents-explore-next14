@@ -1,6 +1,35 @@
 import type { ICurrentUser } from "@/types/auth.types";
+import { clearLegacyChatStorage } from "./chat-session";
 
 export const AUTH_USER_CACHE_KEY = "talents-explore-auth-user";
+export const AUTH_SESSION_CHANGE_KEY = "te-auth-session-change";
+
+function activeAccount(): string | null | undefined {
+  try {
+    if (typeof window === "undefined") return undefined;
+    const raw = window.localStorage?.getItem(AUTH_SESSION_CHANGE_KEY);
+    if (!raw) return undefined;
+    const value = JSON.parse(raw);
+    return value?.userId === null || typeof value?.userId === "string"
+      ? value.userId
+      : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export function publishAuthSessionChange(userId: string | null) {
+  clearLegacyChatStorage();
+  try {
+    if (typeof window !== "undefined" && activeAccount() !== userId)
+      window.localStorage?.setItem(
+        AUTH_SESSION_CHANGE_KEY,
+        JSON.stringify({ userId, changedAt: Date.now() }),
+      );
+  } catch {
+    /* Cross-tab synchronization is optional when storage is blocked. */
+  }
+}
 
 function cachedUser(value: unknown): ICurrentUser | null {
   if (!value || typeof value !== "object") return null;
@@ -29,6 +58,7 @@ function cachedUser(value: unknown): ICurrentUser | null {
 }
 
 export function clearCachedAuthUser() {
+  clearLegacyChatStorage();
   try {
     if (typeof window !== "undefined")
       window.sessionStorage.removeItem(AUTH_USER_CACHE_KEY);
@@ -38,12 +68,17 @@ export function clearCachedAuthUser() {
 }
 
 export function readCachedAuthUser(): ICurrentUser | null {
+  clearLegacyChatStorage();
   try {
     if (typeof window === "undefined") return null;
     const raw = window.sessionStorage.getItem(AUTH_USER_CACHE_KEY);
     if (raw === null) return null;
     const user = cachedUser(JSON.parse(raw));
-    if (!user) clearCachedAuthUser();
+    const active = activeAccount();
+    if (!user || (active !== undefined && user.currentUserId !== active)) {
+      clearCachedAuthUser();
+      return null;
+    }
     return user;
   } catch {
     clearCachedAuthUser();
@@ -60,6 +95,7 @@ export function writeCachedAuthUser(user: ICurrentUser): boolean {
       return false;
     }
     window.sessionStorage.setItem(AUTH_USER_CACHE_KEY, JSON.stringify(value));
+    publishAuthSessionChange(value.currentUserId);
     return true;
   } catch {
     // When quota prevents replacement, remove the old entry rather than restore

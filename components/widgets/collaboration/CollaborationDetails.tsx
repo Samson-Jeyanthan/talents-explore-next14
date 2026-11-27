@@ -1,4 +1,5 @@
 "use client";
+import LinkedText from "@/components/others/LinkedText";
 
 import {
   deleteCollaborationAction,
@@ -267,8 +268,12 @@ function CollaborationDetails({
             {collaboration?.title || "Untitled collaboration"}
           </h1>
           <p className="pt-3 text-sm text-light-500">
-            {collaboration?.description ||
-              "No collaboration description provided yet."}
+            <LinkedText
+              text={
+                collaboration?.description ||
+                "No collaboration description provided yet."
+              }
+            />
           </p>
 
           {collaboration?.poster?.url ? (

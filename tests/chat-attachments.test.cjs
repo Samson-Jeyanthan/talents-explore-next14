@@ -217,6 +217,15 @@ function actionHarness(
     "next/dist/client/components/redirect": { isRedirectError },
     axios: {
       default: {
+        get: async () => ({
+          data: {
+            status: "7400",
+            response: {
+              info: { type: "CHAT" },
+              list: [{ userId: "trusted-user" }],
+            },
+          },
+        }),
         post: async (url, body, options) => {
           calls.push({ url, body, options });
           if (response instanceof Error) throw response;

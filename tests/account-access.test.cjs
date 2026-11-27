@@ -380,6 +380,7 @@ function all(tree, predicate) {
   ];
 }
 const staticHooks = {
+  useRef: (value) => ({ current: value }),
   useState: (value) => [value, () => {}],
   useEffect() {},
   useCallback: (fn) => fn,
@@ -453,13 +454,15 @@ test("normal-user menus keep share and direct chat available while hiding collab
       "date-fns": {},
       "@/lib/utils/postSharing": {},
     }).default;
-    const tree = Dashboard({
+    const view = Dashboard({
+      accountId: viewer,
       isTalent,
       initialChats: [],
       initialRequests: [],
       initialGroups: [],
       initialUnreadCount: {},
     });
+    const tree = view.type(view.props);
     const labels = all(tree, (n) => n.type === "button").map((n) =>
       JSON.stringify(n.props.children),
     );
@@ -474,7 +477,9 @@ test("normal-user menus keep share and direct chat available while hiding collab
 test("the chat rooms HTTP endpoint rejects normal users requesting group rooms", async () => {
   let reads = 0;
   const route = load("app/api/chat/rooms/route.ts", {
-    "@/lib/session": { getSession: async () => "test" },
+    "@/lib/session": {
+      getAuthHeaders: async () => ({ Authorization: "Bearer test" }),
+    },
     "@/actions/auth.action": {
       getUserPersonalInfoAction: async () => ({
         status: "7400",

@@ -13,6 +13,8 @@ import { toast } from "sonner";
 import {
   readCachedAuthUser,
   writeCachedAuthUser,
+  clearCachedAuthUser,
+  AUTH_SESSION_CHANGE_KEY,
 } from "@/lib/utils/auth-user-cache";
 
 export { AUTH_USER_CACHE_KEY } from "@/lib/utils/auth-user-cache";
@@ -37,21 +39,45 @@ const INITIAL_STATE = {
 const AuthContext = createContext<IContextType>(INITIAL_STATE);
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<ICurrentUser>(INITIAL_USER);
+  const [user, setUserState] = useState<ICurrentUser>(INITIAL_USER);
   const [isLoading, setIsLoading] = useState(false);
-  const authCheckStarted = useRef(false);
+  const authVersion = useRef(0);
+  const currentUser = useRef(user);
+  currentUser.current = user;
+  const setUser: React.Dispatch<React.SetStateAction<ICurrentUser>> = (
+    value,
+  ) => {
+    authVersion.current++;
+    setIsLoading(false);
+    setUserState(value);
+  };
 
-  async function checkAuthUser() {
-    const cachedUser = readCachedAuthUser();
+  async function checkAuthUser(force = false) {
+    const version = ++authVersion.current;
+    const cachedUser = force ? null : readCachedAuthUser();
     if (cachedUser) {
-      setUser(cachedUser);
+      setIsLoading(false);
+      setUserState(cachedUser);
       return;
     }
 
     setIsLoading(true);
     try {
       const res = await getCurrentSessionUserAction();
-      if (!res) return;
+      if (version !== authVersion.current) return;
+      if (res?.status === "7400" && !res.response?._id)
+        throw new Error("Unable to verify your account. Please try again.");
+      if (
+        !res ||
+        (res.status === "7400" &&
+          currentUser.current.currentUserId &&
+          currentUser.current.currentUserId !== res.response?._id)
+      ) {
+        clearCachedAuthUser();
+        setUserState(INITIAL_USER);
+        if (force) window.location.assign(res ? "/home" : "/sign-in");
+        return;
+      }
 
       if (res.status === "7400") {
         if (res?.response?.personalInfo?.firstName) {
@@ -64,7 +90,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             imageUrl: res?.response?.personalInfo?.profileImage,
             isTalent: res?.response?.isTalent,
           };
-          setUser(nextUser);
+          setUserState(nextUser);
           writeCachedAuthUser(nextUser);
         } else {
           const nextUser = {
@@ -76,7 +102,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             imageUrl: null,
             isTalent: false,
           };
-          setUser(nextUser);
+          setUserState(nextUser);
           writeCachedAuthUser(nextUser);
           // router.push("/complete-profile");
           toast.info("Please complete your profile", {
@@ -85,25 +111,44 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       } else {
         // router.push("/sign-in");
-        toast.error("Couldn't fetch user details", {
-          duration: 5000,
-        });
+        if (!force)
+          toast.error("Couldn't fetch user details", {
+            duration: 5000,
+          });
       }
     } catch (error) {
-      console.error("Error checking auth user:", error);
-      toast.error("Error checking auth user", {
-        duration: 5000,
-      });
+      if (version !== authVersion.current) return;
+      if (!force)
+        toast.error("Error checking auth user", {
+          duration: 5000,
+        });
       throw error;
     } finally {
-      setIsLoading(false);
+      if (version === authVersion.current) setIsLoading(false);
     }
   }
 
   useEffect(() => {
-    if (authCheckStarted.current) return;
-    authCheckStarted.current = true;
-    checkAuthUser();
+    const lifecycle = authVersion;
+    checkAuthUser().catch(() => {});
+    const onSessionChange = (event: StorageEvent) => {
+      if (event.key !== AUTH_SESSION_CHANGE_KEY) return;
+      authVersion.current++;
+      clearCachedAuthUser();
+      setUserState(INITIAL_USER);
+      window.location.assign("/home");
+    };
+    const onFocus = () => {
+      if (!currentUser.current.currentUserId) return;
+      checkAuthUser(true).catch(() => {});
+    };
+    window.addEventListener?.("storage", onSessionChange);
+    window.addEventListener?.("focus", onFocus);
+    return () => {
+      lifecycle.current++;
+      window.removeEventListener?.("storage", onSessionChange);
+      window.removeEventListener?.("focus", onFocus);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

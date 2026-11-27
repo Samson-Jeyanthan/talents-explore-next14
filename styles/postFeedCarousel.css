@@ -15,6 +15,7 @@
 }
 .pf-embla__container {
   display: flex;
+  align-items: flex-start;
   touch-action: pan-y pinch-zoom;
   margin-left: calc(var(--slide-spacing) * -1);
 }

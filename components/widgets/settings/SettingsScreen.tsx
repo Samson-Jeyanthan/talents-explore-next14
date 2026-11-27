@@ -1,4 +1,5 @@
 "use client";
+import LinkedText from "@/components/others/LinkedText";
 
 import Link from "next/link";
 import {
@@ -581,7 +582,7 @@ function ActivityGrid({
                   {getActivityTitle(item)}
                 </p>
                 <p className="pt-2 text-sm text-light-500">
-                  {getActivityDescription(item)}
+                  <LinkedText text={getActivityDescription(item)} />
                 </p>
               </div>
               <div className="size-14 shrink-0 rounded-2xl bg-gradient-to-br from-primary-500/30 to-dark-200" />

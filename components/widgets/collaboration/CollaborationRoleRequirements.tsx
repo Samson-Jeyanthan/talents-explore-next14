@@ -1,3 +1,4 @@
+import LinkedText from "@/components/others/LinkedText";
 import {
   detailText,
   enumLabel,
@@ -52,7 +53,9 @@ export default function CollaborationRoleRequirements({ role }: { role: any }) {
         </div>
       </dl>
       <p className="whitespace-pre-wrap break-words text-sm text-light-700">
-        {detailText(role?.description, "No role description provided.")}
+        <LinkedText
+          text={detailText(role?.description, "No role description provided.")}
+        />
       </p>
       <div>
         <h3 className="text-sm font-medium text-light-600">Skills required</h3>

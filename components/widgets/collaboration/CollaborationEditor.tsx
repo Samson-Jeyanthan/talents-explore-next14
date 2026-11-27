@@ -1,4 +1,5 @@
 "use client";
+import LinkedText from "@/components/others/LinkedText";
 
 import {
   createCollaborationAction,
@@ -791,7 +792,7 @@ export default function CollaborationEditor({
                       </div>
                     </div>
                     <p className="pt-3 text-sm text-light-500">
-                      {role.description}
+                      <LinkedText text={role.description} />
                     </p>
                   </div>
                 ))

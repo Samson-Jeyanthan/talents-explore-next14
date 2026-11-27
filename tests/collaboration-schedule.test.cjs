@@ -47,6 +47,7 @@ const jsx = {
   jsxs: (type, props) => ({ type, props }),
 };
 const mocks = {
+  "@/components/others/LinkedText": "linked-text",
   "react/jsx-runtime": jsx,
   react: { useState: (value) => [value, () => {}], useEffect: () => {} },
   "next/link": "link",
@@ -56,6 +57,7 @@ function text(tree) {
   if (tree == null || typeof tree === "boolean") return "";
   if (typeof tree !== "object") return String(tree);
   if (Array.isArray(tree)) return tree.map(text).join(" ");
+  if (tree.type === "linked-text") return text(tree.props.text);
   return text(tree.props?.children);
 }
 function find(tree, predicate) {

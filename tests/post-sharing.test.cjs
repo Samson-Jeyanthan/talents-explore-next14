@@ -27,7 +27,7 @@ function load(file, mocks = {}, globals = {}) {
   return testModule.exports;
 }
 const sharing = load("lib/utils/postSharing.ts");
-const post = { id: "6aff08a32e63b493d0e6e337", title: "Title & details 🎬" };
+const post = { id: "6aff08a32e63b493d0e6e337", title: "Title & details ðŸŽ¬" };
 
 test("post and shared-link sharing use the current site post route without query parameters", () => {
   const data = sharing.getPostShareData(
@@ -300,6 +300,7 @@ test("choosing a direct or group conversation preserves the shared post and spec
         useState: (initial) => [initial === "chat" ? tab : initial, () => {}],
         useMemo: (callback) => callback(),
         useCallback: (callback) => callback,
+        useRef: (value) => ({ current: value }),
         useEffect() {},
         useTransition: () => [false, () => {}],
       },
@@ -313,8 +314,10 @@ test("choosing a direct or group conversation preserves the shared post and spec
       "@/components/others/UserProfileImg": {},
       "@/components/ui/button": {},
       "@/lib/utils/postSharing": sharing,
+      "@/lib/utils/chat-session": {},
     });
-    const tree = dashboard.default({
+    const view = dashboard.default({
+      accountId: "qa-account",
       isTalent: true,
       initialChats: [
         { roomId: "direct-room", member: [{ userName: "Test user" }] },
@@ -324,6 +327,7 @@ test("choosing a direct or group conversation preserves the shared post and spec
       initialUnreadCount: { oneToOne: 0, group: 0, request: 0 },
       sharedPost: post,
     });
+    const tree = view.type(view.props);
     const links = [];
     function visit(node) {
       if (!node || typeof node !== "object") return;

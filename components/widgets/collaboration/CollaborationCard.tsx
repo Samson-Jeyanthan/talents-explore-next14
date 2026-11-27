@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import LinkedText from "@/components/others/LinkedText";
 
 function getDurationLabel(item: any) {
   const collaboration = item?.collaboration || item || {};
@@ -65,11 +66,7 @@ function CollaborationCard({ collaboration }: { collaboration: any }) {
   const title = collaborationInfo?.title || "Untitled collaboration";
 
   return (
-    <Link
-      href={`/collaboration/${collaborationInfo?._id || collaborationInfo?.id || collaboration?._id || ""}`}
-      aria-label={`View collaboration: ${title}`}
-      className="group block min-w-0 overflow-hidden rounded-3xl border border-dark-400/50 bg-dark-250 shadow-sm transition duration-200 hover:border-primary-500/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-dark-200"
-    >
+    <article className="group relative block min-w-0 overflow-hidden rounded-3xl border border-dark-400/50 bg-dark-250 shadow-sm transition duration-200 focus-within:ring-2 focus-within:ring-primary-500 hover:border-primary-500/40 hover:shadow-md">
       <div
         className={`grid min-w-0 ${hasPoster ? "md:grid-cols-[220px_minmax(0,1fr)] xl:grid-cols-[240px_minmax(0,1fr)]" : ""}`}
       >
@@ -125,11 +122,21 @@ function CollaborationCard({ collaboration }: { collaboration: any }) {
             ) : null}
           </div>
           <h3 className="mt-4 break-words text-xl font-semibold leading-snug text-light-900 transition-colors group-hover:text-primary-500">
-            {title}
+            <Link
+              href={`/collaboration/${collaborationInfo?._id || collaborationInfo?.id || collaboration?._id || ""}`}
+              aria-label={`View collaboration: ${title}`}
+              className="after:absolute after:inset-0 after:rounded-3xl focus-visible:outline-none"
+            >
+              {title}
+            </Link>
           </h3>
-          <p className="mt-2 line-clamp-2 break-words text-sm leading-relaxed text-light-600">
-            {collaborationInfo?.description ||
-              "No collaboration description provided yet."}
+          <p className="mt-2 line-clamp-2 break-words text-sm leading-relaxed text-light-600 [&_a]:relative [&_a]:z-10">
+            <LinkedText
+              text={
+                collaborationInfo?.description ||
+                "No collaboration description provided yet."
+              }
+            />
           </p>
           <dl className="my-5 grid min-w-0 grid-cols-2 gap-x-4 gap-y-3 text-sm sm:grid-cols-3">
             <div className="min-w-0">
@@ -183,7 +190,7 @@ function CollaborationCard({ collaboration }: { collaboration: any }) {
           </div>
         </div>
       </div>
-    </Link>
+    </article>
   );
 }
 

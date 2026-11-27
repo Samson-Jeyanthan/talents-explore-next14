@@ -48,6 +48,9 @@ const TopPostCard = ({ userTopPostCard, index }: Prop) => {
           height={512}
           className="size-full rounded-xl bg-dark-400 object-cover"
         />
+        <span className="absolute right-2 top-2 rounded-full bg-black/70 px-3 py-2 text-xs font-medium text-blue-300">
+          View details <span aria-hidden="true">→</span>
+        </span>
 
         <div className="theme-on-media absolute bottom-0 right-0 flex h-1/2 w-full items-end rounded-xl bg-gradient-to-b from-transparent to-black/90 p-2">
           <div className="flex-start w-full gap-2">

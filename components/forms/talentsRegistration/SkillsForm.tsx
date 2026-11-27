@@ -1,4 +1,5 @@
 "use client";
+import LinkedText from "@/components/others/LinkedText";
 
 import { useProfileSkillOptions } from "@/lib/hooks/useProfileSkillOptions";
 import { registrationSkillValidation } from "@/lib/utils/talent-registration";
@@ -44,8 +45,8 @@ const SkillsForm = ({ form, isTalentRegister, page, onDraftChange }: any) => {
     page === 1,
   );
   const mainCategoryOptions = main.options;
-    const subCategoryOptions = sub.options;
-    const skillOptions = availableSkills.options;
+  const subCategoryOptions = sub.options;
+  const skillOptions = availableSkills.options;
   const ready =
     main.status === "ready" &&
     sub.status === "ready" &&
@@ -243,7 +244,7 @@ const SkillsForm = ({ form, isTalentRegister, page, onDraftChange }: any) => {
               {skills.skillsHave.length !== 1 && (
                 <button
                   type="button"
-                  aria-label={`Remove skill ${index+1}`}
+                  aria-label={`Remove skill ${index + 1}`}
                   onClick={() => removeRow(index)}
                   className="flex-center absolute right-0 top-3 size-5 cursor-pointer rounded-full border border-light-500 p-[2px] text-light-600 hover:text-light-850"
                 >
@@ -355,7 +356,9 @@ const SkillsForm = ({ form, isTalentRegister, page, onDraftChange }: any) => {
                 ))}
               </ul>
 
-              <p className="mt-2 text-sm text-light-500">{set.description}</p>
+              <p className="mt-2 text-sm text-light-500">
+                <LinkedText text={set.description} />
+              </p>
               <p className="mt-2 text-xs text-light-500">
                 {set.hashTags.join(" ")}
               </p>

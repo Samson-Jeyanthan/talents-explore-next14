@@ -1,4 +1,6 @@
 "use client";
+import LinkedText from "@/components/others/LinkedText";
+
 
 import Link from "next/link";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
@@ -180,7 +182,7 @@ function RequestCard({ item, feature }: { item: any; feature: Feature }) {
       {item?.[isAdvertisement ? "furtherDetails" : "previousExperience"] ? (
         <div className="mt-5 rounded-2xl bg-dark-200 p-4">
           <p className="text-xs font-medium uppercase tracking-wide text-light-500">{isAdvertisement ? "Details" : "Previous Experience"}</p>
-          <p className="pt-1 text-sm leading-6 text-light-700">{item[isAdvertisement ? "furtherDetails" : "previousExperience"]}</p>
+          <p className="pt-1 text-sm leading-6 text-light-700"><LinkedText text={item[isAdvertisement ? "furtherDetails" : "previousExperience"]} /></p>
         </div>
       ) : null}
 
@@ -193,7 +195,7 @@ function RequestCard({ item, feature }: { item: any; feature: Feature }) {
 }
 
 function Meta({ label, value }: { label: string; value?: string }) {
-  return <p className="min-w-0 text-light-500"><span className="font-medium text-light-700">{label}: </span>{value || "-"}</p>;
+  return <p className="min-w-0 text-light-500"><span className="font-medium text-light-700">{label}: </span><LinkedText text={value || "-"} /></p>;
 }
 
 function AdvertisementForm() {

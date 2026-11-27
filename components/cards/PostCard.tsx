@@ -1,4 +1,5 @@
 "use client";
+import LinkedText from "@/components/others/LinkedText";
 
 import { IPost } from "@/types/post.types";
 import { useUserContext } from "@/context/AuthProvider";
@@ -152,8 +153,14 @@ const PostCard = ({ postFeedCard, index }: Props) => {
       </div>
 
       <p className="line-clamp-3 text-justify text-[13px] text-light-700">
-        {postFeedCard.about.description}
+        <LinkedText text={postFeedCard.about.description} />
       </p>
+      <Link
+        href={postLink}
+        className="inline-flex min-h-10 w-fit items-center gap-1 text-sm font-medium text-blue-600 underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:outline focus-visible:outline-2 dark:text-blue-400"
+      >
+        View details <span aria-hidden="true">→</span>
+      </Link>
     </MotionDiv>
   );
 };

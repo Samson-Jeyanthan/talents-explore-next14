@@ -90,6 +90,12 @@ export default function ExplorePostCard({
         ) : (
           <p className="text-xs text-light-500">{name}</p>
         )}
+        <Link
+          href={`/post/${item._id}`}
+          className="inline-flex min-h-10 w-fit items-center gap-1 text-sm font-medium text-blue-600 underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:outline focus-visible:outline-2 dark:text-blue-400"
+        >
+          View details <span aria-hidden="true">→</span>
+        </Link>
       </div>
     </article>
   );
