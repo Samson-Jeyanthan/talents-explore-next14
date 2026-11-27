@@ -28,6 +28,9 @@ const CreatePostAboutForm = ({
   formType,
 }: any) => {
   const isPost = formType === "POST";
+  const hashtags = (form.watch("keywords") || "")
+    .split(/[\s,]+/)
+    .filter((tag: string) => /^#[^#\s,]+$/.test(tag));
   return (
     <form className="flex w-full flex-col gap-6">
       <div className="flex w-full flex-col gap-2">
@@ -139,6 +142,23 @@ const CreatePostAboutForm = ({
             />
           </div>
         ) : null}
+        <FormInput
+          form={form}
+          formLabel="Hashtags / keywords"
+          inputName="keywords"
+          inputType="text"
+          placeholder={`Add #hashtags related to your ${isPost ? "post" : "shared content"}`}
+          formDescription="Separate hashtags with spaces or commas, for example #art #design."
+        />
+        {hashtags.length > 0 && (
+          <ul aria-label="Hashtag preview" className="flex flex-wrap gap-2">
+            {hashtags.map((tag: string, index: number) => (
+              <li key={`${tag}-${index}`} className="max-w-full break-all rounded-full bg-primary-500 px-3 py-1 text-sm text-white">
+                {tag}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <div className="flex flex-col gap-2">
@@ -217,12 +237,6 @@ const CreatePostAboutForm = ({
               values={form.getValues("peopleTag")}
             />
           )}
-        />
-        <FormInput
-          form={form}
-          inputName="keywords"
-          inputType="text"
-          placeholder="Add hashtags ex- #art #design #coding"
         />
       </div>
     </form>
