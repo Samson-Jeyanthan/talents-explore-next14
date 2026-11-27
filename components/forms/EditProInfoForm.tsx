@@ -29,6 +29,7 @@ const EditProInfoForm = ({
           placeholder="About your self, your work, and your experience"
           formDescription="This will be displayed on your profile and will help others understand more about you."
           maxLength={1000}
+          showCharacterCount
           className="h-60"
         />
         <ProfileEthnicityInput form={form} userData={userData} />

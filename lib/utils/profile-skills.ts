@@ -41,9 +41,12 @@ export const profileSkillValidation = z.object({
         .string()
         .trim()
         .max(100)
-        .regex(hashtagPattern, "Use #hashtags separated by spaces or commas."),
+        .regex(
+          hashtagPattern,
+          "Add # before every word (for example: #talent, #explorer).",
+        ),
     )
-    .min(1, "Add at least one #hashtag.")
+    .min(1, "Add at least one hashtag starting with #.")
     .max(30),
 });
 export const profileSkillMutationValidation = z.object({

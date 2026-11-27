@@ -305,20 +305,27 @@ const SkillsForm = ({ form, isTalentRegister, page, onDraftChange }: any) => {
             {error}
           </p>
         ) : null}
-        <div className="flex w-full justify-end">
-          {hasDraft ? (
-            <Button type="button" variant="ghost" onClick={clear}>
-              Clear
-            </Button>
-          ) : null}
+        <p className="text-sm text-light-850">
+          Click Add Skill to add this entry before selecting Next.
+        </p>
+        <div className="flex w-full flex-wrap items-center gap-3">
           <Button
             type="button"
             disabled={!ready}
             onClick={handleAddClick}
-            className="shad-button_secondary !w-32 !text-custom-100"
+            className="shad-button_primary !h-auto min-h-11 flex-1 !whitespace-normal font-semibold !text-white"
           >
             Add Skill
           </Button>
+          <button
+            type="button"
+            aria-label="Clear skill entry"
+            disabled={!hasDraft}
+            onClick={clear}
+            className="min-h-11 px-2 text-sm text-light-850 underline underline-offset-4 focus-visible:outline focus-visible:outline-2 disabled:opacity-50"
+          >
+            Clear
+          </button>
         </div>
       </div>
       {isTalentRegister && (

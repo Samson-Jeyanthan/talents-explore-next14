@@ -160,7 +160,10 @@ const LangEducationForm = ({ form, langData, onDraftChange }: any) => {
             onValueChange={setSelectedLevel}
           />
 
-          <div className="flex w-full justify-end">
+          <p className="text-sm text-light-850">
+            Click Add Language to add this entry before selecting Next.
+          </p>
+          <div className="flex w-full flex-wrap items-center gap-3">
             <Button
               type="button"
               onClick={handleLangAddClick}
@@ -169,10 +172,22 @@ const LangEducationForm = ({ form, langData, onDraftChange }: any) => {
                 !selectedLevel ||
                 languages.status !== "ready"
               }
-              className="shad-button_secondary !w-32 !text-custom-100"
+              className="shad-button_primary !h-auto min-h-11 flex-1 !whitespace-normal font-semibold !text-white"
             >
               Add Language
             </Button>
+            <button
+              type="button"
+              aria-label="Clear language entry"
+              disabled={!selectedLangId && !selectedLevel}
+              onClick={() => {
+                setSelectedLangId("");
+                setSelectedLevel("");
+              }}
+              className="min-h-11 px-2 text-sm text-light-850 underline underline-offset-4 focus-visible:outline focus-visible:outline-2 disabled:opacity-50"
+            >
+              Clear
+            </button>
           </div>
         </div>
 
@@ -263,15 +278,30 @@ const LangEducationForm = ({ form, langData, onDraftChange }: any) => {
               {eduErr}
             </p>
           )}
-          <div className="flex w-full justify-end">
+          <p className="text-sm text-light-850">
+            Click Add Education to add this entry before selecting Next.
+          </p>
+          <div className="flex w-full flex-wrap items-center gap-3">
             <Button
               type="button"
               onClick={handleEduAddClick}
               disabled={!canAddEdu}
-              className="shad-button_secondary !w-32 !text-custom-100"
+              className="shad-button_primary !h-auto min-h-11 flex-1 !whitespace-normal font-semibold !text-white"
             >
               Add Education
             </Button>
+            <button
+              type="button"
+              aria-label="Clear education entry"
+              disabled={!Object.values(education).some(Boolean)}
+              onClick={() => {
+                setEducation(INITIAL_VALUES);
+                setEduErr("");
+              }}
+              className="min-h-11 px-2 text-sm text-light-850 underline underline-offset-4 focus-visible:outline focus-visible:outline-2 disabled:opacity-50"
+            >
+              Clear
+            </button>
           </div>
         </div>
 
@@ -300,22 +330,6 @@ const LangEducationForm = ({ form, langData, onDraftChange }: any) => {
           ))}
         </div>
       </div>
-      {selectedLangId ||
-      selectedLevel ||
-      Object.values(education).some(Boolean) ? (
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={() => {
-            setSelectedLangId("");
-            setSelectedLevel("");
-            setEducation(INITIAL_VALUES);
-            setEduErr("");
-          }}
-        >
-          Clear unfinished entry
-        </Button>
-      ) : null}
     </div>
   );
 };

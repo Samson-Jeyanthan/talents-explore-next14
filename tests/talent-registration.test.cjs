@@ -766,7 +766,7 @@ test("consent is enforced before upload even when final submission is invoked di
   assert.equal(h.uploads.length, 0);
 });
 
-test("unfinished social links report a draft until added or cleared, preserving existing link visibility", () => {
+test("registration social fields only offer the three supported networks and never leave an unfinished draft", () => {
   const host = hooks(),
     drafts = [],
     updates = [];
@@ -774,51 +774,36 @@ test("unfinished social links report a draft until added or cleared, preserving 
     ...ui,
     react: host.react,
     "@/constants": {
-      SOCIAL_MEDIA_OPTIONS: [
-        { type: "facebook", default: true, icon: "icon" },
-        { type: "website", default: false, icon: "icon" },
-      ],
+      SOCIAL_MEDIA_OPTIONS: ["facebook", "instagram", "linkedin"].map(
+        (type) => ({ type, default: true, icon: "icon" }),
+      ),
     },
     "@/public/assets/svgs": { LinkIcon: "icon" },
     "../ui/input": { Input: "input" },
-    "../ui/select": Object.fromEntries(
-      [
-        "Select",
-        "SelectContent",
-        "SelectItem",
-        "SelectTrigger",
-        "SelectValue",
-      ].map((name) => [name, name]),
-    ),
   }).default;
   const props = {
-    values: [{ type: "facebook", url: "https://facebook.com/qa", show: false }],
-    fieldChange: (rows) => updates.push(rows),
+    values: [],
+    fieldChange: (rows) => {
+      props.values = rows;
+      updates.push(rows);
+    },
     onDraftChange: (value) => drafts.push(value),
   };
   const render = () => host.render(() => component(props));
   render();
-  find(render(), (n) => n.type === "Select").props.onValueChange("website");
-  find(
-    render(),
-    (n) => n.type === "input" && n.props.placeholder === "Add related URL",
-  ).props.onChange({ target: { value: "https://example.test/work" } });
-  render();
-  assert.equal(drafts.at(-1), true);
-  find(
-    render(),
-    (n) => n.type === "button" && n.props.children === "OK",
-  ).props.onClick();
-  render();
-  assert.equal(drafts.at(-1), false);
-  assert.equal(updates[0][0].show, false);
-  assert.equal(updates[0][1].url, "https://example.test/work");
-  find(render(), (n) => n.type === "Select").props.onValueChange("website");
-  render();
-  find(
-    render(),
-    (n) => n.type === "button" && n.props.children === "Clear",
-  ).props.onClick();
-  render();
-  assert.equal(drafts.at(-1), false);
+  for (const type of ["facebook", "instagram", "linkedin"])
+    find(
+      render(),
+      (n) => n.props?.type === type && typeof n.props.onChange === "function",
+    ).props.onChange("https://example.test/" + type);
+  assert.equal(
+    find(render(), (n) => n.type === "Select" || n.type === "button"),
+    undefined,
+  );
+  assert.deepEqual(plain(updates.at(-1).map((row) => row.type)), [
+    "facebook",
+    "instagram",
+    "linkedin",
+  ]);
+  assert.ok(drafts.every((value) => value === false));
 });

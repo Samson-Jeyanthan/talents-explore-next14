@@ -121,32 +121,37 @@ const AwardsForm = ({ form, onDraftChange }: any) => {
             })
           }
         />
-        <div className="flex w-full justify-end">
-          {error ? (
-            <p role="alert" className="text-sm text-red-700 dark:text-red-300">
-              {error}
-            </p>
-          ) : null}
-          {award.name || award.givenBy || award.year || award.certificate ? (
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => {
-                setAward(INITIAL_VALUES);
-                setError("");
-              }}
-            >
-              Clear
-            </Button>
-          ) : null}
+        <p className="text-sm text-light-850">
+          Click Add Award / Certificate to add this entry before selecting Next.
+        </p>
+        {error ? (
+          <p role="alert" className="text-sm text-red-700 dark:text-red-300">
+            {error}
+          </p>
+        ) : null}
+        <div className="flex w-full flex-wrap items-center gap-3">
           <Button
             type="button"
             onClick={handleAddClick}
             disabled={!award.name || !award.givenBy}
-            className="shad-button_secondary !w-auto !text-custom-100"
+            className="shad-button_primary !h-auto min-h-11 flex-1 !whitespace-normal font-semibold !text-white"
           >
             Add Award / Certificate
           </Button>
+          <button
+            type="button"
+            aria-label="Clear award or certificate entry"
+            disabled={
+              !award.name && !award.givenBy && !award.year && !award.certificate
+            }
+            className="min-h-11 px-2 text-sm text-light-850 underline underline-offset-4 focus-visible:outline focus-visible:outline-2 disabled:opacity-50"
+            onClick={() => {
+              setAward(INITIAL_VALUES);
+              setError("");
+            }}
+          >
+            Clear
+          </button>
         </div>
       </div>
       <div className="flex w-full min-w-0 flex-col gap-2 md:w-2/5">

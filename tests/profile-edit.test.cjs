@@ -730,32 +730,21 @@ function socialEditor(h) {
     ...ui,
     react: host.react,
     "@/constants": {
-      SOCIAL_MEDIA_OPTIONS: [
-        { type: "facebook", default: true, icon: "icon" },
-        { type: "portfolio", default: false, icon: "icon" },
-      ],
+      SOCIAL_MEDIA_OPTIONS: ["facebook", "instagram", "linkedin"].map(
+        (type) => ({ type, default: true, icon: "icon" }),
+      ),
     },
     "@/public/assets/svgs": { LinkIcon: "icon" },
     "../ui/input": { Input: "input" },
-    "../ui/select": Object.fromEntries(
-      [
-        "Select",
-        "SelectContent",
-        "SelectItem",
-        "SelectTrigger",
-        "SelectValue",
-      ].map((name) => [name, name]),
-    ),
   }).default;
   const render = () => {
     const props = find(
       h.render(),
-      (node) => node.type === "professional-fields",
+      (n) => n.type === "professional-fields",
     ).props;
-    const tree = section(props);
     const field = find(
-      tree,
-      (node) => node.type === "field" && node.props.name === "socialLinks",
+      section(props),
+      (n) => n.type === "field" && n.props.name === "socialLinks",
     );
     const input = field.props.render({
       field: {
@@ -769,141 +758,39 @@ function socialEditor(h) {
   render();
   return {
     render,
-    choose(type) {
-      find(render(), (node) => node.type === "Select").props.onValueChange(
-        type,
-      );
-    },
-    type(url) {
+    change(type, url) {
       find(
         render(),
-        (node) =>
-          node.type === "input" && node.props.placeholder === "Add related URL",
-      ).props.onChange({ target: { value: url } });
-    },
-    click(label) {
-      find(
-        render(),
-        (node) => node.type === "button" && node.props.children === label,
-      ).props.onClick();
+        (n) => n.props?.type === type && typeof n.props.onChange === "function",
+      ).props.onChange(url);
     },
   };
 }
-test("unfinished social link blocks uploads and saving immediately and retains the draft", async () => {
-  const h = editor({ fail: false }),
-    social = socialEditor(h);
-  h.fields().profilePhoto = photo("profile.jpg");
-  h.fields().firstName = "Changed";
-  social.choose("portfolio");
-  social.type("https://example.test/work");
-  // Submit before rendering the child's effect for the final input event.
-  await h.submit();
-  assert.equal(h.calls.length, 0);
-  assert.equal(h.uploads.length, 0);
-  assert.equal(h.navigation.length, 0);
-  assert.equal(h.fields().firstName, "Changed");
-  assert.equal(h.fields().profilePhoto.name, "profile.jpg");
-  assert.match(
-    find(h.render(), (node) => node.props?.role === "alert").props.children,
-    /Click OK.*Clear/,
-  );
-  assert.equal(
-    find(social.render(), (node) => node.type === "Select").props.value,
-    "portfolio",
-  );
-  assert.equal(
-    find(
-      social.render(),
-      (node) =>
-        node.type === "input" && node.props.placeholder === "Add related URL",
-    ).props.value,
-    "https://example.test/work",
-  );
-});
-test("partial social links remain protected when OK cannot add them", async () => {
-  for (const part of ["type", "url"]) {
-    const h = editor({ fail: false }),
-      social = socialEditor(h);
-    if (part === "type") social.choose("portfolio");
-    else social.type("https://example.test/work");
-    social.click("OK");
-    await h.submit();
-    assert.equal(h.calls.length, 0);
-    assert.equal(h.navigation.length, 0);
-    assert.match(
-      find(h.render(), (node) => node.props?.role === "alert").props.children,
-      /unfinished social link/,
-    );
-  }
-});
-test("batched type and URL input retain both values before the next render", async () => {
-  const h = editor({ fail: false });
-  const social = socialEditor(h);
-  const tree = social.render();
-  find(tree, (node) => node.type === "Select").props.onValueChange("portfolio");
-  find(
-    tree,
-    (node) =>
-      node.type === "input" && node.props.placeholder === "Add related URL",
-  ).props.onChange({ target: { value: "https://example.test/batched" } });
-  await h.submit();
-  assert.equal(h.calls.length, 0);
-  assert.equal(
-    find(social.render(), (node) => node.type === "Select").props.value,
-    "portfolio",
-  );
-  social.click("OK");
-  await h.submit();
-  assert.equal(h.calls[0].payload.moreInfo.socialLinks[1].type, "portfolio");
-  assert.equal(
-    h.calls[0].payload.moreInfo.socialLinks[1].url,
-    "https://example.test/batched",
-  );
-});
-test("adding the social link clears its warning and saves the link with existing visibility preserved", async () => {
-  const h = editor({ fail: false }),
-    social = socialEditor(h);
-  social.choose("portfolio");
-  social.type("https://example.test/work");
-  await h.submit();
-  social.click("OK");
-  assert.equal(
-    find(h.render(), (node) => node.props?.role === "alert"),
-    undefined,
-  );
-  await h.submit();
-  assert.equal(h.calls.length, 1);
-  const links = h.calls[0].payload.moreInfo.socialLinks;
-  assert.equal(links[0].show, false);
-  assert.equal(links[1].type, "portfolio");
-  assert.equal(links[1].url, "https://example.test/work");
-  assert.ok(h.navigation.includes("/profile/qa-user/" + profile));
-});
-test("clearing an unfinished link permits saving without adding it", async () => {
+test("social editor only offers Facebook, Instagram and LinkedIn without extra-link controls", () => {
   const h = editor({ fail: false }),
     social = socialEditor(h),
-    before = plain(h.fields().socialLinks);
-  social.choose("portfolio");
-  social.type("https://example.test/work");
-  await h.submit();
-  social.click("Clear");
+    tree = social.render();
+  for (const type of ["facebook", "instagram", "linkedin"])
+    assert.ok(
+      find(
+        tree,
+        (n) => n.props?.type === type && typeof n.props.onChange === "function",
+      ),
+    );
+  for (const type of ["youtube", "portfolio", "website", "twitter"])
+    assert.equal(
+      find(tree, (n) => n.props?.type === type),
+      undefined,
+    );
   assert.equal(
-    find(h.render(), (node) => node.props?.role === "alert"),
+    find(tree, (n) => n.type === "button" || n.type === "Select"),
     undefined,
   );
-  await h.submit();
-  assert.equal(h.calls.length, 1);
-  assert.deepEqual(h.calls[0].payload.moreInfo.socialLinks, before);
 });
-test("editing an existing social link saves directly without an extra OK step", async () => {
+test("editing an existing supported social link saves directly and preserves visibility", async () => {
   const h = editor({ fail: false }),
     social = socialEditor(h);
-  find(
-    social.render(),
-    (node) =>
-      node.props?.type === "facebook" &&
-      typeof node.props.onChange === "function",
-  ).props.onChange("https://facebook.com/updated");
+  social.change("facebook", "https://facebook.com/updated");
   await h.submit();
   assert.equal(h.calls.length, 1);
   assert.equal(
@@ -912,21 +799,78 @@ test("editing an existing social link saves directly without an extra OK step", 
   );
   assert.equal(h.calls[0].payload.moreInfo.socialLinks[0].show, false);
 });
-test("clearing a draft does not hide an unrelated backend save error", async () => {
+test("new supported social links save without an OK or additional-link step", async () => {
+  const h = editor({ fail: false }),
+    social = socialEditor(h);
+  social.change("instagram", "https://instagram.com/qa");
+  social.change("linkedin", "https://linkedin.com/in/qa");
+  await h.submit();
+  assert.equal(h.calls.length, 1);
+  const links = h.calls[0].payload.moreInfo.socialLinks;
+  assert.equal(
+    links.find((row) => row.type === "instagram").url,
+    "https://instagram.com/qa",
+  );
+  assert.equal(
+    links.find((row) => row.type === "linkedin").url,
+    "https://linkedin.com/in/qa",
+  );
+});
+test("rapid updates to different supported social fields retain both edits", async () => {
+  const h = editor({ fail: false }),
+    social = socialEditor(h),
+    tree = social.render();
+  find(tree, (n) => n.props?.type === "facebook").props.onChange(
+    "https://facebook.com/updated",
+  );
+  find(tree, (n) => n.props?.type === "instagram").props.onChange(
+    "https://instagram.com/qa",
+  );
+  await h.submit();
+  const links = h.calls[0].payload.moreInfo.socialLinks;
+  assert.equal(
+    links.find((row) => row.type === "facebook").url,
+    "https://facebook.com/updated",
+  );
+  assert.equal(
+    links.find((row) => row.type === "instagram").url,
+    "https://instagram.com/qa",
+  );
+});
+test("previously saved additional links are preserved without showing extra entry controls", async () => {
+  const h = editor({ fail: false });
+  h.fields().socialLinks.push({
+    type: "portfolio",
+    url: "https://example.test/old",
+    show: false,
+  });
+  const social = socialEditor(h);
+  assert.equal(
+    find(social.render(), (n) => n.props?.type === "portfolio"),
+    undefined,
+  );
+  social.change("facebook", "https://facebook.com/updated");
+  await h.submit();
+  assert.deepEqual(
+    plain(
+      h.calls[0].payload.moreInfo.socialLinks.find(
+        (row) => row.type === "portfolio",
+      ),
+    ),
+    { type: "portfolio", url: "https://example.test/old", show: false },
+  );
+});
+test("editing a social link does not clear an unrelated save failure", async () => {
   const h = editor(),
     social = socialEditor(h);
   await h.submit();
+  social.change("facebook", "https://facebook.com/updated");
   assert.equal(
-    find(h.render(), (node) => node.props?.role === "alert").props.children,
-    "Offline",
-  );
-  social.choose("portfolio");
-  social.click("Clear");
-  assert.equal(
-    find(h.render(), (node) => node.props?.role === "alert").props.children,
+    find(h.render(), (n) => n.props?.role === "alert").props.children,
     "Offline",
   );
 });
+
 test("regular profile saving remains available without talent social-link controls", async () => {
   const h = editor({ fail: false });
   h.props.userData.isTalent = false;

@@ -8,18 +8,13 @@ import {
   HomeIcon,
   InstagramIcon,
   LinkedInIcon,
-  LinkIcon,
   MessageIcon,
   PinIcon,
   SaveIcon,
   SettingsIcon,
   ShareFeedIcon,
-  SnapchatIcon,
-  TikTokIcon,
-  TwitterIcon,
   UploadIcon,
   WarningIcon,
-  YoutubeIcon,
 } from "@/public/assets/svgs";
 import { ITab, TConvertedSvgJsxProps } from "@/types/utils.types";
 import { AiOutlineLink } from "react-icons/ai";
@@ -342,16 +337,6 @@ interface ISocialMediaProps {
 
 export const SOCIAL_MEDIA_OPTIONS: ISocialMediaProps[] = [
   {
-    type: "linkedin",
-    icon: LinkedInIcon,
-    default: true,
-  },
-  {
-    type: "youtube",
-    icon: YoutubeIcon,
-    default: true,
-  },
-  {
     type: "facebook",
     icon: FacebookIcon,
     default: true,
@@ -362,24 +347,9 @@ export const SOCIAL_MEDIA_OPTIONS: ISocialMediaProps[] = [
     default: true,
   },
   {
-    type: "tiktok",
-    icon: TikTokIcon,
-    default: false,
-  },
-  {
-    type: "twitter",
-    icon: TwitterIcon,
-    default: false,
-  },
-  {
-    type: "snapchat",
-    icon: SnapchatIcon,
-    default: false,
-  },
-  {
-    type: "portfolio",
-    icon: LinkIcon,
-    default: false,
+    type: "linkedin",
+    icon: LinkedInIcon,
+    default: true,
   },
 ];
 

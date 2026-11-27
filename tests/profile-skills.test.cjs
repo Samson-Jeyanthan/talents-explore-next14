@@ -255,6 +255,16 @@ test("skill validation covers categories, levels, required text, hashtags and du
     true,
   );
 });
+test("hashtag errors use the mobile app wording", () => {
+  for (const [hashTags, message] of [
+    [[], "Add at least one hashtag starting with #."],
+    [["talent", "#explorer"], "Add # before every word (for example: #talent, #explorer)."],
+  ]) {
+    const result = util.profileSkillValidation.safeParse({ ...skillSet(), hashTags });
+    assert.equal(result.success, false);
+    assert.equal(result.error.issues[0].message, message);
+  }
+});
 test("adding skills uses the mobile endpoint, canonical catalogue names and fresh unrelated records", async () => {
   const existing = {
     ...skillSet(second),
