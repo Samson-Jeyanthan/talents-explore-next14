@@ -360,7 +360,8 @@ export async function getUserPersonalInfoAction(token: string | undefined) {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/`,
       {
-        // cache: "no-store",
+        cache: "no-store",
+        signal: AbortSignal.timeout(15000),
         headers:
           token === undefined || token === ""
             ? headers
@@ -371,7 +372,6 @@ export async function getUserPersonalInfoAction(token: string | undefined) {
     );
     const res = await response.json();
 
-    console.log(res, "// getUserPersonalInfoAction //");
     return res;
   } catch (error: any) {
     console.error(

@@ -26,9 +26,9 @@ async function Overview({ params }: TProfileURLProps) {
         className={`${isTalent ? "w-72 min-w-72 border-2 border-dark-300 bg-dark-250 p-4 2xl:w-[21rem] 2xl:min-w-[21rem]" : "w-[21rem] min-w-[21rem] p-2"} flex flex-col gap-10 rounded-3xl `}
       >
         <BioDetails userData={userData} isOwnProfile={isOwnProfile} />
+        <Contact userData={userData} isOwnProfile={isOwnProfile} />
         {isTalent && (
           <>
-            <Contact userData={userData} isOwnProfile={isOwnProfile} />
             {visibility.canViewProfile ? (
               <MyPhotos myPhotos={userData?.morePersonalInfo?.featuredPhotos} />
             ) : null}

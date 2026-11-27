@@ -126,6 +126,15 @@ async function changeFollowing(followingId: string, follow: boolean) {
     if (!viewerId) return { status: 401, message: "Please sign in again." };
     if (viewerId === followingId)
       return { status: 400, message: "You cannot follow your own account." };
+    if (follow) {
+      const profile = await connectionRequest(`/user/public/${followingId}`);
+      if (profile.status !== "7400") return profile;
+      if (
+        profile.response?._id !== followingId ||
+        profile.response.isTalent !== true
+      )
+        return { status: 403, message: "You can only follow talent profiles." };
+    }
     const result = await connectionRequest(
       `/connect-user/${follow ? "follow" : "unfollow"}`,
       "POST",
@@ -281,6 +290,23 @@ export async function addProfileRatingAction(
 ) {
   if (!connectionId(ratingUserId) || !validRating(rating))
     return { status: 400, message: "Choose a rating from 1 to 5 stars." };
+  const profile = await connectionRequest(
+    `/user/public/${ratingUserId}`,
+    "GET",
+    undefined,
+    "ratings",
+  );
+  if (profile.status !== "7400") return profile;
+  if (
+    profile.response?._id !== ratingUserId ||
+    profile.response.isTalent !== true
+  )
+    return {
+      status: 403,
+      message: "Only talent profiles can receive ratings.",
+    };
+  if (profile.response.permissions?.canRateProfile === false)
+    return { status: 403, message: "Ratings are restricted for this profile." };
   const result = await connectionRequest(
     "/user/rating",
     "POST",

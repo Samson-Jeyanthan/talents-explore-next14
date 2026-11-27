@@ -190,9 +190,9 @@ export async function submitFeedbackAction(payload: FeedbackPayload) {
 
 export async function getPrivacySettingsAction(accessToken?: string) {
   try {
-    const token = accessToken || (await getCurrentUser()).token;
+    const { token, user } = await getCurrentUser();
 
-    if (!token) {
+    if (!token || user?.isTalent !== true) {
       return null;
     }
 
@@ -215,10 +215,13 @@ export async function getPrivacySettingsAction(accessToken?: string) {
 
 export async function updatePrivacySettingsAction(payload: PrivacyPayload) {
   try {
-    const { token } = await getCurrentUser();
+    const { token, user } = await getCurrentUser();
 
-    if (!token) {
-      return false;
+    if (!token || user?.isTalent !== true) {
+      return {
+        status: "7403",
+        message: "Profile privacy controls are available to talent accounts.",
+      };
     }
 
     const response = await axios.put(
@@ -239,10 +242,14 @@ export async function updatePrivacySettingsAction(payload: PrivacyPayload) {
 
 export async function updateSocialLinksPrivacyAction(payload: any[]) {
   try {
-    const { token } = await getCurrentUser();
+    const { token, user } = await getCurrentUser();
 
-    if (!token) {
-      return false;
+    if (!token || user?.isTalent !== true) {
+      return {
+        status: "7403",
+        message:
+          "Social link privacy controls are available to talent accounts.",
+      };
     }
 
     const response = await axios.put(

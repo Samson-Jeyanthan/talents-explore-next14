@@ -60,6 +60,14 @@ function api(responses = [], authError) {
     {
       process: { env: { NEXT_PUBLIC_BACKEND_URL: "https://backend.test" } },
       fetch: async (url, options) => {
+        if (url.includes("/user/public/"))
+          return {
+            ok: true,
+            json: async () => ({
+              status: "7400",
+              response: { _id: url.split("/").pop(), isTalent: true },
+            }),
+          };
         calls.push({ url, options });
         const result = responses.shift();
         if (result instanceof Error) throw result;

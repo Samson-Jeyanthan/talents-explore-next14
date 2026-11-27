@@ -207,6 +207,7 @@ function actionHarness(
           status: "7400",
           response: {
             _id: "trusted-user",
+            isTalent: true,
             userName: "test-user",
             personalInfo: { profileImage: null },
           },

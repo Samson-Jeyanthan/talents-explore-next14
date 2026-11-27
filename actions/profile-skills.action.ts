@@ -89,6 +89,10 @@ async function updateSkills(
   try {
     const headers = await getAuthHeaders();
     const viewer = await request("/user/", headers);
+    if (viewer?.isTalent !== true)
+      throw new Error(
+        "Become a talent to manage professional profile details.",
+      );
     if (viewer?._id !== profileId)
       return {
         status: "400",

@@ -14,6 +14,10 @@ async function Skills({ params }: TProfileURLProps) {
   if (!userData) {
     return <AlertNote />;
   }
+  if (userData.isTalent !== true)
+    return (
+      <p className="text-light-900">Skills are available on talent profiles.</p>
+    );
 
   const visibility = getProfileVisibilityState(userData, isOwnProfile);
 

@@ -40,12 +40,18 @@ const rows = (count = 20) =>
     item(i.toString(16).padStart(24, "0")),
   );
 const ok = (response = []) => ({ status: "7400", response });
-function api(responses = [], authError) {
+function api(
+  responses = [],
+  authError,
+  account = { _id: viewer, isTalent: true },
+) {
   const calls = [];
   const logs = [];
   let authCalls = 0;
   const transport = (method) => async (url, bodyOrConfig, config) => {
     const options = config || bodyOrConfig;
+    if (url.endsWith("/user/") && account !== null)
+      return { status: 200, data: ok(account) };
     calls.push({
       method,
       url,
@@ -261,17 +267,40 @@ test("every collaboration action preserves session-refresh redirects", async () 
   assert.equal(h.calls.length, 0);
   assert.equal(h.logs.length, 0);
 });
+test("normal and unverified account types cannot access any collaboration operation", async () => {
+  for (const isTalent of [false, undefined, "true", 1]) {
+    const h = api([], undefined, { _id: viewer, isTalent });
+    for (const invoke of validCalls(h.actions)) {
+      try {
+        const result = await invoke();
+        assert.notEqual(result?.status, "7400");
+      } catch (error) {
+        assert.match(error.message, /Unable to load/);
+      }
+    }
+    assert.equal(
+      h.calls.length,
+      0,
+      "No collaboration endpoint should be called",
+    );
+  }
+});
 test("the current profile is fetched with fresh headers and exposes no token fields", async () => {
-  const h = api([
-    ok({
-      _id: viewer,
-      userName: "artist",
-      email: "artist@example.test",
-      accessToken: "private",
-      refreshToken: "private",
-      password: "private",
-    }),
-  ]);
+  const h = api(
+    [
+      ok({
+        _id: viewer,
+        isTalent: true,
+        userName: "artist",
+        email: "artist@example.test",
+        accessToken: "private",
+        refreshToken: "private",
+        password: "private",
+      }),
+    ],
+    undefined,
+    null,
+  );
   const user = await h.actions.getCurrentCollaborationUserAction();
   assert.equal(user._id, viewer);
   assert.equal(user.userName, "artist");
@@ -282,7 +311,11 @@ test("the current profile is fetched with fresh headers and exposes no token fie
   assert.equal(new URL(h.calls[0].url).pathname, "/user/");
 });
 test("profile outage or mismatched identity becomes a retryable error, never a signed-out result", async () => {
-  const h = api([new Error("Offline"), ok({ _id: id }), { status: "7401" }]);
+  const h = api(
+    [new Error("Offline"), ok({ _id: id }), { status: "7401" }],
+    undefined,
+    null,
+  );
   for (let i = 0; i < 3; i++)
     await assert.rejects(
       h.actions.getCurrentCollaborationUserAction(),

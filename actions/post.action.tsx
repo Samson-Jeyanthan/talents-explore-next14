@@ -8,6 +8,7 @@ import { resolveViewerIdAction } from "./tokenAndHeaders.action";
 import { isRedirectError } from "next/dist/client/components/redirect";
 import { postUpdateValidation } from "@/lib/validations/postUpdate.validation";
 import { getPostType } from "@/lib/utils/postEditing";
+import { getCurrentAccountAccessAction } from "./account-access.action";
 
 type TPostActionError = {
   status: number;
@@ -21,6 +22,14 @@ export async function updatePostAction(postId: string, payload: unknown) {
   if (!parsed.success)
     return { status: "7401", message: parsed.error.issues[0].message };
   try {
+    if (parsed.data.type === "POST") {
+      const account = await getCurrentAccountAccessAction();
+      if (!account.isTalent)
+        return {
+          status: "7403",
+          message: "Become a talent to create or edit talent posts.",
+        };
+    }
     const viewerId = await resolveViewerIdAction();
     const headers = await getAuthHeaders();
     const originalResponse = await fetch(
@@ -171,13 +180,24 @@ export async function createPostShareAction(
   revalidatePathURL: string,
 ) {
   try {
+    if (!formData || typeof formData !== "object" || Array.isArray(formData))
+      return { status: 400, message: "Invalid post data." };
+    const payload = formData as Record<string, unknown>;
+    if (!["POST", "SHARELINK"].includes(type) || payload.type !== type)
+      return { status: 400, message: "Invalid content type." };
+    const account = await getCurrentAccountAccessAction();
+    if (type === "POST" && !account.isTalent)
+      return {
+        status: 403,
+        message: "Become a talent to create posts. You can still share links.",
+      };
     const headers = await getAuthHeaders();
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/te-post`,
       {
         method: "POST",
         headers,
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...payload, userId: account._id }),
       },
     );
 
@@ -201,6 +221,7 @@ export async function createPostShareAction(
       return data;
     }
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error("createPostShareAction failed:", error);
 
     return {
@@ -257,6 +278,12 @@ async function updateBestWork(userId: string, postId: string, pinned: boolean) {
       return {
         status: "7403",
         message: "Please sign in to your account again.",
+      };
+    const account = await getCurrentAccountAccessAction();
+    if (!account.isTalent || account._id !== viewerId)
+      return {
+        status: "7403",
+        message: "Best Work is available on talent profiles.",
       };
     const headers = await getAuthHeaders();
     const response = await fetch(

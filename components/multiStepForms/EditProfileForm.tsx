@@ -1,4 +1,5 @@
 "use client";
+import ProfileEthnicityInput from "@/components/inputs/ProfileEthnicityInput";
 
 import { userPersonalInfoEditAction } from "@/actions/user.action";
 import { EditPersonalInfoForm, EditProInfoForm } from "@/components/forms";
@@ -163,6 +164,11 @@ const EditProfileForm = ({ langData, professionData, userData }: Props) => {
               prevURLs={prevURLs}
               setPrevURLs={setPrevURLs}
             />
+          )}
+          {!isTalent && (
+            <div className="mt-6 w-full max-w-screen-md">
+              <ProfileEthnicityInput form={form} userData={userData} />
+            </div>
           )}
         </fieldset>
         {write.error ? (

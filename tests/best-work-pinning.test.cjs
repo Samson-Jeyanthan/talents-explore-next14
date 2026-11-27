@@ -34,6 +34,12 @@ function server(reply, viewer = userId) {
     "actions/post.action.tsx",
     {
       "next/cache": { revalidatePath: (...args) => paths.push(args) },
+      "./account-access.action": {
+        getCurrentAccountAccessAction: async () => ({
+          _id: userId,
+          isTalent: true,
+        }),
+      },
       "@/lib/session": {
         getAuthHeaders: async () => ({ Authorization: "Bearer test" }),
       },
@@ -328,6 +334,7 @@ test("post menu exposes pending progress, disables actions, and keeps shared-lin
   const host = hooks();
   let pinState = { isPinned: false, pinning: true, togglePin: () => {} };
   let type = "POST";
+  let isTalent = true;
   const jsx = (type, props) => ({ type, props });
   const Menu = load("components/options/PostOptions.tsx", {
     react: { ...host.react, default: { Fragment: "Fragment" } },
@@ -350,11 +357,11 @@ test("post menu exposes pending progress, disables actions, and keeps shared-lin
       })),
     },
     "@/context/AuthProvider": {
-      useUserContext: () => ({ user: { currentUserId: userId } }),
+      useUserContext: () => ({ user: { currentUserId: userId, isTalent } }),
     },
     "@/lib/hooks/useBestWorkPin": {
       useBestWorkPin: (post, user, pinned, allowed) => {
-        assert.equal(allowed, type !== "SHARELINK");
+        assert.equal(allowed, isTalent && type !== "SHARELINK");
         return pinState;
       },
     },
@@ -406,4 +413,8 @@ test("post menu exposes pending progress, disables actions, and keeps shared-lin
   );
   type = "SHARELINK";
   assert.equal(all(render(), (n) => n.type === "MenubarItem").length, 3);
+  isTalent = false;
+  assert.equal(all(render(), (n) => n.type === "MenubarItem").length, 3);
+  type = "POST";
+  assert.equal(all(render(), (n) => n.type === "MenubarItem").length, 2);
 });

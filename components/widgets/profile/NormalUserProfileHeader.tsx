@@ -10,8 +10,7 @@ import ConnectionListModal from "../../modals/ConnectionListModal";
 import ChatLauncher from "../ChatLauncher";
 import { getProfileVisibilityState } from "@/lib/utils/profilePrivacy";
 import { useRouter } from "next/navigation";
-import ConnectionButton from "@/components/buttons/ConnectionButton";
-import { followFlag } from "@/lib/utils/connections";
+import Link from "next/link";
 
 const NormalUserProfileHeader = ({
   userData,
@@ -83,21 +82,22 @@ const NormalUserProfileHeader = ({
 
       <section className="flex items-start justify-between gap-3">
         {isOwnProfile ? (
-          <Button
-            className="shad-button_secondary w-36 rounded-full"
-            onClick={() => router.push(`/profile/edit/${userData?._id}`)}
-          >
-            Edit Profile
-          </Button>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/talent-registration"
+              className="rounded-full bg-primary-500 px-4 py-3 text-sm text-white"
+            >
+              Become a Talent
+            </Link>
+            <Button
+              className="shad-button_secondary w-36 rounded-full"
+              onClick={() => router.push(`/profile/edit/${userData?._id}`)}
+            >
+              Edit Profile
+            </Button>
+          </div>
         ) : (
           <>
-            {followFlag(userData?.isFollowing) && (
-              <ConnectionButton
-                userId={userData._id}
-                userName={userData.userName}
-                isFollow={userData.isFollowing}
-              />
-            )}
             {visibility.canReceiveMessages ? (
               <ChatLauncher
                 userId={userData?._id}

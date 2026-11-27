@@ -8,6 +8,7 @@ import {
 } from "@/actions/chat.action";
 import ChatRoom from "@/components/widgets/chat/ChatRoom";
 import { readSharedPost } from "@/lib/utils/postSharing";
+import TalentAccessNotice from "@/components/others/TalentAccessNotice";
 
 type Props = {
   params: {
@@ -24,10 +25,9 @@ export default async function ChatRoomPage({ params, searchParams }: Props) {
   const type = searchParams?.type || "chat";
 
   if (type === "group") {
-    const [currentUser, members] = await Promise.all([
-      getCurrentChatUserAction(),
-      getChatMembersAction(params.roomId),
-    ]);
+    const currentUser = await getCurrentChatUserAction();
+    if (currentUser?.isTalent !== true) return <TalentAccessNotice />;
+    const members = await getChatMembersAction(params.roomId);
     if (members.status !== "7400") return <ChatAccessNotice />;
     if (!groupMemberAllowed(currentUser, members.list))
       return <ChatAccessNotice denied />;
@@ -63,6 +63,10 @@ export default async function ChatRoomPage({ params, searchParams }: Props) {
     }),
     getChatMembersAction(params.roomId),
   ]);
+  if (membersRes.status === "403" && currentUser?.isTalent !== true)
+    return <TalentAccessNotice />;
+  if (membersRes.status !== "7400")
+    return <ChatAccessNotice denied={membersRes.status === "403"} />;
 
   return (
     <ChatRoom

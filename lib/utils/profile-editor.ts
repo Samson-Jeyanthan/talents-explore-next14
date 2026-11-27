@@ -78,6 +78,16 @@ export const profileEditPayloadValidation = z
           )
           .max(50),
       })
+      .or(
+        z
+          .object({
+            ethnic: z
+              .string()
+              .regex(/^[a-f\d]{24}$/i)
+              .nullable(),
+          })
+          .strict(),
+      )
       .optional(),
   })
   .refine(
@@ -152,6 +162,8 @@ export async function prepareProfileEditPayload(
         ? { ethnic: values.ethnic || null }
         : {}),
     };
+  else if (values.ethnic || ethnicDirty)
+    payload.moreInfo = { ethnic: values.ethnic || null };
   const checked = profileEditPayloadValidation.safeParse(payload);
   if (!checked.success) throw new Error(checked.error.issues[0].message);
   const result = checked.data;
@@ -175,7 +187,7 @@ export async function prepareProfileEditPayload(
       values.coverPhoto === null
         ? ""
         : await uploadCached(values.coverPhoto, "cover-pic");
-  if (result.moreInfo) {
+  if (result.moreInfo && "featuredPhotos" in result.moreInfo) {
     result.moreInfo.featuredPhotos = [...retainedPhotos];
     for (const file of values.featuredPhotos || [])
       result.moreInfo.featuredPhotos.push(

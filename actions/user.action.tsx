@@ -205,7 +205,11 @@ export async function userPersonalInfoEditAction(
         status: "400",
         message: "Unable to verify your profile. Please reload and try again.",
       };
-    if (parsed.data.moreInfo && !current.isTalent)
+    if (
+      parsed.data.moreInfo &&
+      !current.isTalent &&
+      Object.keys(parsed.data.moreInfo).some((key) => key !== "ethnic")
+    )
       return {
         status: "400",
         message: "Your profile type has changed. Reload before saving.",

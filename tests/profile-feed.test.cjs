@@ -162,8 +162,9 @@ const post = (n = 1) => ({
 const rows = (start = 1, count = 10) =>
   Array.from({ length: count }, (_, index) => post(start + index));
 const ok = (response) => ({ status: "7400", response });
-const viewer = () => ({ _id: first });
+const viewer = () => ({ _id: first, isTalent: true });
 const target = (privacy = {}, following = false) => ({
+  isTalent: true,
   _id: profile,
   privacySettings: privacy,
   isFollowing: following,
@@ -270,6 +271,7 @@ test("owners retain access and follower-restricted feeds require the authenticat
   const own = api([
     ok({
       _id: profile,
+      isTalent: true,
       privacySettings: { profileView: "NO_ONE", postView: "NO_ONE" },
     }),
     ok(rows()),

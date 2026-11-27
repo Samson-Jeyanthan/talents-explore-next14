@@ -5,7 +5,13 @@ import { Button } from "@/components/ui/button";
 import { formatDistanceToNowStrict } from "date-fns";
 import { Inbox, MessageSquare, Search, Users } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useTransition,
+} from "react";
 import { postShareParams, SharedPost } from "@/lib/utils/postSharing";
 
 type TabKey = "chat" | "request" | "group";
@@ -17,6 +23,7 @@ type ChatUnreadCount = {
 };
 
 type Props = {
+  isTalent: boolean;
   initialChats: any[];
   initialRequests: any[];
   initialGroups: any[];
@@ -85,6 +92,7 @@ function sumUnread(rooms: any[]) {
 }
 
 function ChatDashboard({
+  isTalent,
   initialChats,
   initialRequests,
   initialGroups,
@@ -105,28 +113,34 @@ function ChatDashboard({
   const [debugState, setDebugState] = useState<Record<string, any>>({});
   const [isPending, startTransition] = useTransition();
 
-  const fetchRooms = async (tab: TabKey, pageNumber = 1) => {
-    const response = await fetch(
-      `/api/chat/rooms?tab=${tab}&pageNumber=${pageNumber}&pageSize=${PAGE_SIZE}`,
-      {
-        method: "GET",
-        cache: "no-store",
-      },
-    );
+  const fetchRooms = useCallback(
+    async (tab: TabKey, pageNumber = 1) => {
+      if (tab === "group" && !isTalent) return [];
+      const response = await fetch(
+        `/api/chat/rooms?tab=${tab}&pageNumber=${pageNumber}&pageSize=${PAGE_SIZE}`,
+        {
+          method: "GET",
+          cache: "no-store",
+        },
+      );
 
-    const data = (await response.json()) as ChatRoomsApiResult;
+      const data = (await response.json()) as ChatRoomsApiResult;
 
-    setDebugState((prev) => ({
-      ...prev,
-      [tab]: data?.debug || null,
-    }));
+      setDebugState((prev) => ({
+        ...prev,
+        [tab]: data?.debug || null,
+      }));
 
-    return Array.isArray(data?.rooms) ? data.rooms : [];
-  };
+      return Array.isArray(data?.rooms) ? data.rooms : [];
+    },
+    [isTalent],
+  );
 
   useEffect(() => {
     const recentChats = readRecentChatsStorage(RECENT_CHATS_KEY);
-    const recentGroups = readRecentChatsStorage(RECENT_GROUPS_KEY);
+    const recentGroups = isTalent
+      ? readRecentChatsStorage(RECENT_GROUPS_KEY)
+      : [];
 
     if (recentChats.length > 0) {
       setChatRooms((prev) => mergeRoomsByKey(prev, recentChats));
@@ -169,7 +183,14 @@ function ChatDashboard({
 
       setPages({ chat: 1, request: 1, group: 1 });
     });
-  }, []);
+  }, [fetchRooms, isTalent]);
+
+  useEffect(() => {
+    if (!isTalent) {
+      setGroupRooms([]);
+      setActiveTab((tab) => (tab === "group" ? "chat" : tab));
+    }
+  }, [isTalent]);
 
   const activeData = useMemo(() => {
     const rooms =
@@ -297,7 +318,9 @@ function ChatDashboard({
           <div>
             <h1 className="text-2xl font-semibold">Chat</h1>
             <p className="text-sm text-light-500">
-              Messages, requests, and collaboration groups in one place.
+              {isTalent
+                ? "Messages, requests, and collaboration groups in one place."
+                : "Your messages and chat requests."}
             </p>
           </div>
 
@@ -341,19 +364,21 @@ function ChatDashboard({
             ) : null}
           </Button>
 
-          <Button
-            type="button"
-            className={`${activeTab === "group" ? "bg-primary-500 text-light-900" : "bg-dark-200 text-light-500"} rounded-full px-4 hover:text-light-900`}
-            onClick={() => setActiveTab("group")}
-          >
-            <Users className="mr-2 size-4" />
-            Groups
-            {visibleUnreadCount.group > 0 ? (
-              <span className="ml-2 rounded-full bg-dark-100 px-2 py-0.5 text-[10px] text-light-900">
-                {visibleUnreadCount.group}
-              </span>
-            ) : null}
-          </Button>
+          {isTalent && (
+            <Button
+              type="button"
+              className={`${activeTab === "group" ? "bg-primary-500 text-light-900" : "bg-dark-200 text-light-500"} rounded-full px-4 hover:text-light-900`}
+              onClick={() => setActiveTab("group")}
+            >
+              <Users className="mr-2 size-4" />
+              Groups
+              {visibleUnreadCount.group > 0 ? (
+                <span className="ml-2 rounded-full bg-dark-100 px-2 py-0.5 text-[10px] text-light-900">
+                  {visibleUnreadCount.group}
+                </span>
+              ) : null}
+            </Button>
+          )}
         </div>
       </div>
 

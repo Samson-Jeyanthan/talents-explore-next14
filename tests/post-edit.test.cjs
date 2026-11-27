@@ -173,6 +173,7 @@ function harness(
   post = original,
   putResponse = { ok: true, json: async () => ({ status: "7400" }) },
   authError,
+  isTalent = true,
 ) {
   const calls = [];
   const invalidated = [];
@@ -181,6 +182,12 @@ function harness(
     {
       "@/lib/validations/postUpdate.validation": schemas,
       "@/lib/utils/postEditing": editing,
+      "./account-access.action": {
+        getCurrentAccountAccessAction: async () => ({
+          _id: viewer,
+          isTalent,
+        }),
+      },
       "./tokenAndHeaders.action": { resolveViewerIdAction: async () => viewer },
       "./session.action": { getSession: async () => "token" },
       "@/lib/session": {
@@ -208,6 +215,30 @@ function harness(
   );
   return { actions, calls, invalidated };
 }
+
+test("normal users cannot edit talent posts but can still edit their shared links", async () => {
+  const normal = harness(original, undefined, undefined, false);
+  assert.equal(
+    (await normal.actions.updatePostAction(postId, payload)).status,
+    "7403",
+  );
+  assert.equal(normal.calls.length, 0);
+  const share = harness(
+    { ...original, type: "SHARELINK" },
+    undefined,
+    undefined,
+    false,
+  );
+  const result = await share.actions.updatePostAction(postId, {
+    ...payload,
+    type: "SHARELINK",
+    media: [],
+    website: "https://example.test/article",
+    shareLinkThumbnail: "https://example.test/preview.png",
+  });
+  assert.equal(result.status, "7400");
+  assert.equal(share.calls.at(-1).options.method, "PUT");
+});
 
 test("owned post edits use PUT, preserve asset keys and use the authenticated author instead of supplied userId", async () => {
   const h = harness();

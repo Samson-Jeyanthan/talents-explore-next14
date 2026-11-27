@@ -86,6 +86,7 @@ async function getCurrentUserResponse() {
 
   try {
     const response = await getUserPersonalInfoAction(token);
+    if (response?.status !== "7400") return { token: "", user: null };
     return {
       token,
       user: response?.response || null,
@@ -113,6 +114,20 @@ export async function GET(request: NextRequest) {
     }
 
     const isGroup = tab === "group";
+    if (isGroup && user.isTalent !== true)
+      return NextResponse.json(
+        { rooms: [], message: "Become a talent to use group chats." },
+        { status: 403 },
+      );
+    if (
+      !["chat", "request", "group"].includes(tab) ||
+      !Number.isSafeInteger(pageNumber) ||
+      pageNumber < 1 ||
+      !Number.isSafeInteger(pageSize) ||
+      pageSize < 1 ||
+      pageSize > 100
+    )
+      return NextResponse.json({ rooms: [] }, { status: 400 });
     const url = isGroup
       ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/chat/group/getChatRooms/${user._id}`
       : `${process.env.NEXT_PUBLIC_BACKEND_URL}/chat/getChatRooms/${user._id}/${tab.toUpperCase()}`;

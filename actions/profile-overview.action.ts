@@ -38,6 +38,12 @@ async function loadSection<T>(
     const own = viewer._id === profileId;
     const profile = own ? viewer : await read(`/user/public/${profileId}`);
     if (profile?._id !== profileId) throw new Error("Invalid profile.");
+    if (profile.isTalent !== true)
+      return {
+        status: "private",
+        response: [],
+        message: "Professional details are available on talent profiles.",
+      };
     const visibility = getProfileVisibilityState(profile, own);
     if (
       !visibility.canViewProfile ||

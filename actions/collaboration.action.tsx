@@ -76,7 +76,16 @@ async function getCurrentUserResponse() {
   const userId = jwtDecode<{ sub?: string }>(token).sub;
   if (!idValidation.safeParse(userId).success)
     throw new Error("Unable to identify your account. Please sign in again.");
-  return { token, user: { _id: userId! } };
+  const response = await axios.get(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/`,
+    { headers: getAuthHeaders(token), timeout: 15000 },
+  );
+  const user = response.data?.response;
+  if (response.data?.status !== SUCCESS_STATUS || user?._id !== userId)
+    throw new Error("Unable to verify your account. Please try again.");
+  if (user.isTalent !== true)
+    throw new Error("Become a talent to use collaborations.");
+  return { token, user };
 }
 
 function getAuthHeaders(token: string) {
@@ -95,18 +104,7 @@ function toNullableValue(value: unknown) {
 
 export async function getCurrentCollaborationUserAction() {
   try {
-    const { token, user: viewer } = await getCurrentUserResponse();
-    const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/`,
-      { headers: getAuthHeaders(token), timeout: 15000 },
-    );
-    const user = response.data?.response;
-    if (
-      response.data?.status !== SUCCESS_STATUS ||
-      !idValidation.safeParse(user?._id).success ||
-      user._id !== viewer._id
-    )
-      throw new Error("Profile unavailable");
+    const { user } = await getCurrentUserResponse();
     return {
       _id: user._id,
       userName: user.userName,

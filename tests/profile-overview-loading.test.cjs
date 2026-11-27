@@ -207,7 +207,11 @@ function api(responses = [], authError) {
   return { actions, calls, logs, auth: () => auth };
 }
 test("Top Posts uses the authenticated viewer and keeps the existing three-card endpoint", async () => {
-  const h = api([ok({ _id: first }), ok({ _id: profile }), ok([top()])]);
+  const h = api([
+    ok({ _id: first }),
+    ok({ _id: profile, isTalent: true }),
+    ok([top()]),
+  ]);
   const result = await h.actions.getProfileTopPostsAction(profile);
   assert.equal(result.status, "7400");
   assert.equal(result.response.length, 1);
@@ -222,7 +226,7 @@ test("Top Posts uses the authenticated viewer and keeps the existing three-card 
   assert.equal(JSON.stringify(result).includes("private-test-token"), false);
 });
 test("language loads return an explicit result and keep the stored IDs and levels", async () => {
-  const h = api([ok({ _id: profile }), ok([language()])]);
+  const h = api([ok({ _id: profile, isTalent: true }), ok([language()])]);
   assert.deepEqual(
     plain(await h.actions.getProfileLanguagesAction(profile)),
     ok([language()]),
@@ -245,14 +249,18 @@ test("HTTP errors, malformed JSON, failed status and outages never become empty 
       ok({}),
       ok([null]),
     ]) {
-      const h = api([ok({ _id: profile }), bad]);
+      const h = api([ok({ _id: profile, isTalent: true }), bad]);
       const result = await h.actions[name](profile);
       assert.equal(result.status, "400");
       assert.deepEqual(plain(result.response), []);
       assert.ok(result.message.includes("try again"));
     }
     assert.deepEqual(
-      plain(await api([ok({ _id: profile }), ok([])]).actions[name](profile)),
+      plain(
+        await api([ok({ _id: profile, isTalent: true }), ok([])]).actions[name](
+          profile,
+        ),
+      ),
       ok([]),
     );
   }
@@ -287,7 +295,11 @@ test("invalid profile IDs and failed identity/profile reads cannot reach section
 test("private sections never request their contents while owners retain access", async () => {
   const topPrivate = api([
     ok({ _id: first }),
-    ok({ _id: profile, privacySettings: { postView: "NO_ONE" } }),
+    ok({
+      _id: profile,
+      isTalent: true,
+      privacySettings: { postView: "NO_ONE" },
+    }),
   ]);
   assert.equal(
     (await topPrivate.actions.getProfileTopPostsAction(profile)).status,
@@ -296,7 +308,11 @@ test("private sections never request their contents while owners retain access",
   assert.equal(topPrivate.calls.length, 2);
   const langPrivate = api([
     ok({ _id: first }),
-    ok({ _id: profile, privacySettings: { profileView: "NO_ONE" } }),
+    ok({
+      _id: profile,
+      isTalent: true,
+      privacySettings: { profileView: "NO_ONE" },
+    }),
   ]);
   assert.equal(
     (await langPrivate.actions.getProfileLanguagesAction(profile)).status,
@@ -306,6 +322,7 @@ test("private sections never request their contents while owners retain access",
   const own = api([
     ok({
       _id: profile,
+      isTalent: true,
       privacySettings: { profileView: "NO_ONE", postView: "NO_ONE" },
     }),
     ok([top()]),

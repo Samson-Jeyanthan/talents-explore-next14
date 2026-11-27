@@ -50,7 +50,7 @@ const PostOptions = ({
     postId,
     user?.currentUserId || "",
     isBestWork,
-    isOwnPost && postType !== "SHARELINK",
+    isOwnPost && user.isTalent === true && postType !== "SHARELINK",
   );
   const router = useRouter();
   const pathname = usePathname();
@@ -85,7 +85,11 @@ const PostOptions = ({
   const handlePostOptionClick = (id: number) => {
     if (id === 0) {
       return togglePin();
-    } else if (id === 2 && isOwnPost) {
+    } else if (
+      id === 2 &&
+      isOwnPost &&
+      (postType === "SHARELINK" || user.isTalent === true)
+    ) {
       router.push(
         `/${postType === "SHARELINK" ? "share" : "post"}/edit/${postId}`,
       );
@@ -121,7 +125,12 @@ const PostOptions = ({
             {POST_OPTIONS.map((item, index) => (
               <React.Fragment key={index}>
                 {isOwnPost === item.isOwnPost &&
-                  !(postType === "SHARELINK" && index === 0) && (
+                  !(postType === "SHARELINK" && index === 0) &&
+                  !(
+                    user.isTalent !== true &&
+                    (item.id === 0 ||
+                      (item.id === 2 && postType !== "SHARELINK"))
+                  ) && (
                     <MenubarItem
                       disabled={pinning}
                       className={`${

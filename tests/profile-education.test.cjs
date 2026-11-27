@@ -163,7 +163,11 @@ test("older education records with missing dates remain readable and unrelated d
     ),
     ok([legacy]),
   );
-  const h = api([ok({ _id: profile }), ok([education(), legacy]), ok([])]);
+  const h = api([
+    ok({ _id: profile, isTalent: true }),
+    ok([education(), legacy]),
+    ok([]),
+  ]);
   assert.equal(
     (await h.actions.deleteProfileEducationAction(profile, first)).status,
     "7400",
@@ -194,7 +198,7 @@ test("adding education merges into fresh backend data and uses the mobile endpoi
     institution: "Other institute",
     extra: "preserve",
   };
-  const h = api([ok({ _id: profile }), ok([existing]), ok([])]);
+  const h = api([ok({ _id: profile, isTalent: true }), ok([existing]), ok([])]);
   assert.equal(
     (
       await h.actions.saveProfileEducationAction({
@@ -217,7 +221,7 @@ test("adding education merges into fresh backend data and uses the mobile endpoi
 });
 test("editing education preserves identity, metadata and unrelated records", async () => {
   const rows = [{ ...education(), extra: "keep" }, education(second)];
-  const h = api([ok({ _id: profile }), ok(rows), ok([])]);
+  const h = api([ok({ _id: profile, isTalent: true }), ok(rows), ok([])]);
   await h.actions.saveProfileEducationAction({
     profileId: profile,
     educationId: first,
@@ -230,7 +234,7 @@ test("editing education preserves identity, metadata and unrelated records", asy
 });
 test("deletion removes only the selected education after fresh reading", async () => {
   const h = api([
-    ok({ _id: profile }),
+    ok({ _id: profile, isTalent: true }),
     ok([education(), education(second)]),
     ok([]),
   ]);
@@ -243,8 +247,8 @@ test("deletion removes only the selected education after fresh reading", async (
 test("another user's profile and failed reads cannot cause a replacement PUT", async () => {
   for (const responses of [
     [ok({ _id: second })],
-    [ok({ _id: profile }), new Error("Offline")],
-    [ok({ _id: profile }), ok({})],
+    [ok({ _id: profile, isTalent: true }), new Error("Offline")],
+    [ok({ _id: profile, isTalent: true }), ok({})],
   ]) {
     const h = api(responses);
     assert.equal(
@@ -263,7 +267,11 @@ test("HTTP errors, business rejection and network failures never report a succes
     { ...ok([]), httpStatus: 500 },
     new Error("Offline"),
   ]) {
-    const h = api([ok({ _id: profile }), ok([education()]), response]);
+    const h = api([
+      ok({ _id: profile, isTalent: true }),
+      ok([education()]),
+      response,
+    ]);
     assert.equal(
       (await h.actions.deleteProfileEducationAction(profile, first)).status,
       "400",
@@ -272,7 +280,7 @@ test("HTTP errors, business rejection and network failures never report a succes
   }
 });
 test("retries avoid duplicate additions and already accepted deletions", async () => {
-  const saved = api([ok({ _id: profile }), ok([education()])]);
+  const saved = api([ok({ _id: profile, isTalent: true }), ok([education()])]);
   assert.equal(
     (
       await saved.actions.saveProfileEducationAction({
@@ -283,7 +291,7 @@ test("retries avoid duplicate additions and already accepted deletions", async (
     "7400",
   );
   assert.equal(saved.calls.length, 2);
-  const removed = api([ok({ _id: profile }), ok([])]);
+  const removed = api([ok({ _id: profile, isTalent: true }), ok([])]);
   assert.equal(
     (await removed.actions.deleteProfileEducationAction(profile, first)).status,
     "7400",
@@ -292,7 +300,7 @@ test("retries avoid duplicate additions and already accepted deletions", async (
 });
 test("stale edits and ambiguous legacy entries cannot replace an arbitrary education", async () => {
   const legacy = { ...education(), _id: undefined };
-  const h = api([ok({ _id: profile }), ok([legacy, legacy])]);
+  const h = api([ok({ _id: profile, isTalent: true }), ok([legacy, legacy])]);
   assert.equal(
     (
       await h.actions.deleteProfileEducationAction(
@@ -303,7 +311,7 @@ test("stale edits and ambiguous legacy entries cannot replace an arbitrary educa
     "400",
   );
   assert.equal(h.calls.length, 2);
-  const missing = api([ok({ _id: profile }), ok([])]);
+  const missing = api([ok({ _id: profile, isTalent: true }), ok([])]);
   assert.equal(
     (
       await missing.actions.saveProfileEducationAction({
@@ -318,7 +326,7 @@ test("stale edits and ambiguous legacy entries cannot replace an arbitrary educa
 test("legacy entries without IDs are targeted by their full content", async () => {
   const legacy = { ...education(), _id: undefined };
   const h = api([
-    ok({ _id: profile }),
+    ok({ _id: profile, isTalent: true }),
     ok([legacy, education(second)]),
     ok([]),
   ]);
@@ -334,7 +342,11 @@ test("legacy entries without IDs are targeted by their full content", async () =
   assert.deepEqual(h.calls[2].body, [education(second)]);
 });
 test("cache failures do not turn an acknowledged education save into a failed retry", async () => {
-  const h = api([ok({ _id: profile }), ok([]), ok([])], undefined, true);
+  const h = api(
+    [ok({ _id: profile, isTalent: true }), ok([]), ok([])],
+    undefined,
+    true,
+  );
   assert.equal(
     (
       await h.actions.saveProfileEducationAction({

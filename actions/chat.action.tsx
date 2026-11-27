@@ -14,6 +14,7 @@ const SUCCESS_STATUS = "7400";
 
 type CurrentChatUser = {
   _id: string;
+  isTalent: boolean;
   userName: string;
   profileImage: string | null;
   professional: string;
@@ -145,6 +146,8 @@ async function getCurrentUserResponse() {
 
   try {
     const response = await getUserPersonalInfoAction(token);
+    if (response?.status !== SUCCESS_STATUS || !response.response?._id)
+      return { token: "", user: null };
     return {
       token,
       user: response?.response || null,
@@ -170,6 +173,7 @@ export async function getCurrentChatUserAction(): Promise<CurrentChatUser | null
 
   return {
     _id: user._id,
+    isTalent: user.isTalent === true,
     userName: user.userName || "",
     profileImage: user?.personalInfo?.profileImage || null,
     professional: user?.personalInfo?.professional || "",
@@ -194,7 +198,10 @@ export async function getChatUnreadCountAction(): Promise<ChatUnreadCount> {
     if (response.data?.status === SUCCESS_STATUS) {
       return {
         oneToOne: Number(response.data?.response?.oneToOne || 0),
-        group: Number(response.data?.response?.group || 0),
+        group:
+          user.isTalent === true
+            ? Number(response.data?.response?.group || 0)
+            : 0,
         request: Number(response.data?.response?.request || 0),
       };
     }
@@ -263,7 +270,7 @@ export async function getGroupChatRoomsAction(pageNumber = 1, pageSize = 10) {
   try {
     const { token, user } = await getCurrentUserResponse();
 
-    if (!token || !user?._id) {
+    if (!token || !user?._id || user.isTalent !== true) {
       return [];
     }
 
@@ -359,6 +366,10 @@ export async function getChatMembersAction(roomId: string) {
       response.data?.status === SUCCESS_STATUS &&
       Array.isArray(response.data?.response?.list)
     ) {
+      const info = response.data.response.info;
+      // Classify from the server response, not the caller's ?type=chat hint.
+      if (user.isTalent !== true && !["CHAT", "REQUEST"].includes(info?.type))
+        return { status: "403", list: [], info: null };
       return {
         status: SUCCESS_STATUS,
         list: Array.isArray(response.data?.response?.list)
@@ -378,9 +389,9 @@ export async function getChatMembersAction(roomId: string) {
 
 export async function getGroupChatRoomDetailsAction(roomId: string) {
   try {
-    const token = await getAccessToken();
+    const { token, user } = await getCurrentUserResponse();
 
-    if (!token || !roomId) {
+    if (!token || !roomId || user?.isTalent !== true) {
       return null;
     }
 
@@ -414,6 +425,11 @@ export async function getChatMessagesAction({
     if (!token || !user?._id || !roomId) {
       return [];
     }
+    if (
+      user.isTalent !== true &&
+      (await getChatMembersAction(roomId)).status !== SUCCESS_STATUS
+    )
+      return [];
 
     const response = await axios.get(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/chat/getMessages`,
@@ -456,6 +472,15 @@ export async function sendChatMessageAction(payload: SendChatMessagePayload) {
         message: "Unable to identify your chat session. Please try again.",
       };
     }
+
+    if (
+      user.isTalent !== true &&
+      (await getChatMembersAction(payload.roomId)).status !== SUCCESS_STATUS
+    )
+      return {
+        status: "ERROR",
+        message: "This conversation is unavailable for your account.",
+      };
 
     const response = await axios.post(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/chat/sendMessage`,
@@ -505,11 +530,16 @@ export async function sendChatMessageAction(payload: SendChatMessagePayload) {
 
 export async function deleteChatMessageAction(roomId: string, chatId: string) {
   try {
-    const token = await getAccessToken();
+    const { token, user } = await getCurrentUserResponse();
 
     if (!token || !roomId || !chatId) {
       return false;
     }
+    if (
+      user?.isTalent !== true &&
+      (await getChatMembersAction(roomId)).status !== SUCCESS_STATUS
+    )
+      return false;
 
     const response = await axios.post(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/chat/deleteMessage`,
@@ -532,12 +562,17 @@ export async function deleteChatMessageAction(roomId: string, chatId: string) {
 
 export async function deleteConversationAction(roomId: string) {
   try {
-    const token = await getAccessToken();
-    const userId = await getCurrentUserId();
+    const { token, user } = await getCurrentUserResponse();
+    const userId = user?._id;
 
     if (!token || !userId || !roomId) {
       return false;
     }
+    if (
+      user.isTalent !== true &&
+      (await getChatMembersAction(roomId)).status !== SUCCESS_STATUS
+    )
+      return false;
 
     const response = await axios.post(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/chat/deleteConversation/${userId}/${roomId}`,

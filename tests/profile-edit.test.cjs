@@ -485,6 +485,33 @@ function api(responses = [], authError, cacheError = false) {
 }
 const ok = (response) => ({ status: "7400", response });
 
+test("normal users can change and clear ethnicity without uploading or submitting professional details", async () => {
+  for (const ethnic of [ethnicId, ""]) {
+    const result = await util.prepareProfileEditPayload(
+      { ...values(), ethnic, featuredPhotos: [photo()] },
+      user(false),
+      [],
+      async () => {
+        throw Error("Normal account must not upload featured photos");
+      },
+      new Map(),
+      () => true,
+      true,
+    );
+    assert.deepEqual(plain(result.moreInfo), { ethnic: ethnic || null });
+    const h = api([ok(user(false)), ok({})]);
+    assert.equal(
+      (await h.actions.userPersonalInfoEditAction(result, profile)).status,
+      "7400",
+    );
+    assert.equal(h.calls[1].body.moreInfo.ethnic, ethnic || null);
+    assert.equal(h.calls[1].body.moreInfo.bio, undefined);
+    assert.equal(h.calls[1].body.moreInfo.featuredPhotos, undefined);
+    assert.equal(h.calls[1].body.moreInfo.socialLinks, undefined);
+    assert.equal(h.calls[1].body.moreInfo._id, user().morePersonalInfo._id);
+  }
+});
+
 test("clearing a talent bio passes form validation and sends an explicit empty bio to the API", async () => {
   const schema = load(
     "lib/validations/profile.validation.ts",
@@ -651,6 +678,7 @@ function editor(options = {}) {
         EditProInfoForm: "professional-fields",
       },
       "@/components/ui/form": { Form: "Form" },
+      "@/components/inputs/ProfileEthnicityInput": "ethnicity",
       "react-hook-form": {
         useForm: ({ defaultValues }) => {
           fields ||= defaultValues;
@@ -880,7 +908,7 @@ test("regular profile saving remains available without talent social-link contro
   );
   await h.submit();
   assert.equal(h.calls.length, 1);
-  assert.equal(h.calls[0].payload.moreInfo, undefined);
+  assert.deepEqual(plain(h.calls[0].payload.moreInfo), { ethnic: ethnicId });
 });
 
 test("editor retains text and selected files after rejection and reuses uploads before navigating on success", async () => {

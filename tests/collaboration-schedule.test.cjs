@@ -353,7 +353,7 @@ test("group route checks membership before requesting messages or rendering the 
     "@/components/widgets/chat/ChatAccessNotice": "notice",
     "@/lib/utils/postSharing": { readSharedPost: () => null },
     "@/actions/chat.action": {
-      getCurrentChatUserAction: async () => ({ _id: viewer }),
+      getCurrentChatUserAction: async () => ({ _id: viewer, isTalent: true }),
       getChatMembersAction: async () => ({ status, list: members, info: null }),
       getChatMessagesAction: async () => {
         reads++;

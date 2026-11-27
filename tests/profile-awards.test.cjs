@@ -206,7 +206,7 @@ test("invalid writes never request auth or a backend endpoint", async () => {
 });
 test("save verifies backend identity and merges against a fresh list instead of an old form array", async () => {
   const existing = { ...award(second), customMetadata: "Keep me" };
-  const h = api([ok({ _id: profile }), ok([existing]), ok({})]);
+  const h = api([ok({ _id: profile, isTalent: true }), ok([existing]), ok({})]);
   const result = await h.actions.saveProfileAwardAction({
     profileId: profile,
     award: { ...award(), certificateUrl: "https://example.test/new.pdf" },
@@ -228,7 +228,11 @@ test("save verifies backend identity and merges against a fresh list instead of 
 test("editing preserves the saved certificate, identity and unrelated awards", async () => {
   const original = award(),
     other = award(second);
-  const h = api([ok({ _id: profile }), ok([original, other]), ok({})]);
+  const h = api([
+    ok({ _id: profile, isTalent: true }),
+    ok([original, other]),
+    ok({}),
+  ]);
   await h.actions.saveProfileAwardAction({
     profileId: profile,
     awardId: first,
@@ -243,8 +247,8 @@ test("editing preserves the saved certificate, identity and unrelated awards", a
 test("another user's profile cannot be changed and failed reads never overwrite awards", async () => {
   for (const responses of [
     [ok({ _id: second })],
-    [ok({ _id: profile }), new Error("Offline")],
-    [ok({ _id: profile }), ok({})],
+    [ok({ _id: profile, isTalent: true }), new Error("Offline")],
+    [ok({ _id: profile, isTalent: true }), ok({})],
   ]) {
     const h = api(responses);
     assert.equal(
@@ -260,7 +264,11 @@ test("another user's profile cannot be changed and failed reads never overwrite 
   }
 });
 test("deletion removes only its target and API rejection or HTTP failure cannot report success", async () => {
-  const h = api([ok({ _id: profile }), ok([award(), award(second)]), ok({})]);
+  const h = api([
+    ok({ _id: profile, isTalent: true }),
+    ok([award(), award(second)]),
+    ok({}),
+  ]);
   assert.equal(
     (await h.actions.deleteProfileAwardAction(profile, first)).status,
     "7400",
@@ -271,7 +279,11 @@ test("deletion removes only its target and API rejection or HTTP failure cannot 
     { status: "7400", httpStatus: 500 },
     new Error("Timeout"),
   ]) {
-    const f = api([ok({ _id: profile }), ok([award()]), failure]);
+    const f = api([
+      ok({ _id: profile, isTalent: true }),
+      ok([award()]),
+      failure,
+    ]);
     assert.equal(
       (await f.actions.deleteProfileAwardAction(profile, first)).status,
       "400",
@@ -280,7 +292,7 @@ test("deletion removes only its target and API rejection or HTTP failure cannot 
   }
 });
 test("retried accepted additions and deletions are idempotent; a cache failure is not a failed save", async () => {
-  const added = api([ok({ _id: profile }), ok([award()])]);
+  const added = api([ok({ _id: profile, isTalent: true }), ok([award()])]);
   assert.equal(
     (
       await added.actions.saveProfileAwardAction({
@@ -291,14 +303,14 @@ test("retried accepted additions and deletions are idempotent; a cache failure i
     "7400",
   );
   assert.equal(added.calls.length, 2);
-  const removed = api([ok({ _id: profile }), ok([])]);
+  const removed = api([ok({ _id: profile, isTalent: true }), ok([])]);
   assert.equal(
     (await removed.actions.deleteProfileAwardAction(profile, first)).status,
     "7400",
   );
   assert.equal(removed.calls.length, 2);
   const cached = api(
-    [ok({ _id: profile }), ok([award()]), ok({})],
+    [ok({ _id: profile, isTalent: true }), ok([award()]), ok({})],
     undefined,
     true,
   );
@@ -314,7 +326,7 @@ test("stale edits and ambiguous legacy records never update an arbitrary award",
     year: 2020,
     certificateUrl: "https://example.test/old.pdf",
   };
-  const h = api([ok({ _id: profile }), ok([old, old])]);
+  const h = api([ok({ _id: profile, isTalent: true }), ok([old, old])]);
   assert.equal(
     (
       await h.actions.saveProfileAwardAction({
@@ -326,7 +338,7 @@ test("stale edits and ambiguous legacy records never update an arbitrary award",
     "400",
   );
   assert.equal(h.calls.length, 2);
-  const missing = api([ok({ _id: profile }), ok([])]);
+  const missing = api([ok({ _id: profile, isTalent: true }), ok([])]);
   assert.equal(
     (
       await missing.actions.saveProfileAwardAction({

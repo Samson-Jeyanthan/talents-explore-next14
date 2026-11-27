@@ -299,6 +299,7 @@ test("choosing a direct or group conversation preserves the shared post and spec
       react: {
         useState: (initial) => [initial === "chat" ? tab : initial, () => {}],
         useMemo: (callback) => callback(),
+        useCallback: (callback) => callback,
         useEffect() {},
         useTransition: () => [false, () => {}],
       },
@@ -314,6 +315,7 @@ test("choosing a direct or group conversation preserves the shared post and spec
       "@/lib/utils/postSharing": sharing,
     });
     const tree = dashboard.default({
+      isTalent: true,
       initialChats: [
         { roomId: "direct-room", member: [{ userName: "Test user" }] },
       ],

@@ -114,7 +114,7 @@ test("level-only edit sends the stable language ID and preserves freshly read en
     note: "added in another tab",
   };
   const h = api([
-    ok({ _id: profile }),
+    ok({ _id: profile, isTalent: true }),
     ok([{ ...row(), custom: "keep" }, newer]),
     ok({}),
   ]);
@@ -148,7 +148,7 @@ test("adding or changing a language uses the catalog label and retains other sav
       },
     };
     const h = api([
-      ok({ _id: profile }),
+      ok({ _id: profile, isTalent: true }),
       ok([row(), row(otherEntry, french, "French")]),
       ok([{ _id: spanish, language: "Spanish" }]),
       ok({}),
@@ -191,7 +191,7 @@ test("other owners and missing or malformed rows cannot be overwritten", async (
     [row(), row()],
     [{ ...row(), languageId: undefined }],
   ]) {
-    const h = api([ok({ _id: profile }), ok(rows)]);
+    const h = api([ok({ _id: profile, isTalent: true }), ok(rows)]);
     assert.equal((await h.action(input())).status, "400");
     assert.equal(
       h.calls.filter((call) => call.options.method === "PUT").length,
@@ -200,14 +200,17 @@ test("other owners and missing or malformed rows cannot be overwritten", async (
   }
 });
 test("identical add retries are idempotent while conflicting duplicate languages are blocked", async () => {
-  const h = api([ok({ _id: profile }), ok([{ ...row(), level: "advanced" }])]);
+  const h = api([
+    ok({ _id: profile, isTalent: true }),
+    ok([{ ...row(), level: "advanced" }]),
+  ]);
   assert.equal((await h.action(input(false))).status, "7400");
   assert.equal(h.calls.length, 2);
-  const conflict = api([ok({ _id: profile }), ok([row()])]);
+  const conflict = api([ok({ _id: profile, isTalent: true }), ok([row()])]);
   assert.equal((await conflict.action(input(false))).status, "400");
   assert.equal(conflict.calls.length, 2);
   const edit = api([
-    ok({ _id: profile }),
+    ok({ _id: profile, isTalent: true }),
     ok([row(), row(otherEntry, french, "French")]),
   ]);
   assert.equal(
@@ -229,7 +232,7 @@ test("unknown catalog selections and failed reads cannot issue a write", async (
     { ...ok([]), httpStatus: 500 },
     new Error("offline"),
   ]) {
-    const h = api([ok({ _id: profile }), ok([row()]), result]);
+    const h = api([ok({ _id: profile, isTalent: true }), ok([row()]), result]);
     assert.equal(
       (
         await h.action({
@@ -251,14 +254,18 @@ test("failed writes retain retry errors and cache failure cannot undo an acknowl
     { ...ok({}), httpStatus: 500 },
     new Error("offline"),
   ]) {
-    const h = api([ok({ _id: profile }), ok([row()]), response]);
+    const h = api([
+      ok({ _id: profile, isTalent: true }),
+      ok([row()]),
+      response,
+    ]);
     const result = await h.action(input());
     assert.equal(result.status, "400");
     assert.match(result.message, /still here/);
     assert.equal(h.invalidations.length, 0);
   }
   const saved = api(
-    [ok({ _id: profile }), ok([row()]), ok({})],
+    [ok({ _id: profile, isTalent: true }), ok([row()]), ok({})],
     undefined,
     true,
   );
@@ -627,7 +634,11 @@ test("deletion removes only the selected stable entry from the latest list", asy
     ...row(otherEntry, french, "French"),
     note: "new in another tab",
   };
-  const h = api([ok({ _id: profile }), ok([newer, row()]), ok({})]);
+  const h = api([
+    ok({ _id: profile, isTalent: true }),
+    ok([newer, row()]),
+    ok({}),
+  ]);
   assert.equal((await h.deleteAction(profile, entry)).status, "7400");
   assert.deepEqual(h.calls[2].body, [newer]);
   assert.equal(h.calls[2].options.method, "PUT");
@@ -635,11 +646,11 @@ test("deletion removes only the selected stable entry from the latest list", asy
   assert.equal(h.invalidations.length, 1);
 });
 test("deleting the last language sends an empty array and an already-deleted retry never removes another row", async () => {
-  const last = api([ok({ _id: profile }), ok([row()]), ok({})]);
+  const last = api([ok({ _id: profile, isTalent: true }), ok([row()]), ok({})]);
   assert.equal((await last.deleteAction(profile, entry)).status, "7400");
   assert.deepEqual(last.calls[2].body, []);
   const retry = api([
-    ok({ _id: profile }),
+    ok({ _id: profile, isTalent: true }),
     ok([row(otherEntry, french, "French")]),
   ]);
   assert.equal((await retry.deleteAction(profile, entry)).status, "7400");
@@ -671,7 +682,7 @@ test("invalid deletion selections, other owners and failed or malformed list rea
     { ...ok([row()]), httpStatus: 500 },
     new Error("offline"),
   ]) {
-    const h = api([ok({ _id: profile }), rows]);
+    const h = api([ok({ _id: profile, isTalent: true }), rows]);
     assert.equal((await h.deleteAction(profile, entry)).status, "400");
     assert.equal(
       h.calls.filter((call) => call.options.method === "PUT").length,
@@ -685,14 +696,18 @@ test("failed deletes remain retryable and cache failure cannot undo confirmed de
     { ...ok({}), httpStatus: 500 },
     new Error("offline"),
   ]) {
-    const h = api([ok({ _id: profile }), ok([row()]), response]);
+    const h = api([
+      ok({ _id: profile, isTalent: true }),
+      ok([row()]),
+      response,
+    ]);
     const result = await h.deleteAction(profile, entry);
     assert.equal(result.status, "400");
     assert.match(result.message, /try again/);
     assert.equal(h.invalidations.length, 0);
   }
   const saved = api(
-    [ok({ _id: profile }), ok([row()]), ok({})],
+    [ok({ _id: profile, isTalent: true }), ok([row()]), ok({})],
     undefined,
     true,
   );

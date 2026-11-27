@@ -41,6 +41,11 @@ export async function getProfilePostPageAction(
     const profile = own ? viewer : await read(`/user/public/${profileId}`);
     if (profile?._id !== profileId)
       throw new Error("Unable to verify profile.");
+    if (kind !== "sharelink" && profile.isTalent !== true)
+      return {
+        status: "private",
+        message: "This profile does not have talent posts or credits.",
+      };
     const visibility = getProfileVisibilityState(profile, own);
     if (
       !visibility.canViewProfile ||

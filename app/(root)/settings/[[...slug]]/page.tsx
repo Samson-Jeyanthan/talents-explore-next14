@@ -6,6 +6,7 @@ import {
   getPrivacySettingsAction,
 } from "@/actions/settings.action";
 import { getAuthHeaders } from "@/lib/session";
+import TalentAccessNotice from "@/components/others/TalentAccessNotice";
 
 export const dynamic = "force-dynamic";
 
@@ -34,13 +35,15 @@ export default async function SettingsPage({ params }: Props) {
   if (!isRequestRoute && !currentUser?._id) {
     throw new Error("Unable to load your settings. Please try again.");
   }
+  if (slugPath.startsWith("privacy") && currentUser?.isTalent !== true)
+    return <TalentAccessNotice />;
 
   const shouldLoadPrivacy = slugPath === "" || slugPath.startsWith("privacy");
   const shouldLoadNotification =
     slugPath === "" || slugPath === "notifications";
 
   const [initialPrivacy, initialNotification] = await Promise.all([
-    shouldLoadPrivacy
+    shouldLoadPrivacy && currentUser?.isTalent === true
       ? getPrivacySettingsAction(session)
       : Promise.resolve(null),
     shouldLoadNotification

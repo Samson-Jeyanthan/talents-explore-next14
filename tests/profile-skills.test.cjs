@@ -258,9 +258,15 @@ test("skill validation covers categories, levels, required text, hashtags and du
 test("hashtag errors use the mobile app wording", () => {
   for (const [hashTags, message] of [
     [[], "Add at least one hashtag starting with #."],
-    [["talent", "#explorer"], "Add # before every word (for example: #talent, #explorer)."],
+    [
+      ["talent", "#explorer"],
+      "Add # before every word (for example: #talent, #explorer).",
+    ],
   ]) {
-    const result = util.profileSkillValidation.safeParse({ ...skillSet(), hashTags });
+    const result = util.profileSkillValidation.safeParse({
+      ...skillSet(),
+      hashTags,
+    });
     assert.equal(result.success, false);
     assert.equal(result.error.issues[0].message, message);
   }
@@ -271,7 +277,7 @@ test("adding skills uses the mobile endpoint, canonical catalogue names and fres
     description: "Other record",
     extra: "keep",
   };
-  const h = api([ok({ _id: profile }), ok([existing]), ok([])]);
+  const h = api([ok({ _id: profile, isTalent: true }), ok([existing]), ok([])]);
   const result = await h.actions.saveProfileSkillAction({
     profileId: profile,
     skill: {
@@ -293,7 +299,7 @@ test("adding skills uses the mobile endpoint, canonical catalogue names and fres
 });
 test("editing preserves record identity and unrelated data while updating all skill fields", async () => {
   const h = api([
-    ok({ _id: profile }),
+    ok({ _id: profile, isTalent: true }),
     ok([{ ...skillSet(), extra: "keep" }, skillSet(second)]),
     ok([]),
   ]);
@@ -324,7 +330,7 @@ test("editing preserves record identity and unrelated data while updating all sk
 });
 test("deletion sends only the remaining skill sets and no category lookups", async () => {
   const h = api([
-    ok({ _id: profile }),
+    ok({ _id: profile, isTalent: true }),
     ok([skillSet(), skillSet(second)]),
     ok([]),
   ]);
@@ -379,7 +385,12 @@ test("invalid category relationships, absent skills and unavailable catalogues c
     ],
   ];
   for (const [skill, catalogs] of variants) {
-    const h = api([ok({ _id: profile }), ok([])], undefined, false, catalogs);
+    const h = api(
+      [ok({ _id: profile, isTalent: true }), ok([])],
+      undefined,
+      false,
+      catalogs,
+    );
     assert.equal(
       (await h.actions.saveProfileSkillAction({ profileId: profile, skill }))
         .status,
@@ -392,9 +403,14 @@ test("invalid category relationships, absent skills and unavailable catalogues c
   }
 });
 test("a category with no individual skills accepts an empty skills list", async () => {
-  const h = api([ok({ _id: profile }), ok([]), ok([])], undefined, false, {
-    "/category/skill/222222222222222222222222": ok([]),
-  });
+  const h = api(
+    [ok({ _id: profile, isTalent: true }), ok([]), ok([])],
+    undefined,
+    false,
+    {
+      "/category/skill/222222222222222222222222": ok([]),
+    },
+  );
   assert.equal(
     (
       await h.actions.saveProfileSkillAction({
@@ -417,7 +433,7 @@ test("failed loads remain errors and never produce a replacement array", async (
       (await api([response]).actions.getProfileSkillsAction(profile)).status,
       "400",
     );
-    const h = api([ok({ _id: profile }), response]);
+    const h = api([ok({ _id: profile, isTalent: true }), response]);
     assert.equal(
       (await h.actions.deleteProfileSkillAction(profile, first)).status,
       "400",
@@ -438,7 +454,11 @@ test("rejected or interrupted writes cannot report success or invalidate the pro
     { status: "400" },
     { ...ok([]), httpStatus: 500 },
   ]) {
-    const h = api([ok({ _id: profile }), ok([skillSet()]), response]);
+    const h = api([
+      ok({ _id: profile, isTalent: true }),
+      ok([skillSet()]),
+      response,
+    ]);
     assert.equal(
       (await h.actions.deleteProfileSkillAction(profile, first)).status,
       "400",
@@ -447,7 +467,7 @@ test("rejected or interrupted writes cannot report success or invalidate the pro
   }
 });
 test("accepted addition and deletion retries are idempotent", async () => {
-  const added = api([ok({ _id: profile }), ok([skillSet()])]);
+  const added = api([ok({ _id: profile, isTalent: true }), ok([skillSet()])]);
   assert.equal(
     (
       await added.actions.saveProfileSkillAction({
@@ -458,7 +478,7 @@ test("accepted addition and deletion retries are idempotent", async () => {
     "7400",
   );
   assert.equal(added.calls.length, 2);
-  const deleted = api([ok({ _id: profile }), ok([])]);
+  const deleted = api([ok({ _id: profile, isTalent: true }), ok([])]);
   assert.equal(
     (await deleted.actions.deleteProfileSkillAction(profile, first)).status,
     "7400",
@@ -467,7 +487,10 @@ test("accepted addition and deletion retries are idempotent", async () => {
 });
 test("ambiguous legacy entries and stale edits fail without changing arbitrary records", async () => {
   const legacy = { ...skillSet(), _id: undefined };
-  const ambiguous = api([ok({ _id: profile }), ok([legacy, legacy])]);
+  const ambiguous = api([
+    ok({ _id: profile, isTalent: true }),
+    ok([legacy, legacy]),
+  ]);
   assert.equal(
     (
       await ambiguous.actions.deleteProfileSkillAction(
@@ -477,7 +500,7 @@ test("ambiguous legacy entries and stale edits fail without changing arbitrary r
     ).status,
     "400",
   );
-  const stale = api([ok({ _id: profile }), ok([])]);
+  const stale = api([ok({ _id: profile, isTalent: true }), ok([])]);
   assert.equal(
     (
       await stale.actions.saveProfileSkillAction({
@@ -491,7 +514,7 @@ test("ambiguous legacy entries and stale edits fail without changing arbitrary r
 });
 test("cache failures preserve acknowledged success and session redirects propagate", async () => {
   const h = api(
-    [ok({ _id: profile }), ok([skillSet()]), ok([])],
+    [ok({ _id: profile, isTalent: true }), ok([skillSet()]), ok([])],
     undefined,
     true,
   );

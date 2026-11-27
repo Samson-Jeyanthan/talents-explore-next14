@@ -52,7 +52,9 @@ const LeftSidebar = () => {
             className="h-auto w-4/6 object-contain dark:hidden max-lg:hidden 2xl:w-[70%]"
           />
           <ul className="flex w-full flex-col gap-2 p-3 2xl:gap-3">
-            {SIDEBAR_ITEMS.map((item, index) => {
+            {SIDEBAR_ITEMS.filter(
+              (item) => item.name !== "Collaboration" || user.isTalent === true,
+            ).map((item, index) => {
               const isActive =
                 pathname === item.path || pathname.includes(item.path);
               const isUpload =

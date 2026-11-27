@@ -262,6 +262,7 @@ function PageShell({
   children: ReactNode;
   currentPath: string;
 }) {
+  const { user } = useUserContext();
   return (
     <section className="flex w-full max-w-7xl gap-6 px-4 py-8 sm:px-6">
       <aside className="hidden w-72 shrink-0 xl:block">
@@ -270,7 +271,10 @@ function PageShell({
             Settings
           </p>
           <div className="flex flex-col gap-1">
-            {SETTINGS_LINKS.map((item) => {
+            {SETTINGS_LINKS.filter(
+              (item) =>
+                item.href !== "/settings/privacy" || user.isTalent === true,
+            ).map((item) => {
               const itemPath = item.href
                 .replace("/settings", "")
                 .replace(/^\//, "");

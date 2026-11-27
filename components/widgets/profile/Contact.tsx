@@ -8,7 +8,10 @@ import {
 } from "@/public/assets/svgs";
 import { TCurrentUserData, TPublicUserData } from "@/types/profile.types";
 import { FiUser } from "react-icons/fi";
-import { canViewBooleanField, getVisibleSocialLinks } from "@/lib/utils/profilePrivacy";
+import {
+  canViewBooleanField,
+  getVisibleSocialLinks,
+} from "@/lib/utils/profilePrivacy";
 
 const Contact = ({
   userData,
@@ -19,15 +22,16 @@ const Contact = ({
 }) => {
   const showEmail = canViewBooleanField(userData, "email", isOwnProfile);
   const showPhone = canViewBooleanField(userData, "phone", isOwnProfile);
-  const visibleSocialLinks = getVisibleSocialLinks(userData, isOwnProfile).filter(
-    (mediaLink: any) => mediaLink?.url
-  );
+  const visibleSocialLinks = getVisibleSocialLinks(
+    userData,
+    isOwnProfile,
+  ).filter((mediaLink: any) => mediaLink?.url);
 
   return (
     <section className="flex flex-col gap-2">
       <div className="profile-detail-heading mb-3">
         <PhoneBookIcon width="20px" height="20px" />
-        Contact & Social Media
+        {userData.isTalent === true ? "Contact & Social Media" : "Contact Info"}
       </div>
 
       <h3 className="text-[13px]">Contact</h3>
@@ -54,28 +58,32 @@ const Contact = ({
         </div>
       ) : null}
 
-      <h3 className="mt-4 text-[13px]">Social Media</h3>
+      {userData.isTalent === true && (
+        <>
+          <h3 className="mt-4 text-[13px]">Social Media</h3>
 
-      {visibleSocialLinks.length > 0 ? null : (
-        <EmptyDetails
-          Icon={SocialMediaIcon}
-          text="There are no social media links"
-          size="64px"
-        />
+          {visibleSocialLinks.length > 0 ? null : (
+            <EmptyDetails
+              Icon={SocialMediaIcon}
+              text="There are no social media links"
+              size="64px"
+            />
+          )}
+
+          {visibleSocialLinks.map((mediaLink: any, index: number) => (
+            <React.Fragment key={index}>
+              <div className="bio-element-wrap items-start">
+                <span className="bio-details-icon">
+                  <FiUser />
+                </span>
+                <p className="line-clamp-2 w-full max-w-[70%] pt-2 text-left">
+                  {mediaLink.url}
+                </p>
+              </div>
+            </React.Fragment>
+          ))}
+        </>
       )}
-
-      {visibleSocialLinks.map((mediaLink: any, index: number) => (
-        <React.Fragment key={index}>
-          <div className="bio-element-wrap items-start">
-            <span className="bio-details-icon">
-              <FiUser />
-            </span>
-            <p className="line-clamp-2 w-full max-w-[70%] pt-2 text-left">
-              {mediaLink.url}
-            </p>
-          </div>
-        </React.Fragment>
-      ))}
     </section>
   );
 };
